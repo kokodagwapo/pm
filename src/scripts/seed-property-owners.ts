@@ -17,7 +17,7 @@ import Property from '../models/Property';
 const PROPERTY_OWNERS = [
   {
     email: 'maria.santos@smartstart.us',
-    password: 'Owner123$',
+    password: 'SmartStart2025',
     firstName: 'Maria',
     lastName: 'Santos',
     role: 'owner',
@@ -33,7 +33,7 @@ const PROPERTY_OWNERS = [
   },
   {
     email: 'james.wellington@smartstart.us',
-    password: 'Owner123$',
+    password: 'SmartStart2025',
     firstName: 'James',
     lastName: 'Wellington',
     role: 'owner',
@@ -49,7 +49,7 @@ const PROPERTY_OWNERS = [
   },
   {
     email: 'sarah.mitchell@smartstart.us',
-    password: 'Owner123$',
+    password: 'SmartStart2025',
     firstName: 'Sarah',
     lastName: 'Mitchell',
     role: 'owner',
@@ -65,7 +65,7 @@ const PROPERTY_OWNERS = [
   },
   {
     email: 'robert.chen@smartstart.us',
-    password: 'Owner123$',
+    password: 'SmartStart2025',
     firstName: 'Robert',
     lastName: 'Chen',
     role: 'owner',
@@ -81,7 +81,7 @@ const PROPERTY_OWNERS = [
   },
   {
     email: 'lisa.anderson@smartstart.us',
-    password: 'Owner123$',
+    password: 'SmartStart2025',
     firstName: 'Lisa',
     lastName: 'Anderson',
     role: 'owner',
@@ -215,12 +215,12 @@ async function seedPropertyOwners() {
       const propertiesAssigned = PROPERTY_ASSIGNMENTS[owner.email]?.length || 0;
       console.log(`   • ${owner.firstName} ${owner.lastName}`);
       console.log(`     Email: ${owner.email}`);
-      console.log(`     Password: Owner123$`);
+      console.log(`     Password: SmartStart2025`);
       console.log(`     Properties: ${propertiesAssigned}`);
       console.log('');
     }
 
-    console.log('💡 Login credentials: All owners use password "Owner123$"');
+    console.log('💡 Login credentials: All owners use password "SmartStart2025"');
     console.log('🔗 These owners are now linked to their respective properties');
 
   } catch (error: any) {

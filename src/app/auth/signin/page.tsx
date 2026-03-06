@@ -127,10 +127,10 @@ export default function SignInPage() {
     (typeof window !== "undefined" && window.location.hostname === "localhost");
 
   const demoAccounts = [
-    { label: "Super Admin", email: "hi@smartstart.us", password: "Admin123$", icon: Shield, color: "bg-red-500/90 hover:bg-red-600/90" },
-    { label: "Manager", email: "manager@smartstart.us", password: "Manager123$", icon: Users, color: "bg-blue-500/90 hover:bg-blue-600/90" },
-    { label: "Owner", email: "owner@smartstart.us", password: "Owner123$", icon: Building2, color: "bg-purple-500/90 hover:bg-purple-600/90" },
-    { label: "Tenant", email: "tenant@smartstart.us", password: "Tenant123$", icon: Home, color: "bg-green-500/90 hover:bg-green-600/90" },
+    { label: "Super Admin", email: "hi@smartstart.us", password: "SmartStart2025", icon: Shield, color: "bg-red-500/90 hover:bg-red-600/90" },
+    { label: "Manager", email: "manager@smartstart.us", password: "SmartStart2025", icon: Users, color: "bg-blue-500/90 hover:bg-blue-600/90" },
+    { label: "Owner", email: "owner@smartstart.us", password: "SmartStart2025", icon: Building2, color: "bg-purple-500/90 hover:bg-purple-600/90" },
+    { label: "Tenant", email: "tenant@smartstart.us", password: "SmartStart2025", icon: Home, color: "bg-green-500/90 hover:bg-green-600/90" },
   ];
 
   return (

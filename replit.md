@@ -51,10 +51,10 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 ## Demo Accounts (seeded into local MongoDB)
 | Role    | Email                    | Password    |
 |---------|--------------------------|-------------|
-| Admin   | hi@smartstart.us         | Admin123$   |
-| Manager | manager@smartstart.us    | Manager123$ |
-| Owner   | owner@smartstart.us      | Owner123$   |
-| Tenant  | tenant@smartstart.us     | Tenant123$  |
+| Admin   | hi@smartstart.us         | SmartStart2025 |
+| Manager | manager@smartstart.us    | SmartStart2025 |
+| Owner   | owner@smartstart.us      | SmartStart2025 |
+| Tenant  | tenant@smartstart.us     | SmartStart2025 |
 
 ## Required Environment Variables (Replit Secrets)
 - `MONGODB_URI` - MongoDB connection string (e.g. `mongodb://localhost:27017/SmartStartPM`)

@@ -18,7 +18,7 @@ import { Property } from '../models';
 const DEMO_ACCOUNTS = [
   {
     email: 'hi@smartstart.us',
-    password: 'Admin123$',
+    password: 'SmartStart2025',
     firstName: 'Super',
     lastName: 'Admin',
     role: 'admin',
@@ -28,7 +28,7 @@ const DEMO_ACCOUNTS = [
   },
   {
     email: 'manager@smartstart.us',
-    password: 'Manager123$',
+    password: 'SmartStart2025',
     firstName: 'Property',
     lastName: 'Manager',
     role: 'manager',
@@ -38,7 +38,7 @@ const DEMO_ACCOUNTS = [
   },
   {
     email: 'owner@smartstart.us',
-    password: 'Owner123$',
+    password: 'SmartStart2025',
     firstName: 'Property',
     lastName: 'Owner',
     role: 'owner',
@@ -48,7 +48,7 @@ const DEMO_ACCOUNTS = [
   },
   {
     email: 'tenant@smartstart.us',
-    password: 'Tenant123$',
+    password: 'SmartStart2025',
     firstName: 'Demo',
     lastName: 'Tenant',
     role: 'tenant',
