@@ -3,13 +3,6 @@ import mongoose from "mongoose";
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/SmartStartPM";
 
-// Don't throw error in development if MongoDB is not available
-if (!process.env.MONGODB_URI && process.env.NODE_ENV === "production") {
-  throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env.local"
-  );
-}
-
 let cached = global.mongoose;
 
 if (!cached) {
@@ -17,6 +10,12 @@ if (!cached) {
 }
 
 async function connectDB() {
+  if (!process.env.MONGODB_URI) {
+    throw new Error(
+      "Please define the MONGODB_URI environment variable"
+    );
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
