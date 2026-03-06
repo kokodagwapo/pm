@@ -260,6 +260,16 @@ export const authOptions: NextAuthConfig = {
         return false;
       }
     },
+
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      try {
+        const u = new URL(url);
+        const b = new URL(baseUrl);
+        if (u.host === b.host) return url;
+      } catch {}
+      return baseUrl;
+    },
   },
 
   pages: {

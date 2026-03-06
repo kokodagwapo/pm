@@ -111,7 +111,14 @@ const MobileHeader = memo(function MobileHeader({
               <span>{t("header.menu.settings")}</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600" onClick={() => signOut({ callbackUrl: "/" })}>
+            <DropdownMenuItem
+              className="text-red-600"
+              onClick={() =>
+                signOut({ redirect: false }).then(() => {
+                  window.location.href = "/";
+                })
+              }
+            >
               <LogOut className="mr-2 h-4 w-4" />
               <span>{t("header.menu.logout")}</span>
             </DropdownMenuItem>
