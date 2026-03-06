@@ -152,9 +152,9 @@ export function AIConciergeCard() {
 
       {/* Quick links - glassmorphic, touch-friendly */}
       <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
-        {quickLinks.map((link) => (
+        {quickLinks.map((link, i) => (
           <Link
-            key={link.href}
+            key={`${i}-${link.href}`}
             href={link.href}
             className="min-h-[44px] inline-flex items-center px-3 py-2.5 sm:py-1.5 rounded-full text-black text-xs sm:text-sm transition-all hover:bg-white/25 touch-manipulation"
             style={{
