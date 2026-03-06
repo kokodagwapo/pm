@@ -11,4 +11,7 @@ else
   echo "MongoDB already running"
 fi
 
+echo "Running auto-seed check..."
+node src/scripts/auto-seed.mjs
+
 exec npm run dev

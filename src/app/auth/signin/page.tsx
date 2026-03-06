@@ -122,10 +122,6 @@ export default function SignInPage() {
     }
   };
 
-  const isDevelopment =
-    process.env.NODE_ENV === "development" ||
-    (typeof window !== "undefined" && window.location.hostname === "localhost");
-
   const demoAccounts = [
     { label: "Super Admin", email: "hi@smartstart.us", password: "SmartStart2025", icon: Shield, color: "bg-red-500/90 hover:bg-red-600/90" },
     { label: "Manager", email: "manager@smartstart.us", password: "SmartStart2025", icon: Users, color: "bg-blue-500/90 hover:bg-blue-600/90" },
@@ -255,9 +251,8 @@ export default function SignInPage() {
               </button>
             </form>
 
-            {/* Development Quick Login */}
-            {isDevelopment && (
-              <div className="mt-6 pt-6 border-t border-white/20">
+            {/* Quick Login */}
+            <div className="mt-6 pt-6 border-t border-white/20">
                 <div className="flex items-center gap-2 mb-3">
                   <Zap className="h-4 w-4 text-amber-400" />
                   <span className="text-sm font-medium text-black/80">
@@ -283,8 +278,7 @@ export default function SignInPage() {
                 <p className="text-xs text-black/60 mt-2 text-center">
                   Click to instantly log in as that role
                 </p>
-              </div>
-            )}
+            </div>
           </div>
 
           <p className="text-center text-sm text-white/70">
