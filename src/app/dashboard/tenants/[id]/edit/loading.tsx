@@ -1,5 +1,5 @@
-import { TenantEditSimpleLoading } from "@/components/ui/simple-loading";
+import { PagePreloader } from "@/components/ui/preloader";
 
-export default function TenantEditLoading() {
-  return <TenantEditSimpleLoading />;
+export default function Loading() {
+  return <PagePreloader />;
 }

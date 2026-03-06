@@ -1,5 +1,5 @@
-import TenantPageSkeleton from "@/components/tenants/TenantListSkeleton";
+import { PagePreloader } from "@/components/ui/preloader";
 
-export default function TenantsLoading() {
-  return <TenantPageSkeleton />;
+export default function Loading() {
+  return <PagePreloader />;
 }

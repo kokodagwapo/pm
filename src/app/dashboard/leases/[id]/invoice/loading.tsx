@@ -1,5 +1,5 @@
-import { DetailPageSkeleton } from "@/components/ui/skeleton-layouts";
+import { PagePreloader } from "@/components/ui/preloader";
 
-export default function LeaseInvoiceLoading() {
-  return <DetailPageSkeleton showImage={false} showTabs={true} />;
+export default function Loading() {
+  return <PagePreloader />;
 }

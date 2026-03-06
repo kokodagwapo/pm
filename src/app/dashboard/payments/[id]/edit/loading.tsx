@@ -1,5 +1,5 @@
-import { FormSkeleton } from "@/components/ui/skeleton-layouts";
+import { PagePreloader } from "@/components/ui/preloader";
 
-export default function EditPaymentLoading() {
-  return <FormSkeleton showHeader={true} fieldCount={8} showSidebar={false} />;
+export default function Loading() {
+  return <PagePreloader />;
 }

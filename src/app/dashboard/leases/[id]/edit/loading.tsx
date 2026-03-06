@@ -1,5 +1,5 @@
-import { FormSkeleton } from "@/components/ui/skeleton-layouts";
+import { PagePreloader } from "@/components/ui/preloader";
 
-export default function LeaseEditLoading() {
-  return <FormSkeleton showHeader={true} fieldCount={10} showSidebar={true} />;
+export default function Loading() {
+  return <PagePreloader />;
 }

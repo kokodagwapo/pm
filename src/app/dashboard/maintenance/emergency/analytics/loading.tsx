@@ -1,5 +1,5 @@
-import { DashboardSkeleton } from "@/components/ui/skeleton-layouts";
+import { PagePreloader } from "@/components/ui/preloader";
 
-export default function EmergencyMaintenanceAnalyticsLoading() {
-  return <DashboardSkeleton />;
+export default function Loading() {
+  return <PagePreloader />;
 }

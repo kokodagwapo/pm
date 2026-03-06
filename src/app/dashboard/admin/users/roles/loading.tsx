@@ -1,7 +1,5 @@
-import { ListPageSkeleton } from "@/components/ui/skeleton-layouts";
+import { PagePreloader } from "@/components/ui/preloader";
 
-export default function UserRolesLoading() {
-  return (
-    <ListPageSkeleton showStats={false} showFilters={false} itemCount={6} />
-  );
+export default function Loading() {
+  return <PagePreloader />;
 }
