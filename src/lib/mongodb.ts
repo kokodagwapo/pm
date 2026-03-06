@@ -1,7 +1,14 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/SmartStartPM";
+function getMongoUri(): string {
+  let uri = process.env.MONGODB_URI || "mongodb://localhost:27017/SmartStartPM";
+  if (uri.includes("=") && !uri.startsWith("mongodb")) {
+    uri = uri.substring(uri.indexOf("=") + 1).trim();
+  }
+  return uri;
+}
+
+const MONGODB_URI = getMongoUri();
 
 let cached = global.mongoose;
 

@@ -82,13 +82,15 @@ const DEMO_ACCOUNTS = [
 async function seedDemoAccounts() {
   try {
 
-    // Get MongoDB URI from environment
-    const MONGODB_URI = process.env.MONGODB_URI;
-    if (!MONGODB_URI) {
-      throw new Error('MONGODB_URI is not defined in .env.local');
+    // Get MongoDB URI from environment, stripping any accidental KEY=value prefix
+    let rawUri = process.env.MONGODB_URI;
+    if (!rawUri) {
+      throw new Error('MONGODB_URI is not defined');
     }
-
-
+    if (rawUri.includes('=') && !rawUri.startsWith('mongodb')) {
+      rawUri = rawUri.substring(rawUri.indexOf('=') + 1).trim();
+    }
+    const MONGODB_URI = rawUri;
 
     // Connect to database directly
     await mongoose.connect(MONGODB_URI, {
