@@ -1,0 +1,40 @@
+# PropertyPro - App + MongoDB
+# Super admin after first run: admin@propertypro.com / Admin123$
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: propertypro-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: propertypro-app
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/propertypro
+      MONGODB_HOST: mongodb
+      MONGODB_PORT: "27017"
+      NEXTAUTH_URL: http://localhost:3001
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-propertypro-docker-secret-change-in-production}
+      AUTH_TRUST_HOST: "true"
+      # Optional: set real keys for payments
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_docker_placeholder}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_docker_placeholder}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+volumes:
+  mongodb_data:

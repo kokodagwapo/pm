@@ -1,0 +1,46 @@
+import "./globals.css";
+import { Inter, Playfair_Display, Montserrat } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
+import { Providers } from "@/components/providers";
+import type { Metadata } from "next";
+
+const inter = Inter({ subsets: ["latin"] });
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+});
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "SmartStartPM",
+  description: "Property Management Software",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+      </head>
+      <body className={`${inter.className} ${playfair.variable} ${montserrat.variable}`} suppressHydrationWarning>
+        <Providers>
+          {children}
+          <Toaster />
+        </Providers>
+      </body>
+    </html>
+  );
+}

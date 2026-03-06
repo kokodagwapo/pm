@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 40" width="180" height="40">
+  <defs>
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0EA5E9"/>
+      <stop offset="100%" stop-color="#6366F1"/>
+    </linearGradient>
+  </defs>
+  <!-- Modern geometric icon -->
+  <g transform="translate(0, 4)">
+    <rect x="2" y="8" width="12" height="24" rx="2" fill="url(#brandGradient)"/>
+    <rect x="16" y="2" width="12" height="30" rx="2" fill="url(#brandGradient)" opacity="0.7"/>
+    <rect x="30" y="12" width="8" height="20" rx="2" fill="url(#brandGradient)" opacity="0.4"/>
+  </g>
+  <!-- SmartStartPM text -->
+  <text x="48" y="26" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif" font-size="18" font-weight="600" fill="#0F172A" letter-spacing="-0.3">
+    <tspan>Smart</tspan><tspan fill="url(#brandGradient)">Start</tspan><tspan fill="#64748B" font-weight="500" font-size="14">PM</tspan>
+  </text>
+</svg>
