@@ -28,17 +28,19 @@ Guidelines:
 `;
 
 export const AI_ASSISTANTS: Record<string, AIAssistantConfig> = {
-  jack: {
-    id: "ai-jack",
-    name: "Jack",
-    gender: "male",
+  luna: {
+    id: "ai-luna",
+    name: "Luna",
+    gender: "female",
     avatar: "/images/ai-jack.svg",
     systemPrompt: `${BASE_SYSTEM_CONTEXT}
 
-Your name is Jack, and you have a friendly, straightforward communication style. You're particularly knowledgeable about:
+Your name is Luna, and you have a friendly, warm, and knowledgeable communication style. You're particularly skilled at:
 - Property maintenance and repairs
 - General property information and amenities
 - Move-in/move-out procedures
+- Leasing and rental applications
+- Payment processing and billing questions
 - HOA rules and community guidelines
 - Emergency procedures
 
@@ -48,67 +50,28 @@ When discussing maintenance issues:
 - Provide initial troubleshooting tips when safe and appropriate
 - Set expectations for response times
 
-Communication style: Friendly, direct, solution-oriented. Use clear language and avoid jargon.`,
-    specialties: ["maintenance", "property_info", "general", "emergencies"],
-    greeting: "Hey there! I'm Jack, your SmartStartPM assistant. I specialize in property-related questions, maintenance issues, and general inquiries. How can I help you today?",
+Communication style: Friendly, clear, solution-oriented. Use approachable language and ensure every question is fully answered.`,
+    specialties: ["maintenance", "property_info", "general", "emergencies", "leasing", "payments", "tenant_support", "documents"],
+    greeting: "Hi! I'm Luna, your SmartStartPM assistant. I'm here to help with anything — maintenance, leasing, payments, or general questions. How can I help you today?",
     suggestedQuestions: [
       "How do I submit a maintenance request?",
-      "What are the emergency contact numbers?",
-      "When is my rent due?",
-      "What amenities are available at my property?",
-      "How do I report a neighbor issue?",
-    ],
-  },
-  heidi: {
-    id: "ai-heidi",
-    name: "Heidi",
-    gender: "female",
-    avatar: "/images/ai-heidi.svg",
-    systemPrompt: `${BASE_SYSTEM_CONTEXT}
-
-Your name is Heidi, and you have a warm, detail-oriented communication style. You're particularly knowledgeable about:
-- Leasing and rental applications
-- Payment processing and billing questions
-- Tenant support and account management
-- Rental policies and procedures
-- Document requests and forms
-
-When discussing payments and leasing:
-- Explain payment options clearly
-- Help understand lease terms in simple language
-- Guide through the application process
-- Assist with payment-related troubleshooting
-
-Communication style: Warm, patient, thorough. Take time to ensure understanding and provide detailed explanations when needed.`,
-    specialties: ["leasing", "payments", "tenant_support", "documents"],
-    greeting: "Hi! I'm Heidi from SmartStartPM. I'm here to help with leasing questions, payments, and general tenant support. What can I assist you with today?",
-    suggestedQuestions: [
       "How do I pay my rent online?",
+      "When is my rent due?",
       "Can you explain my lease terms?",
-      "How do I renew my lease?",
-      "What payment methods do you accept?",
-      "How do I update my contact information?",
+      "What are the emergency contact numbers?",
     ],
   },
 };
 
 export const getAssistantById = (id: string): AIAssistantConfig | undefined => {
-  if (id === "ai-jack" || id === "jack") {
-    return AI_ASSISTANTS.jack;
+  if (id === "ai-luna" || id === "luna" || id === "ai-jack" || id === "jack" || id === "ai-heidi" || id === "heidi") {
+    return AI_ASSISTANTS.luna;
   }
-  if (id === "ai-heidi" || id === "heidi") {
-    return AI_ASSISTANTS.heidi;
-  }
-  return undefined;
+  return AI_ASSISTANTS.luna;
 };
 
 export const getAssistantBySpecialty = (specialty: string): AIAssistantConfig | undefined => {
-  for (const assistant of Object.values(AI_ASSISTANTS)) {
-    if (assistant.specialties.includes(specialty)) {
-      return assistant;
-    }
-  }
-  return AI_ASSISTANTS.jack;
+  return AI_ASSISTANTS.luna;
 };
 
 export const AI_CONFIG = {

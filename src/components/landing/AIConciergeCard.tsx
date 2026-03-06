@@ -57,7 +57,7 @@ export function AIConciergeCard() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             message: input.trim(),
-            assistantId: "heidi",
+            assistantId: "luna",
           }),
         });
 

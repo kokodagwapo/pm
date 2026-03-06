@@ -181,8 +181,7 @@ const navigationSections: NavSection[] = [
         icon: Bot,
         roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT],
         children: [
-          { title: "nav.aiHelp.jack", href: "/dashboard/ai-help?assistant=jack", icon: Bot, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
-          { title: "nav.aiHelp.heidi", href: "/dashboard/ai-help?assistant=heidi", icon: Bot, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
+          { title: "nav.aiHelp.luna", href: "/dashboard/ai-help?assistant=luna", icon: Bot, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
           { title: "nav.aiHelp.faq", href: "/dashboard/ai-help/faq", icon: HelpCircle, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
         ],
       },

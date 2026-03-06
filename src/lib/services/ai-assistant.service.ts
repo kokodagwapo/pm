@@ -220,12 +220,12 @@ Return only the suggestions, one per line, no numbering or bullets. Keep each un
     const systemPrompt = `Analyze the user message and categorize it. Return JSON only with:
 - category: one of "maintenance", "payment", "lease", "general", "emergency", "complaint"
 - urgency: one of "low", "medium", "high", "emergency"
-- suggestedAssistant: "jack" for maintenance/property issues, "heidi" for payments/leasing
+- suggestedAssistant: always "luna"
 
 Examples:
-"My AC is not working" -> {"category":"maintenance","urgency":"high","suggestedAssistant":"jack"}
-"How do I pay rent?" -> {"category":"payment","urgency":"low","suggestedAssistant":"heidi"}
-"Water is flooding my apartment" -> {"category":"emergency","urgency":"emergency","suggestedAssistant":"jack"}`;
+"My AC is not working" -> {"category":"maintenance","urgency":"high","suggestedAssistant":"luna"}
+"How do I pay rent?" -> {"category":"payment","urgency":"low","suggestedAssistant":"luna"}
+"Water is flooding my apartment" -> {"category":"emergency","urgency":"emergency","suggestedAssistant":"luna"}`;
 
     try {
       const openai = this.getOpenAI();
@@ -246,14 +246,14 @@ Examples:
       return {
         category: result.category || "general",
         urgency: result.urgency || "low",
-        suggestedAssistant: result.suggestedAssistant || "jack",
+        suggestedAssistant: "luna",
       };
     } catch (error) {
       console.error("Intent analysis error:", error);
       return {
         category: "general",
         urgency: "low",
-        suggestedAssistant: "jack",
+        suggestedAssistant: "luna",
       };
     }
   }

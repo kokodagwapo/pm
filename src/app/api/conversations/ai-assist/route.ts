@@ -20,7 +20,7 @@ import { User, Conversation, Message, Property, Tenant, Lease } from "@/models";
 import { z } from "zod";
 
 const chatRequestSchema = z.object({
-  assistantId: z.enum(["jack", "heidi", "ai-jack", "ai-heidi"]),
+  assistantId: z.enum(["luna", "ai-luna", "jack", "heidi", "ai-jack", "ai-heidi"]),
   message: z.string().min(1, "Message is required").max(4000, "Message too long"),
   conversationId: z.string().optional(),
   propertyId: z.string().optional(),

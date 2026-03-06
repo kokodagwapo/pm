@@ -36,7 +36,7 @@ interface ChatMessage {
 }
 
 interface AIAssistantChatProps {
-  initialAssistant?: "jack" | "heidi";
+  initialAssistant?: "luna" | "jack" | "heidi";
   propertyId?: string;
   conversationId?: string;
   onClose?: () => void;
@@ -44,7 +44,7 @@ interface AIAssistantChatProps {
 }
 
 export default function AIAssistantChat({
-  initialAssistant = "jack",
+  initialAssistant = "luna",
   propertyId,
   conversationId,
   onClose,

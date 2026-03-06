@@ -20,7 +20,7 @@ import { z } from "zod";
 
 const chatRequestSchema = z.object({
   message: z.string().min(1, "Message is required").max(2000, "Message too long"),
-  assistantId: z.enum(["heidi", "ai-heidi"]).default("heidi"),
+  assistantId: z.enum(["luna", "ai-luna", "heidi", "ai-heidi"]).default("luna"),
 });
 
 export async function POST(request: NextRequest) {
