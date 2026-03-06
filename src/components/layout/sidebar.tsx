@@ -1,6 +1,6 @@
 /**
- * SmartStartPM - Optimized Sidebar Navigation
- * Mobile-first responsive design with performance optimizations
+ * SmartStartPM — Sidebar Navigation
+ * Smooth accordion, animated active indicator, thin modern typography
  */
 
 "use client";
@@ -249,8 +249,9 @@ const NavItemComponent = memo(function NavItemComponent({
   const isActive = pathname === item.href;
   const hasChildren = item.children && item.children.length > 0;
   const filteredChildren = item.children?.filter((child) => child.roles.includes(userRole));
-  const hasActiveChild = hasChildren && filteredChildren?.some((child) => pathname === child.href);
+  const hasActiveChild = hasChildren && filteredChildren?.some((child) => pathname === child.href || pathname.startsWith(child.href + "/"));
   const isExpanded = expandedItems.includes(item.href) || hasActiveChild;
+  const isParentActive = isActive || hasActiveChild;
 
   return (
     <div>
@@ -264,46 +265,76 @@ const NavItemComponent = memo(function NavItemComponent({
           }
         }}
         className={cn(
-          "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
-          "hover:bg-accent/50 active:bg-accent",
-          isActive && level === 0 && "bg-primary/10 text-primary",
-          hasActiveChild && level === 0 && "bg-primary/5 text-primary",
-          isActive && level > 0 && "bg-primary/5 text-primary",
-          level > 0 && "ml-6 text-xs py-1.5",
-          isCollapsed && level === 0 && "justify-center px-2"
+          "relative flex items-center gap-2.5 rounded-lg transition-all duration-200",
+          "select-none outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+          level === 0 && "px-3 py-2 text-sm",
+          level > 0 && "ml-5 pl-3 pr-3 py-1.5 text-xs",
+          /* default state */
+          !isParentActive && "text-foreground/60 hover:text-foreground hover:bg-accent/60 active:bg-accent active:scale-[0.98]",
+          /* active top-level */
+          isParentActive && level === 0 && "text-primary bg-primary/8 font-medium hover:bg-primary/12 active:bg-primary/16",
+          /* active child */
+          isActive && level > 0 && "text-primary bg-primary/8 font-medium",
+          /* non-active child */
+          !isActive && level > 0 && "text-foreground/55 hover:text-foreground hover:bg-accent/50 active:scale-[0.98]",
+          isCollapsed && level === 0 && "justify-center px-2",
         )}
       >
-        <item.icon className={cn("shrink-0", level === 0 ? "h-4 w-4" : "h-3.5 w-3.5")} />
+        {/* Active indicator bar */}
+        {isParentActive && level === 0 && (
+          <span className="nav-active-indicator" />
+        )}
+
+        <item.icon
+          className={cn(
+            "shrink-0 transition-transform duration-200",
+            level === 0 ? "h-4 w-4" : "h-3.5 w-3.5",
+            isParentActive && "text-primary",
+          )}
+        />
+
         {!isCollapsed && (
           <>
-            <span className="flex-1 truncate">{t(item.title)}</span>
+            <span className={cn("flex-1 truncate tracking-[-0.01em]")}>
+              {t(item.title)}
+            </span>
             {item.badge && (
-              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+              <span className="ml-auto flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
                 {item.badge}
               </span>
             )}
             {hasChildren && filteredChildren && filteredChildren.length > 0 && (
-              <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", isExpanded && "rotate-180")} />
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 shrink-0 text-foreground/40 transition-transform duration-250 ease-out",
+                  isExpanded && "rotate-180",
+                )}
+              />
             )}
           </>
         )}
       </Link>
 
-      {!isCollapsed && hasChildren && isExpanded && filteredChildren && filteredChildren.length > 0 && (
-        <div className="mt-1 space-y-0.5">
-          {filteredChildren.map((child) => (
-            <NavItemComponent
-              key={child.href}
-              item={child}
-              level={level + 1}
-              isCollapsed={isCollapsed}
-              pathname={pathname}
-              userRole={userRole}
-              expandedItems={expandedItems}
-              toggleExpanded={toggleExpanded}
-              t={t}
-            />
-          ))}
+      {/* Smooth accordion using CSS grid */}
+      {!isCollapsed && hasChildren && filteredChildren && filteredChildren.length > 0 && (
+        <div className={cn("nav-accordion", isExpanded && "open")}>
+          <div>
+            <div className="pt-0.5 pb-1 space-y-0.5">
+              {filteredChildren.map((child) => (
+                <NavItemComponent
+                  key={child.href}
+                  item={child}
+                  level={level + 1}
+                  isCollapsed={isCollapsed}
+                  pathname={pathname}
+                  userRole={userRole}
+                  expandedItems={expandedItems}
+                  toggleExpanded={toggleExpanded}
+                  t={t}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -347,21 +378,21 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex flex-col h-[100dvh] md:h-full bg-card border-r border-border/50",
-        "w-64 transition-all duration-200",
+        "flex flex-col h-[100dvh] md:h-full bg-card/95 border-r border-border/40",
+        "w-64 transition-all duration-300 ease-out",
         isCollapsed && "w-16",
-        className
+        className,
       )}
     >
       {/* Header */}
-      <div className="flex items-center h-16 px-3 border-b border-border/50 shrink-0">
+      <div className="flex items-center h-16 px-3 border-b border-border/40 shrink-0">
         {!isCollapsed && (
-          <Link href="/dashboard" className="flex items-center">
+          <Link href="/dashboard" className="flex items-center opacity-90 hover:opacity-100 transition-opacity">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={logoSrc}
               alt="SmartStartPM"
-              className="h-8 w-auto max-w-[140px] object-contain"
+              className="h-7 w-auto max-w-[130px] object-contain"
               loading="eager"
             />
           </Link>
@@ -370,18 +401,25 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className={cn("ml-auto h-8 w-8 shrink-0", isCollapsed && "mx-auto")}
+          className={cn(
+            "ml-auto h-7 w-7 shrink-0 text-foreground/40 hover:text-foreground/70 hover:bg-accent/60 transition-all duration-200",
+            isCollapsed && "mx-auto",
+          )}
         >
-          {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          {isCollapsed ? (
+            <ChevronRight className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronLeft className="h-3.5 w-3.5" />
+          )}
         </Button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 min-h-0 overflow-y-auto p-2 space-y-4 scrollbar-thin">
+      <nav className="flex-1 min-h-0 overflow-y-auto px-2 py-3 space-y-4 scrollbar-thin">
         {filteredSections.map((section, sectionIndex) => (
           <div key={sectionIndex}>
             {section.title && !isCollapsed && (
-              <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-foreground/30">
                 {t(section.title)}
               </p>
             )}
@@ -402,26 +440,25 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
             </div>
           </div>
         ))}
-        {/* Bottom padding for scroll */}
         <div className="h-4" />
       </nav>
 
       {/* User Profile */}
       {!isCollapsed && (
-        <div className="p-3 border-t border-border/50 shrink-0">
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
-            <Avatar className="h-8 w-8">
+        <div className="px-3 py-3 border-t border-border/40 shrink-0">
+          <div className="flex items-center gap-2.5 p-2 rounded-xl bg-accent/40 hover:bg-accent/60 transition-colors cursor-default">
+            <Avatar className="h-7 w-7 shrink-0">
               <AvatarImage src={avatarUrl || session.user?.avatar || ""} alt={session.user?.firstName || ""} />
-              <AvatarFallback className="text-xs">
+              <AvatarFallback className="text-[10px] font-medium">
                 {session.user?.firstName?.[0]}
                 {session.user?.lastName?.[0]}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">
+              <p className="text-xs font-medium truncate leading-tight">
                 {session.user?.firstName} {session.user?.lastName}
               </p>
-              <p className="text-xs text-muted-foreground truncate capitalize">
+              <p className="text-[10px] text-foreground/40 truncate capitalize leading-tight mt-0.5">
                 {session.user?.role?.replace("_", " ")}
               </p>
             </div>

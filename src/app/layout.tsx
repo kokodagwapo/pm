@@ -4,7 +4,12 @@ import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import type { Metadata } from "next";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  weight: ["300", "400", "500", "600"],
+  display: "swap",
+});
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
@@ -42,7 +47,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
-      <body className={`${inter.className} ${playfair.variable} ${montserrat.variable}`} suppressHydrationWarning>
+      <body className={`${inter.variable} ${inter.className} ${playfair.variable} ${montserrat.variable} font-light`} suppressHydrationWarning>
         <Providers>
           {children}
           <Toaster />

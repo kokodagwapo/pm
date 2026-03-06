@@ -490,3 +490,58 @@
 .animate-spin-slow {
   animation: spin-slow 3s linear infinite;
 }
+
+/* Page transition — dashboard route changes */
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-in {
+  animation: pageIn 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* Smooth accordion via CSS grid rows */
+.nav-accordion {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.nav-accordion.open {
+  grid-template-rows: 1fr;
+}
+
+.nav-accordion > div {
+  overflow: hidden;
+}
+
+/* Active nav indicator slide */
+.nav-active-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  border-radius: 0 2px 2px 0;
+  background: var(--primary);
+  transition: opacity 0.15s ease;
+}
+
+/* Dashboard typography — thin/light weights */
+.dashboard-heading {
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-label {
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
