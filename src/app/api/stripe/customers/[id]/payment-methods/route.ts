@@ -10,10 +10,15 @@ import { Types } from "mongoose";
 import connectDB from "@/lib/mongodb";
 import { Tenant, Payment, RecurringPayment, User } from "@/models";
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
-});
+let _stripe: Stripe | null = null;
+function getStripeInstance() {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) throw new Error("STRIPE_SECRET_KEY is not configured");
+    _stripe = new Stripe(key, { apiVersion: "2024-06-20" });
+  }
+  return _stripe;
+}
 
 async function resolveStripeCustomerId(
   customerIdentifier: string
@@ -145,14 +150,14 @@ async function resolveStripeCustomerId(
       .trim()
       .replace(/\s+/g, " ");
 
-    const existingCustomer = await stripe.customers.list({
+    const existingCustomer = await getStripeInstance().customers.list({
       email: user.email,
       limit: 1,
     });
 
     const customer =
       existingCustomer.data[0] ||
-      (await stripe.customers.create({
+      (await getStripeInstance().customers.create({
         email: user.email,
         name: fullName || user.email,
         metadata: {
@@ -192,7 +197,7 @@ export async function GET(
     }
 
     // Retrieve customer payment methods
-    const paymentMethods = await stripe.paymentMethods.list({
+    const paymentMethods = await getStripeInstance().paymentMethods.list({
       customer: resolvedCustomerId,
       type: type as Stripe.PaymentMethodListParams.Type,
     });

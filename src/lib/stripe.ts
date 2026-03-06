@@ -8,12 +8,21 @@ import { Payment } from "@/models";
 import { PaymentStatus } from "@/types";
 import { formatCurrency } from "@/lib/utils/formatting";
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
-});
+// Lazy Stripe initialization — avoids build-time failures when key is absent
+let _stripe: Stripe | null = null;
 
-export { stripe };
+function getStripe(): Stripe {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) {
+      throw new Error("STRIPE_SECRET_KEY environment variable is not configured");
+    }
+    _stripe = new Stripe(key, { apiVersion: "2024-06-20" });
+  }
+  return _stripe;
+}
+
+export { getStripe as stripe };
 
 // ============================================================================
 // PAYMENT INTENT CREATION
@@ -42,7 +51,7 @@ export async function createPaymentIntent({
       throw new Error("Amount must be between $0.50 and $999,999.99");
     }
 
-    const paymentIntent = await stripe.paymentIntents.create(
+    const paymentIntent = await getStripe().paymentIntents.create(
       {
         amount: Math.round(amount * 100), // Convert to cents
         currency,
@@ -88,7 +97,7 @@ export async function confirmPayment(
   paymentIntentId: string
 ): Promise<boolean> {
   try {
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    const paymentIntent = await getStripe().paymentIntents.retrieve(paymentIntentId);
 
     if (paymentIntent.status === "succeeded") {
       // Find and update the payment record
@@ -142,7 +151,7 @@ export async function createRefund({
       refundParams.amount = Math.round(amount * 100); // Convert to cents
     }
 
-    const refund = await stripe.refunds.create(refundParams);
+    const refund = await getStripe().refunds.create(refundParams);
 
     // Update payment record
     const payment = await Payment.findOne({
@@ -173,14 +182,14 @@ export async function createOrUpdateCustomer(
 ): Promise<Stripe.Customer> {
   try {
     // Check if customer already exists
-    const existingCustomers = await stripe.customers.list({
+    const existingCustomers = await getStripe().customers.list({
       email,
       limit: 1,
     });
 
     if (existingCustomers.data.length > 0) {
       // Update existing customer
-      const customer = await stripe.customers.update(
+      const customer = await getStripe().customers.update(
         existingCustomers.data[0].id,
         {
           name,
@@ -194,7 +203,7 @@ export async function createOrUpdateCustomer(
       return customer;
     } else {
       // Create new customer
-      const customer = await stripe.customers.create({
+      const customer = await getStripe().customers.create({
         email,
         name,
         phone,
@@ -221,7 +230,7 @@ export function constructWebhookEvent(
   secret: string
 ): Stripe.Event {
   try {
-    return stripe.webhooks.constructEvent(payload, signature, secret);
+    return getStripe().webhooks.constructEvent(payload, signature, secret);
   } catch (error) {
     console.error("Error constructing webhook event:", error);
     throw new Error("Invalid webhook signature");
@@ -883,7 +892,7 @@ export async function getPaymentMethods(
   customerId: string
 ): Promise<Stripe.PaymentMethod[]> {
   try {
-    const paymentMethods = await stripe.paymentMethods.list({
+    const paymentMethods = await getStripe().paymentMethods.list({
       customer: customerId,
       type: "card",
     });

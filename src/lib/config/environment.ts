@@ -14,11 +14,9 @@ const envSchema = z.object({
   NEXTAUTH_SECRET: z.string().min(1, "NextAuth secret is required"),
   NEXTAUTH_URL: z.string().url().optional(),
 
-  // Stripe Configuration
-  STRIPE_SECRET_KEY: z.string().min(1, "Stripe secret key is required"),
-  STRIPE_PUBLISHABLE_KEY: z
-    .string()
-    .min(1, "Stripe publishable key is required"),
+  // Stripe Configuration — optional at build time; validated at runtime per request
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_PUBLISHABLE_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
 
   // SMTP Configuration
@@ -196,14 +194,15 @@ export const isTest = env.NODE_ENV === "test";
 // Export environment for external use
 export { env as environment };
 
-// Configuration validation on startup
-if (isProduction && !validateConfig.areRequiredServicesConfigured()) {
-  console.error("❌ Required services not configured for production");
-  console.error(
-    "Configuration status:",
-    validateConfig.getConfigurationStatus()
-  );
-  process.exit(1);
+// Log configuration status — warn if optional services are missing, but do not exit
+if (isProduction) {
+  const status = validateConfig.getConfigurationStatus();
+  if (!status.stripe) {
+    console.warn("⚠️  Stripe not configured — payment features will be unavailable");
+  }
+  if (!status.email) {
+    console.warn("⚠️  Email not configured — notifications will be unavailable");
+  }
 }
 
 // Log configuration status in development

@@ -14,9 +14,15 @@ import {
   createErrorResponse as createApiErrorResponse,
 } from "@/lib/api-utils";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
-});
+let _stripe: Stripe | null = null;
+function getStripeInstance() {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) throw new Error("STRIPE_SECRET_KEY is not configured");
+    _stripe = new Stripe(key, { apiVersion: "2024-06-20" });
+  }
+  return _stripe;
+}
 
 // ============================================================================
 // PUT - Update recurring payment setup
@@ -86,7 +92,7 @@ export async function PUT(
       try {
         if (isActive === false) {
           // Cancel the subscription
-          await stripe.subscriptions.cancel(
+          await getStripeInstance().subscriptions.cancel(
             recurringPayment.stripeSubscriptionId
           );
         } else {
@@ -95,7 +101,7 @@ export async function PUT(
 
           if (amount !== undefined) {
             // Update the subscription item with new amount
-            const subscription = await stripe.subscriptions.retrieve(
+            const subscription = await getStripeInstance().subscriptions.retrieve(
               recurringPayment.stripeSubscriptionId,
               { expand: ["items"] }
             );
@@ -128,7 +134,7 @@ export async function PUT(
           }
 
           if (Object.keys(updateData).length > 0) {
-            await stripe.subscriptions.update(
+            await getStripeInstance().subscriptions.update(
               recurringPayment.stripeSubscriptionId,
               updateData
             );
@@ -146,7 +152,7 @@ export async function PUT(
       try {
         let customerId = session.user.stripeCustomerId;
         if (!customerId) {
-          const customer = await stripe.customers.create({
+          const customer = await getStripeInstance().customers.create({
             email: session.user.email!,
             name: session.user.name!,
             metadata: {
@@ -157,7 +163,7 @@ export async function PUT(
           customerId = customer.id;
         }
 
-        const subscription = await stripe.subscriptions.create({
+        const subscription = await getStripeInstance().subscriptions.create({
           customer: customerId,
           items: [
             {
@@ -282,7 +288,7 @@ export async function DELETE(
     // Cancel Stripe subscription if it exists
     if (recurringPayment.stripeSubscriptionId) {
       try {
-        await stripe.subscriptions.cancel(
+        await getStripeInstance().subscriptions.cancel(
           recurringPayment.stripeSubscriptionId
         );
       } catch (stripeError) {

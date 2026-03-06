@@ -16,9 +16,15 @@ import {
   createErrorResponse as createApiErrorResponse,
 } from "@/lib/api-utils";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
-});
+let _stripe: Stripe | null = null;
+function getStripeInstance() {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) throw new Error("STRIPE_SECRET_KEY is not configured");
+    _stripe = new Stripe(key, { apiVersion: "2024-06-20" });
+  }
+  return _stripe;
+}
 
 // ============================================================================
 // GET - Fetch tenant's recurring payment setup
@@ -173,7 +179,7 @@ export async function POST(request: NextRequest) {
         // Create Stripe customer if doesn't exist
         let customerId = session.user.stripeCustomerId;
         if (!customerId) {
-          const customer = await stripe.customers.create({
+          const customer = await getStripeInstance().customers.create({
             email: session.user.email!,
             name: session.user.name!,
             metadata: {
@@ -185,7 +191,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Create subscription
-        const subscription = await stripe.subscriptions.create({
+        const subscription = await getStripeInstance().subscriptions.create({
           customer: customerId,
           items: [
             {

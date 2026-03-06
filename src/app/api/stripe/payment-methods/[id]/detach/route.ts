@@ -6,10 +6,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
-});
+let _stripe: Stripe | null = null;
+function getStripeInstance() {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) throw new Error("STRIPE_SECRET_KEY is not configured");
+    _stripe = new Stripe(key, { apiVersion: "2024-06-20" });
+  }
+  return _stripe;
+}
 
 export async function POST(
   request: NextRequest,
@@ -19,7 +24,7 @@ export async function POST(
     const paymentMethodId = params.id;
 
     // Detach payment method from customer
-    const paymentMethod = await stripe.paymentMethods.detach(paymentMethodId);
+    const paymentMethod = await getStripeInstance().paymentMethods.detach(paymentMethodId);
 
 
     return NextResponse.json({

@@ -12,10 +12,16 @@ import {
 } from "@/lib/database/schema-updates";
 import { emailService } from "./email.service";
 
-// Initialize Stripe
-const stripe = new Stripe(stripeConfig.secretKey, {
-  apiVersion: stripeConfig.apiVersion,
-});
+// Lazy Stripe initialization — only runs at request time, not at build time
+let _stripeInstance: Stripe | null = null;
+function getStripe(): Stripe {
+  if (!_stripeInstance) {
+    const key = stripeConfig.secretKey || process.env.STRIPE_SECRET_KEY;
+    if (!key) throw new Error("STRIPE_SECRET_KEY is not configured");
+    _stripeInstance = new Stripe(key, { apiVersion: stripeConfig.apiVersion });
+  }
+  return _stripeInstance;
+}
 
 export interface PaymentStatusTransition {
   from: PaymentStatus;
@@ -95,7 +101,7 @@ class CorePaymentService {
       );
 
       // Create Stripe payment intent
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntent = await getStripe().paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
         payment_method: paymentMethodId,

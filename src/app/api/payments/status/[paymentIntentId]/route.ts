@@ -33,7 +33,7 @@ export const GET = withRoleAndDB(
       }
 
       // Retrieve payment intent from Stripe
-      const paymentIntent = await stripe.paymentIntents.retrieve(
+      const paymentIntent = await stripe().paymentIntents.retrieve(
         paymentIntentId
       );
 

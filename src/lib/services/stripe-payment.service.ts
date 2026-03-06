@@ -413,4 +413,17 @@ class StripePaymentService {
   }
 }
 
-export const stripePaymentService = new StripePaymentService();
+// Lazy singleton — only instantiated when first called, not at build time
+let _stripePaymentService: StripePaymentService | null = null;
+export function getStripePaymentService(): StripePaymentService {
+  if (!_stripePaymentService) {
+    _stripePaymentService = new StripePaymentService();
+  }
+  return _stripePaymentService;
+}
+
+export const stripePaymentService = new Proxy({} as StripePaymentService, {
+  get(_target, prop) {
+    return getStripePaymentService()[prop as keyof StripePaymentService];
+  },
+});
