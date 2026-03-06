@@ -12,7 +12,12 @@ import type { Provider } from "next-auth/providers";
 // MongoDB client for NextAuth adapter
 // Use lazy connection to avoid timeout during build
 // Guard: skip adapter when MONGODB_URI is missing (e.g. build time, misconfigured env)
-const uri = process.env.MONGODB_URI;
+// Strip key=value prefix if secret was stored as "MONGODB_URI=mongodb://..."
+const _rawUri = process.env.MONGODB_URI ?? "";
+const uri =
+  _rawUri.includes("=") && !_rawUri.startsWith("mongodb")
+    ? _rawUri.substring(_rawUri.indexOf("=") + 1).trim()
+    : _rawUri || undefined;
 const options = {
   serverSelectionTimeoutMS: 30000,
   connectTimeoutMS: 30000,

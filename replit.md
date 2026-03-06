@@ -28,15 +28,33 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - `src/templates/` - Email/notification templates
 - `src/locales/` - i18n translations
 
-## Running
+## Running (Replit)
+- Workflow: `bash start.sh` — starts local MongoDB, then `next dev` on port 5000
 - Dev: `npm run dev` (port 5000, bound to 0.0.0.0)
 - Build: `npm run build`
 - Start: `npm run start` (port 5000, bound to 0.0.0.0)
+- Seed demo accounts: `npm run seed:demo`
 
-## Required Environment Variables
-- `MONGODB_URI` - MongoDB connection string
-- `AUTH_SECRET` - NextAuth secret
-- `NEXTAUTH_URL` - NextAuth base URL
+## Replit-Specific Configuration
+- **MongoDB**: Running locally via Nix (mongodb 7.0), data at `.mongodb/data/`
+- **start.sh**: Starts `mongod` (background) then `npm run dev`
+- **Port/Host**: 5000 / 0.0.0.0 (set in `package.json` dev script)
+- **allowedDevOrigins**: `next.config.ts` reads `REPLIT_DEV_DOMAIN`/`REPLIT_DOMAINS` env vars and adds wildcard `*.replit.dev` patterns
+- **NODE_OPTIONS**: `--max-old-space-size=3072` for build memory
+- **MONGODB_URI secret quirk**: Secret value may be stored as `MONGODB_URI=mongodb://...` (with key prefix). Both `src/lib/mongodb.ts` and `src/lib/auth.ts` strip this prefix automatically.
+
+## Demo Accounts (seeded into local MongoDB)
+| Role    | Email                    | Password    |
+|---------|--------------------------|-------------|
+| Admin   | hi@smartstart.us         | Admin123$   |
+| Manager | manager@smartstart.us    | Manager123$ |
+| Owner   | owner@smartstart.us      | Owner123$   |
+| Tenant  | tenant@smartstart.us     | Tenant123$  |
+
+## Required Environment Variables (Replit Secrets)
+- `MONGODB_URI` - MongoDB connection string (e.g. `mongodb://localhost:27017/SmartStartPM`)
+- `AUTH_SECRET` - NextAuth secret (required for session signing)
+- `NEXTAUTH_URL` - NextAuth base URL (e.g. `https://<replit-domain>`)
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - Stripe
 - `OPENAI_API_KEY`, `OPENAI_MODEL` - OpenAI
 - `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_URL`, `NEXT_PUBLIC_R2_PUBLIC_URL` - Cloudflare R2
