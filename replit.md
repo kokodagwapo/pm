@@ -21,7 +21,8 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - `src/hooks/` - Custom React hooks
 - `src/stores/` - Zustand state stores
 - `src/middleware/` - Custom middleware (audit)
-- `src/scripts/` - Seed scripts
+- `src/scripts/` - Seed and data management scripts
+- `data/` - DB snapshots (`snapshot.json`) produced by `export:data`
 - `src/styles/` - Global styles
 - `src/types/` - TypeScript type definitions
 - `src/utils/` - Utility functions
@@ -34,6 +35,10 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - Build: `npm run build`
 - Start: `npm run start` (port 5000, bound to 0.0.0.0)
 - Seed demo accounts: `npm run seed:demo`
+- Seed 35 Naples properties: `npm run seed:35`
+- Export DB to `data/snapshot.json`: `npm run export:data`
+- Restore from snapshot: `npm run import:data`
+- Seed everything: `npm run seed:all` (demo → 35 properties → pricing → faq → owners)
 
 ## Replit-Specific Configuration
 - **MongoDB**: Running locally via Nix (mongodb 7.0), data at `.mongodb/data/`
