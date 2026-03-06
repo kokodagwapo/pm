@@ -4,6 +4,7 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
+packages = ["mongodb"]
 
 [workflows]
 runButton = "Project"
@@ -21,13 +22,13 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash start.sh"
+waitForPort = 5000
 
 [[ports]]
 localPort = 5000
@@ -38,3 +39,8 @@ deploymentTarget = "autoscale"
 run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
 publicDir = "public"
+
+[userenv]
+
+[userenv.shared]
+NEXTAUTH_URL = "https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev"
