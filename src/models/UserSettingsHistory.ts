@@ -85,7 +85,7 @@ const userSettingsHistorySchema = new Schema<IUserSettingsHistory>(
       },
       ipAddress: {
         type: String,
-        maxlength: 45,
+        maxlength: 500,
       },
       sessionId: {
         type: String,
