@@ -101,9 +101,25 @@ export default function SignInPage() {
     }
   };
 
-  const handleDemoCredentials = (demoEmail: string, demoPassword: string) => {
-    setEmail(demoEmail);
-    setPassword(demoPassword);
+  const handleQuickLogin = async (demoEmail: string, demoPassword: string) => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const result = await signIn("credentials", {
+        email: demoEmail,
+        password: demoPassword,
+        redirect: false,
+      });
+      if (result?.error) {
+        setError("Invalid credentials");
+        setIsLoading(false);
+      } else if (result?.ok) {
+        window.location.href = "/dashboard";
+      }
+    } catch {
+      setError("An error occurred during sign in");
+      setIsLoading(false);
+    }
   };
 
   const isDevelopment =
@@ -255,7 +271,7 @@ export default function SignInPage() {
                       type="button"
                       className={`flex flex-col items-center justify-center gap-1 min-h-[48px] py-3 rounded-lg text-white text-xs font-medium transition-all touch-manipulation ${account.color}`}
                       onClick={() =>
-                        handleDemoCredentials(account.email, account.password)
+                        handleQuickLogin(account.email, account.password)
                       }
                       disabled={isLoading}
                     >
@@ -265,7 +281,7 @@ export default function SignInPage() {
                   ))}
                 </div>
                 <p className="text-xs text-black/60 mt-2 text-center">
-                  Click to auto-fill credentials, then sign in
+                  Click to instantly log in as that role
                 </p>
               </div>
             )}

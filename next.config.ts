@@ -11,6 +11,8 @@ const replitDevOrigins: string[] = [
     : []),
   "*.spock.replit.dev",
   "*.replit.dev",
+  "localhost",
+  "127.0.0.1",
 ];
 
 const nextConfig: NextConfig = {

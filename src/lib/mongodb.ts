@@ -28,13 +28,14 @@ async function connectDB() {
   }
 
   if (!cached.promise) {
+    const isLocal = MONGODB_URI.includes("localhost") || MONGODB_URI.includes("127.0.0.1");
     const opts = {
       bufferCommands: false,
-      maxPoolSize: 10, // Maintain up to 10 socket connections
-      serverSelectionTimeoutMS: 30000, // Keep trying to send operations for 30 seconds
-      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-      connectTimeoutMS: 30000, // Give up initial connection after 30 seconds
-      family: 4, // Use IPv4, skip trying IPv6
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: isLocal ? 5000 : 30000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: isLocal ? 5000 : 30000,
+      family: 4,
     };
 
     cached.promise = mongoose
