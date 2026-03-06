@@ -1,7 +1,26 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/SmartStartPM";
+/**
+ * Normalize MONGODB_URI - strip accidental "MONGODB_URI=" prefix if copied incorrectly.
+ * Correct format: mongodb+srv://user:pass@cluster.mongodb.net/dbname
+ * or: mongodb://localhost:27017/dbname
+ */
+export function normalizeMongoUri(raw: string | undefined): string {
+  if (!raw || typeof raw !== "string") return "mongodb://localhost:27017/SmartStartPM";
+  let uri = raw.trim();
+  // Fix: "MONGODB_URI=mongodb+srv://..." -> "mongodb+srv://..."
+  if (uri.toLowerCase().startsWith("mongodb_uri=")) {
+    uri = uri.slice("mongodb_uri=".length).trim();
+  }
+  return uri || "mongodb://localhost:27017/SmartStartPM";
+}
+
+const MONGODB_URI = normalizeMongoUri(process.env.MONGODB_URI);
+
+/** Exported for auth adapter - returns normalized URI (strips accidental MONGODB_URI= prefix) */
+export function getMongoUri(): string {
+  return normalizeMongoUri(process.env.MONGODB_URI);
+}
 
 // Don't throw error in development if MongoDB is not available
 if (!process.env.MONGODB_URI && process.env.NODE_ENV === "production") {

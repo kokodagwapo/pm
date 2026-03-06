@@ -4,7 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { MongoClient } from "mongodb";
-import connectDB from "./mongodb";
+import connectDB, { getMongoUri } from "./mongodb";
 import User, { UserDocument } from "@/models/User";
 import { UserRole } from "@/types";
 import type { Provider } from "next-auth/providers";
@@ -12,7 +12,8 @@ import type { Provider } from "next-auth/providers";
 // MongoDB client for NextAuth adapter
 // Use lazy connection to avoid timeout during build
 // Guard: skip adapter when MONGODB_URI is missing (e.g. build time, misconfigured env)
-const uri = process.env.MONGODB_URI;
+// getMongoUri() normalizes the value (strips accidental "MONGODB_URI=" prefix)
+const uri = getMongoUri();
 const options = {
   serverSelectionTimeoutMS: 30000,
   connectTimeoutMS: 30000,

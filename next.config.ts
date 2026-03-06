@@ -60,6 +60,16 @@ const nextConfig: NextConfig = {
         hostname: "images.unsplash.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "vms-florida.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.vms-florida.com",
+        pathname: "/**",
+      },
     ],
   },
 

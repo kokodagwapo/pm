@@ -39,8 +39,28 @@ export async function GET(request: NextRequest) {
       ? parseInt(searchParams.get("bedrooms")!)
       : undefined;
     const city = searchParams.get("city") || undefined;
+    const sortParam = searchParams.get("sort") || "";
 
     const skip = (page - 1) * limit;
+
+    let sort: Record<string, 1 | -1> = { createdAt: -1 };
+    switch (sortParam) {
+      case "priceDesc":
+        sort = { "units.0.rentAmount": -1 };
+        break;
+      case "priceAsc":
+        sort = { "units.0.rentAmount": 1 };
+        break;
+      case "newest":
+        sort = { createdAt: -1 };
+        break;
+      case "bedroomsDesc":
+        sort = { "units.0.bedrooms": -1 };
+        break;
+      case "bedroomsAsc":
+        sort = { "units.0.bedrooms": 1 };
+        break;
+    }
 
     const query: Record<string, unknown> = {
       deletedAt: null,
@@ -69,7 +89,7 @@ export async function GET(request: NextRequest) {
     const [data, total] = await Promise.all([
       Property.find(query)
         .select("-__v")
-        .sort({ createdAt: -1 })
+        .sort(sort)
         .skip(skip)
         .limit(limit)
         .lean(),

@@ -4,11 +4,15 @@
  */
 
 import { z } from "zod";
+import { normalizeMongoUri } from "@/lib/mongodb";
 
 // Environment variable schema validation
 const envSchema = z.object({
-  // Database
-  MONGODB_URI: z.string().min(1, "MongoDB URI is required"),
+  // Database - normalize strips accidental "MONGODB_URI=" prefix from value
+  MONGODB_URI: z
+    .string()
+    .min(1, "MongoDB URI is required")
+    .transform((val) => normalizeMongoUri(val)),
 
   // Authentication
   NEXTAUTH_SECRET: z.string().min(1, "NextAuth secret is required"),

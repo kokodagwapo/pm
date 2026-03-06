@@ -1,0 +1,4520 @@
+[
+  {
+    "_id": "69aabc9ef0e8b399abf2f456",
+    "name": "Beautiful 2 Bed/2 Bath Lakeview Condo",
+    "description": "Welcome to your dream retreat in Falling Waters, a premier residential community nestled in the heart of Naples, Florida. This stunning modern lakeview condo offers an exquisite blend of luxury, comfort, and the breathtaking natural beauty that Southwest Florida is renowned for.\n\nAs you step into this beautifully designed condo, you are greeted by an open-concept layout that maximizes space and light. The expansive living area features large windows that frame picturesque views of the serene lake and lush landscaping.\n\nThe modern kitchen is a chef's delight, equipped with stainless steel appliances, elegant quartz countertops, and ample cabinetry. Retreat to the luxurious master suite with a spacious walk-in closet and private en-suite bathroom.",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "7050 Falling Waters Drive",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Washer/Dryer",
+        "category": "Laundry"
+      },
+      {
+        "name": "Lake View",
+        "category": "Living"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C442-LV",
+        "unitType": "apartment",
+        "floor": 2,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 3900,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
+          "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+          "https://images.unsplash.com/photo-1572331165267-854da2b10ccc?w=800&q=80",
+          "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80",
+          "https://images.unsplash.com/photo-1617325247661-675ab4b64ae2?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f457",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+      "https://images.unsplash.com/photo-1572331165267-854da2b10ccc?w=800&q=80",
+      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80",
+      "https://images.unsplash.com/photo-1617325247661-675ab4b64ae2?w=800&q=80"
+    ],
+    "ownerId": "69aacb63fc50955117376624",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.242Z",
+    "updatedAt": "2026-03-06T12:41:09.049Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f45b",
+    "name": "WOODLANDS Condo, World Tennis Club",
+    "description": "Cozy coastal condo in the World Tennis Club in Naples, Florida. This charming 2-bedroom, 2-bathroom unit offers the perfect blend of comfort and convenience for your Naples getaway.\n\nEnjoy access to world-class tennis facilities, a beautiful community pool, and well-maintained grounds. The condo features a fully equipped kitchen, comfortable living spaces, and a private lanai.\n\nLocated just minutes from Naples' famous beaches, shopping, and dining destinations.",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "3650 Olympic Drive",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34105",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Tennis Courts",
+        "category": "Recreation"
+      },
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C373-WTC",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1100,
+        "rentAmount": 3900,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": false,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": false,
+          "dryer": false,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80",
+          "https://images.unsplash.com/photo-1572331165267-854da2b10ccc?w=800&q=80",
+          "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=80",
+          "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+          "https://images.unsplash.com/photo-1617325247661-675ab4b64ae2?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f45c",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80",
+      "https://images.unsplash.com/photo-1572331165267-854da2b10ccc?w=800&q=80",
+      "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=80",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+      "https://images.unsplash.com/photo-1617325247661-675ab4b64ae2?w=800&q=80"
+    ],
+    "ownerId": "69aacb64fc5095511737662d",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.250Z",
+    "updatedAt": "2026-03-06T12:41:09.070Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f460",
+    "name": "Whitten Drive Pool Home",
+    "description": "Beautiful single-family pool home in the heart of Naples. This spacious 3-bedroom, 2-bathroom home offers everything you need for an unforgettable Florida vacation.\n\nThe highlight of this property is the private heated pool and expansive lanai, perfect for entertaining or simply relaxing under the Florida sun. Inside, you'll find an open floor plan with modern furnishings, a fully equipped kitchen, and comfortable bedrooms.\n\nLocated in the desirable Villas of Whittenberg community, you're just minutes from Naples' best beaches, golf courses, and shopping.",
+    "type": "house",
+    "status": "available",
+    "address": {
+      "street": "2891 Whitten Drive",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34109",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Private Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Washer/Dryer",
+        "category": "Laundry"
+      },
+      {
+        "name": "Garage",
+        "category": "Parking"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "BBQ Grill",
+        "category": "Outdoor"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "H190-VW",
+        "unitType": "loft",
+        "floor": 1,
+        "bedrooms": 3,
+        "bathrooms": 2,
+        "squareFootage": 1800,
+        "rentAmount": 5700,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 2,
+          "type": "garage",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80",
+          "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+          "https://images.unsplash.com/photo-1572331165267-854da2b10ccc?w=800&q=80",
+          "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80",
+          "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f461",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+      "https://images.unsplash.com/photo-1572331165267-854da2b10ccc?w=800&q=80",
+      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80"
+    ],
+    "ownerId": "69aacb64fc50955117376630",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.255Z",
+    "updatedAt": "2026-03-06T12:41:09.074Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f465",
+    "name": "ROSEWOOD Condo, Falling Waters",
+    "description": "Airy, second-story lake-view Rosewood condo in Falling Waters. This beautifully appointed 2-bedroom, 2-bathroom condo offers stunning views and resort-style amenities.\n\nWake up to gorgeous lake views from your private lanai. The open floor plan features a well-equipped kitchen, comfortable living area, and two spacious bedrooms. The community offers multiple pools, tennis courts, and beautifully landscaped grounds.\n\nPerfect for couples or small families looking for a relaxing Naples retreat.",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "7015 Rosewood Lane",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Tennis Courts",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lake View",
+        "category": "Living"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C442-RW",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1150,
+        "rentAmount": 4650,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": false,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": false,
+          "dryer": false,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80",
+          "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80",
+          "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800&q=80",
+          "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&q=80",
+          "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f466",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80",
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80",
+      "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800&q=80",
+      "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80"
+    ],
+    "ownerId": "69aacb63fc50955117376624",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.260Z",
+    "updatedAt": "2026-03-06T12:41:09.061Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f46a",
+    "name": "OLYMPIC DRIVE Condo, World Tennis Club",
+    "description": "Charming Ground-Floor Condo in World Tennis Club — Naples, Florida. This well-maintained 2-bedroom, 2-bathroom unit is perfect for tennis enthusiasts and those seeking a peaceful retreat.\n\nEnjoy easy access from this ground-floor unit to the community's amenities including tennis courts, pool, and fitness center. The condo features updated finishes, a modern kitchen, and a relaxing lanai.\n\nIdeally located near Naples' top attractions, beaches, and dining options.",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "3680 Olympic Drive",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34105",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Tennis Courts",
+        "category": "Recreation"
+      },
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Fitness Center",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C456-OD",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1050,
+        "rentAmount": 3900,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": false,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": false,
+          "dryer": false,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": false,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
+          "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+          "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+          "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+          "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f46b",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
+      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+      "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800&q=80"
+    ],
+    "ownerId": "69aacb64fc5095511737662d",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.265Z",
+    "updatedAt": "2026-03-06T12:41:09.071Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f46f",
+    "name": "JASMINE COURT Condo, Falling Waters",
+    "description": "Coastal second-floor condo in Jasmine Court offers a quiet setting in the heart of Falling Waters. This 2-bedroom, 2-bathroom unit provides the perfect balance of privacy and community amenities.\n\nRelax on your private lanai overlooking the beautifully landscaped grounds. The condo features a modern kitchen, comfortable living spaces, and two well-appointed bedrooms with quality linens.\n\nJust seconds away from the resort-style pool and walking distance to the community's waterfall feature.",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "7030 Jasmine Court",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Washer/Dryer",
+        "category": "Laundry"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C96-JC",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1100,
+        "rentAmount": 4650,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80",
+          "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80",
+          "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+          "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+          "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f470",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80",
+      "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+      "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=80"
+    ],
+    "ownerId": "69aacb64fc5095511737662d",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.271Z",
+    "updatedAt": "2026-03-06T12:41:09.073Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f474",
+    "name": "CASCADE Condo, Falling Waters",
+    "description": "Fountain view Cascades condo with furnished lanai in the prestigious Falling Waters community. This stunning 2-bedroom, 2-bathroom unit offers views of the community's signature waterfall.\n\nThe spacious lanai is perfect for outdoor dining with its furnished seating area. Inside, enjoy a fully equipped kitchen, comfortable living room, and two bedrooms designed for restful sleep.\n\nResort-style amenities include multiple pools, tennis courts, and miles of walking paths through tropical landscaping.",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "7045 Cascade Lane",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Tennis Courts",
+        "category": "Recreation"
+      },
+      {
+        "name": "Fountain View",
+        "category": "Living"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Furnished Lanai",
+        "category": "Outdoor"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C91-CS",
+        "unitType": "apartment",
+        "floor": 2,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1175,
+        "rentAmount": 4980,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": false,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": false,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": false,
+          "dryer": false,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": false,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80",
+          "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+          "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+          "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800&q=80",
+          "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f475",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+      "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800&q=80",
+      "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80"
+    ],
+    "ownerId": "69aacb63fc5095511737662a",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.276Z",
+    "updatedAt": "2026-03-06T12:41:09.066Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f479",
+    "name": "ORCHID FALLS Condo, Falling Waters",
+    "description": "Beautiful lake-view sunsets from the second-story lanai of this Orchid Falls condo. This 2-bedroom, 2-bathroom unit offers some of the best views in Falling Waters.\n\nWatch stunning Florida sunsets over the lake from your private lanai. The interior features modern updates, a well-appointed kitchen, and comfortable bedrooms with quality furnishings.\n\nFalling Waters offers resort-style amenities including pools, tennis, and a clubhouse.",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "7025 Orchid Falls Way",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Tennis Courts",
+        "category": "Recreation"
+      },
+      {
+        "name": "Lake View",
+        "category": "Living"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Sunset Views",
+        "category": "Living"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C381-OF",
+        "unitType": "apartment",
+        "floor": 2,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1125,
+        "rentAmount": 4650,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": false,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": false,
+          "dryer": false,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": false,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80",
+          "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80",
+          "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+          "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&q=80",
+          "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f47a",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80",
+      "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+      "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&q=80",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80"
+    ],
+    "ownerId": "69aacb63fc5095511737662a",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.280Z",
+    "updatedAt": "2026-03-06T12:41:09.068Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f47e",
+    "name": "MAGNOLIA FALLS Condo with Outdoor Kitchen",
+    "description": "Second-story condo in Magnolia Falls with an outdoor kitchen - a rare find in Falling Waters! This 2-bedroom, 2-bathroom unit is perfect for those who love to entertain.\n\nThe highlight is the lanai featuring a built-in outdoor kitchen with grill, sink, and mini-fridge. Inside, enjoy updated finishes, a modern kitchen, and two spacious bedrooms.\n\nTake advantage of Falling Waters' resort amenities including multiple pools and tennis courts.",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "7060 Magnolia Falls Drive",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Outdoor Kitchen",
+        "category": "Outdoor"
+      },
+      {
+        "name": "BBQ Grill",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C122-MF",
+        "unitType": "apartment",
+        "floor": 2,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 4980,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": false,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": false,
+          "dryer": false,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": false,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80",
+          "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800&q=80",
+          "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+          "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80",
+          "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f47f",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80",
+      "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800&q=80",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+      "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80"
+    ],
+    "ownerId": "69aacb63fc5095511737662a",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.284Z",
+    "updatedAt": "2026-03-06T12:41:09.069Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f483",
+    "name": "ORCHID FALLS Premium Condo",
+    "description": "Beautiful upgraded Orchid Falls condo with private second-story lake views. This premium 2-bedroom, 2-bathroom unit features high-end finishes throughout.\n\nUpgraded features include granite countertops, stainless steel appliances, tile flooring, and designer furnishings. The private lanai offers peaceful lake views and is perfect for morning coffee or evening relaxation.\n\nEnjoy all of Falling Waters' amenities including pools, tennis, and fitness center.",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "7035 Orchid Falls Way",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Fitness Center",
+        "category": "Recreation"
+      },
+      {
+        "name": "Lake View",
+        "category": "Living"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Premium Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Designer Furnishings",
+        "category": "Living"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C447-OF",
+        "unitType": "apartment",
+        "floor": 2,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1175,
+        "rentAmount": 5550,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": false,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": false,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": false,
+          "dryer": false,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": false,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80",
+          "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80",
+          "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=80",
+          "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80",
+          "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f484",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80",
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80",
+      "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=80",
+      "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80",
+      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80"
+    ],
+    "ownerId": "69aacb64fc50955117376630",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.290Z",
+    "updatedAt": "2026-03-06T12:41:09.077Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f488",
+    "name": "MOON LAKE Pool Home",
+    "description": "Spacious modern pool home in Moon Lake is perfect for a group of adults or family vacation. This stunning 4-bedroom, 3-bathroom home offers luxury living in Naples.\n\nThe heated private pool and spa are surrounded by a beautifully landscaped backyard with plenty of space for outdoor entertaining. Inside, the open floor plan features a gourmet kitchen, spacious living areas, and four comfortable bedrooms.\n\nLocated in the desirable Moon Lake community with easy access to Naples' beaches, golf, and dining.",
+    "type": "house",
+    "status": "available",
+    "address": {
+      "street": "4520 Moon Lake Drive",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34109",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Private Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Spa/Hot Tub",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Gourmet Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Washer/Dryer",
+        "category": "Laundry"
+      },
+      {
+        "name": "Garage",
+        "category": "Parking"
+      },
+      {
+        "name": "BBQ Grill",
+        "category": "Outdoor"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "H437-ML",
+        "unitType": "loft",
+        "floor": 1,
+        "bedrooms": 4,
+        "bathrooms": 3,
+        "squareFootage": 2400,
+        "rentAmount": 8250,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": false,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 2,
+          "type": "garage",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80",
+          "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+          "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=80",
+          "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+          "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f489",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
+      "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80"
+    ],
+    "ownerId": "69aacb64fc50955117376630",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.294Z",
+    "updatedAt": "2026-03-06T12:41:09.076Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f48d",
+    "name": "CASCADES Ground Floor Condo",
+    "description": "Ground-floor Cascades condo with an outdoor kitchen in Falling Waters. This accessible 2-bedroom, 2-bathroom unit is perfect for those who prefer single-level living.\n\nStep right out to your private lanai with built-in outdoor kitchen. The ground-floor location provides easy access to the community pool and amenities. Inside, enjoy modern finishes and comfortable furnishings.\n\nFalling Waters offers a true resort lifestyle with pools, tennis, and beautiful grounds.",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "7040 Cascade Lane",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Outdoor Kitchen",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Ground Floor",
+        "category": "Other"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Easy Access",
+        "category": "Other"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C83-CS",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1100,
+        "rentAmount": 4200,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": false,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": false,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": false,
+          "dryer": false,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": false,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
+          "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+          "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+          "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&q=80",
+          "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f48e",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+      "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&q=80",
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80"
+    ],
+    "ownerId": "69aacb64fc50955117376633",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.299Z",
+    "updatedAt": "2026-03-06T12:41:09.078Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f492",
+    "name": "MAGNOLIA COVE Villa, Falling Waters",
+    "description": "Luxurious 3-bedroom, 2-bathroom villa in the exclusive Magnolia Cove section of Falling Waters. This spacious villa offers more privacy and space than typical condos.\n\nFeatures include a private garage, extended lanai, upgraded finishes throughout, and generous living spaces. The villa layout is perfect for families or groups seeking more room to spread out.\n\nEnjoy Falling Waters' extensive amenities including multiple pools, tennis courts, and a clubhouse.",
+    "type": "townhouse",
+    "status": "available",
+    "address": {
+      "street": "7100 Magnolia Cove Lane",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Private Garage",
+        "category": "Parking"
+      },
+      {
+        "name": "Extended Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Full Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Washer/Dryer",
+        "category": "Laundry"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "V452-MC",
+        "unitType": "penthouse",
+        "floor": 2,
+        "bedrooms": 3,
+        "bathrooms": 2,
+        "squareFootage": 1650,
+        "rentAmount": 7800,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": false,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": false,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
+          "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=80",
+          "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80",
+          "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800&q=80",
+          "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f493",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
+      "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=80",
+      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80",
+      "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80"
+    ],
+    "ownerId": "69aacb63fc50955117376624",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.303Z",
+    "updatedAt": "2026-03-06T12:41:09.063Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f497",
+    "name": "MAGNOLIA FALLS Preserve View Condo",
+    "description": "Upgraded ground-floor condo in Magnolia Falls with peaceful preserve view from west-facing lanai. This 2-bedroom, 2-bathroom unit offers tranquility and natural beauty.\n\nThe west-facing lanai provides beautiful sunset views over the protected preserve. Inside, enjoy upgraded finishes, a modern kitchen, and two comfortable bedrooms.\n\nPerfect location within Falling Waters - close to the pool while maintaining a peaceful setting.",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "7055 Magnolia Falls Drive",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Preserve View",
+        "category": "Living"
+      },
+      {
+        "name": "Sunset Views",
+        "category": "Living"
+      },
+      {
+        "name": "Ground Floor",
+        "category": "Other"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C44-MF",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1150,
+        "rentAmount": 4980,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": false,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": false,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": false,
+          "dryer": false,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": false,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80",
+          "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+          "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80",
+          "https://images.unsplash.com/photo-1572331165267-854da2b10ccc?w=800&q=80",
+          "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f498",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80",
+      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80",
+      "https://images.unsplash.com/photo-1572331165267-854da2b10ccc?w=800&q=80",
+      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80"
+    ],
+    "ownerId": "69aacb64fc50955117376633",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.308Z",
+    "updatedAt": "2026-03-06T12:41:09.079Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aabc9ef0e8b399abf2f49c",
+    "name": "JASMINE COURT Premium Condo",
+    "description": "Upgraded second-floor Jasmine Court condo only seconds away from the large resort-style pool. This premium 2-bedroom, 2-bathroom unit features the best upgrades in Falling Waters.\n\nPremium features include hurricane impact windows, crown molding, upgraded appliances, and designer furniture. The location couldn't be better - just steps from the community's main pool.\n\nEnjoy all of Falling Waters' resort amenities during your Naples vacation.",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "7032 Jasmine Court",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Hurricane Windows",
+        "category": "Security"
+      },
+      {
+        "name": "Premium Upgrades",
+        "category": "Other"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Designer Kitchen",
+        "category": "Kitchen"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C453-JC",
+        "unitType": "apartment",
+        "floor": 2,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1125,
+        "rentAmount": 4800,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": false,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": false,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": false,
+          "dryer": false,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": false,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80",
+          "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800&q=80",
+          "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80",
+          "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=80",
+          "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80"
+        ],
+        "_id": "69aabc9ef0e8b399abf2f49d",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80",
+      "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800&q=80",
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80",
+      "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=80",
+      "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80"
+    ],
+    "ownerId": "69aacb63fc50955117376624",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T11:38:06.312Z",
+    "updatedAt": "2026-03-06T12:41:09.065Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1ce644ecd2e79122a3d1",
+    "name": "FROSTY WAY Condo, Winterpark (2BR / 2 BA) – # 900",
+    "description": "Price per night:  USD 80",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "900",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 2400,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1197.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1194.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1193.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1192.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1203.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1199.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1195.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1198.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1213.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1204.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1211.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1206.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1208.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1191.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2025/11/VMS-Florida-Realty_Logo-Mobile_v4.svg"
+        ],
+        "_id": "69ab1ce644ecd2e79122a3d2",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1197.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1194.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1193.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1192.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1203.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1199.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1195.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1198.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1213.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1204.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1211.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1206.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1208.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1191.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2025/11/VMS-Florida-Realty_Logo-Mobile_v4.svg"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:28:54.092Z",
+    "updatedAt": "2026-03-06T18:29:33.345Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1ce744ecd2e79122a3d7",
+    "name": "CASCADES Condo, Falling Waters (2 BR / 2 BA) – #C446",
+    "description": "Price per night:  USD 145",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C446",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 4350,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-back-lanai-view-5.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-back-lanai-seating.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-back-lanai-table-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-back-lanai-chairs-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-back-lanai-table-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-entrance-door-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-entrance-door-kitchen-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-kitchen-appliances-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-kitchen-layout-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-kitchen-counters-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-kitchen-layout-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-dining-room-table-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-dining-room-table-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-dining-room-table-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-living-room-doors-7.webp"
+        ],
+        "_id": "69ab1ce744ecd2e79122a3d8",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-back-lanai-view-5.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-back-lanai-seating.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-back-lanai-table-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-back-lanai-chairs-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-back-lanai-table-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-entrance-door-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-entrance-door-kitchen-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-kitchen-appliances-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-kitchen-layout-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-kitchen-counters-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-kitchen-layout-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-dining-room-table-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-dining-room-table-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-dining-room-table-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-living-room-doors-7.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:28:55.243Z",
+    "updatedAt": "2026-03-06T18:29:34.416Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1ce844ecd2e79122a3dd",
+    "name": "ROSEWOOD Condo, Falling Waters (2 BR / 2 BA) – #C14",
+    "description": "Price per night:  USD 155.4",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C14",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 4500,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-living-room-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/falling-waters-resort-style-pool-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/falling-waters-resort-style-pool-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/falling-waters-tennis-courts.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-breakfast-bar-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-dining-room-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-entrance-hallway-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-entry-lanai-patio-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-entry-lanai-patio-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-entry-sign-decor.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-guest-bathroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-guest-bedroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-kitchen-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-kitchen-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-kitchen-3.webp"
+        ],
+        "_id": "69ab1ce844ecd2e79122a3de",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-living-room-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/falling-waters-resort-style-pool-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/falling-waters-resort-style-pool-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/falling-waters-tennis-courts.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-breakfast-bar-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-dining-room-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-entrance-hallway-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-entry-lanai-patio-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-entry-lanai-patio-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-entry-sign-decor.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-guest-bathroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-guest-bedroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-kitchen-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-kitchen-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-kitchen-3.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:28:56.316Z",
+    "updatedAt": "2026-03-06T18:30:02.726Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1ce944ecd2e79122a3e3",
+    "name": "NAPLES PARK Pool House (2 BR / 2 BA) – #H450",
+    "description": "Price per night:  USD 250",
+    "type": "house",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "H450",
+        "unitType": "loft",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 7500,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-pool-deck-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-guest-bathroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-guest-bedroom-1-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-guest-bedroom-1-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-guest-bedroom-2-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-guest-bedroom-2-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-kitchen-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-kitchen-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-kitchen-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-kitchen-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-laundry-room-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-laundry-room-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-master-bathroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-master-bedroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-master-bedroom-2.webp"
+        ],
+        "_id": "69ab1ce944ecd2e79122a3e4",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-pool-deck-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-guest-bathroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-guest-bedroom-1-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-guest-bedroom-1-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-guest-bedroom-2-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-guest-bedroom-2-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-kitchen-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-kitchen-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-kitchen-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-kitchen-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-laundry-room-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-laundry-room-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-master-bathroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-master-bedroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/naples-park-master-bedroom-2.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:28:57.417Z",
+    "updatedAt": "2026-03-06T18:29:36.544Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1cea44ecd2e79122a3e9",
+    "name": "NORTHWINDS DRIVE Condo, Winter Park (2 BR / 2 BA) – #C321",
+    "description": "Price per night:  USD 140",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C321",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 4200,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-dining-room-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-breakfast-nook-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-entry-balcony-lanai-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-guest-bedroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-kitchen-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-kitchen-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-kitchen-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-laundry-room-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-living-room-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-master-bathroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-master-bathroom-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-master-bedroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-master-bedroom-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-guest-bathroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/VMS-Florida-Realty_Logo-Mobile_v4.svg"
+        ],
+        "_id": "69ab1cea44ecd2e79122a3ea",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-dining-room-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-breakfast-nook-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-entry-balcony-lanai-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-guest-bedroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-kitchen-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-kitchen-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-kitchen-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-laundry-room-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-living-room-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-master-bathroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-master-bathroom-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-master-bedroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-master-bedroom-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/northwinds-drive-guest-bathroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/VMS-Florida-Realty_Logo-Mobile_v4.svg"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:28:58.520Z",
+    "updatedAt": "2026-03-06T18:29:37.560Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1ceb44ecd2e79122a3ef",
+    "name": "SNOWFLAKE LANE Condo, Winter Park (2 BR / 2 BA) – #C415",
+    "description": "Price per night:  USD 130",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C415",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 3900,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-living-room-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-breakfast-nook-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-building-exterior-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-building-exterior-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-building-exterior-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-dining-room-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-dining-room-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-dining-room-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-entry-stairs-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-entry-stairs-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-guest-bathroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-guest-bathroom-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-guest-bedroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-kitchen-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-laundry-room-1.webp"
+        ],
+        "_id": "69ab1ceb44ecd2e79122a3f0",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-living-room-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-breakfast-nook-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-building-exterior-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-building-exterior-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-building-exterior-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-dining-room-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-dining-room-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-dining-room-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-entry-stairs-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-entry-stairs-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-guest-bathroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-guest-bathroom-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-guest-bedroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-kitchen-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/snowflake-lane-laundry-room-1.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:28:59.621Z",
+    "updatedAt": "2026-03-06T18:29:38.624Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1cec44ecd2e79122a3f5",
+    "name": "WATER CREST Condo, Falling Waters (3 BR / 2 BA)- #C438",
+    "description": "Price per night:  USD 159",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C438",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 3,
+        "bathrooms": 2,
+        "squareFootage": 1250,
+        "rentAmount": 4770,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-kitchen-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-balcony-lanai-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-balcony-lanai-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bedroom-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bedroom-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bedroom-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bedroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-7.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-6.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-5.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-water-closet-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-1.webp"
+        ],
+        "_id": "69ab1cec44ecd2e79122a3f6",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-kitchen-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-balcony-lanai-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-balcony-lanai-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bedroom-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bedroom-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bedroom-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bedroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-7.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-6.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-5.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-water-closet-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-master-bathroom-1.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:29:00.708Z",
+    "updatedAt": "2026-03-06T18:29:39.693Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1ced44ecd2e79122a3fb",
+    "name": "ARCTIC CIRCLE Condo, Winter Park (2 BR / 2 BA) – #C2634",
+    "description": "Price per night:  USD 125",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C2634",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 3750,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-kitchen-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-breakfast-bar-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-community-resort-pool.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-condo-entrance-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-dining-room-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-entry-hallway-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-entry-hallway-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-guest-bathroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-kitchen-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-kitchen-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-kitchen-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-kitchen-5.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-kitchen-6.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-laundry-room-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-laundry-room-2.webp"
+        ],
+        "_id": "69ab1ced44ecd2e79122a3fc",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-kitchen-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-breakfast-bar-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-community-resort-pool.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-condo-entrance-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-dining-room-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-entry-hallway-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-entry-hallway-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-guest-bathroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-kitchen-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-kitchen-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-kitchen-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-kitchen-5.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-kitchen-6.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-laundry-room-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-laundry-room-2.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:29:01.831Z",
+    "updatedAt": "2026-03-06T18:29:40.733Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1cee44ecd2e79122a401",
+    "name": "HARWICH COURT Pool Home, Glen Eagle (3 BR / 2 BA) – #H830",
+    "description": "Price per night:  USD 222",
+    "type": "house",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "H830",
+        "unitType": "loft",
+        "floor": 1,
+        "bedrooms": 3,
+        "bathrooms": 2,
+        "squareFootage": 1250,
+        "rentAmount": 6660,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-living-room-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-front-entrance-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bathroom-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bedroom-1-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bedroom-1-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bedroom-1-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bedroom-1-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-dining-room-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bedroom-2-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bedroom-2-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-hallway-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-kitchen-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-kitchen-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-kitchen-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-kitchen-4.webp"
+        ],
+        "_id": "69ab1cee44ecd2e79122a402",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-living-room-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-front-entrance-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bathroom-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bedroom-1-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bedroom-1-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bedroom-1-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bedroom-1-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-dining-room-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bedroom-2-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-bedroom-2-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-guest-hallway-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-kitchen-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-kitchen-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-kitchen-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/harwich-court-kitchen-4.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:29:02.919Z",
+    "updatedAt": "2026-03-06T18:29:41.792Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1cf144ecd2e79122a409",
+    "name": "GEORGETOWN BLVD Condo, Royal Arms (2 BR / 2 BA) – #C448",
+    "description": "Price per night:  USD 145",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C448",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 4350,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-patio-lanai-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-condominium-pool-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-living-room-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-dining-room-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-dining-room-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-dining-room-photo-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-entry-room-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-entry-room-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-entry-room-photo-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-guest-bathroom-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-guest-bathroom-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-guest-bathroom-photo-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-guest-bedroom-closet.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-guest-bedroom-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-guest-bedroom-photo-2.webp"
+        ],
+        "_id": "69ab1cf144ecd2e79122a40a",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-patio-lanai-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-condominium-pool-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-living-room-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-dining-room-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-dining-room-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-dining-room-photo-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-entry-room-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-entry-room-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-entry-room-photo-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-guest-bathroom-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-guest-bathroom-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-guest-bathroom-photo-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-guest-bedroom-closet.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-guest-bedroom-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/royal-arms-guest-bedroom-photo-2.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:29:05.030Z",
+    "updatedAt": "2026-03-06T18:29:44.336Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1cf244ecd2e79122a40f",
+    "name": "JASMINE COURT Condo, Falling Waters (2 BR / 2 BA) – #436",
+    "description": "Price per night:  USD 155.4",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "436",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 4662,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-living-room-photo-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-bathroom-photo-1-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-bathroom-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-bedroom-2-photo-1-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-bedroom-2-photo-2-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-dining-room-photo-1-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-dining-room-photo-2-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-dining-room-photo-3-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-dining-room-photo-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-entry-hallway-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-entry-lanai-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-kitchen-photo-1-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-kitchen-photo-2-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-kitchen-photo-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-laundry-room-photo-2.webp"
+        ],
+        "_id": "69ab1cf244ecd2e79122a410",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-living-room-photo-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-bathroom-photo-1-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-bathroom-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-bedroom-2-photo-1-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-bedroom-2-photo-2-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-dining-room-photo-1-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-dining-room-photo-2-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-dining-room-photo-3-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-dining-room-photo-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-entry-hallway-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-entry-lanai-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-kitchen-photo-1-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-kitchen-photo-2-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-kitchen-photo-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-laundry-room-photo-2.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:29:06.097Z",
+    "updatedAt": "2026-03-06T18:29:59.327Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1cf344ecd2e79122a415",
+    "name": "ROSEWOOD Condo, Falling Waters (2 BR / 2 BA) – #C422",
+    "description": "Price per night:  USD 166.5",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C422",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 4995,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-kitchen-photo-2-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-kitchen-photo-1-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-breakfast-bar-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-dining-room-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-breakfast-nook-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-bathroom-photo-1-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-bathroom-photo-2-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-bathroom-photo-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-bedroom-2-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-dining-room-photo-1-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-entry-lanai-photo-5.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-living-room-photo-1-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-living-room-photo-2-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-living-room-photo-3-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-master-bathroom-photo-1.webp"
+        ],
+        "_id": "69ab1cf344ecd2e79122a416",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-kitchen-photo-2-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-kitchen-photo-1-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-breakfast-bar-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-dining-room-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-breakfast-nook-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-bathroom-photo-1-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-bathroom-photo-2-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-bathroom-photo-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-bedroom-2-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-dining-room-photo-1-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-entry-lanai-photo-5.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-living-room-photo-1-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-living-room-photo-2-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-living-room-photo-3-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-master-bathroom-photo-1.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:29:07.142Z",
+    "updatedAt": "2026-03-06T18:29:07.142Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1cf444ecd2e79122a41b",
+    "name": "OLYMPIC DR Condo, World Tennis Club (2 BR / 2 BA) – #C360",
+    "description": "Price per night:  USD 130",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C360",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 3900,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-living-room-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bathroom-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bathroom-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bathroom-photo-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bedroom-2-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bedroom-2-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bedroom-2-photo-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bedroom-2-photo-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-breakfast-bar-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-condomium-entrance-photo.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-dining-room-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-dining-room-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-dining-room-photo-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-entry-hallway-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-entry-hallway-photo-2.webp"
+        ],
+        "_id": "69ab1cf444ecd2e79122a41c",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-living-room-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bathroom-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bathroom-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bathroom-photo-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bedroom-2-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bedroom-2-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bedroom-2-photo-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-bedroom-2-photo-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-breakfast-bar-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-condomium-entrance-photo.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-dining-room-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-dining-room-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-dining-room-photo-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-entry-hallway-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/tennis-club-entry-hallway-photo-2.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:29:08.179Z",
+    "updatedAt": "2026-03-06T18:29:47.997Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1cf644ecd2e79122a423",
+    "name": "ORCHID FALLS Condo, Falling Waters (2 BR / 2 BA) – #C449",
+    "description": "Price per night:  USD 155.4",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C449",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 4200,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-patio-lanai-photo-3-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-patio-lanai-photo-1-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-patio-lanai-photo-2-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-1-5.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-1-5.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-2-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-sitting-room-photo-1-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-sitting-room-photo-2-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-photo-1-5.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bedroom-photo-3-5.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bedroom-photo-1-5.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bedroom-photo-4-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bedroom-photo-5-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bathroom-photo-1-5.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bathroom-photo-2-5.webp"
+        ],
+        "_id": "69ab1cf644ecd2e79122a424",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-patio-lanai-photo-3-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-patio-lanai-photo-1-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-patio-lanai-photo-2-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-1-5.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-1-5.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-2-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-sitting-room-photo-1-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-sitting-room-photo-2-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-photo-1-5.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bedroom-photo-3-5.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bedroom-photo-1-5.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bedroom-photo-4-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bedroom-photo-5-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bathroom-photo-1-5.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bathroom-photo-2-5.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:29:10.329Z",
+    "updatedAt": "2026-03-06T18:29:51.591Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1cf744ecd2e79122a429",
+    "name": "ORCHID FALLS Condo, Falling Waters (2 BR / 2 BA) – #C401",
+    "description": "Price per night:  USD 155.4",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C401",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 4662,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bedroom-photo-3-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bathroom-photo-1-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-2-photo-1-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-2-photo-2-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-breakfast-bar-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-breakfast-bar-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-1-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-entry-hallway-photo-1-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-entry-lanai-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-entry-lanai-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-entry-lanai-photo-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-1-4.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-2-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-3-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-laundry-room-photo-4.webp"
+        ],
+        "_id": "69ab1cf744ecd2e79122a42a",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bedroom-photo-3-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bathroom-photo-1-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-2-photo-1-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-2-photo-2-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-breakfast-bar-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-breakfast-bar-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-1-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-entry-hallway-photo-1-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-entry-lanai-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-entry-lanai-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-entry-lanai-photo-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-1-4.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-2-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-3-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-laundry-room-photo-4.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:29:11.395Z",
+    "updatedAt": "2026-03-06T18:29:11.395Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1cf844ecd2e79122a42f",
+    "name": "MAGNOLIA FALLS Condo, Falling Waters (2 BR / 2 BA) – #C383",
+    "description": "Price per night:  USD 155.4",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C383",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 4662,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bedroom-photo-1-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bathroom-photo-1-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-2-photo-1-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-2-photo-2-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-2-photo-3-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-breakfast-nook-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-1-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-2-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-entry-hallway-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-1-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-2-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-laundry-room-photo-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-photo-1-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-photo-2-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-photo-3-3.webp"
+        ],
+        "_id": "69ab1cf844ecd2e79122a430",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-master-bedroom-photo-1-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bathroom-photo-1-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-2-photo-1-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-2-photo-2-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-2-photo-3-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-breakfast-nook-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-1-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-2-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-entry-hallway-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-1-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-2-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-laundry-room-photo-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-photo-1-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-photo-2-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-photo-3-3.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:29:12.480Z",
+    "updatedAt": "2026-03-06T18:29:52.727Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1cfe44ecd2e79122a43f",
+    "name": "JASMINE Court Condo, Falling Waters (2 BR / 2 BA) – #C396",
+    "description": "Price per night:  USD 155.4",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C396",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 4662,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-master-bedroom-photo-2-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-sitting-room-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-patio-lanai-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-patio-lanai-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-master-water-closet-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-master-bedroom-photo-1-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-master-bathroom-photo-2-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-master-bathroom-photo-1-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-living-room-photo-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-living-room-photo-1-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-laundry-room-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-kitchen-photo-3.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-kitchen-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-kitchen-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-dining-room-photo-1-1.webp"
+        ],
+        "_id": "69ab1cfe44ecd2e79122a440",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-master-bedroom-photo-2-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-sitting-room-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-patio-lanai-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-patio-lanai-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-master-water-closet-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-master-bedroom-photo-1-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-master-bathroom-photo-2-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-master-bathroom-photo-1-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-living-room-photo-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-living-room-photo-1-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-laundry-room-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-kitchen-photo-3.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-kitchen-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-kitchen-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/jasmine-court-dining-room-photo-1-1.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:29:18.924Z",
+    "updatedAt": "2026-03-06T18:29:18.924Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1d0244ecd2e79122a449",
+    "name": "ROSEWOOD Condo, Falling Waters (2 BR / 2 BA) – C455",
+    "description": "Price per night:  USD 155.4",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "C455",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 4662,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-lake-view-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bathroom-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bathroom-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-front-patio-view-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-front-patio-view-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-breakfast-nook.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-laundry-room-photo.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-chairs.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-photo-2.webp"
+        ],
+        "_id": "69ab1d0244ecd2e79122a44a",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-lake-view-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bathroom-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bathroom-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-bedroom-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-dining-room-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-front-patio-view-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-front-patio-view-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-breakfast-nook.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-kitchen-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-laundry-room-photo.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-chairs.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/orchid-falls-living-room-photo-2.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:29:22.119Z",
+    "updatedAt": "2026-03-06T18:29:22.119Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1d2eb014d1214bd95348",
+    "name": "Whitten Drive House, Villas of Whittenberg (3 BR / 2 BA)",
+    "description": "Price per night:  USD 190",
+    "type": "house",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "VMS-31",
+        "unitType": "loft",
+        "floor": 1,
+        "bedrooms": 3,
+        "bathrooms": 2,
+        "squareFootage": 1250,
+        "rentAmount": 5700,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-pool-lanai-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/gulf-beach-photo-umbrellas.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/gulf-beach-photo.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/gulf-beach-sunset-photo.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-bathroom-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-bathroom-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-bedroom-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-bedroom-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-den-photo.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-dining-room-photo.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-entrance-photo-1.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-entrance-photo-2.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-house-driveway-photo.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-house-exterior-photo.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-kitchen-photo-2.webp"
+        ],
+        "_id": "69ab1d2eb014d1214bd95349",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-pool-lanai-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/gulf-beach-photo-umbrellas.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/gulf-beach-photo.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/gulf-beach-sunset-photo.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-bathroom-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-bathroom-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-bedroom-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-bedroom-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-den-photo.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-dining-room-photo.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-entrance-photo-1.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-entrance-photo-2.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-house-driveway-photo.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-house-exterior-photo.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/whitten-drive-kitchen-photo-2.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:30:06.947Z",
+    "updatedAt": "2026-03-06T18:30:06.947Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ab1d31b014d1214bd95350",
+    "name": "Beautiful 2 bed-/ 2 bathroom condo with lakeview",
+    "description": "Price per night: $ USD 130 0",
+    "type": "condo",
+    "status": "available",
+    "address": {
+      "street": "Falling Waters on Davis BLVD, Naples",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34119",
+      "country": "USA"
+    },
+    "amenities": [
+      {
+        "name": "Pool",
+        "category": "Recreation"
+      },
+      {
+        "name": "Air Conditioning",
+        "category": "Climate"
+      },
+      {
+        "name": "WiFi",
+        "category": "Utilities"
+      },
+      {
+        "name": "Kitchen",
+        "category": "Kitchen"
+      },
+      {
+        "name": "Lanai",
+        "category": "Outdoor"
+      },
+      {
+        "name": "Parking",
+        "category": "Parking"
+      }
+    ],
+    "isMultiUnit": false,
+    "totalUnits": 1,
+    "units": [
+      {
+        "unitNumber": "VMS-33",
+        "unitType": "apartment",
+        "floor": 1,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1200,
+        "rentAmount": 3900,
+        "securityDeposit": 500,
+        "status": "available",
+        "balcony": true,
+        "patio": false,
+        "garden": false,
+        "dishwasher": true,
+        "inUnitLaundry": true,
+        "hardwoodFloors": false,
+        "fireplace": false,
+        "walkInClosets": false,
+        "centralAir": true,
+        "ceilingFans": false,
+        "appliances": {
+          "refrigerator": true,
+          "stove": true,
+          "oven": true,
+          "microwave": true,
+          "dishwasher": true,
+          "washer": true,
+          "dryer": true,
+          "washerDryerHookups": false
+        },
+        "parking": {
+          "included": true,
+          "spaces": 1,
+          "type": "open",
+          "gated": false,
+          "assigned": false
+        },
+        "utilities": {
+          "electricity": "tenant",
+          "water": "included",
+          "internet": "included",
+          "cable": "tenant",
+          "trash": "included",
+          "gas": "tenant",
+          "heating": "tenant",
+          "cooling": "tenant",
+          "sewer": "included"
+        },
+        "images": [
+          "https://vms-florida.com/wp-content/uploads/2025/11/VMS-Florida-Realty_Logo-Mobile_v4.svg",
+          "https://vms-florida.com/wp-content/uploads/2025/11/vms-florida-realty-logo.svg",
+          "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1197-400x314.jpeg",
+          "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-back-lanai-view-5-400x314.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-living-room-3-400x314.webp",
+          "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-kitchen-1-400x314.webp"
+        ],
+        "_id": "69ab1d31b014d1214bd95351",
+        "attachments": []
+      }
+    ],
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2025/11/VMS-Florida-Realty_Logo-Mobile_v4.svg",
+      "https://vms-florida.com/wp-content/uploads/2025/11/vms-florida-realty-logo.svg",
+      "https://vms-florida.com/wp-content/uploads/2026/02/IMG_1197-400x314.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2025/12/cascades-condo-back-lanai-view-5-400x314.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/rosewood-living-room-3-400x314.webp",
+      "https://vms-florida.com/wp-content/uploads/2025/11/water-crest-kitchen-1-400x314.webp"
+    ],
+    "ownerId": "69aabc97682efb42d25f6afa",
+    "managerId": "69aabc97682efb42d25f6aeb",
+    "deletedAt": null,
+    "attachments": [],
+    "createdAt": "2026-03-06T18:30:09.072Z",
+    "updatedAt": "2026-03-06T18:30:09.072Z",
+    "__v": 0
+  }
+]

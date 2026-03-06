@@ -12,7 +12,11 @@ const navLinks = [
 
 export function LandingHeader() {
   const pathname = usePathname();
-  const isLightPage = pathname?.startsWith("/rentals") || pathname?.startsWith("/properties");
+  // Default to light for properties/rentals; avoid hydration mismatch when pathname is undefined during SSR
+  const isLightPage =
+    !pathname ||
+    pathname.startsWith("/rentals") ||
+    pathname.startsWith("/properties");
 
   const textClass = isLightPage ? "text-slate-900" : "text-white";
   const textMutedClass = isLightPage ? "text-slate-600" : "text-white/90";

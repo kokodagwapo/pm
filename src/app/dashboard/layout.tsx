@@ -43,46 +43,49 @@ const MobileHeader = memo(function MobileHeader({
   router: any;
 }) {
   return (
-    <header className="flex h-14 md:h-16 items-center justify-between border-b border-border/30 bg-background/95 backdrop-blur-sm px-3 md:px-6 shrink-0 sticky top-0 z-30">
+    <header className="flex h-14 md:h-16 items-center justify-between border-b border-border/40 bg-background/80 backdrop-blur-xl px-3 md:px-6 shrink-0 sticky top-0 z-30">
       <div className="flex items-center gap-2 md:gap-4">
         <Button
           variant="ghost"
           size="sm"
-          className="md:hidden h-9 w-9 p-0 text-foreground hover:text-foreground"
+          className="md:hidden h-9 w-9 p-0 rounded-lg text-foreground/80 hover:text-foreground hover:bg-muted/60 transition-colors"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
 
         <div className="relative hidden sm:block">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/50" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="search"
             placeholder="Search..."
-            className="w-40 md:w-56 lg:w-72 rounded-lg border border-border bg-background text-foreground pl-9 pr-3 py-2 text-sm placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-colors"
+            className="w-40 md:w-56 lg:w-72 rounded-xl border border-border/60 bg-muted/30 text-foreground pl-9 pr-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 focus:bg-background transition-all duration-200"
           />
         </div>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-3">
-        <div className="sm:hidden">
-          <Button variant="ghost" size="sm" className="h-9 w-9 p-0 text-foreground hover:text-foreground">
-            <Search className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <ThemeToggle />
-        
-        <div className="text-foreground">
-          <NotificationBell />
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-0.5 rounded-xl bg-muted/40 border border-border/50 px-1.5 py-1">
+          <div className="sm:hidden">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg text-muted-foreground hover:text-foreground hover:bg-background/70 transition-colors">
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex items-center [&>button]:scale-90 [&>button]:origin-center">
+            <ThemeToggle />
+          </div>
+          <div className="h-5 w-px bg-border/60 mx-0.5" />
+          <div className="[&_button]:h-8 [&_button]:w-8 [&_button]:rounded-lg [&_button]:text-muted-foreground [&_button]:hover:text-foreground [&_button]:hover:bg-background/70">
+            <NotificationBell />
+          </div>
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-8 w-8">
+            <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0 ring-2 ring-border/40 hover:ring-primary/30 focus:ring-2 focus:ring-primary/40 transition-all duration-200 overflow-hidden">
+              <Avatar className="h-8 w-8 ring-0">
                 <AvatarImage src={avatarUrl || user?.avatar || ""} alt={user?.firstName || ""} />
-                <AvatarFallback className="text-xs">
+                <AvatarFallback className="text-xs font-semibold bg-primary/10 text-primary">
                   {user?.firstName?.[0]}
                   {user?.lastName?.[0]}
                 </AvatarFallback>

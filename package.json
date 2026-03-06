@@ -15,6 +15,8 @@
     "seed:faq": "tsx src/scripts/seed-faq.ts",
     "seed:owners": "tsx src/scripts/seed-property-owners.ts",
     "migrate:vms": "tsx src/scripts/migrate-vms-florida-properties.ts",
+    "export:properties": "tsx src/scripts/export-properties.ts",
+    "seed:properties:json": "tsx src/scripts/seed-properties-from-json.ts",
     "seed:all": "npm run seed:demo && npm run seed:ai-assistants && npm run seed:properties && npm run seed:pricing && npm run seed:faq && npm run seed:owners"
   },
   "dependencies": {

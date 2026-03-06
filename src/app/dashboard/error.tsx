@@ -25,7 +25,7 @@ interface DashboardErrorProps {
 }
 
 function getErrorContext(error: Error) {
-  const message = error.message.toLowerCase();
+  const message = (error?.message ?? "").toLowerCase();
 
   if (message.includes("unauthorized") || message.includes("session")) {
     return {
@@ -61,6 +61,17 @@ function getErrorContext(error: Error) {
     };
   }
 
+  if (message.includes("next/image") || message.includes("hostname") || message.includes("not configured")) {
+    return {
+      type: "image",
+      icon: AlertCircle,
+      title: "Image Loading Error",
+      description: "A property image could not be loaded. The image source may need to be configured.",
+      action: "Try refreshing the page. If the issue persists, contact support.",
+      color: "blue",
+    };
+  }
+
   return {
     type: "unknown",
     icon: AlertCircle,
@@ -77,11 +88,10 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
   const ErrorIcon = errorContext.icon;
 
   useEffect(() => {
-    // Log dashboard error
-    console.error("Dashboard Error:", {
-      message: error.message,
-      stack: error.stack,
-      digest: error.digest,
+    // Log dashboard error (defensive: error may have non-enumerable props)
+    const errMsg = error?.message ?? "Unknown error";
+    console.error("Dashboard Error:", errMsg, {
+      digest: error?.digest,
       type: errorContext.type,
       timestamp: new Date().toISOString(),
     });
@@ -89,7 +99,7 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
     // Track error in analytics
     if (typeof window !== "undefined" && (window as any).gtag) {
       (window as any).gtag("event", "exception", {
-        description: `Dashboard Error: ${error.message}`,
+        description: `Dashboard Error: ${errMsg}`,
         fatal: false,
       });
     }
