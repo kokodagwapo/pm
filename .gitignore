@@ -40,5 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.env.local.mongodb/
+# local env
+.env.local
+
+# MongoDB local data directory (binary files, not for git)
+.mongodb/
+
+# DB snapshots
 data/snapshot.json
