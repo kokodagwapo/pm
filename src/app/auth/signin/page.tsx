@@ -37,18 +37,18 @@ const DEFAULT_BRANDING: Branding = {
 };
 
 const glassCard = {
-  background: "rgba(255,255,255,0.12)",
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
-  border: "1px solid rgba(255,255,255,0.25)",
+  background: "rgba(255,255,255,0.06)",
+  backdropFilter: "blur(6px)",
+  WebkitBackdropFilter: "blur(6px)",
+  border: "1px solid rgba(255,255,255,0.2)",
   boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
 };
 
 const glassInput = {
-  background: "rgba(255,255,255,0.15)",
-  backdropFilter: "blur(8px)",
-  WebkitBackdropFilter: "blur(8px)",
-  border: "1px solid rgba(255,255,255,0.25)",
+  background: "rgba(255,255,255,0.08)",
+  backdropFilter: "blur(4px)",
+  WebkitBackdropFilter: "blur(4px)",
+  border: "1px solid rgba(255,255,255,0.2)",
   boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
 };
 
@@ -126,8 +126,8 @@ export default function SignInPage() {
       <LandingHeader />
 
       {/* Content */}
-      <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 pt-20 pb-24">
-        <div className="w-full max-w-lg space-y-8 animate-fade-in-up">
+      <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 pt-16 sm:pt-20 pb-20 sm:pb-24">
+        <div className="w-full max-w-lg space-y-6 sm:space-y-8 animate-fade-in-up">
           {/* Header */}
           <div className="text-center">
             <Link
@@ -153,7 +153,7 @@ export default function SignInPage() {
               )}
             </div>
             <h2
-              className="mt-6 text-3xl font-[var(--font-playfair)] font-bold text-white drop-shadow-lg"
+              className="mt-6 text-2xl sm:text-3xl font-[var(--font-playfair)] font-bold text-white drop-shadow-lg"
               style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}
             >
               Sign in to your account
@@ -165,14 +165,14 @@ export default function SignInPage() {
 
           {/* Glassmorphic Sign In Card */}
           <div
-            className="rounded-2xl p-6 md:p-8 transition-all duration-300"
+            className="rounded-2xl p-4 sm:p-6 md:p-8 transition-all duration-300"
             style={glassCard}
           >
             <div className="mb-6">
-              <h3 className="text-xl font-semibold text-white font-[var(--font-montserrat)]">
+              <h3 className="text-xl font-semibold text-black font-[var(--font-montserrat)]">
                 Welcome back
               </h3>
-              <p className="mt-1 text-sm text-white/80">
+              <p className="mt-1 text-sm text-black/80">
                 Enter your credentials to access your account
               </p>
             </div>
@@ -186,18 +186,18 @@ export default function SignInPage() {
               )}
 
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-white/90">
+                <label htmlFor="email" className="text-sm font-medium text-black/90">
                   Email address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-black/70" />
                   <input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all"
+                    className="w-full min-h-[48px] pl-10 pr-4 py-3 rounded-xl text-base text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all"
                     style={glassInput}
                     required
                   />
@@ -205,18 +205,18 @@ export default function SignInPage() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-white/90">
+                <label htmlFor="password" className="text-sm font-medium text-black/90">
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-black/70" />
                   <input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all"
                     style={glassInput}
                     required
                   />
@@ -226,7 +226,7 @@ export default function SignInPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 rounded-xl font-medium text-white bg-white/20 hover:bg-white/30 border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full min-h-[48px] py-3 rounded-xl font-medium text-black bg-white/20 hover:bg-white/30 border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all touch-manipulation"
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -244,7 +244,7 @@ export default function SignInPage() {
               <div className="mt-6 pt-6 border-t border-white/20">
                 <div className="flex items-center gap-2 mb-3">
                   <Zap className="h-4 w-4 text-amber-400" />
-                  <span className="text-sm font-medium text-white/80">
+                  <span className="text-sm font-medium text-black/80">
                     Dev Quick Login
                   </span>
                 </div>
@@ -253,7 +253,7 @@ export default function SignInPage() {
                     <button
                       key={account.email}
                       type="button"
-                      className={`flex flex-col items-center gap-1 h-auto py-2 rounded-lg text-white text-xs font-medium transition-all ${account.color}`}
+                      className={`flex flex-col items-center justify-center gap-1 min-h-[48px] py-3 rounded-lg text-white text-xs font-medium transition-all touch-manipulation ${account.color}`}
                       onClick={() =>
                         handleDemoCredentials(account.email, account.password)
                       }
@@ -264,7 +264,7 @@ export default function SignInPage() {
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-white/60 mt-2 text-center">
+                <p className="text-xs text-black/60 mt-2 text-center">
                   Click to auto-fill credentials, then sign in
                 </p>
               </div>

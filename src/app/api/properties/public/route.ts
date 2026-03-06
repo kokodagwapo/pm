@@ -61,6 +61,8 @@ export async function GET(request: NextRequest) {
         { description: { $regex: search, $options: "i" } },
         { "address.city": { $regex: search, $options: "i" } },
         { "address.street": { $regex: search, $options: "i" } },
+        { "address.state": { $regex: search, $options: "i" } },
+        { "address.zipCode": { $regex: search, $options: "i" } },
       ];
     }
 

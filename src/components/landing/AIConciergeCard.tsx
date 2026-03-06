@@ -1,18 +1,43 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { Send, Loader2 } from "lucide-react";
 
 type RentalType = "short" | "long";
 
-const quickLinks = [
-  { label: "Vanderbilt Beach Condos", href: "/rentals?search=Vanderbilt" },
-  { label: "Old Naples Annual Lease", href: "/rentals?search=Old+Naples" },
-  { label: "Pelican Bay Rentals", href: "/rentals?search=Pelican" },
+// Demo fallback when no properties in DB
+const DEMO_LINKS = [
+  { label: "View All Rentals", href: "/rentals" },
+  { label: "Browse Properties", href: "/rentals" },
+  { label: "See Availability", href: "/rentals" },
 ];
 
 export function AIConciergeCard() {
+  const [quickLinks, setQuickLinks] = useState<{ label: string; href: string }[]>(DEMO_LINKS);
+
+  useEffect(() => {
+    fetch("/api/properties/public?limit=50")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success || !data.data?.properties?.length) return;
+        const properties = data.data.properties as Array<{ name?: string; address?: { city?: string } }>;
+        const seen = new Set<string>();
+        const links: { label: string; href: string }[] = [];
+        for (const p of properties) {
+          const city = p.address?.city?.trim();
+          const name = p.name?.trim();
+          const label = city || name;
+          if (label && !seen.has(label)) {
+            seen.add(label);
+            links.push({ label, href: `/rentals?search=${encodeURIComponent(label)}` });
+            if (links.length >= 4) break;
+          }
+        }
+        if (links.length > 0) setQuickLinks(links);
+      })
+      .catch(() => {});
+  }, []);
   const [activeTab, setActiveTab] = useState<RentalType>("short");
   const [input, setInput] = useState("");
   const [response, setResponse] = useState<string | null>(null);
@@ -53,7 +78,7 @@ export function AIConciergeCard() {
 
   return (
     <div
-      className="w-full max-w-2xl mx-auto rounded-2xl p-6 md:p-8 transition-all duration-300"
+      className="w-full max-w-2xl mx-auto rounded-2xl p-4 sm:p-6 md:p-8 transition-all duration-300"
       style={{
         background: "rgba(255,255,255,0.12)",
         backdropFilter: "blur(20px)",
@@ -62,9 +87,9 @@ export function AIConciergeCard() {
         boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
       }}
     >
-      {/* Tabs - glassmorphic */}
+      {/* Tabs - glassmorphic, stack on very small screens */}
       <div
-        className="flex gap-1 p-1.5 rounded-full mb-6 w-fit"
+        className="flex flex-wrap sm:flex-nowrap gap-1.5 sm:gap-1 p-1.5 rounded-full mb-4 sm:mb-6 w-full sm:w-fit"
         style={{
           background: "rgba(255,255,255,0.08)",
           backdropFilter: "blur(20px)",
@@ -76,7 +101,7 @@ export function AIConciergeCard() {
         <button
           type="button"
           onClick={() => setActiveTab("short")}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+          className={`flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all touch-manipulation ${
             activeTab === "short"
               ? "text-black"
               : "text-black/70 hover:text-black"
@@ -98,7 +123,7 @@ export function AIConciergeCard() {
         <button
           type="button"
           onClick={() => setActiveTab("long")}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+          className={`flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all touch-manipulation ${
             activeTab === "long"
               ? "text-black"
               : "text-black/70 hover:text-black"
@@ -120,18 +145,18 @@ export function AIConciergeCard() {
       </div>
 
       {/* Greeting */}
-      <p className="text-black text-base md:text-lg mb-4 leading-relaxed">
+      <p className="text-black text-sm sm:text-base md:text-lg mb-4 leading-relaxed">
         Welcome to Naples. Are you looking for a vibrant short-term retreat or a
         relaxing long-term rental by the Gulf?
       </p>
 
-      {/* Quick links - glassmorphic */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      {/* Quick links - glassmorphic, touch-friendly */}
+      <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
         {quickLinks.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className="px-3 py-1.5 rounded-full text-black text-sm transition-all hover:bg-white/25"
+            className="min-h-[44px] inline-flex items-center px-3 py-2.5 sm:py-1.5 rounded-full text-black text-xs sm:text-sm transition-all hover:bg-white/25 touch-manipulation"
             style={{
               background: "rgba(255,255,255,0.15)",
               backdropFilter: "blur(8px)",
@@ -153,7 +178,7 @@ export function AIConciergeCard() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="type your inquiry..."
-            className="w-full px-4 py-3 pr-12 rounded-xl text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all"
+            className="w-full min-h-[48px] px-4 py-3 pr-12 rounded-xl text-base text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all"
             style={{
               background: "rgba(255,255,255,0.15)",
               backdropFilter: "blur(8px)",
@@ -166,7 +191,7 @@ export function AIConciergeCard() {
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all touch-manipulation"
           >
             {isLoading ? (
               <Loader2 className="w-4 h-4 text-black animate-spin" />

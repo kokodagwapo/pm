@@ -33,18 +33,15 @@ function RentalsContent() {
   }, [searchParams]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
       <LandingHeader />
 
       <main className="pt-24 pb-16 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
-          <h1
-            className="font-[var(--font-playfair)] text-4xl md:text-5xl text-white mb-2"
-            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}
-          >
+          <h1 className="font-[var(--font-playfair)] text-4xl md:text-5xl text-slate-900 mb-2">
             Naples Rentals
           </h1>
-          <p className="text-white/70 mb-8">
+          <p className="text-slate-600 mb-8">
             Browse our hand-picked selection of vacation homes and apartments
           </p>
 
@@ -60,17 +57,13 @@ function RentalsContent() {
             <div className="md:hidden w-full">
               <button
                 onClick={() => setFiltersOpen(!filtersOpen)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-white/15 transition-all w-full justify-center"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm transition-all w-full justify-center"
               >
                 {filtersOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
                 {filtersOpen ? "Close Filters" : "Show Filters"}
               </button>
               {filtersOpen && (
-                <div className="mt-4 p-4 rounded-xl animate-fade-in-up" style={{
-                  background: "rgba(255,255,255,0.08)",
-                  backdropFilter: "blur(12px)",
-                  border: "1px solid rgba(255,255,255,0.15)",
-                }}>
+                <div className="mt-4 p-4 rounded-xl animate-fade-in-up bg-white border border-slate-200 shadow-lg">
                   <PropertyFilters />
                 </div>
               )}
@@ -83,20 +76,13 @@ function RentalsContent() {
                   {[...Array(6)].map((_, i) => (
                     <div
                       key={i}
-                      className="aspect-[4/3] rounded-2xl bg-white/10 animate-pulse"
+                      className="aspect-[4/3] rounded-2xl bg-slate-200 animate-pulse"
                     />
                   ))}
                 </div>
               ) : properties.length === 0 ? (
-                <div
-                  className="rounded-2xl p-12 text-center"
-                  style={{
-                    background: "rgba(255,255,255,0.08)",
-                    backdropFilter: "blur(12px)",
-                    border: "1px solid rgba(255,255,255,0.15)",
-                  }}
-                >
-                  <p className="text-white/70">No properties found. Try adjusting your filters.</p>
+                <div className="rounded-2xl p-12 text-center bg-white border border-slate-200 shadow-sm">
+                  <p className="text-slate-600">No properties found. Try adjusting your filters.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -118,8 +104,8 @@ function RentalsContent() {
                         }).toString()}`}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                           page === pagination.page
-                            ? "bg-white text-slate-900"
-                            : "bg-white/10 text-white hover:bg-white/20"
+                            ? "bg-slate-900 text-white"
+                            : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
                         }`}
                       >
                         {page}
@@ -140,8 +126,8 @@ export default function RentalsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-          <div className="animate-pulse text-white">Loading...</div>
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <div className="animate-pulse text-slate-600">Loading...</div>
         </div>
       }
     >

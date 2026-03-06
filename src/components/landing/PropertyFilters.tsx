@@ -56,35 +56,28 @@ export function PropertyFilters() {
   };
 
   return (
-    <div
-      className="rounded-2xl p-6 space-y-6"
-      style={{
-        background: "rgba(255,255,255,0.12)",
-        backdropFilter: "blur(20px)",
-        border: "1px solid rgba(255,255,255,0.25)",
-      }}
-    >
-      <h3 className="font-[var(--font-playfair)] text-lg text-white font-semibold">
+    <div className="rounded-2xl p-6 space-y-6 bg-white border border-slate-200 shadow-sm">
+      <h3 className="font-[var(--font-playfair)] text-lg text-slate-900 font-semibold">
         Filters
       </h3>
 
       <div>
-        <label className="block text-white/80 text-sm mb-2">Search</label>
+        <label className="block text-slate-600 text-sm mb-2">Search</label>
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Property name, city..."
-          className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-white/40"
+          placeholder="Property name, city, area..."
+          className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-300"
         />
       </div>
 
       <div>
-        <label className="block text-white/80 text-sm mb-2">Property Type</label>
+        <label className="block text-slate-600 text-sm mb-2">Property Type</label>
         <select
           value={type}
           onChange={(e) => setType(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/40"
+          className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
         >
           {PROPERTY_TYPES.map((opt) => (
             <option key={opt.value || "all"} value={opt.value}>
@@ -95,11 +88,11 @@ export function PropertyFilters() {
       </div>
 
       <div>
-        <label className="block text-white/80 text-sm mb-2">Bedrooms</label>
+        <label className="block text-slate-600 text-sm mb-2">Bedrooms</label>
         <select
           value={bedrooms}
           onChange={(e) => setBedrooms(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/40"
+          className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
         >
           {BEDROOMS.map((opt) => (
             <option key={opt.value || "any"} value={opt.value}>
@@ -110,21 +103,21 @@ export function PropertyFilters() {
       </div>
 
       <div>
-        <label className="block text-white/80 text-sm mb-2">Price Range</label>
+        <label className="block text-slate-600 text-sm mb-2">Price Range</label>
         <div className="flex gap-2">
           <input
             type="number"
             value={minRent}
             onChange={(e) => setMinRent(e.target.value)}
             placeholder="Min"
-            className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-white/40"
+            className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
           />
           <input
             type="number"
             value={maxRent}
             onChange={(e) => setMaxRent(e.target.value)}
             placeholder="Max"
-            className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-white/40"
+            className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
           />
         </div>
       </div>
@@ -132,13 +125,13 @@ export function PropertyFilters() {
       <div className="flex gap-2">
         <button
           onClick={applyFilters}
-          className="flex-1 py-2.5 rounded-lg bg-white text-[var(--landing-navy)] font-semibold text-sm hover:bg-white/95 transition-all"
+          className="flex-1 py-2.5 rounded-lg bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-all"
         >
           Apply
         </button>
         <button
           onClick={clearFilters}
-          className="px-4 py-2.5 rounded-lg bg-white/20 text-white text-sm hover:bg-white/30 transition-all"
+          className="px-4 py-2.5 rounded-lg bg-slate-100 text-slate-700 text-sm hover:bg-slate-200 transition-all"
         >
           Clear
         </button>

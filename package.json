@@ -14,6 +14,7 @@
     "seed:pricing": "tsx src/scripts/seed-property-pricing.ts",
     "seed:faq": "tsx src/scripts/seed-faq.ts",
     "seed:owners": "tsx src/scripts/seed-property-owners.ts",
+    "migrate:vms": "tsx src/scripts/migrate-vms-florida-properties.ts",
     "seed:all": "npm run seed:demo && npm run seed:ai-assistants && npm run seed:properties && npm run seed:pricing && npm run seed:faq && npm run seed:owners"
   },
   "dependencies": {
@@ -87,6 +88,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
+    "cheerio": "^1.2.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.9",
     "tailwindcss": "^4",

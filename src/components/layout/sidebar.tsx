@@ -256,6 +256,7 @@ const NavItemComponent = memo(function NavItemComponent({
     <div>
       <Link
         href={item.href}
+        prefetch={true}
         onClick={(e) => {
           if (hasChildren && filteredChildren && filteredChildren.length > 0) {
             e.preventDefault();
