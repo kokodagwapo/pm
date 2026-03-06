@@ -193,7 +193,7 @@ const displaySettingsSchema = new Schema(
     theme: {
       type: String,
       enum: ["light", "dark", "system"],
-      default: "system",
+      default: "light",
     },
     language: { type: String, default: "en" },
     timezone: { type: String, default: "America/New_York" },

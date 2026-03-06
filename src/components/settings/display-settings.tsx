@@ -173,7 +173,7 @@ export function DisplaySettings({
     resolver: zodResolver(formDisplaySettingsSchema),
     mode: "onChange",
     defaultValues: {
-      theme: (settings?.theme as "light" | "dark" | "system") || "system",
+      theme: (settings?.theme as "light" | "dark" | "system") || "light",
       language:
         (settings?.language as string | undefined) ||
         localization.language ||

@@ -17,7 +17,6 @@ export const Providers = memo(function Providers({ children }: ProvidersProps) {
       <ThemeProvider
         attribute="class"
         defaultTheme="light"
-        enableSystem
         disableTransitionOnChange
       >
         <BrandingProvider>
