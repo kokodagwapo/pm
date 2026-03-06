@@ -134,12 +134,26 @@ export async function GET(request: NextRequest) {
     await connectDB();
     const session = await auth();
 
-    if (!session?.user?.id) {
-      return createErrorResponse("Unauthorized", 401);
-    }
+    let actorId: string;
+    let actorRole: UserRole;
 
-    const actorId = session.user.id;
-    const actorRole = (session.user.role as UserRole) || UserRole.TENANT;
+    if (!session?.user?.id) {
+      // Unauthenticated: load admin's public display settings (branding etc.)
+      const admin = await User.findOne({ role: UserRole.ADMIN, isActive: true })
+        .select("_id")
+        .lean();
+      if (!admin) {
+        return createSuccessResponse({
+          settings: { branding: { logoLight: "/images/logo-light.svg", logoDark: "/images/logo-dark.svg", favicon: "/favicon.ico", primaryColor: "#3B82F6", secondaryColor: "#64748B" } },
+          metadata: { lastUpdated: new Date(), version: 1 },
+        });
+      }
+      actorId = (admin as any)._id.toString();
+      actorRole = UserRole.ADMIN;
+    } else {
+      actorId = session.user.id;
+      actorRole = (session.user.role as UserRole) || UserRole.TENANT;
+    }
 
     // Read access is allowed for all roles; writes are restricted below
     const settingsOwnerId = await resolveSettingsOwnerId(actorId, actorRole);
