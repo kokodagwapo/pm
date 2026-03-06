@@ -33,7 +33,7 @@ function RentalsContent() {
   }, [searchParams]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
+    <div className="min-h-screen bg-background">
       <LandingHeader />
 
       <main className="pt-24 pb-16 px-4 md:px-8">
@@ -126,7 +126,7 @@ export default function RentalsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="animate-pulse text-slate-600">Loading...</div>
         </div>
       }
