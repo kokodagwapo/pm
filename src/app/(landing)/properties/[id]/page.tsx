@@ -77,6 +77,32 @@ export default function PropertyDetailPage() {
     }
   }, []);
 
+  // Geocode address once property loads — must stay above early returns
+  const unit = property?.units?.[0];
+  const address = property?.address;
+  const fullAddress = address
+    ? `${address.street}, ${address.city}, ${address.state} ${address.zipCode}`
+    : "";
+
+  useEffect(() => {
+    if (fullAddress && fullAddress.trim().length > 5) geocodeAddress(fullAddress);
+  }, [fullAddress, geocodeAddress]);
+
+  // Escape key / body scroll lock for map modal — must stay above early returns
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMapModalOpen(false);
+    };
+    if (mapModalOpen) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleEscape);
+    }
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [mapModalOpen]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
@@ -127,42 +153,19 @@ export default function PropertyDetailPage() {
     );
   }
 
-  const unit = property.units?.[0];
   const images = property.images?.length
     ? property.images
     : [
         "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80",
       ];
-  const address = property.address;
-  const fullAddress = address
-    ? `${address.street}, ${address.city}, ${address.state} ${address.zipCode}`
-    : "";
   const propertyType = property.type ? String(property.type).charAt(0).toUpperCase() + String(property.type).slice(1) : null;
   const status = property.status;
-
-  useEffect(() => {
-    if (fullAddress && fullAddress.trim().length > 5) geocodeAddress(fullAddress);
-  }, [fullAddress, geocodeAddress]);
 
   const lat = mapCoords?.lat ?? 26.142;
   const lon = mapCoords?.lon ?? -81.7948;
   const bbox = `${lon - 0.02},${lat - 0.02},${lon + 0.02},${lat + 0.02}`;
   const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${lat},${lon}`;
   const osmLink = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=16/${lat}/${lon}`;
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMapModalOpen(false);
-    };
-    if (mapModalOpen) {
-      document.body.style.overflow = "hidden";
-      window.addEventListener("keydown", handleEscape);
-    }
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleEscape);
-    };
-  }, [mapModalOpen]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
