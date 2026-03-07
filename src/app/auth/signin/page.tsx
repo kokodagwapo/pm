@@ -102,15 +102,44 @@ export default function SignInPage() {
     setIsLoading(true);
     setError("");
     try {
+      // First try the standard signIn approach
       const result = await signIn("credentials", {
         email: demoEmail,
         password: demoPassword,
         redirect: false,
       });
+
       if (result?.error) {
-        setError("Invalid credentials");
-        setIsLoading(false);
+        // If signIn returns an error, try direct form submission as fallback
+        console.warn("signIn returned error, trying direct approach:", result.error);
+
+        // Get CSRF token
+        const csrfRes = await fetch("/api/auth/csrf");
+        const { csrfToken } = await csrfRes.json();
+
+        // Direct POST to credentials callback
+        const callbackRes = await fetch("/api/auth/callback/credentials", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            email: demoEmail,
+            password: demoPassword,
+            csrfToken: csrfToken,
+            json: "true",
+          }),
+          redirect: "follow",
+        });
+
+        if (callbackRes.ok || callbackRes.redirected) {
+          window.location.href = "/dashboard";
+        } else {
+          setError("Login failed. Please try again.");
+          setIsLoading(false);
+        }
       } else if (result?.ok) {
+        window.location.href = "/dashboard";
+      } else {
+        // result is undefined or has no error/ok - try redirect anyway
         window.location.href = "/dashboard";
       }
     } catch {
@@ -240,31 +269,31 @@ export default function SignInPage() {
 
             {/* Quick Login */}
             <div className="mt-6 pt-6 border-t border-white/20">
-                <div className="flex items-center gap-2 mb-3">
-                  <Zap className="h-4 w-4 text-amber-400" />
-                  <span className="text-sm font-medium text-black/80">
-                    Dev Quick Login
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {demoAccounts.map((account) => (
-                    <button
-                      key={account.email}
-                      type="button"
-                      className={`flex flex-col items-center justify-center gap-1 min-h-[48px] py-3 rounded-lg text-white text-xs font-medium transition-all touch-manipulation ${account.color}`}
-                      onClick={() =>
-                        handleQuickLogin(account.email, account.password)
-                      }
-                      disabled={isLoading}
-                    >
-                      <account.icon className="h-4 w-4" />
-                      {account.label}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-xs text-black/60 mt-2 text-center">
-                  Click to instantly log in as that role
-                </p>
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="h-4 w-4 text-amber-400" />
+                <span className="text-sm font-medium text-black/80">
+                  Dev Quick Login
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {demoAccounts.map((account) => (
+                  <button
+                    key={account.email}
+                    type="button"
+                    className={`flex flex-col items-center justify-center gap-1 min-h-[48px] py-3 rounded-lg text-white text-xs font-medium transition-all touch-manipulation ${account.color}`}
+                    onClick={() =>
+                      handleQuickLogin(account.email, account.password)
+                    }
+                    disabled={isLoading}
+                  >
+                    <account.icon className="h-4 w-4" />
+                    {account.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-black/60 mt-2 text-center">
+                Click to instantly log in as that role
+              </p>
             </div>
           </div>
 
