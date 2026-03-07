@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { InlinePreloader } from "@/components/ui/preloader";
+import { DemoGuide } from "@/components/demo/DemoGuide";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -214,6 +215,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="p-3 md:p-6 min-h-full">{children}</div>
         </main>
       </div>
+
+      {/* Role-specific demo guide */}
+      <DemoGuide />
     </div>
   );
 }
