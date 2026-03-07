@@ -277,18 +277,14 @@ export default function SignInPage() {
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {demoAccounts.map((account) => (
-                  <button
+                  <a
                     key={account.email}
-                    type="button"
-                    className={`flex flex-col items-center justify-center gap-1 min-h-[48px] py-3 rounded-lg text-white text-xs font-medium transition-all touch-manipulation ${account.color}`}
-                    onClick={() =>
-                      handleQuickLogin(account.email, account.password)
-                    }
-                    disabled={isLoading}
+                    href={`/api/auth/demo-login?role=${account.role}`}
+                    className={`flex flex-col items-center justify-center gap-1 min-h-[48px] py-3 rounded-lg text-white text-xs font-medium transition-all touch-manipulation no-underline ${account.color}`}
                   >
                     <account.icon className="h-4 w-4" />
                     {account.label}
-                  </button>
+                  </a>
                 ))}
               </div>
               <p className="text-xs text-black/60 mt-2 text-center">
