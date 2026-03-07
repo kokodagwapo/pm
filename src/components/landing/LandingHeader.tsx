@@ -14,7 +14,10 @@ const mobileMenuLinks = [
 export function LandingHeader() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isLightPage = pathname?.startsWith("/rentals") || pathname?.startsWith("/properties");
+  const isLightPage =
+    pathname?.startsWith("/rentals") ||
+    pathname?.startsWith("/properties") ||
+    pathname?.startsWith("/contact");
 
   useEffect(() => {
     setMobileOpen(false);
