@@ -117,8 +117,8 @@ export default function TenantRentalRequestPage() {
       const blocksData = await blocksRes.json();
       const rulesData = await rulesRes.json();
 
-      setBlocks(blocksData.data?.blocks || []);
-      setPricingRules(rulesData.data?.pricingRules || []);
+      setBlocks(Array.isArray(blocksData.data) ? blocksData.data : []);
+      setPricingRules(Array.isArray(rulesData.data) ? rulesData.data : []);
     } catch {
       toast.error("Failed to load calendar data");
     } finally {

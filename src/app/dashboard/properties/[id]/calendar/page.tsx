@@ -146,7 +146,8 @@ export default function PropertyCalendarPage() {
 
       if (requestsRes?.ok) {
         const requestsData = await requestsRes.json();
-        setRentalRequests(requestsData.data || []);
+        const requestsArr = requestsData.data?.requests || requestsData.data || [];
+        setRentalRequests(Array.isArray(requestsArr) ? requestsArr : []);
       }
     } catch (err: any) {
       toast.error("Failed to load calendar data");

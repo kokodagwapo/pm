@@ -132,7 +132,8 @@ export default function UnitCalendarPage() {
 
       if (requestsRes?.ok) {
         const requestsData = await requestsRes.json();
-        setRentalRequests(requestsData.data || []);
+        const requestsArr = requestsData.data?.requests || requestsData.data || [];
+        setRentalRequests(Array.isArray(requestsArr) ? requestsArr : []);
       }
     } catch {
       toast.error("Failed to load calendar data");
