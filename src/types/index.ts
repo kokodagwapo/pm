@@ -1375,3 +1375,148 @@ export interface ISystemSettings extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// ============================================================================
+// DATE BLOCKING TYPES
+// ============================================================================
+
+export enum DateBlockType {
+  OWNER_STAY = "owner_stay",
+  MAINTENANCE = "maintenance",
+  HOLD = "hold",
+  RENOVATION = "renovation",
+  PERSONAL = "personal",
+  SEASONAL_CLOSURE = "seasonal_closure",
+}
+
+export interface IDateBlock extends Document {
+  _id: Types.ObjectId;
+  propertyId: Types.ObjectId;
+  unitId: Types.ObjectId;
+  startDate: Date;
+  endDate: Date;
+  blockType: DateBlockType;
+  isHardBlock: boolean;
+  reason?: string;
+  blockedBy: Types.ObjectId;
+  blockedByRole: "admin" | "manager" | "owner";
+  recurring: {
+    enabled: boolean;
+    frequency: "yearly";
+    endRecurrence?: Date;
+  };
+  isActive: boolean;
+  cancelledAt?: Date;
+  cancelledBy?: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ============================================================================
+// PRICING RULE TYPES
+// ============================================================================
+
+export enum PricingRuleType {
+  DAILY_OVERRIDE = "daily_override",
+  WEEKEND = "weekend",
+  WEEKDAY = "weekday",
+  SEASONAL = "seasonal",
+  HOLIDAY = "holiday",
+  LAST_MINUTE = "last_minute",
+  LONG_TERM_DISCOUNT = "long_term_discount",
+  EARLY_BIRD_DISCOUNT = "early_bird_discount",
+}
+
+export interface IAdvanceBookingDiscount {
+  daysAhead: number;
+  discountPercent: number;
+}
+
+export interface IPriceModifier {
+  type: "fixed" | "percentage";
+  value: number;
+}
+
+export interface IPricingRule extends Document {
+  _id: Types.ObjectId;
+  propertyId: Types.ObjectId;
+  unitId: Types.ObjectId;
+  name: string;
+  ruleType: PricingRuleType;
+  startDate?: Date;
+  endDate?: Date;
+  pricePerNight?: number;
+  priceModifier?: IPriceModifier;
+  daysOfWeek?: number[];
+  minimumStay?: number;
+  maximumStay?: number;
+  gapNightRules?: {
+    enabled: boolean;
+    minimumGap: number;
+    autoBlock: boolean;
+  };
+  turnaroundDays?: number;
+  advanceBookingDiscounts?: IAdvanceBookingDiscount[];
+  longTermDiscount?: {
+    weeklyPercent?: number;
+    monthlyPercent?: number;
+  };
+  lastMinutePricing?: {
+    enabled: boolean;
+    daysBeforeCheckIn?: number;
+    modifier?: IPriceModifier;
+  };
+  priority: number;
+  isActive: boolean;
+  createdBy: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ============================================================================
+// RENTAL REQUEST TYPES
+// ============================================================================
+
+export enum RentalRequestStatus {
+  PENDING = "pending",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+  EXPIRED = "expired",
+  CANCELLED = "cancelled",
+}
+
+export interface IDiscountApplied {
+  type:
+    | "early_bird"
+    | "long_term_weekly"
+    | "long_term_monthly"
+    | "seasonal"
+    | "last_minute"
+    | "custom";
+  label: string;
+  percentage?: number;
+  amount: number;
+}
+
+export interface IRentalRequest extends Document {
+  _id: Types.ObjectId;
+  propertyId: Types.ObjectId;
+  unitId: Types.ObjectId;
+  tenantId: Types.ObjectId;
+  requestedStartDate: Date;
+  requestedEndDate: Date;
+  status: RentalRequestStatus;
+  basePrice: number;
+  calculatedPrice: number;
+  totalNights: number;
+  discountsApplied: IDiscountApplied[];
+  priceBreakdown?: Record<string, any>;
+  tenantMessage?: string;
+  adminResponse?: string;
+  respondedBy?: Types.ObjectId;
+  respondedAt?: Date;
+  approvedLeaseId?: Types.ObjectId;
+  expiresAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}

@@ -404,6 +404,15 @@ export default function PropertyDetailsPage() {
             <Button
               size="sm"
               variant="outline"
+              onClick={() => router.push(`/dashboard/properties/${propertyId}/calendar`)}
+              className="flex items-center space-x-2"
+            >
+              <Calendar className="h-4 w-4" />
+              <span>Calendar</span>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
               onClick={handleEditProperty}
               className="flex items-center space-x-2"
             >

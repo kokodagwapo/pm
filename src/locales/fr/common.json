@@ -87,6 +87,17 @@
   "nav.settings.notifications": "Notifications",
   "nav.settings.billing": "Facturation et abonnements",
 
+  "nav.section.rentals": "Locations",
+
+  "nav.properties.calendar": "Calendrier de disponibilité",
+
+  "nav.rentalRequests": "Demandes de location",
+  "nav.rentalRequests.all": "Toutes les demandes",
+
+  "nav.rentals": "Locations",
+  "nav.rentals.request": "Demander une location",
+  "nav.rentals.myRequests": "Mes demandes",
+
   "nav.admin": "Administration",
   "nav.admin.overview": "Vue d'ensemble",
   "nav.admin.users": "Tous les utilisateurs",

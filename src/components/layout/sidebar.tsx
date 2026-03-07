@@ -37,6 +37,10 @@ import {
   Bot,
   HelpCircle,
   ChevronDown,
+  CalendarDays,
+  ClipboardList,
+  Send,
+  ListChecks,
 } from "lucide-react";
 import { UserRole } from "@/types";
 import { useTheme } from "next-themes";
@@ -80,6 +84,7 @@ const navigationSections: NavSection[] = [
           { title: "nav.properties.new", href: "/dashboard/properties/new", icon: Building2, roles: [UserRole.ADMIN, UserRole.MANAGER] },
           { title: "nav.properties.available", href: "/dashboard/properties/available", icon: Key, roles: [UserRole.ADMIN, UserRole.MANAGER] },
           { title: "nav.properties.allUnits", href: "/dashboard/properties/units", icon: Grid3X3, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.properties.calendar", href: "/dashboard/properties/calendar", icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
         ],
       },
       {
@@ -117,6 +122,30 @@ const navigationSections: NavSection[] = [
           { title: "nav.leases.invoices", href: "/dashboard/leases/invoices", icon: DollarSign, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
           { title: "nav.leases.my", href: "/dashboard/leases/my-leases", icon: Home, roles: [UserRole.TENANT] },
           { title: "nav.leases.documents", href: "/dashboard/leases/documents", icon: FileText, roles: [UserRole.TENANT] },
+        ],
+      },
+    ],
+  },
+  {
+    title: "nav.section.rentals",
+    items: [
+      {
+        title: "nav.rentalRequests",
+        href: "/dashboard/rental-requests",
+        icon: ClipboardList,
+        roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER],
+        children: [
+          { title: "nav.rentalRequests.all", href: "/dashboard/rental-requests", icon: ListChecks, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+        ],
+      },
+      {
+        title: "nav.rentals",
+        href: "/dashboard/rentals",
+        icon: Send,
+        roles: [UserRole.TENANT],
+        children: [
+          { title: "nav.rentals.request", href: "/dashboard/rentals/request", icon: Send, roles: [UserRole.TENANT] },
+          { title: "nav.rentals.myRequests", href: "/dashboard/rentals/my-requests", icon: ListChecks, roles: [UserRole.TENANT] },
         ],
       },
     ],

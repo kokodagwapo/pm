@@ -186,7 +186,7 @@ function UnitCard({ unit, onViewDetails }: UnitCardProps) {
             </div>
             <div className="flex items-center">
               <Square className="h-4 w-4 mr-1" />
-              <span>{unit.squareFootage.toLocaleString()} ft²</span>
+              <span>{(unit.squareFootage || 0).toLocaleString()} ft²</span>
             </div>
           </div>
         </div>
@@ -816,7 +816,7 @@ export default function AllUnitsPage() {
                             </div>
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {unit.squareFootage.toLocaleString()}{" "}
+                            {(unit.squareFootage || 0).toLocaleString()}{" "}
                             {t("properties.available.table.squareFeet")}
                           </div>
                         </div>

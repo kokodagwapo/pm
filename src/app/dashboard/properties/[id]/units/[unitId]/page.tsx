@@ -509,6 +509,12 @@ export default function UnitDetailsPage() {
                   {t("properties.unitDetails.actions.viewProperty")}
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/properties/${propertyId}/units/${unitId}/calendar`}>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Availability Calendar
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => handleStatusChange(PropertyStatus.AVAILABLE)}

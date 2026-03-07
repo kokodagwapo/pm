@@ -92,6 +92,17 @@
   "nav.settings.notifications": "Notification Settings",
   "nav.settings.billing": "Billing & Plans",
 
+  "nav.section.rentals": "Rentals",
+
+  "nav.properties.calendar": "Availability Calendar",
+
+  "nav.rentalRequests": "Rental Requests",
+  "nav.rentalRequests.all": "All Requests",
+
+  "nav.rentals": "Rentals",
+  "nav.rentals.request": "Request Rental",
+  "nav.rentals.myRequests": "My Requests",
+
   "nav.admin": "Admin",
   "nav.admin.overview": "Overview",
   "nav.admin.users": "All Users",

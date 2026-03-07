@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
-import { Bed, Bath, MapPin, ArrowLeft, X, Maximize2 } from "lucide-react";
+import { Bed, Bath, MapPin, ArrowLeft, X, Maximize2, Calendar, DollarSign } from "lucide-react";
+import { AvailabilityCalendar, CalendarBlock, CalendarPricingRule } from "@/components/calendar/AvailabilityCalendar";
 
 function formatPrice(amount: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -81,7 +82,9 @@ export function PropertyDetailClient({
     }
   }, []);
 
-  const unit = property?.units?.[0];
+  const [selectedUnitIndex, setSelectedUnitIndex] = useState(0);
+  const units = property?.units || [];
+  const unit = units[selectedUnitIndex] || units[0];
   const address = property?.address;
   const fullAddress = address
     ? `${address.street}, ${address.city}, ${address.state} ${address.zipCode}`
@@ -104,6 +107,55 @@ export function PropertyDetailClient({
       window.removeEventListener("keydown", handleEscape);
     };
   }, [mapModalOpen]);
+
+  const calendarBlocks: CalendarBlock[] = useMemo(() => {
+    if (!property?.availability?.blocks || !unit?._id) return [];
+    const unitId = unit._id.toString();
+    return property.availability.blocks
+      .filter((b: any) => b.unitId?.toString() === unitId)
+      .map((b: any) => ({
+        _id: b._id,
+        startDate: b.startDate,
+        endDate: b.endDate,
+        blockType: b.blockType,
+      }));
+  }, [property?.availability?.blocks, unit?._id]);
+
+  const calendarPricingRules: CalendarPricingRule[] = useMemo(() => {
+    if (!property?.availability?.pricingRules || !unit?._id) return [];
+    const unitId = unit._id.toString();
+    return property.availability.pricingRules
+      .filter((r: any) => r.unitId?.toString() === unitId)
+      .map((r: any) => ({
+        _id: r._id,
+        name: r.name,
+        ruleType: r.ruleType,
+        startDate: r.startDate,
+        endDate: r.endDate,
+        pricePerNight: r.pricePerNight,
+        priceModifier: r.priceModifier,
+        daysOfWeek: r.daysOfWeek,
+        minimumStay: r.minimumStay,
+        isActive: true,
+      }));
+  }, [property?.availability?.pricingRules, unit?._id]);
+
+  const baseRentPerNight = useMemo(() => {
+    if (!unit?.rentAmount) return 0;
+    return unit.rentAmount / 30;
+  }, [unit?.rentAmount]);
+
+  const seasonalPricingSummary = useMemo(() => {
+    return calendarPricingRules
+      .filter((r) => r.ruleType === "seasonal" && r.startDate && r.endDate)
+      .map((r) => ({
+        name: r.name,
+        startDate: new Date(r.startDate!).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        endDate: new Date(r.endDate!).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        price: r.pricePerNight,
+        modifier: r.priceModifier,
+      }));
+  }, [calendarPricingRules]);
 
   const images = property?.images?.length
     ? property.images
@@ -294,6 +346,96 @@ export function PropertyDetailClient({
                 </div>
               )}
 
+              <div className="rounded-2xl p-6 mb-8 bg-white border border-slate-200 shadow-sm">
+                <h2 className="font-[var(--font-playfair)] text-xl text-slate-900 mb-1 flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Availability
+                </h2>
+                <p className="text-sm text-slate-500 mb-4">
+                  Check available dates for this property
+                </p>
+
+                {units.length > 1 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {units.map((u: any, i: number) => (
+                      <button
+                        key={u._id || i}
+                        onClick={() => setSelectedUnitIndex(i)}
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all border ${
+                          i === selectedUnitIndex
+                            ? "bg-slate-900 text-white border-slate-900"
+                            : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+                        }`}
+                      >
+                        {u.unitNumber || `Unit ${i + 1}`}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <AvailabilityCalendar
+                  blocks={calendarBlocks}
+                  pricingRules={calendarPricingRules}
+                  baseRentPerNight={baseRentPerNight}
+                  readOnly
+                  showPricing={baseRentPerNight > 0}
+                  showLegend
+                />
+              </div>
+
+              {(baseRentPerNight > 0 || seasonalPricingSummary.length > 0) && (
+                <div className="rounded-2xl p-6 mb-8 bg-white border border-slate-200 shadow-sm">
+                  <h2 className="font-[var(--font-playfair)] text-xl text-slate-900 mb-3 flex items-center gap-2">
+                    <DollarSign className="w-5 h-5" />
+                    Pricing
+                  </h2>
+                  {baseRentPerNight > 0 && (
+                    <div className="flex items-baseline gap-2 mb-3">
+                      <span className="text-lg font-semibold text-slate-900">
+                        {formatPrice(Math.round(baseRentPerNight))}
+                      </span>
+                      <span className="text-slate-500 text-sm">/ night (base rate)</span>
+                    </div>
+                  )}
+                  {seasonalPricingSummary.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                        Seasonal Rates
+                      </h3>
+                      <div className="grid gap-2">
+                        {seasonalPricingSummary.map((s, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50 border border-slate-100"
+                          >
+                            <div>
+                              <span className="text-sm font-medium text-slate-800">
+                                {s.name}
+                              </span>
+                              <span className="text-xs text-slate-500 ml-2">
+                                {s.startDate} – {s.endDate}
+                              </span>
+                            </div>
+                            <span className="text-sm font-semibold text-slate-900">
+                              {s.price
+                                ? formatPrice(s.price)
+                                : s.modifier
+                                ? `${s.modifier.value > 0 ? "+" : ""}${
+                                    s.modifier.type === "percentage"
+                                      ? `${s.modifier.value}%`
+                                      : formatPrice(s.modifier.value)
+                                  }`
+                                : "—"}
+                              {s.price ? "/night" : ""}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={() => setMapModalOpen(true)}
@@ -336,14 +478,25 @@ export function PropertyDetailClient({
                     <span className="text-slate-600">/month</span>
                   )}
                 </div>
+                {baseRentPerNight > 0 && (
+                  <p className="text-sm text-slate-500 mb-4">
+                    From {formatPrice(Math.round(baseRentPerNight))}/night
+                  </p>
+                )}
+                <Link
+                  href={`/auth/signin?callbackUrl=${encodeURIComponent(`/dashboard/rentals/request?propertyId=${id}`)}`}
+                  className="block w-full py-4 rounded-xl bg-slate-900 text-white font-semibold text-center hover:bg-slate-800 transition-all mb-3"
+                >
+                  Request to Rent
+                </Link>
                 <Link
                   href="/contact"
-                  className="block w-full py-4 rounded-xl bg-slate-900 text-white font-semibold text-center hover:bg-slate-800 transition-all"
+                  className="block w-full py-3 rounded-xl bg-white text-slate-700 font-medium text-center border border-slate-200 hover:bg-slate-50 transition-all"
                 >
-                  Book Now
+                  Contact Us
                 </Link>
                 <p className="text-slate-500 text-sm mt-4 text-center">
-                  Or contact us for custom stays
+                  Sign in to request rental dates with instant pricing
                 </p>
               </div>
             </aside>
@@ -468,10 +621,10 @@ export function PropertyDetailClient({
                     )}
 
                     <Link
-                      href="/contact"
+                      href={`/auth/signin?callbackUrl=${encodeURIComponent(`/dashboard/rentals/request?propertyId=${id}`)}`}
                       className="inline-flex w-full justify-center py-4 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-all"
                     >
-                      Book Now
+                      Request to Rent
                     </Link>
                   </div>
                 </div>

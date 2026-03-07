@@ -1,9 +1,3 @@
-/**
- * SmartStartPM - Public Single Property API
- * Returns a single property for the property details page
- * No authentication required
- */
-
 export const dynamic = "force-dynamic";
 
 import { NextRequest } from "next/server";
@@ -17,6 +11,8 @@ import {
 } from "@/lib/api-utils";
 import connectDB from "@/lib/mongodb";
 import { calculatePropertyStatusFromUnits } from "@/utils/property-status-calculator";
+import DateBlock from "@/models/DateBlock";
+import PricingRule from "@/models/PricingRule";
 
 export async function GET(
   request: NextRequest,
@@ -51,6 +47,56 @@ export async function GET(
         propertyObj.status = calculatePropertyStatusFromUnits(unitStatuses);
       }
     }
+
+    const now = new Date();
+    const twoYearsOut = new Date();
+    twoYearsOut.setFullYear(twoYearsOut.getFullYear() + 2);
+
+    const unitIds = (propertyObj.units || []).map((u: any) => u._id);
+
+    const [blocks, pricingRules] = await Promise.all([
+      DateBlock.find({
+        propertyId: id,
+        unitId: { $in: unitIds },
+        isActive: true,
+        endDate: { $gte: now },
+        startDate: { $lte: twoYearsOut },
+      })
+        .select("propertyId unitId startDate endDate blockType")
+        .sort({ startDate: 1 })
+        .lean(),
+      PricingRule.find({
+        propertyId: id,
+        unitId: { $in: unitIds },
+        isActive: true,
+      })
+        .select("propertyId unitId name ruleType startDate endDate pricePerNight priceModifier daysOfWeek minimumStay priority")
+        .sort({ priority: -1 })
+        .lean(),
+    ]);
+
+    propertyObj.availability = {
+      blocks: blocks.map((b: any) => ({
+        _id: b._id,
+        unitId: b.unitId,
+        startDate: b.startDate,
+        endDate: b.endDate,
+        blockType: b.blockType,
+      })),
+      pricingRules: pricingRules.map((r: any) => ({
+        _id: r._id,
+        unitId: r.unitId,
+        name: r.name,
+        ruleType: r.ruleType,
+        startDate: r.startDate,
+        endDate: r.endDate,
+        pricePerNight: r.pricePerNight,
+        priceModifier: r.priceModifier,
+        daysOfWeek: r.daysOfWeek,
+        minimumStay: r.minimumStay,
+        isActive: true,
+      })),
+    };
 
     return createSuccessResponse(
       propertyObj,

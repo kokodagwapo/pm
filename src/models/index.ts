@@ -30,6 +30,11 @@ export { EventReminder } from "./EventReminder";
 // Pricing model for dynamic rental rates
 export { default as PropertyPricing } from "./PropertyPricing";
 
+// Availability calendar models
+export { default as DateBlock } from "./DateBlock";
+export { default as PricingRule } from "./PricingRule";
+export { default as RentalRequest } from "./RentalRequest";
+
 // FAQ model for AI-assisted support
 export { default as FAQ } from "./FAQ";
 

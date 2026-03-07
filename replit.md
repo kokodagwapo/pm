@@ -77,6 +77,47 @@ The sign-in page (`/auth/signin`) always shows "Dev Quick Login" buttons for all
 - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `AWS_S3_BUCKET` - AWS S3
 - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` - Google OAuth
 
+## Availability Calendar, Date Blocking & Dynamic Pricing
+
+### Models
+- **DateBlock** (`src/models/DateBlock.ts`): Blocked date ranges per unit with type (owner_stay, maintenance, hold, renovation, personal, seasonal_closure), hard/soft block, recurring support, and role-based access control
+- **PricingRule** (`src/models/PricingRule.ts`): Pricing overrides per unit supporting daily override, weekend/weekday, seasonal, holiday, last-minute, long-term discount, and early-bird discount rule types
+- **RentalRequest** (`src/models/RentalRequest.ts`): Tenant rental requests with auto-calculated pricing, discount breakdown, 7-day TTL auto-expiry, and full approval workflow
+
+### Services
+- **Pricing Service** (`src/lib/services/pricing.service.ts`): Calculates effective nightly rate by rule priority (daily override > holiday > seasonal > weekend/weekday > base rent), applies advance booking and long-term discounts, returns full breakdown
+
+### API Routes
+- `GET/POST/DELETE /api/properties/[id]/units/[unitId]/blocks` — Unit-level date block CRUD
+- `GET/POST /api/properties/[id]/blocks` — Property-level blocks (bulk operations)
+- `GET/POST/PUT/DELETE /api/properties/[id]/units/[unitId]/pricing-rules` — Pricing rule CRUD
+- `POST /api/pricing/calculate` — Calculate price for date range with full breakdown
+- `GET/POST /api/rental-requests` — List/create rental requests
+- `GET/PATCH/DELETE /api/rental-requests/[id]` — Rental request details/approve/reject/cancel
+
+### UI Components
+- `src/components/calendar/AvailabilityCalendar.tsx` — 2-month navigable calendar with color-coded days, drag-to-select, tooltips, read-only mode
+- `src/components/calendar/DateBlockForm.tsx` — Block creation form with type, reason, recurring, hard/soft toggle
+- `src/components/calendar/PricingRuleForm.tsx` — Rule creation form with type-specific fields, discount tiers, live preview
+
+### Dashboard Pages
+- `/dashboard/properties/[id]/calendar` — Property-level calendar management (blocks, pricing rules, bulk ops)
+- `/dashboard/properties/[id]/units/[unitId]/calendar` — Unit-specific calendar management
+- `/dashboard/rental-requests` — Admin/manager/owner rental request management (approve/reject)
+- `/dashboard/rentals/request` — Tenant rental request creation with availability + pricing
+- `/dashboard/rentals/my-requests` — Tenant's request history and status
+
+### Public Pages
+- `/properties/[id]` — Updated with read-only availability calendar, pricing info, and "Request to Rent" CTA
+
+### Role Hierarchy
+- **Admin/Manager**: Full access — block any unit, override owner blocks, manage all pricing rules, approve/reject all requests
+- **Owner**: Block own properties, manage pricing on own units, approve/reject requests for own properties
+- **Tenant**: View availability, submit rental requests, cancel own pending requests
+
+### Permissions Added
+- `calendar_manage`, `pricing_manage`, `date_block_manage`, `rental_request_view`, `rental_request_manage`
+
 ## Deployment / Build Notes
 - **Stripe lazy init**: All `new Stripe(...)` calls are lazy — only run inside route handlers, never at module load time.
 - **environment.ts**: Stripe and Publishable key fields are `.optional()` in the Zod schema.

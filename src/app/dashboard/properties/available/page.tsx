@@ -167,7 +167,7 @@ function UnitCard({ unit, onViewDetails }: UnitCardProps) {
             </div>
             <div className="flex items-center">
               <Square className="h-4 w-4 mr-1" />
-              <span>{unit.squareFootage.toLocaleString()} ft²</span>
+              <span>{(unit.squareFootage || 0).toLocaleString()} ft²</span>
             </div>
           </div>
         </div>

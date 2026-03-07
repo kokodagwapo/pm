@@ -82,6 +82,15 @@ export const SYSTEM_PERMISSIONS = [
 
   // Profile Management
   "profile_management",
+
+  // Calendar & Availability Management
+  "calendar_manage",
+  "pricing_manage",
+  "date_block_manage",
+
+  // Rental Requests
+  "rental_request_view",
+  "rental_request_manage",
 ] as const;
 
 export type SystemPermission = (typeof SYSTEM_PERMISSIONS)[number];

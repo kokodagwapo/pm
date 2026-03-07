@@ -87,6 +87,17 @@
   "nav.settings.notifications": "Benachrichtigungseinstellungen",
   "nav.settings.billing": "Abrechnung & Tarife",
 
+  "nav.section.rentals": "Vermietungen",
+
+  "nav.properties.calendar": "Verfügbarkeitskalender",
+
+  "nav.rentalRequests": "Mietanfragen",
+  "nav.rentalRequests.all": "Alle Anfragen",
+
+  "nav.rentals": "Vermietungen",
+  "nav.rentals.request": "Miete anfragen",
+  "nav.rentals.myRequests": "Meine Anfragen",
+
   "nav.admin": "Admin",
   "nav.admin.overview": "Übersicht",
   "nav.admin.users": "Alle Benutzer",
