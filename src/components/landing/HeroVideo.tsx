@@ -2,19 +2,20 @@
 
 /**
  * Hero video background - Native HTML5 video only (no YouTube)
- * Reliable muted autoplay, smooth cycling between aerial beach clips
+ * Plays through videos 1→2→3 once, then stays on video 3.
  * Sources: Mixkit free stock (aerial tropical beaches)
  */
 
 import { useEffect, useRef, useState } from "react";
 
 const VIDEOS = [
-  "https://assets.mixkit.co/videos/1573/1573-720.mp4", // Aerial tropical beach with green palms, white sand
-  "https://assets.mixkit.co/videos/42495/42495-720.mp4", // Flying over peaceful sunny beach - turquoise sea, white sand
-  "https://assets.mixkit.co/videos/2178/2178-720.mp4", // White sand paradise beach - palm trees, blue ocean
+  "https://assets.mixkit.co/videos/1573/1573-720.mp4",
+  "https://assets.mixkit.co/videos/42495/42495-720.mp4",
+  "https://assets.mixkit.co/videos/2178/2178-720.mp4",
 ];
 
 const CYCLE_SECONDS = 18;
+const LAST_INDEX = VIDEOS.length - 1;
 
 const videoStyle = {
   width: "max(100vw, 177.78vh)",
@@ -27,15 +28,16 @@ export function HeroVideo() {
   const [activeIndex, setActiveIndex] = useState(0);
   const refs = useRef<(HTMLVideoElement | null)[]>([]);
 
-  // Cycle videos on a timer
+  // Advance to next video after CYCLE_SECONDS — stop at the last one
   useEffect(() => {
-    const id = setInterval(() => {
-      setActiveIndex((i) => (i + 1) % VIDEOS.length);
+    if (activeIndex >= LAST_INDEX) return;
+    const id = setTimeout(() => {
+      setActiveIndex((i) => i + 1);
     }, CYCLE_SECONDS * 1000);
-    return () => clearInterval(id);
-  }, []);
+    return () => clearTimeout(id);
+  }, [activeIndex]);
 
-  // Play active video, pause others, reset position when switching
+  // Play active video from start, pause others
   useEffect(() => {
     refs.current.forEach((el, i) => {
       if (!el) return;
@@ -62,7 +64,7 @@ export function HeroVideo() {
           }}
           autoPlay={i === 0}
           muted
-          loop
+          loop={i === LAST_INDEX}
           playsInline
           preload="auto"
           className="absolute left-1/2 top-1/2 w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover transition-opacity duration-1000"
