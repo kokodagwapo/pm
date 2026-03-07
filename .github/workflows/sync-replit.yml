@@ -8,7 +8,7 @@ on:
 
   # Poll every 5 minutes for any missed changes
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/15 * * * *"
 
   # Allow manual trigger
   workflow_dispatch:

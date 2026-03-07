@@ -991,7 +991,7 @@ The workflow also runs on a **5-minute schedule** as a fallback to catch any mis
 
 1. **Connect Replit to this GitHub repo:**
    - Open your Replit project → click the **Git** tab (branch icon in the sidebar).
-   - Click **Connect to GitHub** and select this repository (`kokodagwapo/pm`).
+   - Click **Connect to GitHub** and select this repository.
    - Set the branch to `replit`.
 
 2. **Push from Replit:**
