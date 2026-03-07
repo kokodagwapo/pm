@@ -161,6 +161,7 @@ export function PropertyRowCard({
                 src={featuredImage!}
                 alt={propertyName}
                 fill
+                unoptimized
                 className="object-cover object-center w-full h-full group-hover:scale-105 transition-transform duration-300 m-0 p-0"
                 sizes="(max-width: 640px) 96px, 128px"
                 priority={false}

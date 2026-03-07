@@ -172,6 +172,7 @@ function PropertyCard({
             src={featuredImage!}
             alt={propertyName}
             fill
+            unoptimized
             className="object-cover object-center w-full h-full group-hover:scale-105 transition-transform duration-300 m-0 p-0"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority={false}

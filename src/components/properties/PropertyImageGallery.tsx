@@ -304,6 +304,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                     values: { name: propertyName },
                   })}
                   fill
+                  unoptimized
                   className="object-contain"
                 />
               </div>
