@@ -37,12 +37,19 @@ export async function GET(request: NextRequest) {
     // Fetch a CSRF token from the NextAuth endpoint
     // Use NEXTAUTH_URL from env (ensures localhost, not 0.0.0.0)
     const baseUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || request.nextUrl.origin;
+    let setCookieHeader = "";
+
     try {
         const csrfRes = await fetch(`${baseUrl}/api/auth/csrf`, {
             headers: { cookie: cookieStore.toString() },
         });
         const csrfData = await csrfRes.json();
         csrfToken = csrfData.csrfToken || "";
+
+        // IMPORTANT: We must forward the set-cookie header so the browser 
+        // actually stores the CSRF cookie for the subsequent form POST.
+        const sc = csrfRes.headers.get("set-cookie");
+        if (sc) setCookieHeader = sc;
     } catch {
         // If we can't get CSRF, the form will still try
     }
@@ -66,8 +73,13 @@ export async function GET(request: NextRequest) {
 </body>
 </html>`;
 
+    const headers: Record<string, string> = { "Content-Type": "text/html" };
+    if (setCookieHeader) {
+        headers["Set-Cookie"] = setCookieHeader;
+    }
+
     return new NextResponse(html, {
         status: 200,
-        headers: { "Content-Type": "text/html" },
+        headers,
     });
 }
