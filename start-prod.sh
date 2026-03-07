@@ -1,6 +1,5 @@
 #!/bin/bash
 export PORT=${PORT:-5000}
-export HOSTNAME="0.0.0.0"
 export MONGODB_URI="${MONGODB_URI:-mongodb://localhost:27017/SmartStartPM}"
 
 MONGO_DATA="/home/runner/.mongodb-data/data"
