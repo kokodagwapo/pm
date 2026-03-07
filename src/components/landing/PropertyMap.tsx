@@ -186,23 +186,25 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
     <>
       <style>{`
         .map-price-tag {
-          background: #1e293b;
-          color: white;
-          padding: 4px 8px;
-          border-radius: 6px;
+          background: #e0f2fe;
+          color: #0c4a6e;
+          padding: 5px 10px;
+          border-radius: 20px;
           font-size: 12px;
-          font-weight: 600;
+          font-weight: 700;
           white-space: nowrap;
           text-align: center;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
           cursor: pointer;
-          transition: all 0.15s;
-          border: 2px solid transparent;
+          transition: all 0.2s ease;
+          border: 2px solid #bae6fd;
         }
         .map-price-tag:hover, .map-price-tag-active {
           background: #0ea5e9;
-          transform: scale(1.1);
+          color: white;
+          transform: scale(1.15);
           border-color: white;
+          box-shadow: 0 4px 12px rgba(14,165,233,0.4);
         }
         .custom-map-marker {
           background: none !important;

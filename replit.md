@@ -108,7 +108,8 @@ The sign-in page (`/auth/signin`) always shows "Dev Quick Login" buttons for all
 - `/dashboard/rentals/my-requests` — Tenant's request history and status
 
 ### Public Pages
-- `/properties/[id]` — Updated with read-only availability calendar, pricing info, and "Request to Rent" CTA
+- `/rentals` — VMS Florida-style split layout with interactive Leaflet map (pastel price markers) + property list cards, filter bar with search/type/beds/neighborhood chips
+- `/properties/[id]` — VMS Florida-inspired modern detail page with photo gallery grid, sticky section nav tabs (Description/Pricing/Details/Amenities/Availability/Map), sleeping arrangement cards, amenity icons, availability calendar, embedded map, pricing sidebar with Quick Facts card, fullscreen photo gallery lightbox
 
 ### Role Hierarchy
 - **Admin/Manager**: Full access — block any unit, override owner blocks, manage all pricing rules, approve/reject all requests
