@@ -21,6 +21,10 @@
 - **[VPS Deployment Guide](VPS_DEPLOYMENT_GUIDE.md)** - Deploy on your own server
 - **[Vercel Deployment](INSTALLATION_GUIDE.md#vercel-deployment-recommended)** - One-click cloud deployment
 
+### 🔄 Replit Sync
+
+- **[Replit Sync Guide](#-replit--github-sync)** - Auto-sync Replit changes with this repo
+
 ### 🔧 Support & Troubleshooting
 
 - **[Troubleshooting Guide](TROUBLESHOOTING_GUIDE.md)** - Solutions for common issues
@@ -968,6 +972,41 @@ For additional licensing options including:
 - Custom development services
 
 Contact: **licensing@PropertyPro.com**
+
+---
+
+## 🔄 Replit ↔ GitHub Sync
+
+This repository includes an automated GitHub Actions workflow that keeps Replit and GitHub in sync. When you make changes on Replit, they are automatically pulled into the `main` branch.
+
+### How It Works
+
+1. **Replit pushes to the `replit` branch** — Replit's built-in Git integration commits and pushes your changes to a branch called `replit`.
+2. **GitHub Actions detects the push** — The workflow (`.github/workflows/sync-replit.yml`) triggers automatically.
+3. **Changes are merged into `main`** — The workflow merges the `replit` branch into `main` and pushes the result.
+
+The workflow also runs on a **5-minute schedule** as a fallback to catch any missed pushes, and supports **manual triggering** from the Actions tab.
+
+### Setup Instructions
+
+1. **Connect Replit to this GitHub repo:**
+   - Open your Replit project → click the **Git** tab (branch icon in the sidebar).
+   - Click **Connect to GitHub** and select this repository (`kokodagwapo/pm`).
+   - Set the branch to `replit`.
+
+2. **Push from Replit:**
+   - Make your changes in Replit.
+   - Open the **Git** tab → stage your changes → write a commit message → click **Push**.
+   - Replit will push to the `replit` branch on GitHub.
+
+3. **Automatic merge:**
+   - The GitHub Actions workflow will automatically detect the push and merge the changes into `main`.
+   - You can monitor the sync status in the **Actions** tab of this repository.
+
+4. **Pull latest into Replit:**
+   - To get the latest `main` changes back into Replit, use the Git tab to pull from `main`.
+
+> **Note:** If there are merge conflicts, the workflow will fail and you will need to resolve them manually.
 
 ---
 
