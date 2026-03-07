@@ -1,18 +1,33 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { PropertyCard } from "@/components/landing/PropertyCard";
 import { PropertyFilters } from "@/components/landing/PropertyFilters";
-import { Menu, X } from "lucide-react";
+import { Menu, X, MapPin } from "lucide-react";
+
+const NEIGHBORHOODS = [
+  { label: "All", value: "" },
+  { label: "Falling Waters", value: "Falling Waters" },
+  { label: "Winter Park", value: "Winter Park" },
+  { label: "World Tennis Club", value: "World Tennis Club" },
+  { label: "Glen Eagle", value: "Glen Eagle" },
+  { label: "Moon Lake", value: "Moon Lake" },
+  { label: "Naples Park", value: "Naples Park" },
+  { label: "Royal Arms", value: "Royal Arms" },
+  { label: "Villas of Whittenberg", value: "Villas of Whittenberg" },
+];
 
 function RentalsContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [properties, setProperties] = useState<any[]>([]);
   const [pagination, setPagination] = useState({ page: 1, total: 0, pages: 0 });
   const [loading, setLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const activeNeighborhood = searchParams.get("search") || "";
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
@@ -32,6 +47,20 @@ function RentalsContent() {
       .finally(() => setLoading(false));
   }, [searchParams]);
 
+  const handleNeighborhood = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("page");
+      if (value) {
+        params.set("search", value);
+      } else {
+        params.delete("search");
+      }
+      router.push(`/rentals?${params.toString()}`);
+    },
+    [searchParams, router]
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <LandingHeader />
@@ -41,9 +70,33 @@ function RentalsContent() {
           <h1 className="font-[var(--font-playfair)] text-4xl md:text-5xl text-slate-900 mb-2">
             Naples Rentals
           </h1>
-          <p className="text-slate-600 mb-8">
+          <p className="text-slate-600 mb-5">
             Browse our hand-picked selection of vacation homes and apartments
           </p>
+
+          {/* Neighborhood quick-filter chips */}
+          <div className="flex items-center gap-2 flex-wrap mb-8">
+            <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
+            {NEIGHBORHOODS.map((n) => {
+              const isActive =
+                n.value === ""
+                  ? !activeNeighborhood
+                  : activeNeighborhood === n.value;
+              return (
+                <button
+                  key={n.value}
+                  onClick={() => handleNeighborhood(n.value)}
+                  className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap border ${
+                    isActive
+                      ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-900"
+                  }`}
+                >
+                  {n.label}
+                </button>
+              );
+            })}
+          </div>
 
           <div className="flex flex-col md:flex-row gap-8">
             {/* Sidebar - desktop */}
