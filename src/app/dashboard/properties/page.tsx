@@ -43,6 +43,7 @@ import {
   Rows3,
   X,
   Trash2,
+  CalendarDays,
 } from "lucide-react";
 import {
   propertyService,
@@ -73,6 +74,7 @@ interface PropertyCardProps {
   onEdit: (property: PropertyResponse) => void;
   onDelete: (property: PropertyResponse) => void;
   onView: (property: PropertyResponse) => void;
+  onCalendar: (property: PropertyResponse) => void;
   deleteLoading: boolean;
 }
 
@@ -81,6 +83,7 @@ function PropertyCard({
   onEdit,
   onDelete,
   onView,
+  onCalendar,
   deleteLoading,
 }: PropertyCardProps) {
   const { t, formatCurrency, formatDate } = useLocalizationContext();
@@ -358,6 +361,10 @@ function PropertyCard({
               <DropdownMenuItem onClick={() => onEdit(property)}>
                 <Edit className="h-4 w-4 mr-2" />
                 {t("properties.menu.editProperty")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onCalendar(property)}>
+                <CalendarDays className="h-4 w-4 mr-2" />
+                Availability Calendar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               {!property.deletedAt ? (
@@ -914,6 +921,12 @@ export default function PropertiesPage() {
                 {t("properties.menu.editProperty")}
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/dashboard/properties/${property?._id ?? ""}/calendar`}>
+                <CalendarDays className="mr-2 h-4 w-4" />
+                Availability Calendar
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => handleDeleteClick(property)}
@@ -1417,6 +1430,9 @@ export default function PropertiesPage() {
                     onView={(property) =>
                       router.push(`/dashboard/properties/${property._id}`)
                     }
+                    onCalendar={(property) =>
+                      router.push(`/dashboard/properties/${property._id}/calendar`)
+                    }
                     deleteLoading={deleteLoading === property._id}
                   />
                 ))}
@@ -1462,6 +1478,9 @@ export default function PropertiesPage() {
                     onDelete={handleDeleteClick}
                     onView={(property) =>
                       router.push(`/dashboard/properties/${property._id}`)
+                    }
+                    onCalendar={(property) =>
+                      router.push(`/dashboard/properties/${property._id}/calendar`)
                     }
                     deleteLoading={deleteLoading === property._id}
                   />

@@ -10,6 +10,7 @@ import {
   Edit,
   MoreHorizontal,
   Trash2,
+  CalendarDays,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +31,7 @@ interface PropertyRowCardProps {
   onEdit?: (property: PropertyResponse) => void;
   onDelete?: (property: PropertyResponse) => void;
   onView?: (property: PropertyResponse) => void;
+  onCalendar?: (property: PropertyResponse) => void;
   deleteLoading?: boolean;
   showActions?: boolean;
 }
@@ -39,6 +41,7 @@ export function PropertyRowCard({
   onEdit,
   onDelete,
   onView,
+  onCalendar,
   deleteLoading = false,
   showActions = true,
 }: PropertyRowCardProps) {
@@ -269,6 +272,12 @@ export function PropertyRowCard({
                           {t("properties.menu.editProperty")}
                         </DropdownMenuItem>
                       )}
+                      {onCalendar && (
+                        <DropdownMenuItem onClick={() => onCalendar(property)}>
+                          <CalendarDays className="h-4 w-4 mr-2" />
+                          Availability Calendar
+                        </DropdownMenuItem>
+                      )}
                       {/* DISABLED: Delete functionality temporarily disabled */}
                       {/* {onDelete && (
                         <>
@@ -369,6 +378,12 @@ export function PropertyRowCard({
                         <DropdownMenuItem onClick={() => onEdit(property)}>
                           <Edit className="h-4 w-4 mr-2" />
                           {t("properties.menu.editProperty")}
+                        </DropdownMenuItem>
+                      )}
+                      {onCalendar && (
+                        <DropdownMenuItem onClick={() => onCalendar(property)}>
+                          <CalendarDays className="h-4 w-4 mr-2" />
+                          Availability Calendar
                         </DropdownMenuItem>
                       )}
                       {/* DISABLED: Delete functionality temporarily disabled */}
