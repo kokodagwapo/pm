@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Search, Settings, LogOut, User, Menu, X } from "lucide-react";
 import { useUserAvatar } from "@/components/providers/UserAvatarProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -72,7 +71,6 @@ const MobileHeader = memo(function MobileHeader({
           </Button>
         </div>
 
-        <ThemeToggle />
         
         <div className="text-foreground">
           <NotificationBell />
