@@ -144,7 +144,7 @@ async function main() {
   } else {
     // Full bidirectional sync: export first (capture current DB), then import (merge JSON into DB)
     console.log("🔄 Running full bidirectional sync...\n");
-    const exportCount = await exportProperties();
+    await exportProperties();
     const importResult = await importProperties();
     // Re-export after import to capture any newly created properties
     const finalCount = await exportProperties();
