@@ -1,6 +1,6 @@
 /**
  * SmartStartPM - Public AI Assistant API (Guest Mode)
- * Allows unauthenticated users on the landing page to chat with Heidi
+ * Allows unauthenticated users on the landing page to chat with Luna
  * No conversation persistence - stateless for guest users
  */
 
@@ -18,9 +18,16 @@ import { getAssistantById } from "@/lib/config/ai-assistants";
 import connectDB from "@/lib/mongodb";
 import { z } from "zod";
 
+const messageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().max(2000),
+});
+
 const chatRequestSchema = z.object({
   message: z.string().min(1, "Message is required").max(2000, "Message too long"),
   assistantId: z.enum(["luna", "ai-luna", "heidi", "ai-heidi"]).default("luna"),
+  customContext: z.string().max(2000).optional(),
+  history: z.array(messageSchema).max(20).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -40,25 +47,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { message, assistantId } = validation.data;
+    const { message, assistantId, customContext, history } = validation.data;
 
     const assistant = getAssistantById(assistantId);
     if (!assistant) {
       return createErrorResponse("Assistant not available", 400);
     }
 
-    const conversationHistory: AIMessage[] = [
-      { role: "user", content: message },
-    ];
+    const baseContext =
+      customContext ||
+      "The user is a potential guest or renter browsing the SmartStartPM landing page. They are interested in Naples, Florida vacation rentals or long-term leases. Provide helpful information about our properties, booking process, and services. If they ask about specific areas like Vanderbilt Beach, Old Naples, or Pelican Bay, mention we have properties in those areas and suggest they browse our rentals page.";
 
-    const aiResponse = await aiAssistantService.chat(
-      assistantId,
-      conversationHistory,
-      {
-        customContext:
-          "The user is a potential guest or renter browsing the SmartStartPM landing page. They are interested in Naples, Florida vacation rentals or long-term leases. Provide helpful information about our properties, booking process, and services. If they ask about specific areas like Vanderbilt Beach, Old Naples, or Pelican Bay, mention we have properties in those areas and suggest they browse our rentals page.",
-      }
-    );
+    const conversationHistory: AIMessage[] = history
+      ? [...(history as AIMessage[]), { role: "user", content: message }]
+      : [{ role: "user", content: message }];
+
+    const aiResponse = await aiAssistantService.chat(assistantId, conversationHistory, {
+      customContext: baseContext,
+    });
 
     return createSuccessResponse(
       {

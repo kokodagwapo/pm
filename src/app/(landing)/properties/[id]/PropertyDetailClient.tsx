@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
+import { LunaWidget } from "@/components/landing/LunaWidget";
 import {
   Bed,
   Bath,
@@ -29,8 +30,20 @@ import {
   Heart,
   Grid3X3,
   CheckCircle2,
+  Loader2,
+  Sparkles,
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  Tag,
+  Send,
 } from "lucide-react";
-import { AvailabilityCalendar, CalendarBlock, CalendarPricingRule } from "@/components/calendar/AvailabilityCalendar";
+import {
+  AvailabilityCalendar,
+  CalendarBlock,
+  CalendarPricingRule,
+  DateSelection,
+} from "@/components/calendar/AvailabilityCalendar";
 
 function formatPrice(amount: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -38,6 +51,15 @@ function formatPrice(amount: number): string {
     currency: "USD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function formatPriceExact(amount: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount);
 }
 
@@ -86,6 +108,23 @@ const NAV_SECTIONS = [
   { id: "map", label: "Map" },
 ];
 
+interface PricingResult {
+  totalNights: number;
+  basePrice: number;
+  calculatedPrice: number;
+  averagePricePerNight: number;
+  discountsApplied: Array<{ type: string; label: string; amount: number; percentage?: number }>;
+  minimumStay?: number;
+}
+
+interface InquiryForm {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  message: string;
+}
+
 export function PropertyDetailClient({
   id,
   initialProperty,
@@ -103,6 +142,28 @@ export function PropertyDetailClient({
   const [descExpanded, setDescExpanded] = useState(false);
   const [selectedUnitIndex, setSelectedUnitIndex] = useState(0);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const [selectedDates, setSelectedDates] = useState<DateSelection | null>(null);
+  const [pricingResult, setPricingResult] = useState<PricingResult | null>(null);
+  const [pricingLoading, setPricingLoading] = useState(false);
+  const [pricingError, setPricingError] = useState<string | null>(null);
+
+  const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [inquiryForm, setInquiryForm] = useState<InquiryForm>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [inquirySubmitting, setInquirySubmitting] = useState(false);
+  const [inquiryResult, setInquiryResult] = useState<{
+    success: boolean;
+    ref?: string;
+    error?: string;
+  } | null>(null);
+
+  const inquirySectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (initialProperty) return;
@@ -231,6 +292,109 @@ export function PropertyDetailClient({
       }));
   }, [calendarPricingRules]);
 
+  const fetchPricing = useCallback(
+    async (dates: DateSelection) => {
+      if (!property?._id || !unit?._id) return;
+      setPricingLoading(true);
+      setPricingError(null);
+      try {
+        const res = await fetch("/api/pricing/calculate-public", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            propertyId: property._id.toString(),
+            unitId: unit._id.toString(),
+            startDate: dates.startDate.toISOString(),
+            endDate: dates.endDate.toISOString(),
+          }),
+        });
+        const data = await res.json();
+        if (data?.success && data.data) {
+          setPricingResult(data.data);
+        } else {
+          setPricingError(data?.error || "Could not calculate pricing");
+          setPricingResult(null);
+        }
+      } catch {
+        setPricingError("Could not calculate pricing");
+        setPricingResult(null);
+      } finally {
+        setPricingLoading(false);
+      }
+    },
+    [property?._id, unit?._id]
+  );
+
+  const handleDateSelect = useCallback(
+    (selection: DateSelection) => {
+      setSelectedDates(selection);
+      setPricingResult(null);
+      setInquiryResult(null);
+      fetchPricing(selection);
+    },
+    [fetchPricing]
+  );
+
+  const handleUnitChange = (index: number) => {
+    setSelectedUnitIndex(index);
+    setSelectedDates(null);
+    setPricingResult(null);
+    setPricingError(null);
+    setInquiryResult(null);
+    setShowInquiryForm(false);
+  };
+
+  const stayNudge = useMemo(() => {
+    if (!pricingResult) return null;
+    const n = pricingResult.totalNights;
+    if (n >= 5 && n < 7) return { add: 7 - n, label: "weekly discount", nights: 7 };
+    if (n >= 25 && n < 30) return { add: 30 - n, label: "monthly discount", nights: 30 };
+    return null;
+  }, [pricingResult]);
+
+  const formatDateRange = (start: Date, end: Date) =>
+    `${start.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} – ${end.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
+
+  const handleInquirySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDates || !property || !unit) return;
+    setInquirySubmitting(true);
+    setInquiryResult(null);
+    try {
+      const res = await fetch("/api/inquiries/public", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId: property._id.toString(),
+          unitId: unit._id.toString(),
+          startDate: selectedDates.startDate.toISOString(),
+          endDate: selectedDates.endDate.toISOString(),
+          ...inquiryForm,
+          pricingSnapshot: pricingResult,
+        }),
+      });
+      const data = await res.json();
+      if (data?.success && data.data) {
+        setInquiryResult({ success: true, ref: data.data.inquiryRef });
+        setInquiryForm({ firstName: "", lastName: "", email: "", phone: "", message: "" });
+        setShowInquiryForm(false);
+      } else {
+        setInquiryResult({ success: false, error: data?.error || "Submission failed. Please try again." });
+      }
+    } catch {
+      setInquiryResult({ success: false, error: "Could not submit inquiry. Please try again." });
+    } finally {
+      setInquirySubmitting(false);
+    }
+  };
+
+  const scrollToInquiry = useCallback(() => {
+    setShowInquiryForm(true);
+    setTimeout(() => {
+      inquirySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  }, []);
+
   const images = property?.images?.length
     ? property.images
     : ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80"];
@@ -243,6 +407,17 @@ export function PropertyDetailClient({
   const lon = mapCoords?.lon ?? -81.7948;
   const bbox = `${lon - 0.02},${lat - 0.02},${lon + 0.02},${lat + 0.02}`;
   const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${lat},${lon}`;
+
+  const lunaPropertyContext = useMemo(() => ({
+    propertyId: id,
+    propertyName: property?.name || "this property",
+    neighborhood: property?.neighborhood,
+    pricePerMonth: unit?.rentAmount,
+    pricePerNight: baseRentPerNight || undefined,
+    bedrooms: unit?.bedrooms,
+    bathrooms: unit?.bathrooms,
+    availabilityStatus: status,
+  }), [id, property?.name, property?.neighborhood, unit?.rentAmount, unit?.bedrooms, unit?.bathrooms, baseRentPerNight, status]);
 
   if (loading) {
     return (
@@ -672,14 +847,14 @@ export function PropertyDetailClient({
               </div>
 
               <div ref={(el) => { sectionRefs.current.availability = el; }}>
-                <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
+                <div className="mb-6 rounded-2xl border border-slate-200 overflow-hidden">
                   <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
                     <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <Calendar className="w-5 h-5 text-sky-500" />
-                      Availability
+                      Availability & Booking
                     </h2>
                     <p className="text-sm text-slate-500 mt-1">
-                      Check available dates and pricing for this property
+                      Select your dates to see real-time pricing
                     </p>
                   </div>
                   <div className="p-6">
@@ -688,7 +863,7 @@ export function PropertyDetailClient({
                         {units.map((u: any, i: number) => (
                           <button
                             key={u._id || i}
-                            onClick={() => setSelectedUnitIndex(i)}
+                            onClick={() => handleUnitChange(i)}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
                               i === selectedUnitIndex
                                 ? "bg-sky-500 text-white border-sky-500 shadow-sm"
@@ -705,11 +880,207 @@ export function PropertyDetailClient({
                       blocks={calendarBlocks}
                       pricingRules={calendarPricingRules}
                       baseRentPerNight={baseRentPerNight}
-                      readOnly
+                      readOnly={false}
                       showPricing={baseRentPerNight > 0}
                       showLegend
+                      onDateSelect={handleDateSelect}
                     />
                   </div>
+                </div>
+
+                {selectedDates && (
+                  <div className="mb-6 rounded-2xl border-2 border-sky-200 overflow-hidden shadow-sm">
+                    <div className="px-6 py-4 bg-gradient-to-r from-sky-50 to-indigo-50 border-b border-sky-100 flex items-center justify-between">
+                      <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+                        <DollarSign className="w-4 h-4 text-sky-500" />
+                        Booking Summary
+                      </h3>
+                      <button
+                        onClick={() => {
+                          setSelectedDates(null);
+                          setPricingResult(null);
+                          setPricingError(null);
+                          setInquiryResult(null);
+                          setShowInquiryForm(false);
+                        }}
+                        className="text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="p-6 bg-white">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <p className="text-sm text-slate-500">Selected dates</p>
+                          <p className="font-semibold text-slate-900 text-sm mt-0.5">
+                            {formatDateRange(selectedDates.startDate, selectedDates.endDate)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {pricingLoading && (
+                        <div className="flex items-center gap-3 py-4 text-slate-500">
+                          <Loader2 className="w-4 h-4 animate-spin text-sky-500" />
+                          <span className="text-sm">Calculating pricing…</span>
+                        </div>
+                      )}
+
+                      {pricingError && (
+                        <div className="flex items-center gap-2 py-3 px-4 rounded-xl bg-amber-50 text-amber-700 text-sm mb-4">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                          {pricingError}
+                        </div>
+                      )}
+
+                      {pricingResult && !pricingLoading && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm py-1.5">
+                            <span className="text-slate-600">
+                              {formatPriceExact(pricingResult.averagePricePerNight)} × {pricingResult.totalNights} night{pricingResult.totalNights !== 1 ? "s" : ""}
+                            </span>
+                            <span className="font-medium text-slate-800">{formatPriceExact(pricingResult.basePrice)}</span>
+                          </div>
+
+                          {pricingResult.discountsApplied?.map((d, i) => (
+                            <div key={i} className="flex items-center justify-between text-sm py-1">
+                              <span className="text-emerald-600 flex items-center gap-1.5">
+                                <Tag className="w-3.5 h-3.5" />
+                                {d.label}
+                                {d.percentage ? ` (${d.percentage}% off)` : ""}
+                              </span>
+                              <span className="text-emerald-600 font-medium">−{formatPriceExact(d.amount)}</span>
+                            </div>
+                          ))}
+
+                          <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                            <span className="font-semibold text-slate-900">Total</span>
+                            <span className="text-xl font-bold text-slate-900">{formatPriceExact(pricingResult.calculatedPrice)}</span>
+                          </div>
+
+                          {stayNudge && (
+                            <div className="mt-3 flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
+                              <Sparkles className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                              <p className="text-sm text-amber-800">
+                                Add <strong>{stayNudge.add} more night{stayNudge.add > 1 ? "s" : ""}</strong> to unlock a {stayNudge.label}!
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {inquiryResult?.success && (
+                        <div className="mt-4 flex items-start gap-3 px-4 py-4 rounded-xl bg-emerald-50 border border-emerald-200">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-semibold text-emerald-800 text-sm">Inquiry sent successfully!</p>
+                            <p className="text-emerald-700 text-xs mt-1">
+                              Reference: <strong>{inquiryResult.ref}</strong>. We'll get back to you within 24 hours.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {inquiryResult?.error && (
+                        <div className="mt-4 flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                          {inquiryResult.error}
+                        </div>
+                      )}
+
+                      {!inquiryResult?.success && (
+                        <button
+                          onClick={() => setShowInquiryForm((v) => !v)}
+                          className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-sky-500 text-white font-semibold hover:bg-sky-600 transition-colors shadow-sm shadow-sky-500/20 text-sm"
+                        >
+                          <Mail className="w-4 h-4" />
+                          Request this Rental
+                          {showInquiryForm ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div ref={inquirySectionRef}>
+                  {showInquiryForm && selectedDates && !inquiryResult?.success && (
+                    <div className="mb-6 rounded-2xl border border-slate-200 overflow-hidden">
+                      <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
+                        <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+                          <Send className="w-4 h-4 text-sky-500" />
+                          Your Details
+                        </h3>
+                        <p className="text-xs text-slate-500 mt-1">We'll contact you within 24 hours to confirm availability</p>
+                      </div>
+                      <form onSubmit={handleInquirySubmit} className="p-6 space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-medium text-slate-600 mb-1.5">First Name *</label>
+                            <input
+                              type="text"
+                              required
+                              value={inquiryForm.firstName}
+                              onChange={(e) => setInquiryForm((f) => ({ ...f, firstName: e.target.value }))}
+                              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-400 transition-all"
+                              placeholder="Jane"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-slate-600 mb-1.5">Last Name *</label>
+                            <input
+                              type="text"
+                              required
+                              value={inquiryForm.lastName}
+                              onChange={(e) => setInquiryForm((f) => ({ ...f, lastName: e.target.value }))}
+                              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-400 transition-all"
+                              placeholder="Smith"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-600 mb-1.5">Email Address *</label>
+                          <input
+                            type="email"
+                            required
+                            value={inquiryForm.email}
+                            onChange={(e) => setInquiryForm((f) => ({ ...f, email: e.target.value }))}
+                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-400 transition-all"
+                            placeholder="jane@email.com"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-600 mb-1.5">Phone Number</label>
+                          <input
+                            type="tel"
+                            value={inquiryForm.phone}
+                            onChange={(e) => setInquiryForm((f) => ({ ...f, phone: e.target.value }))}
+                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-400 transition-all"
+                            placeholder="+1 (555) 000-0000"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-600 mb-1.5">Message (optional)</label>
+                          <textarea
+                            rows={3}
+                            value={inquiryForm.message}
+                            onChange={(e) => setInquiryForm((f) => ({ ...f, message: e.target.value }))}
+                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-400 transition-all resize-none"
+                            placeholder="Tell us about your plans or any questions you have…"
+                          />
+                        </div>
+                        <button
+                          type="submit"
+                          disabled={inquirySubmitting}
+                          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-sky-500 text-white font-semibold hover:bg-sky-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm shadow-sky-500/20"
+                        >
+                          {inquirySubmitting ? (
+                            <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>
+                          ) : (
+                            <><Send className="w-4 h-4" /> Send Inquiry</>
+                          )}
+                        </button>
+                      </form>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -768,15 +1139,36 @@ export function PropertyDetailClient({
                       </p>
                     )}
 
-                    <Link
-                      href={`/auth/signin?callbackUrl=${encodeURIComponent(`/dashboard/rentals/request?propertyId=${id}`)}`}
-                      className="block w-full py-3.5 rounded-xl bg-sky-500 text-white font-semibold text-center hover:bg-sky-600 transition-colors shadow-sm shadow-sky-500/20 mb-3"
-                    >
-                      Request to Rent
-                    </Link>
+                    {selectedDates && pricingResult ? (
+                      <div className="mb-4">
+                        <div className="rounded-xl bg-sky-50 border border-sky-200 px-4 py-3 mb-3">
+                          <p className="text-xs text-sky-600 font-medium">Your selection</p>
+                          <p className="text-sm text-slate-800 font-semibold mt-0.5">
+                            {formatDateRange(selectedDates.startDate, selectedDates.endDate)}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {pricingResult.totalNights} nights · {formatPriceExact(pricingResult.calculatedPrice)} total
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => { setShowInquiryForm(true); scrollToInquiry(); }}
+                          className="block w-full py-3.5 rounded-xl bg-sky-500 text-white font-semibold text-center hover:bg-sky-600 transition-colors shadow-sm shadow-sky-500/20 mb-2 text-sm"
+                        >
+                          Request this Rental
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => scrollToSection("availability")}
+                        className="block w-full py-3.5 rounded-xl bg-sky-500 text-white font-semibold text-center hover:bg-sky-600 transition-colors shadow-sm shadow-sky-500/20 mb-3 text-sm"
+                      >
+                        Check Availability
+                      </button>
+                    )}
+
                     <Link
                       href="/contact"
-                      className="block w-full py-3 rounded-xl bg-white text-slate-700 font-medium text-center border border-slate-200 hover:bg-slate-50 transition-colors"
+                      className="block w-full py-3 rounded-xl bg-white text-slate-700 font-medium text-center border border-slate-200 hover:bg-slate-50 transition-colors text-sm"
                     >
                       Contact Us
                     </Link>
@@ -784,7 +1176,7 @@ export function PropertyDetailClient({
 
                   <div className="px-6 py-4 bg-slate-50 border-t border-slate-200">
                     <p className="text-xs text-slate-400 text-center">
-                      Sign in to request rental dates with instant pricing
+                      Select dates above to see instant pricing
                     </p>
                   </div>
                 </div>
@@ -887,6 +1279,13 @@ export function PropertyDetailClient({
             </div>
           </div>
         </div>
+      )}
+
+      {property && (
+        <LunaWidget
+          propertyContext={lunaPropertyContext}
+          onRequestBooking={scrollToInquiry}
+        />
       )}
     </div>
   );

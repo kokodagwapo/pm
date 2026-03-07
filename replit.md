@@ -73,6 +73,7 @@ The sign-in page (`/auth/signin`) always shows "Dev Quick Login" buttons for all
 - `NEXTAUTH_URL` - NextAuth base URL (e.g. `https://<replit-domain>`)
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - Stripe (optional at build time)
 - `OPENAI_API_KEY`, `OPENAI_MODEL` - OpenAI
+- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` - Twilio SMS (optional — gracefully skipped if missing)
 - `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_URL`, `NEXT_PUBLIC_R2_PUBLIC_URL` - Cloudflare R2
 - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `AWS_S3_BUCKET` - AWS S3
 - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` - Google OAuth
@@ -109,7 +110,7 @@ The sign-in page (`/auth/signin`) always shows "Dev Quick Login" buttons for all
 
 ### Public Pages
 - `/rentals` — VMS Florida-style split layout with interactive Leaflet map (pastel price markers) + property list cards, filter bar with search/type/beds/neighborhood chips
-- `/properties/[id]` — VMS Florida-inspired modern detail page with photo gallery grid, sticky section nav tabs (Description/Pricing/Details/Amenities/Availability/Map), sleeping arrangement cards, amenity icons, availability calendar, embedded map, pricing sidebar with Quick Facts card, fullscreen photo gallery lightbox
+- `/properties/[id]` — VMS Florida-inspired modern detail page with photo gallery grid, sticky section nav tabs (Description/Pricing/Details/Amenities/Availability/Map), sleeping arrangement cards, amenity icons, interactive date selection on AvailabilityCalendar (readOnly=false, drag-to-select), real-time pricing via `/api/pricing/calculate-public`, Booking Summary card (nights × rate, discounts applied, total, "extend your stay" nudge at 5-6 and 25-29 nights), collapsible guest inquiry form (name/email/phone/message, submits to `/api/inquiries/public`), inquiry success confirmation with reference number, embedded map, pricing sidebar with Quick Facts card, fullscreen photo gallery lightbox, Luna AI floating chat widget (LunaWidget) with property context, conversation history, voice TTS via `/api/voice/tts` (OpenAI shimmer voice), and auto-voice toggle
 
 ### Role Hierarchy
 - **Admin/Manager**: Full access — block any unit, override owner blocks, manage all pricing rules, approve/reject all requests
