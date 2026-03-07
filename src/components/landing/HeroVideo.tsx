@@ -2,16 +2,16 @@
 
 /**
  * Hero video background - Native HTML5 video only (no YouTube)
- * Cycles: video 1 (18s) → video 2 (18s) → video 3 (4s) → back to video 1
+ * Cycles: video 1 (18s) → video 2 (8s) → video 3 (4s) → back to video 1
  * Sources: Mixkit free stock (aerial tropical beaches)
  */
 
 import { useEffect, useRef, useState } from "react";
 
 const VIDEOS = [
-  { src: "https://assets.mixkit.co/videos/1573/1573-720.mp4",   seconds: 18 },
-  { src: "https://assets.mixkit.co/videos/42495/42495-720.mp4", seconds: 18 },
-  { src: "https://assets.mixkit.co/videos/2178/2178-720.mp4",   seconds: 4  },
+  { src: "https://assets.mixkit.co/videos/1573/1573-720.mp4", seconds: 18 },
+  { src: "https://assets.mixkit.co/videos/42495/42495-720.mp4", seconds: 8 },
+  { src: "https://assets.mixkit.co/videos/2178/2178-720.mp4", seconds: 4 },
 ];
 
 const videoStyle = {
@@ -44,7 +44,7 @@ export function HeroVideo() {
         } catch {
           /* ignore */
         }
-        el.play().catch(() => {});
+        el.play().catch(() => { });
       } else {
         el.pause();
       }
