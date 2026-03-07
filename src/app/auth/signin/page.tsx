@@ -293,6 +293,23 @@ export default function SignInPage() {
             </div>
           </div>
 
+          <div className="text-center">
+            <a
+              href="/rentals"
+              className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-white text-sm transition-all duration-200 hover:scale-105 active:scale-95"
+              style={{
+                background: "linear-gradient(135deg, rgba(14,165,233,0.85) 0%, rgba(99,102,241,0.85) 100%)",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+                border: "1px solid rgba(255,255,255,0.25)",
+                boxShadow: "0 4px 20px rgba(14,165,233,0.35), 0 0 0 1px rgba(255,255,255,0.08) inset",
+              }}
+            >
+              <Home className="h-4 w-4" />
+              View Rentals
+            </a>
+          </div>
+
         </div>
       </main>
     </div>
