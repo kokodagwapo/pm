@@ -2,20 +2,17 @@
 
 /**
  * Hero video background - Native HTML5 video only (no YouTube)
- * Plays through videos 1→2→3 once, then stays on video 3.
+ * Cycles: video 1 (18s) → video 2 (18s) → video 3 (4s) → back to video 1
  * Sources: Mixkit free stock (aerial tropical beaches)
  */
 
 import { useEffect, useRef, useState } from "react";
 
 const VIDEOS = [
-  "https://assets.mixkit.co/videos/1573/1573-720.mp4",
-  "https://assets.mixkit.co/videos/42495/42495-720.mp4",
-  "https://assets.mixkit.co/videos/2178/2178-720.mp4",
+  { src: "https://assets.mixkit.co/videos/1573/1573-720.mp4",   seconds: 18 },
+  { src: "https://assets.mixkit.co/videos/42495/42495-720.mp4", seconds: 18 },
+  { src: "https://assets.mixkit.co/videos/2178/2178-720.mp4",   seconds: 4  },
 ];
-
-const CYCLE_SECONDS = 18;
-const LAST_INDEX = VIDEOS.length - 1;
 
 const videoStyle = {
   width: "max(100vw, 177.78vh)",
@@ -28,12 +25,12 @@ export function HeroVideo() {
   const [activeIndex, setActiveIndex] = useState(0);
   const refs = useRef<(HTMLVideoElement | null)[]>([]);
 
-  // Advance to next video after CYCLE_SECONDS — stop at the last one
+  // Advance to next video (wrap back to 0 after the last)
   useEffect(() => {
-    if (activeIndex >= LAST_INDEX) return;
+    const { seconds } = VIDEOS[activeIndex];
     const id = setTimeout(() => {
-      setActiveIndex((i) => i + 1);
-    }, CYCLE_SECONDS * 1000);
+      setActiveIndex((i) => (i + 1) % VIDEOS.length);
+    }, seconds * 1000);
     return () => clearTimeout(id);
   }, [activeIndex]);
 
@@ -56,7 +53,7 @@ export function HeroVideo() {
 
   return (
     <div className="fixed inset-0 z-0 overflow-hidden" aria-hidden>
-      {VIDEOS.map((src, i) => (
+      {VIDEOS.map(({ src }, i) => (
         <video
           key={src}
           ref={(el) => {
@@ -64,7 +61,7 @@ export function HeroVideo() {
           }}
           autoPlay={i === 0}
           muted
-          loop={i === LAST_INDEX}
+          loop
           playsInline
           preload="auto"
           className="absolute left-1/2 top-1/2 w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover transition-opacity duration-1000"
