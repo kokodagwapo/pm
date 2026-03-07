@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+
 import { toast } from "sonner";
 import { PropertyStatus } from "@/types";
 import { useState, useEffect } from "react";
@@ -839,11 +839,11 @@ export default function UnitDetailsPage() {
                       key={index}
                       className="relative aspect-video rounded-lg overflow-hidden bg-muted border"
                     >
-                      <Image
+                      <img
                         src={image}
                         alt={`Unit ${unit.unitNumber} - Image ${index + 1}`}
-                        fill
-                        className="object-cover hover:scale-105 transition-transform duration-200"
+                        className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                        loading="lazy"
                       />
                     </div>
                   ))}

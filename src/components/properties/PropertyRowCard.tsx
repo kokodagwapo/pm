@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
+
 import Link from "next/link";
 import {
   Building2,
@@ -157,14 +157,11 @@ export function PropertyRowCard({
           {/* Property Image */}
           <div className="relative w-24 h-24 sm:w-32 sm:h-20 flex-shrink-0 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-l-lg m-0 p-0">
             {hasImage ? (
-              <Image
+              <img
                 src={featuredImage!}
                 alt={propertyName}
-                fill
-                unoptimized
-                className="object-cover object-center w-full h-full group-hover:scale-105 transition-transform duration-300 m-0 p-0"
-                sizes="(max-width: 640px) 96px, 128px"
-                priority={false}
+                className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300 m-0 p-0"
+                loading="lazy"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">

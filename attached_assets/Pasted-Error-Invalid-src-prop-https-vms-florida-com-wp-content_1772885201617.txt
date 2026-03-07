@@ -1,0 +1,20 @@
+Error: Invalid src prop (https://vms-florida.com/wp-content/uploads/2025/11/arctic-circle-kitchen-3.webp) on `next/image`, hostname "vms-florida.com" is not configured under images in your `next.config.js`
+See more info: https://nextjs.org/docs/messages/next-image-unconfigured-host
+    at defaultLoader (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_60384685._.js:2781:49)
+    at https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_60384685._.js:207:36
+    at Array.map (<anonymous>)
+    at generateImgAttrs (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_60384685._.js:207:24)
+    at getImgProps (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_60384685._.js:601:27)
+    at https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_60384685._.js:3118:82
+    at Object.react_stack_bottom_frame (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:13072:24)
+    at renderWithHooks (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:4091:24)
+    at updateForwardRef (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:5342:21)
+    at beginWork (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:6186:24)
+    at runWithFiberInDEV (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:886:74)
+    at performUnitOfWork (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8298:97)
+    at workLoopSync (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8190:40)
+    at renderRootSync (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8173:13)
+    at performWorkOnRoot (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:7932:56)
+    at performWorkOnRootViaSchedulerTask (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8882:9)
+    at MessagePort.performWorkUntilDeadline (https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_5150ccfd._.js:2601:64)
+Try Aga

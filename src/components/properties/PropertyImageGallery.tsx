@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -221,7 +221,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
               <Card key={index} className="overflow-hidden py-0">
                 <div className="relative group">
                   <div className="relative w-full h-58 bg-gray-100 dark:bg-gray-800">
-                    <Image
+                    <img
                       src={imageUrl}
                       alt={t("properties.images.alt.thumbnail", {
                         values: {
@@ -229,9 +229,8 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                           name: propertyName,
                         },
                       })}
-                      fill
-                      className="object-cover transition-transform group-hover:scale-105"
-                      unoptimized
+                      className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
+                      loading="lazy"
                     />
                   </div>
                   {/* Image Number Badge */}
@@ -298,14 +297,12 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                 <DialogTitle>{t("properties.images.viewer.title")}</DialogTitle>
               </DialogHeader>
               <div className="relative w-full h-96">
-                <Image
+                <img
                   src={selectedImage}
                   alt={t("properties.images.alt.main", {
                     values: { name: propertyName },
                   })}
-                  fill
-                  unoptimized
-                  className="object-contain"
+                  className="absolute inset-0 w-full h-full object-contain"
                 />
               </div>
               <DialogFooter>

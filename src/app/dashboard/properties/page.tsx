@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { toast } from "sonner";
-import Image from "next/image";
+
 import { useSession } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -168,14 +168,11 @@ function PropertyCard({
       {/* Featured Image */}
       <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-t-lg m-0 p-0">
         {hasImage ? (
-          <Image
+          <img
             src={featuredImage!}
             alt={propertyName}
-            fill
-            unoptimized
-            className="object-cover object-center w-full h-full group-hover:scale-105 transition-transform duration-300 m-0 p-0"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            priority={false}
+            className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300 m-0 p-0"
+            loading="lazy"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
@@ -734,13 +731,11 @@ export default function PropertiesPage() {
         <div className="flex items-center space-x-3">
           <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex-shrink-0">
             {hasPropertyImages(property) ? (
-              <Image
+              <img
                 src={getFeaturedImage(property)!}
                 alt={property.name}
-                fill
-                className="object-cover object-center w-full h-full m-0 p-0"
-                sizes="40px"
-                priority={false}
+                className="absolute inset-0 w-full h-full object-cover object-center m-0 p-0"
+                loading="lazy"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">

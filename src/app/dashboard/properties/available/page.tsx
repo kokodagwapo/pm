@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import Image from "next/image";
+
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect, useCallback } from "react";
@@ -83,13 +83,11 @@ function UnitCard({ unit, onViewDetails }: UnitCardProps) {
       {/* Featured Image */}
       <div className="relative h-48 overflow-hidden bg-gray-100 dark:bg-gray-800">
         {hasImage ? (
-          <Image
+          <img
             src={featuredImage!}
             alt={`${unit.name} - Unit ${unit.unitNumber}`}
-            fill
-            unoptimized
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
@@ -837,13 +835,11 @@ export default function AvailablePropertiesPage() {
                         <div className="flex items-center space-x-3">
                           <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
                             {hasPropertyImages(unit) ? (
-                              <Image
+                              <img
                                 src={getFeaturedImage(unit)!}
                                 alt={`${unit.name} - Unit ${unit.unitNumber}`}
-                                fill
-                                unoptimized
-                                className="object-cover"
-                                sizes="40px"
+                                className="absolute inset-0 w-full h-full object-cover"
+                                loading="lazy"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
