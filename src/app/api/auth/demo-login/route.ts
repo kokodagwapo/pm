@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { signIn as serverSignIn } from "@/lib/auth";
+import { signInAction as signIn } from "@/lib/auth";
 
 const DEMO_CREDENTIALS: Record<string, { email: string; password: string }> = {
     admin: { email: "hi@smartstart.us", password: "SmartStart2025" },
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     try {
         // Use NextAuth server-side signIn action
-        await serverSignIn("credentials", {
+        await signIn("credentials", {
             email: creds.email,
             password: creds.password,
             redirect: false,
