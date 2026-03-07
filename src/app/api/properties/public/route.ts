@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const paginationParams = parsePaginationParams(searchParams);
 
     const page = paginationParams.page;
-    const limit = Math.min(paginationParams.limit, 24);
+    const limit = Math.min(paginationParams.limit, 50);
     const search = searchParams.get("search") || undefined;
     const type = searchParams.get("type") || undefined;
     const minRent = searchParams.get("minRent")
