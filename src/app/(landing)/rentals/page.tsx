@@ -578,9 +578,9 @@ function RentalsContent() {
         </div>
 
         {/* Main content */}
-        <div className="flex flex-1 overflow-hidden" style={{ height: "calc(100vh - 224px)" }}>
+        <div className="flex flex-1 overflow-hidden relative z-0" style={{ height: "calc(100vh - 224px)" }}>
           {/* Map */}
-          <div className={`${mobileView === "map" ? "flex" : "hidden"} md:flex w-full md:w-1/2 lg:w-[55%] relative`}>
+          <div className={`${mobileView === "map" ? "flex" : "hidden"} md:flex w-full md:w-1/2 lg:w-[55%] relative`} style={{ isolation: "isolate" }}>
             <PropertyMap
               properties={properties}
               onMarkerClick={handleMarkerClick}
@@ -590,7 +590,7 @@ function RentalsContent() {
           </div>
 
           {/* Listings */}
-          <div className={`${mobileView === "list" ? "flex" : "hidden"} md:flex flex-col w-full md:w-1/2 lg:w-[45%] overflow-y-auto bg-slate-50 border-l border-slate-200`}>
+          <div className={`${mobileView === "list" ? "flex" : "hidden"} md:flex flex-col w-full md:w-1/2 lg:w-[45%] overflow-y-auto bg-slate-50 border-l border-slate-200`} style={{ isolation: "isolate" }}>
             <div className="p-3 space-y-2.5">
 
               {/* Featured selected property card */}
