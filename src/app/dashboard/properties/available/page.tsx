@@ -221,10 +221,12 @@ function UnitCard({ unit, onViewDetails }: UnitCardProps) {
 }
 
 export default function AvailablePropertiesPage() {
+  console.log("AVAILABLE_PAGE_RENDER: component starting");
   const { t, formatCurrency: formatCurrencyLocalized } =
     useLocalizationContext();
   const router = useRouter();
   const searchParams = useSearchParams();
+  console.log("AVAILABLE_PAGE_RENDER: hooks initialized");
 
   const [availableUnits, setAvailableUnits] = useState<AvailableUnitResponse[]>(
     []
