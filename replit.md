@@ -39,7 +39,7 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 ## Replit-Specific Configuration
 - **MongoDB**: Running locally via Nix (mongodb 7.0), data at `/home/runner/.mongodb-data/data/` (outside project root to avoid file-watcher loops)
 - **start.sh**: Starts `mongod` (background) → runs `src/scripts/auto-seed.mjs` → `npm run build` → `npm run start`
-- **start-prod.sh**: Same as start.sh (both use production mode now)
+- **start-prod.sh**: Lightweight production start script for deployment — only runs `npm run start` (no mongod, no seed, no build). Build is handled separately by deployment build step. Requires external MongoDB via `MONGODB_URI` secret.
 - **Auto-seed**: `src/scripts/auto-seed.mjs` checks if properties/users collections are empty; if so, seeds 33 VMS Florida properties from `data/vms-properties.json` and 4 demo accounts. Safe for production — skips seeding if data already exists.
 - **Port/Host**: 5000 / 0.0.0.0 (set in `package.json` dev script)
 - **allowedDevOrigins**: `next.config.ts` reads `REPLIT_DEV_DOMAIN`/`REPLIT_DOMAINS` env vars and adds wildcard `*.replit.dev` patterns
@@ -119,7 +119,10 @@ The sign-in page (`/auth/signin`) always shows "Dev Quick Login" buttons for all
 - `calendar_manage`, `pricing_manage`, `date_block_manage`, `rental_request_view`, `rental_request_manage`
 
 ## Deployment / Build Notes
+- **Deployment type**: Reserved VM (`deploymentTarget = "vm"` in `.replit`). Build: `npm run build`. Run: `bash start-prod.sh`.
+- **MongoDB in deployment**: Deployment does NOT run local mongod. The `MONGODB_URI` secret MUST point to an external MongoDB instance (e.g. MongoDB Atlas). Local mongod only runs in the development workspace via `start.sh`.
+- **NEXTAUTH_URL**: Set as development-only env var (dev domain). In production, Auth.js v5 auto-detects from request headers. The `NEXTAUTH_URL` secret serves as fallback.
 - **Stripe lazy init**: All `new Stripe(...)` calls are lazy — only run inside route handlers, never at module load time.
 - **environment.ts**: Stripe and Publishable key fields are `.optional()` in the Zod schema.
 - **NEXTAUTH_SECRET vs AUTH_SECRET**: NextAuth v5 uses `AUTH_SECRET`. The env schema validates `NEXTAUTH_SECRET` but this is not required.
-- **Production seeding**: `start.sh` runs `auto-seed.mjs` on every start. In a fresh deployment container with empty MongoDB, this auto-seeds 33 properties + 4 demo users. In an existing deployment, it skips (collections already populated).
+- **Production seeding**: `start.sh` runs `auto-seed.mjs` on every start. In a fresh deployment container with empty MongoDB, this auto-seeds 33 properties + 4 demo users. In an existing deployment, it skips (collections already populated). Note: `start-prod.sh` (deployment) does NOT run auto-seed — data must be seeded externally or migrated.

@@ -47,4 +47,6 @@ publicDir = "public"
 [userenv]
 
 [userenv.shared]
+
+[userenv.development]
 NEXTAUTH_URL = "https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev"
