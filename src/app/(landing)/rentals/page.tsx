@@ -19,6 +19,8 @@ import {
   Home,
   DollarSign,
   ArrowRight,
+  ExternalLink,
+  ChevronDown,
 } from "lucide-react";
 
 const NEIGHBORHOODS = [
@@ -57,14 +59,141 @@ function formatPrice(amount: number): string {
   }).format(amount);
 }
 
+function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: () => void }) {
+  const unit = property.units?.[0];
+  const bedrooms = unit?.bedrooms ?? 0;
+  const bathrooms = unit?.bathrooms ?? 0;
+  const rentAmount = unit?.rentAmount ?? 0;
+  const price = rentAmount > 500 ? rentAmount : rentAmount * 30;
+  const sqft = unit?.squareFootage ?? 0;
+  const basePerNight = rentAmount > 500 ? Math.round(rentAmount / 30) : Math.round(rentAmount);
+  const images = property.images?.length ? property.images : [];
+  const imageUrl = images[0] || null;
+
+  return (
+    <div className="bg-white border border-sky-200 rounded-xl shadow-lg overflow-hidden mx-0 animate-in slide-in-from-top-2 duration-200">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-2.5 bg-sky-50 border-b border-sky-100">
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+          <span className="text-xs font-semibold text-sky-700 uppercase tracking-wide">Selected Property</span>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-1 rounded-lg text-sky-500 hover:bg-sky-100 hover:text-sky-700 transition-colors"
+          aria-label="Close"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      {/* Image */}
+      {imageUrl ? (
+        <div className="relative w-full h-44 overflow-hidden bg-slate-100">
+          <img
+            src={imageUrl}
+            alt={property.name}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
+            <div>
+              <p className="text-white font-bold text-lg leading-tight drop-shadow">
+                {formatPrice(price)}
+                <span className="text-white/70 text-sm font-normal">/mo</span>
+              </p>
+              {basePerNight > 0 && (
+                <p className="text-white/80 text-xs">~{formatPrice(basePerNight)}/night</p>
+              )}
+            </div>
+            {images.length > 1 && (
+              <span className="px-2 py-0.5 rounded-md bg-black/50 text-white text-[10px] backdrop-blur-sm">
+                {images.length} photos
+              </span>
+            )}
+          </div>
+          <div className="absolute top-2.5 left-2.5">
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-500 text-white tracking-wide uppercase">
+              For Rent
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div className="w-full h-28 bg-slate-100 flex items-center justify-center">
+          <Home className="w-8 h-8 text-slate-300" />
+        </div>
+      )}
+
+      {/* Details */}
+      <div className="px-4 py-3">
+        <h3 className="font-bold text-slate-900 text-base leading-tight line-clamp-2 mb-1">
+          {property.name}
+        </h3>
+        {(property.address?.street || property.address?.city) && (
+          <p className="flex items-center gap-1 text-slate-500 text-xs mb-2 truncate">
+            <MapPin className="w-3 h-3 shrink-0 text-sky-400" />
+            {property.address.street ? `${property.address.street}, ` : ""}
+            {property.address.city}
+            {property.address.state ? `, ${property.address.state}` : ""}
+          </p>
+        )}
+
+        <div className="flex items-center gap-3 mb-3">
+          <span className="flex items-center gap-1 text-slate-600 text-xs font-medium">
+            <Bed className="w-3.5 h-3.5 text-slate-400" />
+            {bedrooms} {bedrooms === 1 ? "Bed" : "Beds"}
+          </span>
+          <span className="flex items-center gap-1 text-slate-600 text-xs font-medium">
+            <Bath className="w-3.5 h-3.5 text-slate-400" />
+            {bathrooms} {bathrooms === 1 ? "Bath" : "Baths"}
+          </span>
+          {sqft > 0 && (
+            <span className="text-slate-500 text-xs">{sqft.toLocaleString()} sqft</span>
+          )}
+          {property.neighborhood && (
+            <span className="ml-auto px-2 py-0.5 rounded-full bg-sky-50 text-sky-600 text-[10px] font-medium border border-sky-100 shrink-0">
+              {property.neighborhood}
+            </span>
+          )}
+        </div>
+
+        {property.description && (
+          <p className="text-slate-400 text-xs line-clamp-2 mb-3 leading-relaxed">
+            {property.description}
+          </p>
+        )}
+
+        <Link
+          href={`/properties/${property._id}`}
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 active:bg-sky-700 transition-colors shadow-sm shadow-sky-500/20"
+        >
+          View Property Details
+          <ExternalLink className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+
+      {/* Scroll to list nudge */}
+      <button
+        onClick={onClose}
+        className="w-full flex items-center justify-center gap-1.5 py-2 border-t border-slate-100 text-xs text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
+      >
+        <ChevronDown className="w-3.5 h-3.5" />
+        Show all {/* will be filled by parent */} results
+      </button>
+    </div>
+  );
+}
+
 function PropertyListCard({
   property,
   onHover,
   isHovered,
+  isSelected,
 }: {
   property: any;
   onHover: (id: string | null) => void;
   isHovered: boolean;
+  isSelected: boolean;
 }) {
   const unit = property.units?.[0];
   const bedrooms = unit?.bedrooms ?? 0;
@@ -81,85 +210,73 @@ function PropertyListCard({
     <Link href={`/properties/${property._id}`}>
       <div
         className={`group flex bg-white rounded-xl overflow-hidden transition-all duration-200 cursor-pointer ${
-          isHovered
+          isSelected
+            ? "ring-2 ring-sky-400 ring-offset-1 shadow-md opacity-60"
+            : isHovered
             ? "shadow-md ring-2 ring-sky-400 ring-offset-1"
             : "shadow-sm hover:shadow-md border border-slate-200/80"
         }`}
         onMouseEnter={() => onHover(property._id)}
         onMouseLeave={() => onHover(null)}
       >
-        <div className="relative w-[200px] min-w-[200px] h-[160px] overflow-hidden bg-slate-100">
+        <div className="relative w-[180px] min-w-[180px] h-[140px] overflow-hidden bg-slate-100">
           <img
             src={imageUrl}
             alt={property.name}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-500 text-white tracking-wide uppercase">
+          <div className="absolute top-2 left-2">
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-500 text-white uppercase tracking-wide">
               For Rent
             </span>
           </div>
           {imageCount > 1 && (
-            <div className="absolute bottom-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/50 text-white text-[10px] font-medium backdrop-blur-sm">
-              <span>{imageCount} photos</span>
+            <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/50 text-white text-[10px] backdrop-blur-sm">
+              {imageCount}
             </div>
           )}
         </div>
 
-        <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
+        <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
           <div className="min-w-0">
-            <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className="font-semibold text-slate-900 text-sm leading-snug line-clamp-2 flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2 mb-0.5">
+              <h3 className="font-semibold text-slate-900 text-sm leading-snug line-clamp-1 flex-1 min-w-0">
                 {property.name}
               </h3>
               <div className="text-right shrink-0">
-                <p className="text-lg font-bold text-sky-600 leading-none">
+                <p className="text-base font-bold text-sky-600 leading-none">
                   {formatPrice(price)}
                 </p>
-                <p className="text-[10px] font-normal text-slate-400 mt-0.5">/ month</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">/mo</p>
               </div>
             </div>
 
             {(property.address?.street || property.address?.city) && (
-              <p className="flex items-center gap-1 text-slate-500 text-xs mt-1 truncate">
+              <p className="flex items-center gap-1 text-slate-400 text-xs truncate">
                 <MapPin className="w-3 h-3 shrink-0 text-sky-400" />
                 <span className="truncate">
-                  {property.address.street && `${property.address.street}, `}
+                  {property.address.street ? `${property.address.street}, ` : ""}
                   {property.address.city}
-                  {property.address.state && `, ${property.address.state}`}
+                  {property.address.state ? `, ${property.address.state}` : ""}
                 </span>
-              </p>
-            )}
-
-            {property.neighborhood && (
-              <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-medium">
-                {property.neighborhood}
-              </span>
-            )}
-
-            {property.description && (
-              <p className="text-slate-400 text-xs mt-2 line-clamp-2 leading-relaxed">
-                {property.description}
               </p>
             )}
           </div>
 
-          <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-100">
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1 text-slate-600 text-xs font-medium">
-                <Bed className="w-3.5 h-3.5 text-slate-400" />
-                {bedrooms} {bedrooms === 1 ? "Bed" : "Beds"}
-              </span>
-              <span className="flex items-center gap-1 text-slate-600 text-xs font-medium">
-                <Bath className="w-3.5 h-3.5 text-slate-400" />
-                {bathrooms} {bathrooms === 1 ? "Bath" : "Baths"}
-              </span>
-              {sqft > 0 && (
-                <span className="text-slate-500 text-xs">{sqft.toLocaleString()} sqft</span>
-              )}
-            </div>
-            <span className="flex items-center gap-0.5 text-sky-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-3 mt-2 pt-2 border-t border-slate-100">
+            <span className="flex items-center gap-1 text-slate-500 text-xs font-medium">
+              <Bed className="w-3.5 h-3.5 text-slate-300" />
+              {bedrooms} Bed{bedrooms !== 1 ? "s" : ""}
+            </span>
+            <span className="flex items-center gap-1 text-slate-500 text-xs font-medium">
+              <Bath className="w-3.5 h-3.5 text-slate-300" />
+              {bathrooms} Bath{bathrooms !== 1 ? "s" : ""}
+            </span>
+            {sqft > 0 && (
+              <span className="text-slate-400 text-xs">{sqft.toLocaleString()} sqft</span>
+            )}
+            <span className="ml-auto flex items-center gap-0.5 text-sky-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
               View <ArrowRight className="w-3 h-3" />
             </span>
           </div>
@@ -176,6 +293,7 @@ function RentalsContent() {
   const [pagination, setPagination] = useState({ page: 1, total: 0, pages: 0 });
   const [loading, setLoading] = useState(true);
   const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
 
@@ -186,6 +304,11 @@ function RentalsContent() {
   const [filterMaxPrice, setFilterMaxPrice] = useState("");
 
   const activeNeighborhood = searchParams.get("search") || "";
+
+  const selectedProperty = useMemo(
+    () => properties.find((p) => p._id === selectedPropertyId) ?? null,
+    [properties, selectedPropertyId]
+  );
 
   useEffect(() => {
     setSearchText(searchParams.get("search") || "");
@@ -200,6 +323,7 @@ function RentalsContent() {
     params.set("limit", "50");
     if (!params.get("page")) params.set("page", "1");
     setLoading(true);
+    setSelectedPropertyId(null);
     fetch(`/api/properties/public?${params.toString()}`)
       .then((res) => res.json())
       .then((data) => {
@@ -246,11 +370,10 @@ function RentalsContent() {
   );
 
   const handleMarkerClick = useCallback((propertyId: string) => {
-    const el = document.getElementById(`property-${propertyId}`);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      setHoveredPropertyId(propertyId);
-      setTimeout(() => setHoveredPropertyId(null), 2000);
+    setSelectedPropertyId(propertyId);
+    setHoveredPropertyId(propertyId);
+    if (window.innerWidth < 768) {
+      setMobileView("list");
     }
   }, []);
 
@@ -271,13 +394,12 @@ function RentalsContent() {
       <LandingHeader />
 
       <div className="pt-[72px] flex flex-col flex-1">
-        {/* Sticky filter bar — same bg-slate-50 as the page */}
+        {/* Sticky filter bar */}
         <div className="bg-slate-50 border-b border-slate-200 sticky top-[72px] z-30">
           <div className="px-4 py-3 space-y-2.5">
 
-            {/* Row 1: Search + filters + search button */}
+            {/* Row 1: Search + filters */}
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Search */}
               <div className="relative flex-1 min-w-[200px] max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
@@ -290,7 +412,6 @@ function RentalsContent() {
                 />
               </div>
 
-              {/* Type dropdown */}
               <div className="relative">
                 <select
                   value={filterType}
@@ -306,7 +427,6 @@ function RentalsContent() {
                 </div>
               </div>
 
-              {/* Beds dropdown */}
               <div className="relative">
                 <select
                   value={filterBedrooms}
@@ -322,7 +442,6 @@ function RentalsContent() {
                 </div>
               </div>
 
-              {/* More filters */}
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
@@ -340,7 +459,6 @@ function RentalsContent() {
                 )}
               </button>
 
-              {/* Search button */}
               <button
                 onClick={applyFilters}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 active:bg-sky-700 transition-colors shadow-sm shadow-sky-500/20"
@@ -349,7 +467,6 @@ function RentalsContent() {
                 Search
               </button>
 
-              {/* Clear */}
               {(searchText || hasActiveFilters) && (
                 <button
                   onClick={clearFilters}
@@ -361,14 +478,11 @@ function RentalsContent() {
                 </button>
               )}
 
-              {/* Mobile view toggle */}
               <div className="flex md:hidden ml-auto bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
                 <button
                   onClick={() => setMobileView("list")}
                   className={`p-2 text-xs font-medium flex items-center gap-1.5 px-3 transition-colors ${
-                    mobileView === "list"
-                      ? "bg-sky-500 text-white"
-                      : "text-slate-500 hover:text-slate-800"
+                    mobileView === "list" ? "bg-sky-500 text-white" : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
                   <LayoutList className="w-4 h-4" />
@@ -377,9 +491,7 @@ function RentalsContent() {
                 <button
                   onClick={() => setMobileView("map")}
                   className={`p-2 text-xs font-medium flex items-center gap-1.5 px-3 transition-colors border-l border-slate-200 ${
-                    mobileView === "map"
-                      ? "bg-sky-500 text-white"
-                      : "text-slate-500 hover:text-slate-800"
+                    mobileView === "map" ? "bg-sky-500 text-white" : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
                   <Map className="w-4 h-4" />
@@ -388,12 +500,12 @@ function RentalsContent() {
               </div>
             </div>
 
-            {/* Price range row (expandable) */}
+            {/* Price range */}
             {showFilters && (
               <div className="flex items-center gap-3 pt-2.5 border-t border-slate-200 flex-wrap animate-in slide-in-from-top-1 duration-150">
                 <div className="flex items-center gap-1.5 text-sm text-slate-500">
                   <DollarSign className="w-3.5 h-3.5" />
-                  <span>Price range:</span>
+                  Price range:
                 </div>
                 <div className="flex items-center gap-2">
                   <input
@@ -437,12 +549,12 @@ function RentalsContent() {
             </div>
           </div>
 
-          {/* Results count — seamlessly part of the bar */}
+          {/* Results count */}
           <div className="px-4 py-2 border-t border-slate-200/70 flex items-center justify-between">
             <p className="text-xs text-slate-500">
               {loading ? (
                 <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
+                  <span className="w-3 h-3 rounded-full border-2 border-sky-400 border-t-transparent animate-spin inline-block" />
                   Searching…
                 </span>
               ) : (
@@ -453,30 +565,57 @@ function RentalsContent() {
                 </span>
               )}
             </p>
+            {selectedProperty && (
+              <button
+                onClick={() => setSelectedPropertyId(null)}
+                className="flex items-center gap-1 text-xs text-sky-600 hover:text-sky-700 font-medium"
+              >
+                <X className="w-3 h-3" />
+                Clear selection
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Main content: Map + Listings */}
+        {/* Main content */}
         <div className="flex flex-1 overflow-hidden" style={{ height: "calc(100vh - 224px)" }}>
-          {/* Map — left (desktop) */}
+          {/* Map */}
           <div className={`${mobileView === "map" ? "flex" : "hidden"} md:flex w-full md:w-1/2 lg:w-[55%] relative`}>
-            <div className="w-full h-full">
-              <PropertyMap
-                properties={properties}
-                onMarkerClick={handleMarkerClick}
-                onMarkerHover={setHoveredPropertyId}
-                hoveredPropertyId={hoveredPropertyId}
-              />
-            </div>
+            <PropertyMap
+              properties={properties}
+              onMarkerClick={handleMarkerClick}
+              onMarkerHover={setHoveredPropertyId}
+              hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
+            />
           </div>
 
-          {/* Listings — right */}
+          {/* Listings */}
           <div className={`${mobileView === "list" ? "flex" : "hidden"} md:flex flex-col w-full md:w-1/2 lg:w-[45%] overflow-y-auto bg-slate-50 border-l border-slate-200`}>
             <div className="p-3 space-y-2.5">
+
+              {/* Featured selected property card */}
+              {selectedProperty && (
+                <PropertyFeaturedCard
+                  property={selectedProperty}
+                  onClose={() => setSelectedPropertyId(null)}
+                />
+              )}
+
+              {/* Divider when a property is selected */}
+              {selectedProperty && !loading && (
+                <div className="flex items-center gap-2 py-1">
+                  <div className="flex-1 h-px bg-slate-200" />
+                  <span className="text-xs text-slate-400 font-medium whitespace-nowrap">
+                    All {pagination.total} properties
+                  </span>
+                  <div className="flex-1 h-px bg-slate-200" />
+                </div>
+              )}
+
               {loading ? (
                 <>
                   {[...Array(5)].map((_, i) => (
-                    <div key={i} className="h-[160px] rounded-xl bg-white border border-slate-200 animate-pulse" />
+                    <div key={i} className="h-[140px] rounded-xl bg-white border border-slate-200 animate-pulse" />
                   ))}
                 </>
               ) : properties.length === 0 ? (
@@ -494,17 +633,16 @@ function RentalsContent() {
                   </button>
                 </div>
               ) : (
-                <>
-                  {properties.map((property) => (
-                    <div key={property._id} id={`property-${property._id}`}>
-                      <PropertyListCard
-                        property={property}
-                        onHover={setHoveredPropertyId}
-                        isHovered={hoveredPropertyId === property._id}
-                      />
-                    </div>
-                  ))}
-                </>
+                properties.map((property) => (
+                  <div key={property._id} id={`property-${property._id}`}>
+                    <PropertyListCard
+                      property={property}
+                      onHover={setHoveredPropertyId}
+                      isHovered={hoveredPropertyId === property._id}
+                      isSelected={selectedPropertyId === property._id}
+                    />
+                  </div>
+                ))
               )}
 
               {/* Pagination */}
