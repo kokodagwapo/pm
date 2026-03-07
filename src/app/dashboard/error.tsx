@@ -77,7 +77,8 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
   const ErrorIcon = errorContext.icon;
 
   useEffect(() => {
-    // Log dashboard error
+    console.log("DASHBOARD_ERROR_LOG:", error.message);
+    console.log("DASHBOARD_ERROR_STACK:", error.stack);
     console.error("Dashboard Error:", {
       message: error.message,
       stack: error.stack,

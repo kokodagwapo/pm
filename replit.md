@@ -36,8 +36,9 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - Start: `npm run start` (port 5000, bound to 0.0.0.0)
 
 ## Replit-Specific Configuration
-- **MongoDB**: Running locally via Nix (mongodb 7.0), data at `.mongodb/data/`
+- **MongoDB**: Running locally via Nix (mongodb 7.0), data at `/home/runner/.mongodb-data/data/` (outside project root to avoid Turbopack HMR file-watcher loops)
 - **start.sh**: Starts `mongod` (background) → runs `src/scripts/auto-seed.mjs` → then `npm run dev`
+- **start-prod.sh**: Same as start.sh but uses `npm run start` for production
 - **Auto-seed**: `src/scripts/auto-seed.mjs` checks if properties/users collections are empty; if so, seeds 33 VMS Florida properties from `data/vms-properties.json` and 4 demo accounts. Safe for production — skips seeding if data already exists.
 - **Port/Host**: 5000 / 0.0.0.0 (set in `package.json` dev script)
 - **allowedDevOrigins**: `next.config.ts` reads `REPLIT_DEV_DOMAIN`/`REPLIT_DOMAINS` env vars and adds wildcard `*.replit.dev` patterns
