@@ -77,8 +77,6 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
   const ErrorIcon = errorContext.icon;
 
   useEffect(() => {
-    console.log("DASHBOARD_ERROR_LOG:", error.message);
-    console.log("DASHBOARD_ERROR_STACK:", error.stack);
     console.error("Dashboard Error:", {
       message: error.message,
       stack: error.stack,
@@ -87,7 +85,17 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
       timestamp: new Date().toISOString(),
     });
 
-    // Track error in analytics
+    fetch("/api/log-error", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: error.message,
+        stack: error.stack,
+        digest: error.digest,
+        url: window.location.pathname,
+      }),
+    }).catch(() => {});
+
     if (typeof window !== "undefined" && (window as any).gtag) {
       (window as any).gtag("event", "exception", {
         description: `Dashboard Error: ${error.message}`,

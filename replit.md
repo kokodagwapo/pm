@@ -44,6 +44,8 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **allowedDevOrigins**: `next.config.ts` reads `REPLIT_DEV_DOMAIN`/`REPLIT_DOMAINS` env vars and adds wildcard `*.replit.dev` patterns
 - **NODE_OPTIONS**: `--max-old-space-size=3072` for build memory
 - **MONGODB_URI secret quirk**: Secret value may be stored as `MONGODB_URI=mongodb://...` (with key prefix). Both `src/lib/mongodb.ts` and `src/lib/auth.ts` strip this prefix automatically.
+- **next/image**: ALL `next/image` `<Image>` usage replaced with plain `<img>` tags to avoid Turbopack HMR stale module errors. Do NOT re-introduce `import Image from "next/image"` anywhere.
+- **Error logging**: Dashboard error boundary sends errors to `/api/log-error` for server-side logging (visible in workflow logs).
 
 ## Property Data
 - **Source**: 33 real properties scraped from vms-florida.com/advanced-search

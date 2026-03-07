@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { toast } from "sonner";
-import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import {
@@ -804,7 +803,7 @@ export default function MaintenanceRequestDetailPage() {
                       key={index}
                       className="aspect-square bg-gray-100 rounded-lg overflow-hidden"
                     >
-                      <Image
+                      <img
                         src={image}
                         alt={`Maintenance request image ${index + 1}`}
                         className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"

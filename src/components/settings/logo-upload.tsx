@@ -39,7 +39,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { validateBrandingFile, BRANDING_VALIDATION } from "@/lib/r2";
-import Image from "next/image";
 import { logClientError, logClientInfo, logClientWarn } from "@/utils/logger";
 
 interface LogoUploadProps {
@@ -343,7 +342,7 @@ export function LogoUpload({
       {hasCurrentLogo && (
         <div className="mb-4">
           <div className="relative inline-block">
-            <Image
+            <img
               src={currentUrl!}
               alt={`${variant} ${type} preview`}
               width={type === "favicon" ? 32 : 120}
@@ -352,7 +351,6 @@ export function LogoUpload({
                 "mx-auto object-contain",
                 type === "favicon" ? "max-h-8" : "max-h-16"
               )}
-              unoptimized
             />
             {!isUploading && (
               <AlertDialog>

@@ -17,7 +17,6 @@ import {
   Eye,
 } from "lucide-react";
 import { showSimpleError, showSimpleSuccess } from "@/lib/toast-notifications";
-import Image from "next/image";
 import { useLocalization } from "@/hooks/use-localization";
 
 export interface UploadedImage {
@@ -371,16 +370,10 @@ export function ImageUpload({
                     compact ? "aspect-[4/3] h-20" : "aspect-[4/3] h-32"
                   }`}
                 >
-                  <Image
+                  <img
                     src={image.url}
                     alt={`Upload ${index + 1}`}
-                    fill
-                    className="object-cover transition-transform duration-200 group-hover:scale-105"
-                    sizes={
-                      compact
-                        ? "(max-width: 768px) 33vw, 16vw"
-                        : "(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    }
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                   />
 
                   {/* Success indicator */}
