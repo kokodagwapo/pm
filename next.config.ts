@@ -47,38 +47,8 @@ const nextConfig: NextConfig = {
   // Power by header removal for security
   poweredByHeader: false,
 
-  // Optimize images
   images: {
-    formats: ["image/avif", "image/webp"],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256],
-    minimumCacheTTL: 60 * 60 * 24 * 30,
-    remotePatterns: [
-      ...(r2Hostname
-        ? [
-            {
-              protocol: "https" as const,
-              hostname: r2Hostname,
-              pathname: "/**",
-            },
-          ]
-        : []),
-      {
-        protocol: "https",
-        hostname: "*.r2.dev",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "vms-florida.com",
-        pathname: "/**",
-      },
-    ],
+    unoptimized: true,
   },
 
   transpilePackages: ["@radix-ui/react-label", "@radix-ui/react-primitive"],

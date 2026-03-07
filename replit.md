@@ -30,15 +30,16 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - `src/locales/` - i18n translations
 
 ## Running (Replit)
-- Workflow: `bash start.sh` — starts local MongoDB, runs auto-seed, then `next dev` on port 5000
-- Dev: `npm run dev` (port 5000, bound to 0.0.0.0)
+- Workflow: `bash start.sh` — starts local MongoDB, runs auto-seed, builds, then `next start` (production mode) on port 5000
+- Dev: `npm run dev` (port 5000, Turbopack, HMR — use only for local development, NOT Replit workflow)
 - Build: `npm run build`
 - Start: `npm run start` (port 5000, bound to 0.0.0.0)
+- **Why production mode in workflow**: Replit's filesystem sync triggers constant HMR rebuilds (~200ms interval) which corrupt Turbopack's module factory cache, causing "module factory not available" runtime errors. Production mode has no HMR so this issue doesn't occur.
 
 ## Replit-Specific Configuration
-- **MongoDB**: Running locally via Nix (mongodb 7.0), data at `/home/runner/.mongodb-data/data/` (outside project root to avoid Turbopack HMR file-watcher loops)
-- **start.sh**: Starts `mongod` (background) → runs `src/scripts/auto-seed.mjs` → then `npm run dev`
-- **start-prod.sh**: Same as start.sh but uses `npm run start` for production
+- **MongoDB**: Running locally via Nix (mongodb 7.0), data at `/home/runner/.mongodb-data/data/` (outside project root to avoid file-watcher loops)
+- **start.sh**: Starts `mongod` (background) → runs `src/scripts/auto-seed.mjs` → `npm run build` → `npm run start`
+- **start-prod.sh**: Same as start.sh (both use production mode now)
 - **Auto-seed**: `src/scripts/auto-seed.mjs` checks if properties/users collections are empty; if so, seeds 33 VMS Florida properties from `data/vms-properties.json` and 4 demo accounts. Safe for production — skips seeding if data already exists.
 - **Port/Host**: 5000 / 0.0.0.0 (set in `package.json` dev script)
 - **allowedDevOrigins**: `next.config.ts` reads `REPLIT_DEV_DOMAIN`/`REPLIT_DOMAINS` env vars and adds wildcard `*.replit.dev` patterns

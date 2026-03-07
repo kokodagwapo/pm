@@ -16,4 +16,8 @@ fi
 echo "Running auto-seed check..."
 node src/scripts/auto-seed.mjs
 
+echo "Building application..."
+npm run build
+
+echo "Starting production server..."
 exec npm run start
