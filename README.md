@@ -21,6 +21,10 @@
 - **[VPS Deployment Guide](VPS_DEPLOYMENT_GUIDE.md)** - Deploy on your own server
 - **[Vercel Deployment](INSTALLATION_GUIDE.md#vercel-deployment-recommended)** - One-click cloud deployment
 
+### 🔄 Replit Sync
+
+- **[Replit ↔ GitHub Sync](#-replit--github-bidirectional-sync)** - Auto-sync Replit changes with this repo
+
 ### 🔧 Support & Troubleshooting
 
 - **[Troubleshooting Guide](TROUBLESHOOTING_GUIDE.md)** - Solutions for common issues
@@ -968,6 +972,55 @@ For additional licensing options including:
 - Custom development services
 
 Contact: **licensing@PropertyPro.com**
+
+---
+
+## 🔄 Replit ↔ GitHub Bidirectional Sync
+
+This repository includes automated bidirectional sync between Replit and GitHub using a GitHub Actions workflow and data sync scripts.
+
+### How It Works
+
+| Direction | Trigger | What Happens |
+|-----------|---------|--------------|
+| **Replit → GitHub** | Push to `replit` branch | Workflow merges `replit` into `main` automatically |
+| **GitHub → Replit** | Push to `main` branch | Workflow merges `main` into `replit` automatically |
+| **Fallback** | Every 15 minutes (cron) | Both directions checked and synced if needed |
+| **Manual** | Actions tab → "Run workflow" | Trigger sync on demand |
+
+### Setup Instructions
+
+1. **Connect Replit to this GitHub repo:**
+   - Open your Replit project → click the **Git** tab (branch icon in sidebar).
+   - Click **Connect to GitHub** and select this repository.
+   - Set the branch to **`replit`**.
+
+2. **Push changes from Replit:**
+   - Make changes in Replit → open the Git tab → stage, commit, and push.
+   - The GitHub Actions workflow automatically merges your changes into `main`.
+
+3. **Pull changes into Replit:**
+   - Changes pushed to `main` (from GitHub, PRs, or other contributors) are automatically merged into the `replit` branch.
+   - In Replit, use the Git tab to pull the latest from `replit`.
+
+4. **Sync property data (MongoDB ↔ JSON):**
+
+   ```bash
+   # Export MongoDB → JSON (run on Replit before pushing)
+   npm run sync:export
+
+   # Import JSON → MongoDB (run on Replit after pulling)
+   npm run sync:import
+
+   # Full bidirectional merge (export, import, re-export)
+   npm run sync:data
+   ```
+
+> **Note:** If there are merge conflicts, the workflow will fail and you will need to resolve them manually.
+
+### Replit Environment
+
+This repository includes `.replit` and `replit.nix` configuration files for automatic environment setup on Replit (Node.js 20, TypeScript).
 
 ---
 

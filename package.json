@@ -17,6 +17,9 @@
     "migrate:vms": "tsx src/scripts/migrate-vms-florida-properties.ts",
     "export:properties": "tsx src/scripts/export-properties.ts",
     "seed:properties:json": "tsx src/scripts/seed-properties-from-json.ts",
+    "sync:data": "tsx src/scripts/sync-data.ts --sync",
+    "sync:export": "tsx src/scripts/sync-data.ts --export",
+    "sync:import": "tsx src/scripts/sync-data.ts --import",
     "seed:all": "npm run seed:demo && npm run seed:ai-assistants && npm run seed:properties && npm run seed:pricing && npm run seed:faq && npm run seed:owners"
   },
   "dependencies": {

@@ -1,0 +1,103 @@
+name: Sync Replit ↔ GitHub
+
+on:
+  # Replit → main: triggers when Replit pushes to the replit branch
+  push:
+    branches:
+      - replit
+      - main
+
+  # Fallback poll every 15 minutes
+  schedule:
+    - cron: "*/15 * * * *"
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-replit-to-main:
+    if: github.ref == 'refs/heads/replit' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync replit → main
+        run: |
+          git fetch origin
+
+          # Check if the replit branch exists on the remote
+          if ! git ls-remote --exit-code --heads origin replit >/dev/null 2>&1; then
+            echo "No 'replit' branch found on remote. Nothing to sync."
+            exit 0
+          fi
+
+          git checkout main
+
+          # Check if replit has new commits not in main
+          BEHIND=$(git rev-list --count main..origin/replit)
+          if [ "$BEHIND" -eq 0 ]; then
+            echo "main is already up to date with replit. Nothing to sync."
+            exit 0
+          fi
+
+          echo "Found $BEHIND new commit(s) on replit. Merging into main..."
+          git merge origin/replit --no-edit -m "chore: sync changes from Replit → main"
+          git push origin main
+
+          echo "✅ Synced $BEHIND commit(s) from replit → main."
+
+  sync-main-to-replit:
+    if: github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync main → replit
+        run: |
+          git fetch origin
+
+          # Check if the replit branch exists on the remote
+          if ! git ls-remote --exit-code --heads origin replit >/dev/null 2>&1; then
+            echo "No 'replit' branch found. Creating it from main..."
+            git checkout -b replit origin/main
+            git push origin replit
+            echo "✅ Created 'replit' branch from main."
+            exit 0
+          fi
+
+          git checkout replit
+          git pull origin replit
+
+          # Check if main has new commits not in replit
+          BEHIND=$(git rev-list --count replit..origin/main)
+          if [ "$BEHIND" -eq 0 ]; then
+            echo "replit is already up to date with main. Nothing to sync."
+            exit 0
+          fi
+
+          echo "Found $BEHIND new commit(s) on main. Merging into replit..."
+          git merge origin/main --no-edit -m "chore: sync changes from main → Replit"
+          git push origin replit
+
+          echo "✅ Synced $BEHIND commit(s) from main → replit."
