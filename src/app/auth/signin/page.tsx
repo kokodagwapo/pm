@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { HeroVideo } from "@/components/landing/HeroVideo";
-import { LandingHeader } from "@/components/landing/LandingHeader";
 import {
   Loader2,
   Building2,
@@ -15,7 +13,6 @@ import {
   Shield,
   Users,
   Home,
-  ArrowLeft,
 } from "lucide-react";
 
 interface Branding {
@@ -134,21 +131,11 @@ export default function SignInPage() {
       {/* Video background - same as landing hero */}
       <HeroVideo />
 
-      {/* Header */}
-      <LandingHeader />
-
       {/* Content */}
-      <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 pt-16 sm:pt-20 pb-20 sm:pb-24">
+      <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-12">
         <div className="w-full max-w-lg space-y-6 sm:space-y-8 animate-fade-in-up">
           {/* Header */}
           <div className="text-center">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/20 border border-white/20 mb-6 transition-all text-sm font-medium"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Go back to Home
-            </Link>
             <div className="flex justify-center items-center">
               {logoError ? (
                 <Building2 className="h-14 w-14 text-white/90" />
@@ -281,11 +268,6 @@ export default function SignInPage() {
             </div>
           </div>
 
-          <p className="text-center text-sm text-white/70">
-            <Link href="/" className="hover:text-white underline underline-offset-2">
-              Back to home
-            </Link>
-          </p>
         </div>
       </main>
     </div>
