@@ -984,9 +984,12 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
+            </div>
 
             {/* Payment Status */}
-            <Card className="hover-lift rounded-2xl border-border/60 shadow-sm">
+            <div className="space-y-3">
+              <h3 className="text-base font-bold tracking-tight px-1">💳 Payment Status</h3>
+              <Card className="hover-lift rounded-2xl shadow-lg">
               <CardHeader className="pb-2">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">This Month</p>
                 <CardTitle className="flex items-center gap-2 text-base font-extrabold tracking-tight">
@@ -1038,6 +1041,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </div>
+        </div>
         </div>
 
         {/* Right Column - Activities and Tasks */}

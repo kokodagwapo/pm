@@ -1,6 +1,13 @@
-# PropertyPro
+# SmartStartPM
 
 A Next.js 15 property management application using the App Router (`src/app/`).
+
+## Recent Design Updates
+- **Glassmorphic UI**: All cards (Card, AnalyticsCard, FinancialCard, MetricCard) updated with `backdrop-blur-xl`, `bg-white/10 dark:bg-black/20`, transparent borders `border-white/20`, and `shadow-lg`.
+- **Dashboard modernized**: 5xl/6xl gradient heading, emoji-labeled section headers ("⚡ Action Items", "📊 Empire at a Glance", "💰 Financial Performance", "🏘️ Property Breakdown", "💳 Payment Status"), larger alert count numbers.
+- **Plus Jakarta Sans**: Applied to dashboard layout via `--font-jakarta`.
+- **Sidebar pastel icons**: Each nav item has a distinct pastel `iconColor` (sky, violet, emerald, amber, cyan, teal, orange, purple, rose, red, slate).
+- **Nav labels modernized**: Dashboard→Home, Properties→Listings, Tenants→Residents, Leases→Contracts, Maintenance→Work Orders, Payments→Billing, Analytics→Reports, Messages→Inbox, AI Help→Luna AI, Calendar→Schedule, Settings→Preferences, Admin→Control Panel.
 
 ## Stack
 - **Framework**: Next.js 15.5.9 (App Router)
