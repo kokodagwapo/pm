@@ -28,6 +28,7 @@ import {
   Star,
   Check,
   Grid3X3,
+  RotateCcw,
 } from "lucide-react";
 
 const NEIGHBORHOODS = [
@@ -587,74 +588,76 @@ function RentalsContent() {
             </div>
 
             {/* Row 2: Selects + action buttons */}
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pb-0.5">
-              <div className="relative shrink-0">
-                <select
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                  className="appearance-none pl-3 pr-7 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all cursor-pointer font-medium"
-                >
-                  {PROPERTY_TYPES.map((opt) => (
-                    <option key={opt.value || "all"} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            <div className="flex items-center gap-2">
+              {/* Scrollable filter controls */}
+              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide flex-1 min-w-0 pb-0.5">
+                <div className="relative shrink-0">
+                  <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="appearance-none pl-3 pr-7 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all cursor-pointer font-medium"
+                  >
+                    {PROPERTY_TYPES.map((opt) => (
+                      <option key={opt.value || "all"} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </div>
                 </div>
-              </div>
 
-              <div className="relative shrink-0">
-                <select
-                  value={filterBedrooms}
-                  onChange={(e) => setFilterBedrooms(e.target.value)}
-                  className="appearance-none pl-3 pr-7 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all cursor-pointer font-medium"
-                >
-                  {BEDROOMS_OPTIONS.map((opt) => (
-                    <option key={opt.value || "any"} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                <div className="relative shrink-0">
+                  <select
+                    value={filterBedrooms}
+                    onChange={(e) => setFilterBedrooms(e.target.value)}
+                    className="appearance-none pl-3 pr-7 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all cursor-pointer font-medium"
+                  >
+                    {BEDROOMS_OPTIONS.map((opt) => (
+                      <option key={opt.value || "any"} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </div>
                 </div>
-              </div>
 
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-all ${
-                  showFilters || hasActiveFilters
-                    ? "bg-slate-900 border-slate-900 text-white"
-                    : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-400"
-                }`}
-              >
-                <SlidersHorizontal className="w-3 h-3" />
-                Filters
-                {activeFilterCount > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-amber-400 text-slate-900 text-[9px] font-bold flex items-center justify-center leading-none">
-                    {activeFilterCount}
-                  </span>
-                )}
-              </button>
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-all ${
+                    showFilters || hasActiveFilters
+                      ? "bg-slate-900 border-slate-900 text-white"
+                      : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-400"
+                  }`}
+                >
+                  <SlidersHorizontal className="w-3 h-3" />
+                  Filters
+                  {activeFilterCount > 0 && (
+                    <span className="w-4 h-4 rounded-full bg-amber-400 text-slate-900 text-[9px] font-bold flex items-center justify-center leading-none">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
 
-              <button
-                onClick={applyFilters}
-                className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-[13px] font-semibold hover:bg-slate-800 active:bg-slate-950 transition-colors"
-              >
-                <Search className="w-3 h-3" />
-                Search
-              </button>
+                <button
+                  onClick={applyFilters}
+                  className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-[13px] font-semibold hover:bg-slate-800 active:bg-slate-950 transition-colors"
+                >
+                  <Search className="w-3 h-3" />
+                  Search
+                </button>
 
-              {(searchText || hasActiveFilters) && (
                 <button
                   onClick={clearFilters}
-                  className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[13px] text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                  disabled={!searchText && !hasActiveFilters}
+                  className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[13px] font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed border-slate-200 text-slate-500 hover:enabled:border-slate-400 hover:enabled:text-slate-700 hover:enabled:bg-slate-50"
                 >
-                  <X className="w-3 h-3" />
-                  Clear
+                  <RotateCcw className="w-3 h-3" />
+                  Reset
                 </button>
-              )}
+              </div>
 
-              {/* Desktop List/Map toggle — lg+ only */}
-              <div className="hidden lg:flex ml-auto bg-slate-100 rounded-xl overflow-hidden shrink-0">
+              {/* Desktop List/Map toggle — lg+ only, never scrolls */}
+              <div className="hidden lg:flex shrink-0 bg-slate-100 rounded-xl overflow-hidden">
                 <button
                   onClick={() => setMobileView("list")}
                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${
