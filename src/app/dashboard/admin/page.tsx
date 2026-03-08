@@ -60,6 +60,7 @@ import type {
   AdminDashboardUserSummary,
 } from "@/lib/services/admin-dashboard.service";
 import { UserRole } from "@/types";
+import { AdminTourWidget } from "@/components/dashboard/AdminTourWidget";
 
 const alertColorMap: Record<AdminDashboardAlert["type"], string> = {
   error: "text-red-600",
@@ -1024,6 +1025,7 @@ export default function AdminPage() {
           </Card>
         </TabsContent>
       </Tabs>
+      <AdminTourWidget />
     </div>
   );
 }
