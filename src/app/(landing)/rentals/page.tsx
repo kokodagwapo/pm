@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense, useMemo } from "react";
+import { useState, useEffect, useCallback, Suspense, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LunaWidget } from "@/components/landing/LunaWidget";
@@ -9,23 +9,20 @@ import { NaplesAreaGuide } from "@/components/landing/NaplesAreaGuide";
 import Link from "next/link";
 import {
   Search,
-  SlidersHorizontal,
   X,
   Bed,
   Bath,
   MapPin,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Map,
   LayoutList,
   Home,
-  DollarSign,
   ArrowRight,
   ExternalLink,
-  ChevronDown,
   Heart,
   GitCompare,
-  Star,
   Check,
   Grid3X3,
   RotateCcw,
@@ -421,20 +418,23 @@ function RentalsContent() {
   const [loading, setLoading] = useState(true);
   const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
 
-  const [searchText, setSearchText] = useState("");
-  const [filterType, setFilterType] = useState("");
-  const [filterBedrooms, setFilterBedrooms] = useState("");
-  const [filterMinPrice, setFilterMinPrice] = useState("");
-  const [filterMaxPrice, setFilterMaxPrice] = useState("");
+  const activeType = searchParams.get("type") || "";
+  const activeBedrooms = searchParams.get("bedrooms") || "";
+  const activeMinPrice = searchParams.get("minRent") || "";
+  const activeMaxPrice = searchParams.get("maxRent") || "";
+  const activeSearch = searchParams.get("search") || "";
+  const activeNeighborhood = searchParams.get("neighborhood") || "";
 
-  const activeNeighborhood = searchParams.get("search") || "";
+  const [searchText, setSearchText] = useState(activeSearch);
+  const [minPrice, setMinPrice] = useState(activeMinPrice);
+  const [maxPrice, setMaxPrice] = useState(activeMaxPrice);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const selectedProperty = useMemo(
     () => properties.find((p) => p._id === selectedPropertyId) ?? null,
@@ -464,10 +464,8 @@ function RentalsContent() {
 
   useEffect(() => {
     setSearchText(searchParams.get("search") || "");
-    setFilterType(searchParams.get("type") || "");
-    setFilterBedrooms(searchParams.get("bedrooms") || "");
-    setFilterMinPrice(searchParams.get("minRent") || "");
-    setFilterMaxPrice(searchParams.get("maxRent") || "");
+    setMinPrice(searchParams.get("minRent") || "");
+    setMaxPrice(searchParams.get("maxRent") || "");
   }, [searchParams]);
 
   useEffect(() => {
@@ -488,45 +486,52 @@ function RentalsContent() {
       .finally(() => setLoading(false));
   }, [searchParams]);
 
-  const applyFilters = useCallback(() => {
+  const buildParams = useCallback((patch: Record<string, string | undefined> = {}) => {
+    const resolved = {
+      search: "search" in patch ? patch.search : activeSearch,
+      type: "type" in patch ? patch.type : activeType,
+      bedrooms: "bedrooms" in patch ? patch.bedrooms : activeBedrooms,
+      minRent: "minRent" in patch ? patch.minRent : minPrice,
+      maxRent: "maxRent" in patch ? patch.maxRent : maxPrice,
+      neighborhood: "neighborhood" in patch ? patch.neighborhood : activeNeighborhood,
+    };
     const params = new URLSearchParams();
-    if (searchText) params.set("search", searchText);
-    if (filterType) params.set("type", filterType);
-    if (filterBedrooms) params.set("bedrooms", filterBedrooms);
-    if (filterMinPrice) params.set("minRent", filterMinPrice);
-    if (filterMaxPrice) params.set("maxRent", filterMaxPrice);
-    params.set("page", "1");
-    router.push(`/rentals?${params.toString()}`);
-    setShowFilters(false);
-  }, [searchText, filterType, filterBedrooms, filterMinPrice, filterMaxPrice, router]);
+    if (resolved.search) params.set("search", resolved.search);
+    if (resolved.type) params.set("type", resolved.type);
+    if (resolved.bedrooms) params.set("bedrooms", resolved.bedrooms);
+    if (resolved.minRent) params.set("minRent", resolved.minRent);
+    if (resolved.maxRent) params.set("maxRent", resolved.maxRent);
+    if (resolved.neighborhood) params.set("neighborhood", resolved.neighborhood);
+    return params;
+  }, [activeSearch, activeType, activeBedrooms, minPrice, maxPrice, activeNeighborhood]);
+
+  const pushFilters = useCallback((patch: Record<string, string | undefined> = {}) => {
+    router.push(`/rentals?${buildParams(patch).toString()}`);
+  }, [buildParams, router]);
 
   const clearFilters = useCallback(() => {
     setSearchText("");
-    setFilterType("");
-    setFilterBedrooms("");
-    setFilterMinPrice("");
-    setFilterMaxPrice("");
+    setMinPrice("");
+    setMaxPrice("");
     router.push("/rentals");
-    setShowFilters(false);
   }, [router]);
 
-  const handleNeighborhood = useCallback(
-    (value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("page");
-      if (value) params.set("search", value);
-      else params.delete("search");
-      router.push(`/rentals?${params.toString()}`);
-    },
-    [searchParams, router]
-  );
+  const handleNeighborhood = useCallback((value: string) => {
+    pushFilters({ neighborhood: value || undefined });
+  }, [pushFilters]);
+
+  const handleSearchInput = useCallback((value: string) => {
+    setSearchText(value);
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      router.push(`/rentals?${buildParams({ search: value || undefined }).toString()}`);
+    }, 550);
+  }, [buildParams, router]);
 
   const handleMarkerClick = useCallback((propertyId: string) => {
     setSelectedPropertyId(propertyId);
     setHoveredPropertyId(propertyId);
-    if (window.innerWidth < 768) {
-      setMobileView("list");
-    }
+    if (window.innerWidth < 768) setMobileView("list");
   }, []);
 
   const handlePageChange = useCallback(
@@ -538,186 +543,205 @@ function RentalsContent() {
     [searchParams, router]
   );
 
-  const hasActiveFilters = !!(filterType || filterBedrooms || filterMinPrice || filterMaxPrice);
-  const activeFilterCount = [filterType, filterBedrooms, filterMinPrice, filterMaxPrice].filter(Boolean).length;
+  const hasActiveFilters = !!(activeType || activeBedrooms || activeMinPrice || activeMaxPrice || activeSearch || activeNeighborhood);
 
   return (
     <div className="min-h-screen bg-[#f8f7f4] flex flex-col">
       <LandingHeader />
 
       <div className="pt-[48px] flex flex-col flex-1">
-        {/* Sticky filter bar */}
-        <div className="bg-white/98 backdrop-blur-md border-b border-slate-100 sticky top-[48px] z-30 shadow-[0_1px_0_rgba(0,0,0,0.05)]">
-          <div className="px-3 sm:px-4 py-2.5 space-y-2">
+        {/* ── Sticky filter bar ── */}
+        <div className="bg-white border-b border-slate-100/80 sticky top-[48px] z-30">
 
-            {/* Row 1: Search + List/Map toggle */}
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-                <input
-                  type="text"
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && applyFilters()}
-                  placeholder="Search neighborhood, name..."
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/8 focus:border-slate-300 transition-all"
-                />
-              </div>
+          {/* Row 1 — Search + inline filters + List/Map */}
+          <div className="px-3 sm:px-5 pt-3 pb-2 flex items-center gap-2">
 
-              {/* List/Map toggle — below lg only */}
-              <div className="flex lg:hidden bg-slate-100 rounded-xl overflow-hidden shrink-0">
-                <button
-                  onClick={() => setMobileView("list")}
-                  className={`flex items-center gap-1 px-3 py-2 text-xs font-semibold transition-colors ${
-                    mobileView === "list" ? "bg-slate-900 text-white" : "text-slate-500"
-                  }`}
-                >
-                  <LayoutList className="w-3.5 h-3.5" />
-                  List
-                </button>
-                <button
-                  onClick={() => setMobileView("map")}
-                  className={`flex items-center gap-1 px-3 py-2 text-xs font-semibold transition-colors ${
-                    mobileView === "map" ? "bg-slate-900 text-white" : "text-slate-500"
-                  }`}
-                >
-                  <Map className="w-3.5 h-3.5" />
-                  Map
-                </button>
-              </div>
+            {/* Search input */}
+            <div className="relative flex-1 min-w-0">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchText}
+                onChange={(e) => handleSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+                    pushFilters({ search: searchText || undefined });
+                  }
+                }}
+                placeholder="Search neighborhoods, properties…"
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[13px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 transition-all"
+              />
             </div>
 
-            {/* Row 2: Selects + action buttons */}
-            <div className="flex items-center gap-2">
-              {/* Scrollable filter controls */}
-              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide flex-1 min-w-0 pb-0.5">
-                <div className="relative shrink-0">
-                  <select
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                    className="appearance-none pl-3 pr-7 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all cursor-pointer font-medium"
-                  >
-                    {PROPERTY_TYPES.map((opt) => (
-                      <option key={opt.value || "all"} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                  <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                  </div>
-                </div>
-
-                <div className="relative shrink-0">
-                  <select
-                    value={filterBedrooms}
-                    onChange={(e) => setFilterBedrooms(e.target.value)}
-                    className="appearance-none pl-3 pr-7 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all cursor-pointer font-medium"
-                  >
-                    {BEDROOMS_OPTIONS.map((opt) => (
-                      <option key={opt.value || "any"} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                  <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                  </div>
-                </div>
-
+            {/* Type pills — desktop only inline */}
+            <div className="hidden lg:flex items-center gap-px bg-slate-100 rounded-xl overflow-hidden shrink-0">
+              {PROPERTY_TYPES.map((opt) => (
                 <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-all ${
-                    showFilters || hasActiveFilters
-                      ? "bg-slate-900 border-slate-900 text-white"
-                      : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-400"
+                  key={opt.value || "all-types"}
+                  onClick={() => pushFilters({ type: opt.value || undefined })}
+                  className={`px-3 py-1.5 text-xs font-medium transition-all whitespace-nowrap ${
+                    activeType === opt.value
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/60"
                   }`}
                 >
-                  <SlidersHorizontal className="w-3 h-3" />
-                  Filters
-                  {activeFilterCount > 0 && (
-                    <span className="w-4 h-4 rounded-full bg-amber-400 text-slate-900 text-[9px] font-bold flex items-center justify-center leading-none">
-                      {activeFilterCount}
-                    </span>
-                  )}
+                  {opt.label}
                 </button>
-
-                <button
-                  onClick={applyFilters}
-                  className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-[13px] font-medium tracking-wide hover:bg-slate-800 active:bg-slate-950 transition-colors"
-                >
-                  <Search className="w-3 h-3" />
-                  Search
-                </button>
-
-                <button
-                  onClick={clearFilters}
-                  disabled={!searchText && !hasActiveFilters}
-                  className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[13px] font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed border-slate-200 text-slate-500 hover:enabled:border-slate-400 hover:enabled:text-slate-700 hover:enabled:bg-slate-50"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  Reset
-                </button>
-              </div>
-
-              {/* Desktop List/Map toggle — lg+ only, never scrolls */}
-              <div className="hidden lg:flex shrink-0 bg-slate-100 rounded-xl overflow-hidden">
-                <button
-                  onClick={() => setMobileView("list")}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${
-                    mobileView === "list" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  <LayoutList className="w-3.5 h-3.5" />
-                  List
-                </button>
-                <button
-                  onClick={() => setMobileView("map")}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${
-                    mobileView === "map" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  <Map className="w-3.5 h-3.5" />
-                  Map
-                </button>
-              </div>
+              ))}
             </div>
 
-            {/* Price range */}
-            {showFilters && (
-              <div className="flex items-center gap-3 pt-2.5 border-t border-slate-100 flex-wrap animate-in slide-in-from-top-1 duration-150">
-                <div className="flex items-center gap-1.5 text-sm text-slate-500 font-medium">
-                  <DollarSign className="w-3.5 h-3.5" />
-                  Price range:
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    value={filterMinPrice}
-                    onChange={(e) => setFilterMinPrice(e.target.value)}
-                    placeholder="Min"
-                    className="w-24 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 placeholder:text-slate-400"
-                  />
-                  <span className="text-slate-400 text-sm">—</span>
-                  <input
-                    type="number"
-                    value={filterMaxPrice}
-                    onChange={(e) => setFilterMaxPrice(e.target.value)}
-                    placeholder="Max"
-                    className="w-24 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 placeholder:text-slate-400"
-                  />
-                  <span className="text-xs text-slate-400 font-medium">/month</span>
-                </div>
-              </div>
+            {/* Beds pills — desktop only inline */}
+            <div className="hidden lg:flex items-center gap-px bg-slate-100 rounded-xl overflow-hidden shrink-0">
+              {BEDROOMS_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value || "any-beds"}
+                  onClick={() => pushFilters({ bedrooms: opt.value || undefined })}
+                  className={`px-3 py-1.5 text-xs font-medium transition-all whitespace-nowrap ${
+                    activeBedrooms === opt.value
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/60"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Price range — desktop only */}
+            <div className="hidden lg:flex items-center gap-1.5 shrink-0">
+              <input
+                type="number"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                onBlur={() => pushFilters({ minRent: minPrice || undefined })}
+                onKeyDown={(e) => e.key === "Enter" && pushFilters({ minRent: minPrice || undefined })}
+                placeholder="$ Min"
+                className="w-20 px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-100 text-[12px] text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all"
+              />
+              <span className="text-slate-300 text-sm select-none">—</span>
+              <input
+                type="number"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                onBlur={() => pushFilters({ maxRent: maxPrice || undefined })}
+                onKeyDown={(e) => e.key === "Enter" && pushFilters({ maxRent: maxPrice || undefined })}
+                placeholder="$ Max"
+                className="w-20 px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-100 text-[12px] text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all"
+              />
+            </div>
+
+            {/* Reset — visible whenever any filter is active */}
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 text-[12px] font-medium text-slate-500 hover:border-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-all"
+                title="Clear all filters"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span className="hidden sm:inline">Reset</span>
+              </button>
             )}
 
-            {/* Neighborhood chips */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-hide">
+            {/* List / Map toggle */}
+            <div className="flex items-center gap-px bg-slate-100 rounded-xl overflow-hidden shrink-0">
+              <button
+                onClick={() => setMobileView("list")}
+                className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium transition-all ${
+                  mobileView === "list" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/60"
+                }`}
+              >
+                <LayoutList className="w-3.5 h-3.5" />
+                <span>List</span>
+              </button>
+              <button
+                onClick={() => setMobileView("map")}
+                className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium transition-all ${
+                  mobileView === "map" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/60"
+                }`}
+              >
+                <Map className="w-3.5 h-3.5" />
+                <span>Map</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Row 2 — mobile/tablet only: type + beds + price pills */}
+          <div className="lg:hidden px-3 sm:px-5 pb-2 flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
+            {/* Type */}
+            <div className="flex items-center gap-px bg-slate-100 rounded-xl overflow-hidden shrink-0">
+              {PROPERTY_TYPES.map((opt) => (
+                <button
+                  key={opt.value || "all-t"}
+                  onClick={() => pushFilters({ type: opt.value || undefined })}
+                  className={`px-2.5 py-1.5 text-[11px] font-medium transition-all whitespace-nowrap ${
+                    activeType === opt.value
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="w-px h-4 bg-slate-200 shrink-0" />
+
+            {/* Beds */}
+            <div className="flex items-center gap-px bg-slate-100 rounded-xl overflow-hidden shrink-0">
+              {BEDROOMS_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value || "any-b"}
+                  onClick={() => pushFilters({ bedrooms: opt.value || undefined })}
+                  className={`px-2.5 py-1.5 text-[11px] font-medium transition-all whitespace-nowrap ${
+                    activeBedrooms === opt.value
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="w-px h-4 bg-slate-200 shrink-0" />
+
+            {/* Price */}
+            <div className="flex items-center gap-1 shrink-0">
+              <input
+                type="number"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                onBlur={() => pushFilters({ minRent: minPrice || undefined })}
+                onKeyDown={(e) => e.key === "Enter" && pushFilters({ minRent: minPrice || undefined })}
+                placeholder="$Min"
+                className="w-16 px-2 py-1.5 rounded-xl bg-slate-50 border border-slate-100 text-[11px] text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+              />
+              <span className="text-slate-300 text-xs">—</span>
+              <input
+                type="number"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                onBlur={() => pushFilters({ maxRent: maxPrice || undefined })}
+                onKeyDown={(e) => e.key === "Enter" && pushFilters({ maxRent: maxPrice || undefined })}
+                placeholder="$Max"
+                className="w-16 px-2 py-1.5 rounded-xl bg-slate-50 border border-slate-100 text-[11px] text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+              />
+            </div>
+          </div>
+
+          {/* Row 3 — Neighborhood chips + count */}
+          <div className="px-3 sm:px-5 pb-2.5 flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide flex-1 min-w-0">
               {NEIGHBORHOODS.map((n) => {
                 const isActive = n.value === "" ? !activeNeighborhood : activeNeighborhood === n.value;
                 return (
                   <button
-                    key={n.value}
+                    key={n.value || "all-n"}
                     onClick={() => handleNeighborhood(n.value)}
-                    className={`px-3 py-1 rounded-full text-[11px] font-medium tracking-widest transition-all whitespace-nowrap flex-shrink-0 border ${
+                    className={`px-3 py-1 rounded-full text-[11px] font-medium tracking-wide transition-all whitespace-nowrap flex-shrink-0 border ${
                       isActive
-                        ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                        ? "bg-slate-900 text-white border-slate-900"
                         : "bg-white text-slate-500 border-slate-200 hover:border-slate-400 hover:text-slate-800"
                     }`}
                   >
@@ -727,48 +751,34 @@ function RentalsContent() {
               })}
               <button
                 onClick={() => setShowFavoritesOnly((v) => !v)}
-                className={`px-3 py-1 rounded-full text-[11px] font-medium tracking-widest transition-all whitespace-nowrap flex-shrink-0 border flex items-center gap-1 ${
+                className={`px-3 py-1 rounded-full text-[11px] font-medium tracking-wide transition-all whitespace-nowrap flex-shrink-0 border flex items-center gap-1 ${
                   showFavoritesOnly
-                    ? "bg-rose-500 text-white border-rose-500 shadow-sm"
+                    ? "bg-rose-500 text-white border-rose-500"
                     : "bg-white text-slate-500 border-slate-200 hover:border-rose-300 hover:text-rose-500"
                 }`}
               >
                 <Heart className={`w-3 h-3 ${showFavoritesOnly ? "fill-current" : ""}`} />
                 Saved
                 {favoriteIds.length > 0 && (
-                  <span className={`px-1 py-0.5 rounded-full text-[9px] font-bold ${showFavoritesOnly ? "bg-white/30 text-white" : "bg-rose-100 text-rose-500"}`}>
+                  <span className={`ml-0.5 px-1 rounded-full text-[9px] font-bold leading-4 ${showFavoritesOnly ? "bg-white/30 text-white" : "bg-rose-100 text-rose-500"}`}>
                     {favoriteIds.length}
                   </span>
                 )}
               </button>
             </div>
-          </div>
 
-          {/* Results count */}
-          <div className="px-4 py-2 border-t border-slate-100 flex items-center justify-between">
-            <p className="text-xs text-slate-500 font-medium">
+            {/* Result count — fixed right */}
+            <div className="shrink-0 pl-2">
               {loading ? (
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full border-2 border-slate-400 border-t-transparent animate-spin inline-block" />
-                  Searching…
+                <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                  <span className="w-2.5 h-2.5 rounded-full border-2 border-slate-300 border-t-transparent animate-spin inline-block" />
                 </span>
               ) : (
-                <span>
-                  <strong className="text-slate-800 font-bold">{pagination.total}</strong>{" "}
-                  {pagination.total === 1 ? "property" : "properties"} available
-                  {activeNeighborhood ? ` · ${activeNeighborhood}` : ""}
+                <span className="text-[11px] text-slate-400 whitespace-nowrap">
+                  <strong className="text-slate-700 font-medium">{pagination.total}</strong> {pagination.total === 1 ? "property" : "properties"}
                 </span>
               )}
-            </p>
-            {selectedProperty && (
-              <button
-                onClick={() => setSelectedPropertyId(null)}
-                className="flex items-center gap-1 text-xs text-slate-600 hover:text-slate-800 font-medium"
-              >
-                <X className="w-3 h-3" />
-                Clear selection
-              </button>
-            )}
+            </div>
           </div>
         </div>
 

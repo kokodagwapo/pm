@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
       ? parseInt(searchParams.get("bedrooms")!)
       : undefined;
     const city = searchParams.get("city") || undefined;
+    const neighborhood = searchParams.get("neighborhood") || undefined;
 
     const skip = (page - 1) * limit;
 
@@ -55,6 +56,8 @@ export async function GET(request: NextRequest) {
     if (bedrooms) (query as any)["units.bedrooms"] = { $gte: bedrooms };
     if (city)
       (query as any)["address.city"] = { $regex: city, $options: "i" };
+    if (neighborhood)
+      (query as any).neighborhood = { $regex: neighborhood, $options: "i" };
     if (search) {
       (query as any).$or = [
         { name: { $regex: search, $options: "i" } },
