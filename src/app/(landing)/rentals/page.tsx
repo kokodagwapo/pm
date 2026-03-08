@@ -544,9 +544,9 @@ function RentalsContent() {
     <div className="min-h-screen bg-[#f8f7f4] flex flex-col">
       <LandingHeader />
 
-      <div className="pt-[64px] flex flex-col flex-1">
+      <div className="pt-[48px] flex flex-col flex-1">
         {/* Sticky filter bar */}
-        <div className="bg-white/98 backdrop-blur-md border-b border-slate-100 sticky top-[60px] z-30 shadow-[0_1px_0_rgba(0,0,0,0.05)]">
+        <div className="bg-white/98 backdrop-blur-md border-b border-slate-100 sticky top-[48px] z-30 shadow-[0_1px_0_rgba(0,0,0,0.05)]">
           <div className="px-3 sm:px-4 py-2.5 space-y-2">
 
             {/* Row 1: Search + List/Map toggle */}
