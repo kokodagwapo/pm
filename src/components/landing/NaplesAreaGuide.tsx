@@ -179,6 +179,12 @@ const tools = [
   { icon: CheckCircle2, color: "text-rose-500", bg: "bg-rose-50", label: "Move-In Checklist", desc: "Forward USPS mail, update banks & IRS address, transfer medical records, enroll in Collier County Public Schools if needed." },
 ];
 
+const rainStyle: Record<string, string> = {
+  Low: "bg-emerald-50 text-emerald-700 border border-emerald-100",
+  Med: "bg-amber-50 text-amber-700 border border-amber-100",
+  High: "bg-rose-50 text-rose-700 border border-rose-100",
+};
+
 function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
   return (
@@ -189,7 +195,7 @@ function FAQ() {
             onClick={() => setOpen(open === i ? null : i)}
             className="w-full flex items-center justify-between gap-4 py-4 text-left group"
           >
-            <span className="text-sm md:text-base font-medium text-slate-800 group-hover:text-slate-900 leading-snug pr-2">
+            <span className="text-[15px] md:text-base font-medium text-slate-800 group-hover:text-slate-900 leading-snug pr-2">
               {item.q}
             </span>
             <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors ${open === i ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-500"}`}>
@@ -197,7 +203,7 @@ function FAQ() {
             </span>
           </button>
           {open === i && (
-            <p className="text-sm text-slate-600 leading-relaxed pb-4 pr-10">
+            <p className="text-sm text-slate-600 leading-[1.75] pb-4 pr-10">
               {item.a}
             </p>
           )}
@@ -211,13 +217,13 @@ function SectionHeading({ icon: Icon, label, sub }: { icon: any; label: string; 
   return (
     <div className="flex items-start gap-3 mb-6">
       <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center shrink-0 mt-0.5">
-        <Icon className="w-4.5 h-4.5 text-white w-[18px] h-[18px]" />
+        <Icon className="w-[18px] h-[18px] text-white" />
       </div>
       <div>
         <h2 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight leading-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
           {label}
         </h2>
-        {sub && <p className="text-sm text-slate-500 mt-0.5 font-normal">{sub}</p>}
+        {sub && <p className="text-sm text-slate-500 mt-1 font-normal leading-relaxed">{sub}</p>}
       </div>
     </div>
   );
@@ -225,12 +231,15 @@ function SectionHeading({ icon: Icon, label, sub }: { icon: any; label: string; 
 
 export function NaplesAreaGuide() {
   return (
-    <div className="mt-10 space-y-10">
+    <div
+      className="mt-10 space-y-10"
+      style={{ fontFamily: "var(--font-jakarta), var(--font-inter), system-ui, sans-serif" }}
+    >
 
       {/* FAQ */}
       <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
         <div className="px-5 md:px-8 pt-7 pb-2">
-          <SectionHeading icon={Info} label="Frequently Asked Questions" sub="Everything you need to know before booking" />
+          <SectionHeading icon={Info} label="Frequently Asked Questions" sub="Everything you need to know before booking or moving in" />
         </div>
         <div className="px-5 md:px-8 pb-6">
           <FAQ />
@@ -249,9 +258,9 @@ export function NaplesAreaGuide() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {cat.items.map((item) => (
-                  <div key={item.name} className="bg-white/80 rounded-xl p-3 border border-white">
-                    <p className="font-semibold text-slate-800 text-sm leading-snug">{item.name}</p>
-                    <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{item.note}</p>
+                  <div key={item.name} className="bg-white/80 rounded-xl p-3.5 border border-white">
+                    <p className="font-semibold text-slate-800 text-[15px] leading-snug">{item.name}</p>
+                    <p className="text-sm text-slate-500 mt-1 leading-relaxed">{item.note}</p>
                   </div>
                 ))}
               </div>
@@ -262,7 +271,7 @@ export function NaplesAreaGuide() {
 
       {/* Weather Guide */}
       <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-        <div className="px-5 md:px-8 pt-7 pb-2">
+        <div className="px-5 md:px-8 pt-7 pb-4">
           <SectionHeading icon={CloudSun} label="Naples Weather Guide" sub="Subtropical climate — plan your stay around the seasons" />
           <div className="flex flex-wrap gap-2 mb-6">
             <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-sky-50 text-sky-700 border border-sky-100 font-medium">
@@ -276,34 +285,47 @@ export function NaplesAreaGuide() {
             </span>
           </div>
         </div>
-        <div className="px-5 md:px-8 pb-7 overflow-x-auto">
-          <table className="w-full min-w-[480px] text-sm">
+
+        {/* Mobile: card grid */}
+        <div className="sm:hidden px-5 pb-6 grid grid-cols-2 gap-2">
+          {weather.map((w) => (
+            <div key={w.m} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-3">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl leading-none">{w.icon}</span>
+                <span className="font-semibold text-slate-800 text-sm">{w.m}</span>
+                <span className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${rainStyle[w.rain]}`}>{w.rain}</span>
+              </div>
+              <p className="text-slate-700 text-sm font-medium">{w.hi}° / <span className="text-slate-400 font-normal">{w.lo}°</span></p>
+              <p className="text-xs text-slate-400 mt-0.5 leading-snug">{w.tip}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: table */}
+        <div className="hidden sm:block px-5 md:px-8 pb-7 overflow-x-auto">
+          <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100">
-                <th className="text-left pb-3 text-xs font-semibold text-slate-400 uppercase tracking-wider w-16">Month</th>
-                <th className="text-center pb-3 text-xs font-semibold text-slate-400 uppercase tracking-wider w-14">Hi °F</th>
-                <th className="text-center pb-3 text-xs font-semibold text-slate-400 uppercase tracking-wider w-14">Lo °F</th>
-                <th className="text-center pb-3 text-xs font-semibold text-slate-400 uppercase tracking-wider w-16">Rain</th>
+                <th className="text-left pb-3 text-xs font-semibold text-slate-400 uppercase tracking-wider w-20">Month</th>
+                <th className="text-center pb-3 text-xs font-semibold text-slate-400 uppercase tracking-wider w-16">Hi °F</th>
+                <th className="text-center pb-3 text-xs font-semibold text-slate-400 uppercase tracking-wider w-16">Lo °F</th>
+                <th className="text-center pb-3 text-xs font-semibold text-slate-400 uppercase tracking-wider w-20">Rain</th>
                 <th className="text-left pb-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Notes</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {weather.map((w) => (
                 <tr key={w.m} className="hover:bg-slate-50 transition-colors">
-                  <td className="py-2.5 pr-3">
+                  <td className="py-3 pr-3">
                     <span className="font-semibold text-slate-800">{w.m}</span>
                     <span className="ml-2 text-base">{w.icon}</span>
                   </td>
-                  <td className="py-2.5 text-center font-medium text-slate-700">{w.hi}°</td>
-                  <td className="py-2.5 text-center text-slate-500">{w.lo}°</td>
-                  <td className="py-2.5 text-center">
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      w.rain === "Low" ? "bg-emerald-50 text-emerald-700" :
-                      w.rain === "Med" ? "bg-amber-50 text-amber-700" :
-                      "bg-rose-50 text-rose-700"
-                    }`}>{w.rain}</span>
+                  <td className="py-3 text-center font-medium text-slate-700">{w.hi}°</td>
+                  <td className="py-3 text-center text-slate-500">{w.lo}°</td>
+                  <td className="py-3 text-center">
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${rainStyle[w.rain]}`}>{w.rain}</span>
                   </td>
-                  <td className="py-2.5 text-slate-500 text-xs">{w.tip}</td>
+                  <td className="py-3 text-slate-500 text-sm">{w.tip}</td>
                 </tr>
               ))}
             </tbody>
@@ -311,17 +333,17 @@ export function NaplesAreaGuide() {
         </div>
       </section>
 
-      {/* Parks & Beaches */}
+      {/* Parks & Nature */}
       <section>
         <SectionHeading icon={Trees} label="Parks & Nature" sub="Over 200 parks, preserves, and green spaces across Collier County" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {parks.map((p) => (
-            <div key={p.name} className="rounded-2xl bg-white border border-slate-200 p-5 hover:border-emerald-200 hover:shadow-md transition-all">
+            <div key={p.name} className="rounded-2xl bg-white border border-slate-200 p-5 md:p-6 hover:border-emerald-200 hover:shadow-md transition-all">
               <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full mb-3">
                 {p.tag}
               </span>
-              <h3 className="font-semibold text-slate-800 text-sm leading-snug mb-1">{p.name}</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">{p.desc}</p>
+              <h3 className="font-semibold text-slate-800 text-[15px] leading-snug mb-1.5">{p.name}</h3>
+              <p className="text-sm text-slate-500 leading-relaxed">{p.desc}</p>
             </div>
           ))}
         </div>
@@ -329,26 +351,26 @@ export function NaplesAreaGuide() {
 
       {/* Government Services */}
       <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-        <div className="px-5 md:px-8 pt-7 pb-5">
+        <div className="px-5 md:px-8 pt-7 pb-6">
           <SectionHeading icon={Building2} label="Government & Local Services" sub="Key contacts for residents and new arrivals in Naples" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {govServices.map((s) => (
               <div key={s.label} className="flex gap-3 p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <div className="w-8 h-8 rounded-lg bg-slate-200 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-9 h-9 rounded-lg bg-slate-200 flex items-center justify-center shrink-0 mt-0.5">
                   <Globe className="w-4 h-4 text-slate-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold text-slate-800 text-sm leading-snug">{s.label}</p>
-                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{s.desc}</p>
-                  <div className="flex flex-wrap gap-3 mt-2">
+                  <p className="font-semibold text-slate-800 text-[15px] leading-snug">{s.label}</p>
+                  <p className="text-sm text-slate-500 mt-1 leading-relaxed">{s.desc}</p>
+                  <div className="flex flex-wrap gap-3 mt-2.5">
                     {s.phone && (
-                      <a href={`tel:${s.phone.replace(/\D/g, "")}`} className="inline-flex items-center gap-1 text-xs text-slate-600 hover:text-slate-900 font-medium">
-                        <Phone className="w-3 h-3" /> {s.phone}
+                      <a href={`tel:${s.phone.replace(/\D/g, "")}`} className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors">
+                        <Phone className="w-3.5 h-3.5" /> {s.phone}
                       </a>
                     )}
                     {s.url && (
-                      <a href={s.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-sky-600 hover:text-sky-800 font-medium">
-                        <ExternalLink className="w-3 h-3" /> Website
+                      <a href={s.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-sky-600 hover:text-sky-800 font-medium transition-colors">
+                        <ExternalLink className="w-3.5 h-3.5" /> Website
                       </a>
                     )}
                   </div>
@@ -364,12 +386,12 @@ export function NaplesAreaGuide() {
         <SectionHeading icon={CheckCircle2} label="Before You Arrive" sub="Useful tools and checklists for a smooth move to Naples" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {tools.map((t) => (
-            <div key={t.label} className="rounded-2xl bg-white border border-slate-200 p-5 hover:shadow-md transition-all">
+            <div key={t.label} className="rounded-2xl bg-white border border-slate-200 p-5 md:p-6 hover:shadow-md transition-all">
               <div className={`w-10 h-10 rounded-xl ${t.bg} flex items-center justify-center mb-4`}>
                 <t.icon className={`w-5 h-5 ${t.color}`} />
               </div>
-              <h3 className="font-semibold text-slate-800 text-sm mb-1.5">{t.label}</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">{t.desc}</p>
+              <h3 className="font-semibold text-slate-800 text-[15px] mb-2">{t.label}</h3>
+              <p className="text-sm text-slate-500 leading-relaxed">{t.desc}</p>
             </div>
           ))}
         </div>
