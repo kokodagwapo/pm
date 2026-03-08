@@ -630,14 +630,14 @@ export function PropertyDetailClient({
   const totalGuests = unit ? (unit.bedrooms || 1) * 2 : 2;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#f8f7f4]">
       <LandingHeader />
 
       <main className="pt-20 pb-16">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <Link
             href="/rentals"
-            className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 mb-5 text-sm transition-colors"
+            className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 mb-6 text-sm font-medium transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to all properties
@@ -698,14 +698,14 @@ export function PropertyDetailClient({
             )}
           </div>
 
-          <div className="sticky top-[72px] z-30 bg-white border-b border-slate-200 -mx-4 md:-mx-8 px-4 md:px-8 mb-8">
+          <div className="sticky top-[72px] z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/70 -mx-4 md:-mx-8 px-4 md:px-8 mb-8 shadow-sm">
             <div className="flex items-center justify-between">
               <nav className="flex gap-0.5 overflow-x-auto no-scrollbar py-1 flex-1">
                 {navSections.map((section) => {
                   const Icon = section.icon;
                   const iconColors: Record<string, string> = {
-                    description: "text-sky-300", overview: "text-sky-300", pricing: "text-amber-200", amenities: "text-rose-200",
-                    availability: "text-emerald-200", tour: "text-violet-200", reviews: "text-cyan-200", map: "text-orange-200",
+                    description: "text-slate-400", overview: "text-slate-400", pricing: "text-amber-400", amenities: "text-rose-300",
+                    availability: "text-emerald-400", tour: "text-violet-400", reviews: "text-cyan-400", map: "text-orange-400",
                   };
                   return (
                     <button
@@ -714,13 +714,13 @@ export function PropertyDetailClient({
                       className={`flex items-center gap-1.5 px-3 py-3 text-sm font-medium whitespace-nowrap transition-colors relative ${
                         activeSection === section.id
                           ? "text-slate-900"
-                          : "text-slate-500 hover:text-slate-700"
+                          : "text-slate-400 hover:text-slate-700"
                       }`}
                     >
-                      {Icon && <Icon className={`w-4 h-4 ${iconColors[section.id] || "text-sky-300"}`} />}
+                      {Icon && <Icon className={`w-3.5 h-3.5 ${iconColors[section.id] || "text-slate-400"}`} />}
                       {section.label}
                       {activeSection === section.id && (
-                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sky-400 rounded-full" />
+                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 rounded-full" />
                       )}
                     </button>
                   );
@@ -736,7 +736,7 @@ export function PropertyDetailClient({
                 </button>
                 <button
                   onClick={() => { if (navigator.share) { navigator.share({ title: property?.name, url: window.location.href }); } else { navigator.clipboard?.writeText(window.location.href); }}}
-                  className="p-2 rounded-lg text-slate-400 hover:text-sky-500 hover:bg-sky-50 transition-all"
+                  className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
                   title="Share"
                 >
                   <Share2 className="w-4 h-4" />
@@ -750,7 +750,7 @@ export function PropertyDetailClient({
               <div ref={(el) => { sectionRefs.current.description = el; }}>
                 <div className="flex flex-wrap items-center gap-2 mb-3">
                   {propertyType && (
-                    <span className="px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-sm font-medium border border-sky-100">
+                    <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold uppercase tracking-wide border border-slate-200">
                       {propertyType}
                     </span>
                   )}
@@ -769,13 +769,13 @@ export function PropertyDetailClient({
                   )}
                 </div>
 
-                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900 mb-3 leading-tight">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-3 leading-tight tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                   {property.name}
                 </h1>
 
                 {address && (
                   <p className="flex items-center gap-2 text-slate-500 mb-5 text-sm">
-                    <MapPin className="w-4 h-4 shrink-0 text-sky-500" />
+                    <MapPin className="w-3.5 h-3.5 shrink-0 text-amber-400" />
                     {fullAddress}
                   </p>
                 )}
@@ -815,7 +815,7 @@ export function PropertyDetailClient({
 
                 {property.description && (
                   <div className="mb-10">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Property Description</h2>
+                    <h2 className="text-xl font-semibold text-slate-900 mb-4" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>Property Description</h2>
                     <div className="relative">
                       <p className={`text-slate-600 leading-relaxed whitespace-pre-line ${
                         !descExpanded && property.description.length > 400 ? "line-clamp-5" : ""
@@ -836,7 +836,7 @@ export function PropertyDetailClient({
 
                 {units.length > 0 && (
                   <div className="mb-10">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Sleeping Arrangement</h2>
+                    <h2 className="text-xl font-semibold text-slate-900 mb-4" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>Sleeping Arrangement</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {units.map((u: any, i: number) => (
                         <div
@@ -861,8 +861,8 @@ export function PropertyDetailClient({
                 {(baseRentPerNight > 0 || seasonalPricingSummary.length > 0) && (
                   <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                     <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                      <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                        <DollarSign className="w-5 h-5 text-amber-200" />
+                      <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                        <DollarSign className="w-4 h-4 text-amber-500" />
                         Pricing
                       </h2>
                     </div>
@@ -1004,8 +1004,8 @@ export function PropertyDetailClient({
                 {property.amenities?.length > 0 && (
                   <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                     <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                      <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-rose-200" />
+                      <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                        <Sparkles className="w-4 h-4 text-rose-400" />
                         Amenities
                       </h2>
                     </div>

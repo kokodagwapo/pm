@@ -25,6 +25,7 @@ import {
   GitCompare,
   Star,
   Check,
+  Grid3X3,
 } from "lucide-react";
 
 const NEIGHBORHOODS = [
@@ -75,16 +76,16 @@ function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: (
   const imageUrl = images[0] || null;
 
   return (
-    <div className="bg-white border border-sky-200 rounded-xl shadow-lg overflow-hidden mx-0 animate-in slide-in-from-top-2 duration-200">
+    <div className="bg-white border border-slate-200/60 rounded-2xl shadow-xl overflow-hidden animate-in slide-in-from-top-2 duration-200">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-sky-50 border-b border-sky-100">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800">
         <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
-          <span className="text-xs font-semibold text-sky-700 uppercase tracking-wide">Selected Property</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+          <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest">Selected Property</span>
         </div>
         <button
           onClick={onClose}
-          className="p-1 rounded-lg text-sky-500 hover:bg-sky-100 hover:text-sky-700 transition-colors"
+          className="p-1 rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition-colors"
           aria-label="Close"
         >
           <X className="w-3.5 h-3.5" />
@@ -93,96 +94,89 @@ function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: (
 
       {/* Image */}
       {imageUrl ? (
-        <div className="relative w-full h-44 overflow-hidden bg-slate-100">
+        <div className="relative w-full h-48 overflow-hidden bg-slate-100">
           <img
             src={imageUrl}
             alt={property.name}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
           <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
             <div>
-              <p className="text-white font-bold text-lg leading-tight drop-shadow">
+              <p className="text-white font-bold text-xl leading-tight drop-shadow-lg" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                 {formatPrice(price)}
-                <span className="text-white/70 text-sm font-normal">/mo</span>
+                <span className="text-white/60 text-sm font-normal ml-1">/mo</span>
               </p>
               {basePerNight > 0 && (
-                <p className="text-white/80 text-xs">~{formatPrice(basePerNight)}/night</p>
+                <p className="text-white/70 text-xs mt-0.5">~{formatPrice(basePerNight)}/night</p>
               )}
             </div>
             {images.length > 1 && (
-              <span className="px-2 py-0.5 rounded-md bg-black/50 text-white text-[10px] backdrop-blur-sm">
-                {images.length} photos
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 text-white text-[9px] backdrop-blur-sm font-medium">
+                <Grid3X3 className="w-2.5 h-2.5" />
+                {images.length}
               </span>
             )}
           </div>
           <div className="absolute top-2.5 left-2.5">
-            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-500 text-white tracking-wide uppercase">
+            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-white/10 backdrop-blur-sm border border-white/20 text-white uppercase tracking-widest">
               For Rent
             </span>
           </div>
         </div>
       ) : (
-        <div className="w-full h-28 bg-slate-100 flex items-center justify-center">
+        <div className="w-full h-32 bg-slate-100 flex items-center justify-center">
           <Home className="w-8 h-8 text-slate-300" />
         </div>
       )}
 
       {/* Details */}
-      <div className="px-4 py-3">
-        <h3 className="font-bold text-slate-900 text-base leading-tight line-clamp-2 mb-1">
+      <div className="px-4 py-3.5">
+        {property.neighborhood && (
+          <p className="text-[9px] font-bold uppercase tracking-widest text-amber-600/80 mb-1">{property.neighborhood}</p>
+        )}
+        <h3 className="font-semibold text-slate-900 text-base leading-tight line-clamp-2 mb-1.5" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
           {property.name}
         </h3>
         {(property.address?.street || property.address?.city) && (
-          <p className="flex items-center gap-1 text-slate-500 text-xs mb-2 truncate">
-            <MapPin className="w-3 h-3 shrink-0 text-sky-400" />
+          <p className="flex items-center gap-1 text-slate-400 text-xs mb-3 truncate">
+            <MapPin className="w-2.5 h-2.5 shrink-0 text-amber-400" />
             {property.address.street ? `${property.address.street}, ` : ""}
             {property.address.city}
             {property.address.state ? `, ${property.address.state}` : ""}
           </p>
         )}
 
-        <div className="flex items-center gap-3 mb-3">
-          <span className="flex items-center gap-1 text-slate-600 text-xs font-medium">
-            <Bed className="w-3.5 h-3.5 text-slate-400" />
+        <div className="flex items-center gap-3 mb-3.5 pb-3 border-b border-slate-100">
+          <span className="flex items-center gap-1.5 text-slate-600 text-xs font-medium">
+            <Bed className="w-3 h-3 text-slate-300" />
             {bedrooms} {bedrooms === 1 ? "Bed" : "Beds"}
           </span>
-          <span className="flex items-center gap-1 text-slate-600 text-xs font-medium">
-            <Bath className="w-3.5 h-3.5 text-slate-400" />
+          <span className="flex items-center gap-1.5 text-slate-600 text-xs font-medium">
+            <Bath className="w-3 h-3 text-slate-300" />
             {bathrooms} {bathrooms === 1 ? "Bath" : "Baths"}
           </span>
           {sqft > 0 && (
-            <span className="text-slate-500 text-xs">{sqft.toLocaleString()} sqft</span>
-          )}
-          {property.neighborhood && (
-            <span className="ml-auto px-2 py-0.5 rounded-full bg-sky-50 text-sky-600 text-[10px] font-medium border border-sky-100 shrink-0">
-              {property.neighborhood}
-            </span>
+            <span className="text-slate-400 text-xs">{sqft.toLocaleString()} ft²</span>
           )}
         </div>
 
-        {property.description && (
-          <p className="text-slate-400 text-xs line-clamp-2 mb-3 leading-relaxed">
-            {property.description}
-          </p>
-        )}
-
         <Link
           href={`/properties/${property._id}`}
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 active:bg-sky-700 transition-colors shadow-sm shadow-sky-500/20"
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 active:bg-slate-950 transition-colors shadow-sm"
         >
           View Property Details
           <ExternalLink className="w-3.5 h-3.5" />
         </Link>
       </div>
 
-      {/* Scroll to list nudge */}
+      {/* Dismiss */}
       <button
         onClick={onClose}
-        className="w-full flex items-center justify-center gap-1.5 py-2 border-t border-slate-100 text-xs text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
+        className="w-full flex items-center justify-center gap-1.5 py-2 border-t border-slate-100 text-[11px] text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
       >
-        <ChevronDown className="w-3.5 h-3.5" />
-        Show all {/* will be filled by parent */} results
+        <ChevronDown className="w-3 h-3" />
+        Show all results
       </button>
     </div>
   );
@@ -303,32 +297,37 @@ function PropertyListCard({
   return (
     <Link href={`/properties/${property._id}`}>
       <div
-        className={`group flex bg-white rounded-xl overflow-hidden transition-all duration-200 cursor-pointer ${
+        className={`group flex bg-white rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer ${
           isSelected
-            ? "ring-2 ring-sky-400 ring-offset-1 shadow-md opacity-60"
+            ? "ring-2 ring-amber-400 ring-offset-1 shadow-lg opacity-70"
             : isHovered
-            ? "shadow-md ring-2 ring-sky-400 ring-offset-1"
-            : "shadow-sm hover:shadow-md border border-slate-200/80"
+            ? "shadow-xl ring-2 ring-slate-900/10 ring-offset-1 -translate-y-0.5"
+            : "shadow-sm hover:shadow-xl border border-slate-100 hover:-translate-y-0.5"
         }`}
         onMouseEnter={() => onHover(property._id)}
         onMouseLeave={() => onHover(null)}
       >
-        <div className="relative w-[180px] min-w-[180px] h-[140px] overflow-hidden bg-slate-100">
+        {/* Image */}
+        <div className="relative w-[190px] min-w-[190px] h-[155px] overflow-hidden bg-slate-100">
           <img
             src={imageUrl}
             alt={property.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="absolute top-2 left-2">
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-500 text-white uppercase tracking-wide">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+
+          {/* FOR RENT badge */}
+          <div className="absolute top-2.5 left-2.5">
+            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-900/80 backdrop-blur-sm text-white uppercase tracking-widest">
               For Rent
             </span>
           </div>
-          <div className="absolute top-1.5 right-1.5 flex flex-col gap-1">
+
+          {/* Action buttons */}
+          <div className="absolute top-2 right-2 flex flex-col gap-1.5">
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleFavorite(property._id); }}
-              className={`w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-all ${isFavorited ? "bg-red-500 text-white" : "bg-white/90 text-slate-400 hover:text-red-400"}`}
+              className={`w-7 h-7 rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm transition-all duration-200 ${isFavorited ? "bg-red-500 text-white scale-110" : "bg-white/90 text-slate-400 hover:text-red-400 hover:scale-110"}`}
               title={isFavorited ? "Remove from saved" : "Save property"}
             >
               <Heart className={`w-3.5 h-3.5 ${isFavorited ? "fill-current" : ""}`} />
@@ -336,36 +335,49 @@ function PropertyListCard({
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleCompare(property._id); }}
               disabled={!isInCompare && !canAddToCompare}
-              className={`w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-all disabled:opacity-40 ${isInCompare ? "bg-sky-500 text-white" : "bg-white/90 text-slate-400 hover:text-sky-500"}`}
+              className={`w-7 h-7 rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm transition-all duration-200 disabled:opacity-40 ${isInCompare ? "bg-sky-500 text-white scale-110" : "bg-white/90 text-slate-400 hover:text-sky-500 hover:scale-105"}`}
               title={isInCompare ? "Remove from compare" : "Add to compare"}
             >
               {isInCompare ? <Check className="w-3.5 h-3.5" /> : <GitCompare className="w-3.5 h-3.5" />}
             </button>
           </div>
+
+          {/* Image count */}
           {imageCount > 1 && (
-            <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/50 text-white text-[10px] backdrop-blur-sm">
+            <div className="absolute bottom-2 left-2.5 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white text-[9px] font-medium">
+              <Grid3X3 className="w-2.5 h-2.5" />
               {imageCount}
             </div>
           )}
         </div>
 
-        <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
+        {/* Content */}
+        <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
           <div className="min-w-0">
-            <div className="flex items-start justify-between gap-2 mb-0.5">
-              <h3 className="font-semibold text-slate-900 text-sm leading-snug line-clamp-1 flex-1 min-w-0">
+            {/* Neighborhood tag */}
+            {property.neighborhood && (
+              <p className="text-[9px] font-bold uppercase tracking-widest text-amber-600/80 mb-1">
+                {property.neighborhood}
+              </p>
+            )}
+
+            {/* Name + Price row */}
+            <div className="flex items-start justify-between gap-3 mb-1.5">
+              <h3 className="font-semibold text-slate-900 text-[13px] leading-snug line-clamp-2 flex-1 min-w-0" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                 {property.name}
               </h3>
               <div className="text-right shrink-0">
-                <p className="text-base font-bold text-sky-600 leading-none">
+                <p className="text-[17px] font-bold text-slate-900 leading-none tracking-tight">
                   {formatPrice(price)}
                 </p>
-                <p className="text-[10px] text-slate-400 mt-0.5">/mo</p>
+                <p className="text-[10px] text-slate-400 mt-0.5 font-medium">/month</p>
               </div>
             </div>
 
+            {/* Address */}
             {(property.address?.street || property.address?.city) && (
-              <p className="flex items-center gap-1 text-slate-400 text-xs truncate">
-                <MapPin className="w-3 h-3 shrink-0 text-sky-400" />
+              <p className="flex items-center gap-1 text-slate-400 text-[11px] truncate">
+                <MapPin className="w-2.5 h-2.5 shrink-0 text-amber-400" />
                 <span className="truncate">
                   {property.address.street ? `${property.address.street}, ` : ""}
                   {property.address.city}
@@ -375,19 +387,20 @@ function PropertyListCard({
             )}
           </div>
 
-          <div className="flex items-center gap-3 mt-2 pt-2 border-t border-slate-100">
-            <span className="flex items-center gap-1 text-slate-500 text-xs font-medium">
-              <Bed className="w-3.5 h-3.5 text-slate-300" />
-              {bedrooms} Bed{bedrooms !== 1 ? "s" : ""}
+          {/* Stats */}
+          <div className="flex items-center gap-3 mt-3 pt-2.5 border-t border-slate-100/80">
+            <span className="flex items-center gap-1 text-slate-500 text-[11px] font-medium">
+              <Bed className="w-3 h-3 text-slate-300" />
+              {bedrooms} {bedrooms === 1 ? "Bed" : "Beds"}
             </span>
-            <span className="flex items-center gap-1 text-slate-500 text-xs font-medium">
-              <Bath className="w-3.5 h-3.5 text-slate-300" />
-              {bathrooms} Bath{bathrooms !== 1 ? "s" : ""}
+            <span className="flex items-center gap-1 text-slate-500 text-[11px] font-medium">
+              <Bath className="w-3 h-3 text-slate-300" />
+              {bathrooms} {bathrooms === 1 ? "Bath" : "Baths"}
             </span>
             {sqft > 0 && (
-              <span className="text-slate-400 text-xs">{sqft.toLocaleString()} sqft</span>
+              <span className="text-slate-400 text-[11px]">{sqft.toLocaleString()} ft²</span>
             )}
-            <span className="ml-auto flex items-center gap-0.5 text-sky-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+            <span className="ml-auto flex items-center gap-0.5 text-slate-900 text-[11px] font-semibold opacity-0 group-hover:opacity-100 transition-all duration-200 shrink-0">
               View <ArrowRight className="w-3 h-3" />
             </span>
           </div>
@@ -526,25 +539,25 @@ function RentalsContent() {
   const activeFilterCount = [filterType, filterBedrooms, filterMinPrice, filterMaxPrice].filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-[#f8f7f4] flex flex-col">
       <LandingHeader />
 
       <div className="pt-[72px] flex flex-col flex-1">
-        {/* Sticky filter bar */}
-        <div className="bg-slate-50 border-b border-slate-200 sticky top-[72px] z-30">
+        {/* Sticky filter bar — refined */}
+        <div className="bg-white/95 backdrop-blur-md border-b border-slate-200/60 sticky top-[72px] z-30 shadow-sm">
           <div className="px-4 py-3 space-y-2.5">
 
             {/* Row 1: Search + filters */}
             <div className="flex items-center gap-2 flex-wrap">
               <div className="relative flex-1 min-w-[200px] max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
                 <input
                   type="text"
                   value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && applyFilters()}
                   placeholder="Search by name, neighborhood..."
-                  className="w-full pl-9 pr-4 py-2 rounded-lg bg-white border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-300 transition-shadow"
+                  className="w-full pl-9 pr-4 py-2 rounded-full bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-all"
                 />
               </div>
 
@@ -552,7 +565,7 @@ function RentalsContent() {
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="appearance-none pl-3 pr-8 py-2 rounded-lg bg-white border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200 transition-shadow cursor-pointer"
+                  className="appearance-none pl-3.5 pr-8 py-2 rounded-full bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all cursor-pointer font-medium"
                 >
                   {PROPERTY_TYPES.map((opt) => (
                     <option key={opt.value || "all"} value={opt.value}>{opt.label}</option>
@@ -567,7 +580,7 @@ function RentalsContent() {
                 <select
                   value={filterBedrooms}
                   onChange={(e) => setFilterBedrooms(e.target.value)}
-                  className="appearance-none pl-3 pr-8 py-2 rounded-lg bg-white border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200 transition-shadow cursor-pointer"
+                  className="appearance-none pl-3.5 pr-8 py-2 rounded-full bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all cursor-pointer font-medium"
                 >
                   {BEDROOMS_OPTIONS.map((opt) => (
                     <option key={opt.value || "any"} value={opt.value}>{opt.label}</option>
@@ -580,16 +593,16 @@ function RentalsContent() {
 
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full border text-sm font-medium transition-all ${
                   showFilters || hasActiveFilters
-                    ? "bg-sky-50 border-sky-300 text-sky-700"
-                    : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-800"
+                    ? "bg-slate-900 border-slate-900 text-white"
+                    : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-400 hover:text-slate-800"
                 }`}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
-                More
+                Filters
                 {activeFilterCount > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-sky-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+                  <span className="w-4 h-4 rounded-full bg-amber-400 text-slate-900 text-[9px] font-bold flex items-center justify-center leading-none">
                     {activeFilterCount}
                   </span>
                 )}
@@ -597,7 +610,7 @@ function RentalsContent() {
 
               <button
                 onClick={applyFilters}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 active:bg-sky-700 transition-colors shadow-sm shadow-sky-500/20"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 active:bg-slate-950 transition-colors shadow-sm"
               >
                 <Search className="w-3.5 h-3.5" />
                 Search
@@ -606,7 +619,7 @@ function RentalsContent() {
               {(searchText || hasActiveFilters) && (
                 <button
                   onClick={clearFilters}
-                  className="flex items-center gap-1 px-2.5 py-2 rounded-lg text-sm text-slate-400 hover:text-slate-600 hover:bg-white transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-2 rounded-full text-sm text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
                   title="Clear all filters"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -614,11 +627,11 @@ function RentalsContent() {
                 </button>
               )}
 
-              <div className="flex md:hidden ml-auto bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+              <div className="flex md:hidden ml-auto bg-slate-50 border border-slate-200 rounded-full overflow-hidden shadow-sm">
                 <button
                   onClick={() => setMobileView("list")}
                   className={`p-2 text-xs font-medium flex items-center gap-1.5 px-3 transition-colors ${
-                    mobileView === "list" ? "bg-sky-500 text-white" : "text-slate-500 hover:text-slate-800"
+                    mobileView === "list" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
                   <LayoutList className="w-4 h-4" />
@@ -627,7 +640,7 @@ function RentalsContent() {
                 <button
                   onClick={() => setMobileView("map")}
                   className={`p-2 text-xs font-medium flex items-center gap-1.5 px-3 transition-colors border-l border-slate-200 ${
-                    mobileView === "map" ? "bg-sky-500 text-white" : "text-slate-500 hover:text-slate-800"
+                    mobileView === "map" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
                   <Map className="w-4 h-4" />
@@ -638,8 +651,8 @@ function RentalsContent() {
 
             {/* Price range */}
             {showFilters && (
-              <div className="flex items-center gap-3 pt-2.5 border-t border-slate-200 flex-wrap animate-in slide-in-from-top-1 duration-150">
-                <div className="flex items-center gap-1.5 text-sm text-slate-500">
+              <div className="flex items-center gap-3 pt-2.5 border-t border-slate-100 flex-wrap animate-in slide-in-from-top-1 duration-150">
+                <div className="flex items-center gap-1.5 text-sm text-slate-500 font-medium">
                   <DollarSign className="w-3.5 h-3.5" />
                   Price range:
                 </div>
@@ -649,7 +662,7 @@ function RentalsContent() {
                     value={filterMinPrice}
                     onChange={(e) => setFilterMinPrice(e.target.value)}
                     placeholder="Min"
-                    className="w-24 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-200 placeholder:text-slate-400"
+                    className="w-24 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 placeholder:text-slate-400"
                   />
                   <span className="text-slate-400 text-sm">—</span>
                   <input
@@ -657,9 +670,9 @@ function RentalsContent() {
                     value={filterMaxPrice}
                     onChange={(e) => setFilterMaxPrice(e.target.value)}
                     placeholder="Max"
-                    className="w-24 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-200 placeholder:text-slate-400"
+                    className="w-24 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 placeholder:text-slate-400"
                   />
-                  <span className="text-xs text-slate-400">/month</span>
+                  <span className="text-xs text-slate-400 font-medium">/month</span>
                 </div>
               </div>
             )}
@@ -672,10 +685,10 @@ function RentalsContent() {
                   <button
                     key={n.value}
                     onClick={() => handleNeighborhood(n.value)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap flex-shrink-0 border ${
+                    className={`px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide transition-all whitespace-nowrap flex-shrink-0 border ${
                       isActive
-                        ? "bg-sky-500 text-white border-sky-500 shadow-sm shadow-sky-500/20"
-                        : "bg-white text-slate-600 border-slate-200 hover:border-sky-300 hover:text-sky-600 hover:bg-sky-50"
+                        ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                        : "bg-white text-slate-500 border-slate-200 hover:border-slate-400 hover:text-slate-800"
                     }`}
                   >
                     {n.label}
@@ -684,16 +697,16 @@ function RentalsContent() {
               })}
               <button
                 onClick={() => setShowFavoritesOnly((v) => !v)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap flex-shrink-0 border flex items-center gap-1 ${
+                className={`px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide transition-all whitespace-nowrap flex-shrink-0 border flex items-center gap-1 ${
                   showFavoritesOnly
-                    ? "bg-red-500 text-white border-red-500 shadow-sm shadow-red-500/20"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-red-300 hover:text-red-500 hover:bg-red-50"
+                    ? "bg-rose-500 text-white border-rose-500 shadow-sm"
+                    : "bg-white text-slate-500 border-slate-200 hover:border-rose-300 hover:text-rose-500"
                 }`}
               >
                 <Heart className={`w-3 h-3 ${showFavoritesOnly ? "fill-current" : ""}`} />
                 Saved
                 {favoriteIds.length > 0 && (
-                  <span className={`px-1 py-0.5 rounded-full text-[10px] font-bold ${showFavoritesOnly ? "bg-white/30 text-white" : "bg-red-100 text-red-500"}`}>
+                  <span className={`px-1 py-0.5 rounded-full text-[9px] font-bold ${showFavoritesOnly ? "bg-white/30 text-white" : "bg-rose-100 text-rose-500"}`}>
                     {favoriteIds.length}
                   </span>
                 )}
@@ -702,25 +715,25 @@ function RentalsContent() {
           </div>
 
           {/* Results count */}
-          <div className="px-4 py-2 border-t border-slate-200/70 flex items-center justify-between">
-            <p className="text-xs text-slate-500">
+          <div className="px-4 py-2 border-t border-slate-100 flex items-center justify-between">
+            <p className="text-xs text-slate-500 font-medium">
               {loading ? (
                 <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full border-2 border-sky-400 border-t-transparent animate-spin inline-block" />
+                  <span className="w-3 h-3 rounded-full border-2 border-slate-400 border-t-transparent animate-spin inline-block" />
                   Searching…
                 </span>
               ) : (
                 <span>
-                  <strong className="text-slate-700 font-semibold">{pagination.total}</strong>{" "}
-                  {pagination.total === 1 ? "property" : "properties"} found
-                  {activeNeighborhood ? ` in ${activeNeighborhood}` : ""}
+                  <strong className="text-slate-800 font-bold">{pagination.total}</strong>{" "}
+                  {pagination.total === 1 ? "property" : "properties"} available
+                  {activeNeighborhood ? ` · ${activeNeighborhood}` : ""}
                 </span>
               )}
             </p>
             {selectedProperty && (
               <button
                 onClick={() => setSelectedPropertyId(null)}
-                className="flex items-center gap-1 text-xs text-sky-600 hover:text-sky-700 font-medium"
+                className="flex items-center gap-1 text-xs text-slate-600 hover:text-slate-800 font-medium"
               >
                 <X className="w-3 h-3" />
                 Clear selection
@@ -742,7 +755,7 @@ function RentalsContent() {
           </div>
 
           {/* Listings */}
-          <div className={`${mobileView === "list" ? "flex" : "hidden"} md:flex flex-col w-full md:w-1/2 lg:w-[45%] overflow-y-auto bg-slate-50 border-l border-slate-200`} style={{ isolation: "isolate" }}>
+          <div className={`${mobileView === "list" ? "flex" : "hidden"} md:flex flex-col w-full md:w-1/2 lg:w-[45%] overflow-y-auto bg-[#f8f7f4] border-l border-slate-200/60`} style={{ isolation: "isolate" }}>
             <div className="p-3 space-y-2.5">
 
               {/* Featured selected property card */}
