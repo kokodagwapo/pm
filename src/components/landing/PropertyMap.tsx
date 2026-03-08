@@ -291,7 +291,10 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
       });
 
       const marker = L.marker(coords, { icon }).addTo(map);
-      marker.on("click", () => onMarkerClick?.(property._id));
+      marker.on("click", () => {
+        onMarkerClick?.(property._id);
+        mapInstanceRef.current?.flyTo(coords, 16, { animate: true, duration: 0.7 });
+      });
       marker.on("mouseover", () => onMarkerHover?.(property._id));
       marker.on("mouseout", () => onMarkerHover?.(null));
       markersRef.current.set(property._id, marker);
