@@ -39,7 +39,7 @@ import {
   ChevronUp,
   Tag,
   Send,
-  Star,
+
   Video,
   ExternalLink,
   FileText,
@@ -117,18 +117,7 @@ const BASE_NAV_SECTIONS = [
   { id: "availability", label: "Availability", icon: Calendar },
 ];
 
-function StarRating({ value, max = 5, size = 4 }: { value: number; max?: number; size?: number }) {
-  return (
-    <div className="flex items-center gap-0.5">
-      {Array.from({ length: max }, (_, i) => (
-        <Star
-          key={i}
-          className={`w-${size} h-${size} ${i < Math.round(value) ? "text-amber-400 fill-amber-400" : "text-slate-200 fill-slate-200"}`}
-        />
-      ))}
-    </div>
-  );
-}
+
 
 function getYouTubeEmbedUrl(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
@@ -198,12 +187,6 @@ export function PropertyDetailClient({
   const inquirySectionRef = useRef<HTMLDivElement>(null);
 
   const [isFavorited, setIsFavorited] = useState(false);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [reviewsLoading, setReviewsLoading] = useState(false);
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [reviewForm, setReviewForm] = useState({ guestName: "", guestEmail: "", rating: 5, title: "", body: "" });
-  const [reviewSubmitting, setReviewSubmitting] = useState(false);
-  const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [appStep, setAppStep] = useState(1);
   const [appForm, setAppForm] = useState({
@@ -266,7 +249,6 @@ export function PropertyDetailClient({
   const navSections = useMemo(() => {
     const sections = [...BASE_NAV_SECTIONS];
     if (property?.virtualTourUrl) sections.splice(4, 0, { id: "tour", label: "Tour", icon: Video });
-    sections.push({ id: "reviews", label: "Reviews", icon: Star });
     sections.push({ id: "map", label: "Map", icon: MapPin });
     return sections;
   }, [property?.virtualTourUrl]);
@@ -295,34 +277,6 @@ export function PropertyDetailClient({
       return next;
     });
   }, [id]);
-
-  useEffect(() => {
-    if (!property?._id) return;
-    setReviewsLoading(true);
-    fetch(`/api/reviews/public?propertyId=${property._id}`)
-      .then((r) => r.json())
-      .then((d) => { if (d?.success) setReviews(d.data?.reviews ?? []); })
-      .catch(() => {})
-      .finally(() => setReviewsLoading(false));
-  }, [property?._id]);
-
-  const handleSubmitReview = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setReviewSubmitting(true);
-    try {
-      const res = await fetch("/api/reviews/public", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...reviewForm, propertyId: property._id }),
-      });
-      const data = await res.json();
-      if (data?.success) {
-        setReviewSubmitted(true);
-        setShowReviewForm(false);
-        setReviewForm({ guestName: "", guestEmail: "", rating: 5, title: "", body: "" });
-      }
-    } catch {} finally { setReviewSubmitting(false); }
-  }, [reviewForm, property?._id]);
 
   const handleSubmitApplication = useCallback(async () => {
     setAppSubmitting(true);
@@ -1077,106 +1031,6 @@ export function PropertyDetailClient({
                     </div>
                   );
                 })()}
-              </div>
-
-              {/* Reviews section */}
-              <div ref={(el) => { sectionRefs.current.reviews = el; }}>
-                <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
-                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                      <Star className="w-5 h-5 text-cyan-200 fill-cyan-200" />
-                      Reviews
-                      {reviews.length > 0 && (
-                        <span className="text-sm font-normal text-slate-500 ml-1">({reviews.length})</span>
-                      )}
-                    </h2>
-                    {!showReviewForm && !reviewSubmitted && (
-                      <button onClick={() => setShowReviewForm(true)} className="px-3 py-1.5 rounded-lg bg-sky-500 text-white text-xs font-semibold hover:bg-sky-600 transition-colors">
-                        Write a Review
-                      </button>
-                    )}
-                  </div>
-                  <div className="p-6">
-                    {reviewSubmitted && (
-                      <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200 mb-5">
-                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                        <div>
-                          <p className="font-semibold text-emerald-800 text-sm">Thank you for your review!</p>
-                          <p className="text-emerald-600 text-xs mt-0.5">Your review is pending approval and will appear here shortly.</p>
-                        </div>
-                      </div>
-                    )}
-                    {showReviewForm && (
-                      <form onSubmit={handleSubmitReview} className="mb-6 p-5 rounded-xl border border-slate-200 bg-slate-50 space-y-4">
-                        <h3 className="font-semibold text-slate-900 text-sm">Share your experience</h3>
-                        <div>
-                          <label className="block text-xs font-medium text-slate-600 mb-1">Rating *</label>
-                          <div className="flex items-center gap-1">
-                            {[1,2,3,4,5].map((s) => (
-                              <button key={s} type="button" onClick={() => setReviewForm((f) => ({ ...f, rating: s }))} className="p-0.5">
-                                <Star className={`w-6 h-6 transition-colors ${s <= reviewForm.rating ? "text-amber-400 fill-amber-400" : "text-slate-300"}`} />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-medium text-slate-600 mb-1">Your Name *</label>
-                            <input required value={reviewForm.guestName} onChange={(e) => setReviewForm((f) => ({ ...f, guestName: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="Jane Smith" />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-slate-600 mb-1">Email *</label>
-                            <input required type="email" value={reviewForm.guestEmail} onChange={(e) => setReviewForm((f) => ({ ...f, guestEmail: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="jane@email.com" />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-slate-600 mb-1">Review Title</label>
-                          <input value={reviewForm.title} onChange={(e) => setReviewForm((f) => ({ ...f, title: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="Great stay!" />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-slate-600 mb-1">Your Review *</label>
-                          <textarea required rows={4} value={reviewForm.body} onChange={(e) => setReviewForm((f) => ({ ...f, body: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 resize-none" placeholder="Tell others about your experience…" />
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <button type="submit" disabled={reviewSubmitting} className="px-5 py-2.5 rounded-xl bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 disabled:opacity-50 transition-colors flex items-center gap-2">
-                            {reviewSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                            Submit Review
-                          </button>
-                          <button type="button" onClick={() => setShowReviewForm(false)} className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition-colors">
-                            Cancel
-                          </button>
-                        </div>
-                      </form>
-                    )}
-                    {reviewsLoading ? (
-                      <div className="space-y-4">
-                        {[...Array(2)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-slate-100 animate-pulse" />)}
-                      </div>
-                    ) : reviews.length === 0 ? (
-                      <div className="text-center py-10">
-                        <Star className="w-8 h-8 text-slate-200 fill-slate-200 mx-auto mb-2" />
-                        <p className="text-slate-500 text-sm font-medium">No reviews yet</p>
-                        <p className="text-slate-400 text-xs mt-1">Be the first to share your experience</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-5">
-                        {reviews.map((review: any) => (
-                          <div key={review._id} className="pb-5 border-b border-slate-100 last:border-0 last:pb-0">
-                            <div className="flex items-start justify-between gap-3 mb-2">
-                              <div>
-                                <p className="font-semibold text-slate-900 text-sm">{review.guestName}</p>
-                                <p className="text-xs text-slate-400">{new Date(review.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long" })}</p>
-                              </div>
-                              <StarRating value={review.rating} size={3} />
-                            </div>
-                            {review.title && <p className="font-medium text-slate-800 text-sm mb-1">{review.title}</p>}
-                            <p className="text-slate-600 text-sm leading-relaxed">{review.body}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
 
               <div ref={(el) => { sectionRefs.current.availability = el; }}>
