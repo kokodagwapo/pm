@@ -298,13 +298,13 @@ const NavItemComponent = memo(function NavItemComponent({
           level === 0 && "px-3 py-2 text-sm",
           level > 0 && "ml-5 pl-3 pr-3 py-1.5 text-xs",
           /* default state */
-          !isParentActive && "text-foreground/60 hover:text-foreground hover:bg-accent/60 active:bg-accent active:scale-[0.98]",
+          !isParentActive && "text-foreground/85 hover:text-foreground hover:bg-accent/60 active:bg-accent active:scale-[0.98]",
           /* active top-level */
-          isParentActive && level === 0 && "text-primary bg-primary/8 font-medium hover:bg-primary/12 active:bg-primary/16",
+          isParentActive && level === 0 && "text-primary bg-primary/8 font-semibold hover:bg-primary/12 active:bg-primary/16",
           /* active child */
-          isActive && level > 0 && "text-primary bg-primary/8 font-medium",
+          isActive && level > 0 && "text-primary bg-primary/8 font-semibold",
           /* non-active child */
-          !isActive && level > 0 && "text-foreground/55 hover:text-foreground hover:bg-accent/50 active:scale-[0.98]",
+          !isActive && level > 0 && "text-foreground/80 hover:text-foreground hover:bg-accent/50 active:scale-[0.98]",
           isCollapsed && level === 0 && "justify-center px-2",
         )}
       >
@@ -323,7 +323,7 @@ const NavItemComponent = memo(function NavItemComponent({
 
         {!isCollapsed && (
           <>
-            <span className={cn("flex-1 truncate tracking-[-0.01em]")}>
+            <span className={cn("flex-1 truncate font-medium tracking-[-0.01em]")}>
               {t(item.title)}
             </span>
             {item.badge && (
@@ -408,6 +408,7 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
       className={cn(
         "flex flex-col h-[100dvh] md:h-full bg-card/95 border-r border-border/40",
         "w-64 transition-all duration-300 ease-out",
+        "[font-family:var(--font-jakarta),var(--font-inter),system-ui,sans-serif]",
         isCollapsed && "w-16",
         className,
       )}
@@ -447,7 +448,7 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
         {filteredSections.map((section, sectionIndex) => (
           <div key={sectionIndex}>
             {section.title && !isCollapsed && (
-              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-foreground/30">
+              <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-foreground/50">
                 {t(section.title)}
               </p>
             )}
