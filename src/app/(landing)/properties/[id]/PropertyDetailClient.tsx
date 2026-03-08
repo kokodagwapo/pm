@@ -147,6 +147,11 @@ export function PropertyDetailClient({
   const [pricingResult, setPricingResult] = useState<PricingResult | null>(null);
   const [pricingLoading, setPricingLoading] = useState(false);
   const [pricingError, setPricingError] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponInput, setCouponInput] = useState("");
+  const [showCouponInput, setShowCouponInput] = useState(false);
+  const [couponApplying, setCouponApplying] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
 
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [inquiryForm, setInquiryForm] = useState<InquiryForm>({
@@ -293,10 +298,11 @@ export function PropertyDetailClient({
   }, [calendarPricingRules]);
 
   const fetchPricing = useCallback(
-    async (dates: DateSelection) => {
+    async (dates: DateSelection, coupon?: string) => {
       if (!property?._id || !unit?._id) return;
       setPricingLoading(true);
       setPricingError(null);
+      setCouponError(null);
       try {
         const res = await fetch("/api/pricing/calculate-public", {
           method: "POST",
@@ -306,6 +312,7 @@ export function PropertyDetailClient({
             unitId: unit._id.toString(),
             startDate: dates.startDate.toISOString(),
             endDate: dates.endDate.toISOString(),
+            ...(coupon ? { couponCode: coupon } : {}),
           }),
         });
         const data = await res.json();
@@ -320,6 +327,7 @@ export function PropertyDetailClient({
         setPricingResult(null);
       } finally {
         setPricingLoading(false);
+        setCouponApplying(false);
       }
     },
     [property?._id, unit?._id]
@@ -330,10 +338,24 @@ export function PropertyDetailClient({
       setSelectedDates(selection);
       setPricingResult(null);
       setInquiryResult(null);
+      setCouponCode("");
+      setCouponInput("");
+      setCouponError(null);
       fetchPricing(selection);
     },
     [fetchPricing]
   );
+
+  const handleApplyCoupon = useCallback(() => {
+    if (!couponInput.trim() || !selectedDates) return;
+    setCouponApplying(true);
+    setCouponError(null);
+    const code = couponInput.trim().toUpperCase();
+    setCouponCode(code);
+    fetchPricing(selectedDates, code).then(() => {
+      setCouponApplying(false);
+    });
+  }, [couponInput, selectedDates, fetchPricing]);
 
   const handleUnitChange = (index: number) => {
     setSelectedUnitIndex(index);
@@ -889,10 +911,13 @@ export function PropertyDetailClient({
                 </div>
 
                 {selectedDates && (
-                  <div className="mb-6 rounded-2xl border-2 border-sky-200 overflow-hidden shadow-sm">
-                    <div className="px-6 py-4 bg-gradient-to-r from-sky-50 to-indigo-50 border-b border-sky-100 flex items-center justify-between">
-                      <h3 className="font-semibold text-slate-900 flex items-center gap-2">
-                        <DollarSign className="w-4 h-4 text-sky-500" />
+                  <div className="mb-6 rounded-2xl border border-slate-200 overflow-hidden shadow-md">
+                    {/* Header */}
+                    <div className="px-5 py-3.5 bg-white border-b border-slate-100 flex items-center justify-between">
+                      <h3 className="font-semibold text-slate-900 flex items-center gap-2 text-sm">
+                        <span className="w-6 h-6 rounded-lg bg-sky-100 flex items-center justify-center shrink-0">
+                          <DollarSign className="w-3.5 h-3.5 text-sky-600" />
+                        </span>
                         Booking Summary
                       </h3>
                       <button
@@ -902,100 +927,225 @@ export function PropertyDetailClient({
                           setPricingError(null);
                           setInquiryResult(null);
                           setShowInquiryForm(false);
+                          setCouponCode("");
+                          setCouponInput("");
+                          setCouponError(null);
+                          setShowCouponInput(false);
                         }}
-                        className="text-slate-400 hover:text-slate-600 transition-colors"
+                        className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                        aria-label="Clear selection"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                    <div className="p-6 bg-white">
-                      <div className="flex items-center justify-between mb-4">
+
+                    <div className="bg-white">
+                      {/* Date display */}
+                      <div className="px-5 py-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-slate-100">
                         <div>
-                          <p className="text-sm text-slate-500">Selected dates</p>
-                          <p className="font-semibold text-slate-900 text-sm mt-0.5">
-                            {formatDateRange(selectedDates.startDate, selectedDates.endDate)}
+                          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Check-in</p>
+                          <p className="font-semibold text-slate-900 text-sm">
+                            {selectedDates.startDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="flex items-center gap-1">
+                            <div className="w-6 h-px bg-slate-300" />
+                            {pricingResult ? (
+                              <span className="px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 text-[10px] font-bold whitespace-nowrap">
+                                {pricingResult.totalNights}n
+                              </span>
+                            ) : (
+                              <span className="w-4 h-4 rounded-full bg-slate-100" />
+                            )}
+                            <div className="w-6 h-px bg-slate-300" />
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Check-out</p>
+                          <p className="font-semibold text-slate-900 text-sm">
+                            {selectedDates.endDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                           </p>
                         </div>
                       </div>
 
-                      {pricingLoading && (
-                        <div className="flex items-center gap-3 py-4 text-slate-500">
-                          <Loader2 className="w-4 h-4 animate-spin text-sky-500" />
-                          <span className="text-sm">Calculating pricing…</span>
-                        </div>
-                      )}
-
-                      {pricingError && (
-                        <div className="flex items-center gap-2 py-3 px-4 rounded-xl bg-amber-50 text-amber-700 text-sm mb-4">
-                          <AlertCircle className="w-4 h-4 shrink-0" />
-                          {pricingError}
-                        </div>
-                      )}
-
-                      {pricingResult && !pricingLoading && (
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm py-1.5">
-                            <span className="text-slate-600">
-                              {formatPriceExact(pricingResult.averagePricePerNight)} × {pricingResult.totalNights} night{pricingResult.totalNights !== 1 ? "s" : ""}
-                            </span>
-                            <span className="font-medium text-slate-800">{formatPriceExact(pricingResult.basePrice)}</span>
+                      {/* Pricing area */}
+                      <div className="px-5 py-4">
+                        {pricingLoading ? (
+                          <div className="space-y-3 animate-pulse">
+                            <div className="flex justify-between">
+                              <div className="h-3.5 w-36 rounded bg-slate-100" />
+                              <div className="h-3.5 w-16 rounded bg-slate-100" />
+                            </div>
+                            <div className="flex justify-between">
+                              <div className="h-3.5 w-28 rounded bg-slate-100" />
+                              <div className="h-3.5 w-16 rounded bg-slate-100" />
+                            </div>
+                            <div className="h-px bg-slate-100 my-2" />
+                            <div className="flex justify-between">
+                              <div className="h-4 w-12 rounded bg-slate-100" />
+                              <div className="h-4 w-20 rounded bg-slate-100" />
+                            </div>
                           </div>
-
-                          {pricingResult.discountsApplied?.map((d, i) => (
-                            <div key={i} className="flex items-center justify-between text-sm py-1">
-                              <span className="text-emerald-600 flex items-center gap-1.5">
-                                <Tag className="w-3.5 h-3.5" />
-                                {d.label}
-                                {d.percentage ? ` (${d.percentage}% off)` : ""}
+                        ) : pricingError ? (
+                          <div className="flex items-center gap-2 py-2.5 px-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">
+                            <AlertCircle className="w-4 h-4 shrink-0" />
+                            {pricingError}
+                          </div>
+                        ) : pricingResult ? (
+                          <div className="space-y-0">
+                            {/* Rate × nights */}
+                            <div className="flex items-center justify-between py-2 text-sm">
+                              <span className="text-slate-600">
+                                {formatPrice(Math.round(pricingResult.averagePricePerNight))}/night
+                                <span className="text-slate-400 ml-1">× {pricingResult.totalNights} night{pricingResult.totalNights !== 1 ? "s" : ""}</span>
                               </span>
-                              <span className="text-emerald-600 font-medium">−{formatPriceExact(d.amount)}</span>
+                              <span className="font-medium text-slate-800">{formatPriceExact(pricingResult.basePrice)}</span>
                             </div>
-                          ))}
 
-                          <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                            <span className="font-semibold text-slate-900">Total</span>
-                            <span className="text-xl font-bold text-slate-900">{formatPriceExact(pricingResult.calculatedPrice)}</span>
+                            {/* Discounts */}
+                            {pricingResult.discountsApplied?.length > 0 && pricingResult.discountsApplied.map((d, i) => (
+                              <div key={i} className="flex items-center justify-between py-1.5 text-sm">
+                                <span className="text-emerald-600 flex items-center gap-1.5 min-w-0">
+                                  <Tag className="w-3.5 h-3.5 shrink-0" />
+                                  <span className="truncate">{d.label}</span>
+                                  {d.percentage ? (
+                                    <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+                                      {d.percentage}% off
+                                    </span>
+                                  ) : null}
+                                </span>
+                                <span className="text-emerald-600 font-semibold ml-2 shrink-0">−{formatPriceExact(d.amount)}</span>
+                              </div>
+                            ))}
+
+                            {/* Coupon applied */}
+                            {couponCode && (
+                              <div className="flex items-center justify-between py-1.5 text-sm">
+                                <span className="text-emerald-600 flex items-center gap-1.5">
+                                  <Tag className="w-3.5 h-3.5 shrink-0" />
+                                  Promo: <span className="font-mono font-bold ml-1">{couponCode}</span>
+                                  <button
+                                    onClick={() => { setCouponCode(""); setCouponInput(""); if (selectedDates) fetchPricing(selectedDates); }}
+                                    className="p-0.5 rounded text-emerald-400 hover:text-red-400 transition-colors"
+                                    title="Remove coupon"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Total */}
+                            <div className="flex items-center justify-between pt-3 mt-1 border-t border-slate-100">
+                              <div>
+                                <span className="font-bold text-slate-900 text-base">Total</span>
+                                <span className="text-xs text-slate-400 ml-1.5">
+                                  ({formatPriceExact(Math.round(pricingResult.calculatedPrice / pricingResult.totalNights))}/night avg)
+                                </span>
+                              </div>
+                              <span className="text-xl font-extrabold text-slate-900">{formatPriceExact(pricingResult.calculatedPrice)}</span>
+                            </div>
                           </div>
+                        ) : null}
 
-                          {stayNudge && (
-                            <div className="mt-3 flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
-                              <Sparkles className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-                              <p className="text-sm text-amber-800">
-                                Add <strong>{stayNudge.add} more night{stayNudge.add > 1 ? "s" : ""}</strong> to unlock a {stayNudge.label}!
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                        {/* Stay nudge */}
+                        {stayNudge && pricingResult && !pricingLoading && (
+                          <div className="mt-3 flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-amber-50 border border-amber-200">
+                            <Sparkles className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                            <p className="text-xs text-amber-800 leading-relaxed">
+                              Add <strong>{stayNudge.add} more night{stayNudge.add > 1 ? "s" : ""}</strong> to unlock a <strong>{stayNudge.label}</strong>!
+                            </p>
+                          </div>
+                        )}
 
+                        {/* Coupon section */}
+                        {!pricingLoading && selectedDates && (
+                          <div className="mt-3">
+                            {!showCouponInput ? (
+                              <button
+                                onClick={() => setShowCouponInput(true)}
+                                className="flex items-center gap-1.5 text-xs text-sky-600 hover:text-sky-700 font-medium transition-colors"
+                              >
+                                <Tag className="w-3.5 h-3.5" />
+                                Have a promo code?
+                              </button>
+                            ) : (
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={couponInput}
+                                    onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                                    onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+                                    placeholder="Enter promo code"
+                                    className="flex-1 min-w-0 px-3 py-2 rounded-lg border border-slate-200 text-sm font-mono placeholder:text-slate-400 placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-300 transition-shadow uppercase"
+                                    autoFocus
+                                  />
+                                  <button
+                                    onClick={handleApplyCoupon}
+                                    disabled={!couponInput.trim() || couponApplying}
+                                    className="px-3 py-2 rounded-lg bg-sky-500 text-white text-xs font-semibold hover:bg-sky-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+                                  >
+                                    {couponApplying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Apply"}
+                                  </button>
+                                  <button
+                                    onClick={() => { setShowCouponInput(false); setCouponInput(""); setCouponError(null); }}
+                                    className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                                {couponError && (
+                                  <p className="text-xs text-red-500 flex items-center gap-1">
+                                    <AlertCircle className="w-3 h-3 shrink-0" />
+                                    {couponError}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Inquiry success */}
                       {inquiryResult?.success && (
-                        <div className="mt-4 flex items-start gap-3 px-4 py-4 rounded-xl bg-emerald-50 border border-emerald-200">
-                          <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                        <div className="mx-5 mb-4 flex items-start gap-3 px-4 py-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                           <div>
                             <p className="font-semibold text-emerald-800 text-sm">Inquiry sent successfully!</p>
-                            <p className="text-emerald-700 text-xs mt-1">
-                              Reference: <strong>{inquiryResult.ref}</strong>. We'll get back to you within 24 hours.
+                            <p className="text-emerald-600 text-xs mt-0.5">
+                              Ref: <strong>{inquiryResult.ref}</strong> · We'll be in touch within 24 hours.
                             </p>
                           </div>
                         </div>
                       )}
 
                       {inquiryResult?.error && (
-                        <div className="mt-4 flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
+                        <div className="mx-5 mb-4 flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
                           <AlertCircle className="w-4 h-4 shrink-0" />
                           {inquiryResult.error}
                         </div>
                       )}
 
+                      {/* Request button */}
                       {!inquiryResult?.success && (
-                        <button
-                          onClick={() => setShowInquiryForm((v) => !v)}
-                          className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-sky-500 text-white font-semibold hover:bg-sky-600 transition-colors shadow-sm shadow-sky-500/20 text-sm"
-                        >
-                          <Mail className="w-4 h-4" />
-                          Request this Rental
-                          {showInquiryForm ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
-                        </button>
+                        <div className="px-5 pb-5 pt-1">
+                          <button
+                            onClick={() => setShowInquiryForm((v) => !v)}
+                            disabled={pricingLoading}
+                            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-sky-500 text-white font-semibold hover:bg-sky-600 active:bg-sky-700 disabled:opacity-50 transition-colors shadow-sm shadow-sky-500/20 text-sm"
+                          >
+                            <Mail className="w-4 h-4" />
+                            Request this Rental
+                            {showInquiryForm ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
+                          </button>
+                          {pricingResult && (
+                            <p className="text-center text-xs text-slate-400 mt-2">
+                              No payment required now · Free inquiry
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
