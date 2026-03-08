@@ -506,6 +506,16 @@ const PropertySchema = new Schema<IProperty>(
       default: null,
       // In single company, this is more for organizational purposes
     },
+    virtualTourUrl: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    neighborhood: {
+      type: String,
+      default: null,
+      trim: true,
+    },
     deletedAt: {
       type: Date,
       default: null,

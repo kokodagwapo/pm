@@ -57,6 +57,8 @@ const enhancedPropertySchema = (t: (key: string, options?: any) => string) =>
       .min(1, t("properties.form.validation.nameRequired"))
       .max(200),
     description: z.string().max(2000).optional(),
+    virtualTourUrl: z.string().url().optional().or(z.literal("")),
+    neighborhood: z.string().max(100).optional(),
     type: z.nativeEnum(PropertyType),
     status: z.nativeEnum(PropertyStatus),
 
@@ -410,6 +412,8 @@ export function EnhancedPropertyForm({
     defaultValues: {
       name: initialData?.name || "",
       description: initialData?.description || "",
+      virtualTourUrl: initialData?.virtualTourUrl || "",
+      neighborhood: initialData?.neighborhood || "",
       type: initialData?.type || PropertyType.APARTMENT,
       status: initialData?.status || PropertyStatus.AVAILABLE,
       address: {
@@ -654,6 +658,30 @@ export function EnhancedPropertyForm({
               rows={3}
               {...form.register("description")}
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="neighborhood">Neighborhood / Area</Label>
+              <Input
+                id="neighborhood"
+                placeholder="e.g. Falling Waters, Naples"
+                {...form.register("neighborhood")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="virtualTourUrl">Virtual Tour URL</Label>
+              <Input
+                id="virtualTourUrl"
+                type="url"
+                placeholder="https://youtube.com/watch?v=... or Matterport link"
+                {...form.register("virtualTourUrl")}
+              />
+              {form.formState.errors.virtualTourUrl && (
+                <p className="text-sm text-red-600">{form.formState.errors.virtualTourUrl.message as string}</p>
+              )}
+              <p className="text-xs text-muted-foreground">YouTube or Matterport links will be embedded automatically</p>
+            </div>
           </div>
 
           {/* Address */}

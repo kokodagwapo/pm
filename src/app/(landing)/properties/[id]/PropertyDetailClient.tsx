@@ -37,6 +37,15 @@ import {
   ChevronUp,
   Tag,
   Send,
+  Star,
+  Video,
+  ExternalLink,
+  FileText,
+  User,
+  Briefcase,
+  Building2,
+  Upload,
+  ClipboardList,
 } from "lucide-react";
 import {
   AvailabilityCalendar,
@@ -99,14 +108,31 @@ function getAmenityIcon(name: string) {
   return CheckCircle2;
 }
 
-const NAV_SECTIONS = [
+const BASE_NAV_SECTIONS = [
   { id: "description", label: "Description" },
   { id: "pricing", label: "Pricing" },
   { id: "details", label: "Details" },
   { id: "amenities", label: "Amenities" },
   { id: "availability", label: "Availability" },
-  { id: "map", label: "Map" },
 ];
+
+function StarRating({ value, max = 5, size = 4 }: { value: number; max?: number; size?: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: max }, (_, i) => (
+        <Star
+          key={i}
+          className={`w-${size} h-${size} ${i < Math.round(value) ? "text-amber-400 fill-amber-400" : "text-slate-200 fill-slate-200"}`}
+        />
+      ))}
+    </div>
+  );
+}
+
+function getYouTubeEmbedUrl(url: string): string | null {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}?rel=0&modestbranding=1` : null;
+}
 
 interface PricingResult {
   totalNights: number;
@@ -170,6 +196,24 @@ export function PropertyDetailClient({
 
   const inquirySectionRef = useRef<HTMLDivElement>(null);
 
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ guestName: "", guestEmail: "", rating: 5, title: "", body: "" });
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [appStep, setAppStep] = useState(1);
+  const [appForm, setAppForm] = useState({
+    firstName: "", lastName: "", email: "", phone: "", dob: "",
+    employer: "", monthlyIncome: "", jobLength: "",
+    prevAddress: "", prevLandlord: "", prevLandlordPhone: "",
+    agreeTerms: false,
+  });
+  const [appSubmitting, setAppSubmitting] = useState(false);
+  const [appResult, setAppResult] = useState<{ success: boolean; ref?: string; error?: string } | null>(null);
+
   useEffect(() => {
     if (initialProperty) return;
     if (!id) {
@@ -218,14 +262,103 @@ export function PropertyDetailClient({
     ? `${address.street}, ${address.city}, ${address.state} ${address.zipCode}`
     : "";
 
+  const navSections = useMemo(() => {
+    const sections = [...BASE_NAV_SECTIONS];
+    if (property?.virtualTourUrl) sections.splice(4, 0, { id: "tour", label: "Virtual Tour" });
+    sections.push({ id: "reviews", label: "Reviews" });
+    sections.push({ id: "map", label: "Map" });
+    return sections;
+  }, [property?.virtualTourUrl]);
+
   useEffect(() => {
     if (fullAddress && fullAddress.trim().length > 5) geocodeAddress(fullAddress);
   }, [fullAddress, geocodeAddress]);
 
   useEffect(() => {
+    try {
+      const stored = localStorage.getItem("smartstart_favorites");
+      const ids: string[] = stored ? JSON.parse(stored) : [];
+      setIsFavorited(ids.includes(id));
+    } catch {}
+  }, [id]);
+
+  const toggleFavorite = useCallback(() => {
+    setIsFavorited((prev) => {
+      const next = !prev;
+      try {
+        const stored = localStorage.getItem("smartstart_favorites");
+        const ids: string[] = stored ? JSON.parse(stored) : [];
+        const updated = next ? [...ids.filter((x) => x !== id), id] : ids.filter((x) => x !== id);
+        localStorage.setItem("smartstart_favorites", JSON.stringify(updated));
+      } catch {}
+      return next;
+    });
+  }, [id]);
+
+  useEffect(() => {
+    if (!property?._id) return;
+    setReviewsLoading(true);
+    fetch(`/api/reviews/public?propertyId=${property._id}`)
+      .then((r) => r.json())
+      .then((d) => { if (d?.success) setReviews(d.data?.reviews ?? []); })
+      .catch(() => {})
+      .finally(() => setReviewsLoading(false));
+  }, [property?._id]);
+
+  const handleSubmitReview = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setReviewSubmitting(true);
+    try {
+      const res = await fetch("/api/reviews/public", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...reviewForm, propertyId: property._id }),
+      });
+      const data = await res.json();
+      if (data?.success) {
+        setReviewSubmitted(true);
+        setShowReviewForm(false);
+        setReviewForm({ guestName: "", guestEmail: "", rating: 5, title: "", body: "" });
+      }
+    } catch {} finally { setReviewSubmitting(false); }
+  }, [reviewForm, property?._id]);
+
+  const handleSubmitApplication = useCallback(async () => {
+    setAppSubmitting(true);
+    try {
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId: property._id,
+          unitId: unit?._id,
+          applicantName: `${appForm.firstName} ${appForm.lastName}`,
+          applicantEmail: appForm.email,
+          applicantPhone: appForm.phone,
+          dateOfBirth: appForm.dob,
+          employerName: appForm.employer,
+          monthlyIncome: Number(appForm.monthlyIncome),
+          employmentLength: appForm.jobLength,
+          previousAddress: appForm.prevAddress,
+          previousLandlord: appForm.prevLandlord,
+          previousLandlordPhone: appForm.prevLandlordPhone,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok || data?.success) {
+        setAppResult({ success: true, ref: data?.data?.applicationNumber ?? data?.data?._id?.slice(-6)?.toUpperCase() ?? "APP-" + Date.now().toString(36).toUpperCase() });
+      } else {
+        setAppResult({ success: false, error: data?.message ?? "Submission failed. Please try again." });
+      }
+    } catch (err: any) {
+      setAppResult({ success: false, error: "Connection error. Please try again." });
+    } finally { setAppSubmitting(false); }
+  }, [appForm, property?._id, unit?._id]);
+
+  useEffect(() => {
     const handleScroll = () => {
       const offset = 160;
-      for (const section of [...NAV_SECTIONS].reverse()) {
+      for (const section of [...navSections].reverse()) {
         const el = sectionRefs.current[section.id];
         if (el) {
           const rect = el.getBoundingClientRect();
@@ -567,24 +700,42 @@ export function PropertyDetailClient({
           </div>
 
           <div className="sticky top-[72px] z-30 bg-white border-b border-slate-200 -mx-4 md:-mx-8 px-4 md:px-8 mb-8">
-            <nav className="flex gap-1 overflow-x-auto no-scrollbar py-1">
-              {NAV_SECTIONS.map((section) => (
+            <div className="flex items-center justify-between">
+              <nav className="flex gap-1 overflow-x-auto no-scrollbar py-1 flex-1">
+                {navSections.map((section) => (
+                  <button
+                    key={section.id}
+                    onClick={() => scrollToSection(section.id)}
+                    className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative ${
+                      activeSection === section.id
+                        ? "text-sky-600"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    {section.label}
+                    {activeSection === section.id && (
+                      <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-sky-500 rounded-full" />
+                    )}
+                  </button>
+                ))}
+              </nav>
+              <div className="flex items-center gap-1 shrink-0 pl-2">
                 <button
-                  key={section.id}
-                  onClick={() => scrollToSection(section.id)}
-                  className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative ${
-                    activeSection === section.id
-                      ? "text-sky-600"
-                      : "text-slate-500 hover:text-slate-800"
-                  }`}
+                  onClick={toggleFavorite}
+                  className={`p-2 rounded-lg transition-all ${isFavorited ? "bg-red-50 text-red-500" : "text-slate-400 hover:text-red-400 hover:bg-red-50"}`}
+                  title={isFavorited ? "Saved" : "Save property"}
                 >
-                  {section.label}
-                  {activeSection === section.id && (
-                    <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-sky-500 rounded-full" />
-                  )}
+                  <Heart className={`w-4 h-4 ${isFavorited ? "fill-current" : ""}`} />
                 </button>
-              ))}
-            </nav>
+                <button
+                  onClick={() => { if (navigator.share) { navigator.share({ title: property?.name, url: window.location.href }); } else { navigator.clipboard?.writeText(window.location.href); }}}
+                  className="p-2 rounded-lg text-slate-400 hover:text-sky-500 hover:bg-sky-50 transition-all"
+                  title="Share"
+                >
+                  <Share2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="flex flex-col lg:flex-row gap-10">
@@ -868,6 +1019,148 @@ export function PropertyDetailClient({
                 )}
               </div>
 
+              {/* Virtual Tour section */}
+              <div ref={(el) => { sectionRefs.current.tour = el; }}>
+                {property?.virtualTourUrl && (() => {
+                  const ytUrl = getYouTubeEmbedUrl(property.virtualTourUrl);
+                  const isMatterport = property.virtualTourUrl.includes("matterport.com");
+                  const embedUrl = ytUrl ?? (isMatterport ? property.virtualTourUrl.replace("/show/", "/show/?play=1&") : null);
+                  return (
+                    <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
+                      <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                        <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                          <Video className="w-5 h-5 text-sky-500" />
+                          Virtual Tour
+                        </h2>
+                        <a href={property.virtualTourUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-sky-600 hover:text-sky-700 font-medium">
+                          Open full tour <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                      <div className="relative bg-black" style={{ paddingBottom: "56.25%" }}>
+                        {embedUrl ? (
+                          <iframe
+                            src={embedUrl}
+                            title="Virtual Tour"
+                            className="absolute inset-0 w-full h-full"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking"
+                            allowFullScreen
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                            <Video className="w-12 h-12 mb-3 opacity-40" />
+                            <p className="text-sm opacity-60 mb-3">Tour hosted externally</p>
+                            <a href={property.virtualTourUrl} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-sky-500 rounded-xl text-sm font-medium hover:bg-sky-400 transition-colors flex items-center gap-2">
+                              <ExternalLink className="w-4 h-4" />
+                              Launch Virtual Tour
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Reviews section */}
+              <div ref={(el) => { sectionRefs.current.reviews = el; }}>
+                <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
+                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                      <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+                      Guest Reviews
+                      {reviews.length > 0 && (
+                        <span className="text-sm font-normal text-slate-500 ml-1">({reviews.length})</span>
+                      )}
+                    </h2>
+                    {!showReviewForm && !reviewSubmitted && (
+                      <button onClick={() => setShowReviewForm(true)} className="px-3 py-1.5 rounded-lg bg-sky-500 text-white text-xs font-semibold hover:bg-sky-600 transition-colors">
+                        Write a Review
+                      </button>
+                    )}
+                  </div>
+                  <div className="p-6">
+                    {reviewSubmitted && (
+                      <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200 mb-5">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                        <div>
+                          <p className="font-semibold text-emerald-800 text-sm">Thank you for your review!</p>
+                          <p className="text-emerald-600 text-xs mt-0.5">Your review is pending approval and will appear here shortly.</p>
+                        </div>
+                      </div>
+                    )}
+                    {showReviewForm && (
+                      <form onSubmit={handleSubmitReview} className="mb-6 p-5 rounded-xl border border-slate-200 bg-slate-50 space-y-4">
+                        <h3 className="font-semibold text-slate-900 text-sm">Share your experience</h3>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-600 mb-1">Rating *</label>
+                          <div className="flex items-center gap-1">
+                            {[1,2,3,4,5].map((s) => (
+                              <button key={s} type="button" onClick={() => setReviewForm((f) => ({ ...f, rating: s }))} className="p-0.5">
+                                <Star className={`w-6 h-6 transition-colors ${s <= reviewForm.rating ? "text-amber-400 fill-amber-400" : "text-slate-300"}`} />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-slate-600 mb-1">Your Name *</label>
+                            <input required value={reviewForm.guestName} onChange={(e) => setReviewForm((f) => ({ ...f, guestName: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="Jane Smith" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-slate-600 mb-1">Email *</label>
+                            <input required type="email" value={reviewForm.guestEmail} onChange={(e) => setReviewForm((f) => ({ ...f, guestEmail: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="jane@email.com" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-600 mb-1">Review Title</label>
+                          <input value={reviewForm.title} onChange={(e) => setReviewForm((f) => ({ ...f, title: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="Great stay!" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-600 mb-1">Your Review *</label>
+                          <textarea required rows={4} value={reviewForm.body} onChange={(e) => setReviewForm((f) => ({ ...f, body: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 resize-none" placeholder="Tell others about your experience…" />
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button type="submit" disabled={reviewSubmitting} className="px-5 py-2.5 rounded-xl bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 disabled:opacity-50 transition-colors flex items-center gap-2">
+                            {reviewSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                            Submit Review
+                          </button>
+                          <button type="button" onClick={() => setShowReviewForm(false)} className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition-colors">
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                    {reviewsLoading ? (
+                      <div className="space-y-4">
+                        {[...Array(2)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-slate-100 animate-pulse" />)}
+                      </div>
+                    ) : reviews.length === 0 ? (
+                      <div className="text-center py-10">
+                        <Star className="w-8 h-8 text-slate-200 fill-slate-200 mx-auto mb-2" />
+                        <p className="text-slate-500 text-sm font-medium">No reviews yet</p>
+                        <p className="text-slate-400 text-xs mt-1">Be the first to share your experience</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-5">
+                        {reviews.map((review: any) => (
+                          <div key={review._id} className="pb-5 border-b border-slate-100 last:border-0 last:pb-0">
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <div>
+                                <p className="font-semibold text-slate-900 text-sm">{review.guestName}</p>
+                                <p className="text-xs text-slate-400">{new Date(review.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long" })}</p>
+                              </div>
+                              <StarRating value={review.rating} size={3} />
+                            </div>
+                            {review.title && <p className="font-medium text-slate-800 text-sm mb-1">{review.title}</p>}
+                            <p className="text-slate-600 text-sm leading-relaxed">{review.body}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div ref={(el) => { sectionRefs.current.availability = el; }}>
                 <div className="mb-6 rounded-2xl border border-slate-200 overflow-hidden">
                   <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
@@ -1110,13 +1403,31 @@ export function PropertyDetailClient({
 
                       {/* Inquiry success */}
                       {inquiryResult?.success && (
-                        <div className="mx-5 mb-4 flex items-start gap-3 px-4 py-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                          <div>
-                            <p className="font-semibold text-emerald-800 text-sm">Inquiry sent successfully!</p>
-                            <p className="text-emerald-600 text-xs mt-0.5">
-                              Ref: <strong>{inquiryResult.ref}</strong> · We'll be in touch within 24 hours.
-                            </p>
+                        <div className="mx-5 mb-3 space-y-3">
+                          <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                            <div>
+                              <p className="font-semibold text-emerald-800 text-sm">Inquiry sent successfully!</p>
+                              <p className="text-emerald-600 text-xs mt-0.5">
+                                Ref: <strong>{inquiryResult.ref}</strong> · We'll be in touch within 24 hours.
+                              </p>
+                            </div>
+                          </div>
+                          <div className="px-4 py-4 rounded-xl bg-sky-50 border border-sky-200">
+                            <div className="flex items-start gap-3">
+                              <ClipboardList className="w-5 h-5 text-sky-500 shrink-0 mt-0.5" />
+                              <div className="flex-1">
+                                <p className="font-semibold text-sky-900 text-sm">Ready to apply?</p>
+                                <p className="text-sky-600 text-xs mt-0.5 mb-3">Complete a full rental application to move to the front of the queue.</p>
+                                <button
+                                  onClick={() => { setShowApplyModal(true); setAppStep(1); setAppResult(null); }}
+                                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-sky-500 text-white text-xs font-semibold hover:bg-sky-600 transition-colors"
+                                >
+                                  <FileText className="w-3.5 h-3.5" />
+                                  Start Full Application
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -1436,6 +1747,149 @@ export function PropertyDetailClient({
           propertyContext={lunaPropertyContext}
           onRequestBooking={scrollToInquiry}
         />
+      )}
+
+      {/* Rental Application Modal */}
+      {showApplyModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowApplyModal(false); }}>
+          <div className="bg-white w-full sm:rounded-2xl sm:max-w-xl max-h-[95vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+              <div>
+                <h2 className="font-bold text-slate-900 flex items-center gap-2">
+                  <ClipboardList className="w-5 h-5 text-sky-500" />
+                  Rental Application
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">{property?.name}</p>
+              </div>
+              <button onClick={() => setShowApplyModal(false)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Step indicator */}
+            {!appResult && (
+              <div className="px-6 py-3 border-b border-slate-100 flex items-center gap-2 shrink-0">
+                {[{n:1,label:"Personal",icon:User},{n:2,label:"Employment",icon:Briefcase},{n:3,label:"Rental History",icon:Building2},{n:4,label:"Review & Submit",icon:FileText}].map(({n,label,icon:Icon}) => (
+                  <div key={n} className="flex items-center gap-1.5 flex-1">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 ${appStep >= n ? "bg-sky-500 text-white" : "bg-slate-100 text-slate-400"}`}>
+                      {appStep > n ? <CheckCircle2 className="w-3.5 h-3.5" /> : n}
+                    </div>
+                    <span className={`text-[11px] font-medium hidden sm:block ${appStep >= n ? "text-sky-600" : "text-slate-400"}`}>{label}</span>
+                    {n < 4 && <div className={`flex-1 h-px ${appStep > n ? "bg-sky-300" : "bg-slate-200"}`} />}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="overflow-y-auto flex-1 p-6">
+              {appResult ? (
+                appResult.success ? (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Application Submitted!</h3>
+                    <p className="text-slate-500 text-sm mb-4">We've received your application and will review it shortly.</p>
+                    {appResult.ref && (
+                      <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-mono font-semibold">
+                        Reference: {appResult.ref}
+                      </div>
+                    )}
+                    <p className="text-slate-400 text-xs mt-4">Keep this reference number for your records. We'll contact you within 2-3 business days.</p>
+                    <button onClick={() => setShowApplyModal(false)} className="mt-6 px-6 py-3 rounded-xl bg-sky-500 text-white font-semibold hover:bg-sky-600 transition-colors">
+                      Done
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
+                    <p className="font-semibold text-slate-900 mb-1">Submission Failed</p>
+                    <p className="text-slate-500 text-sm mb-5">{appResult.error}</p>
+                    <button onClick={() => setAppResult(null)} className="px-6 py-3 rounded-xl bg-sky-500 text-white font-semibold hover:bg-sky-600 transition-colors">
+                      Try Again
+                    </button>
+                  </div>
+                )
+              ) : appStep === 1 ? (
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-slate-900 flex items-center gap-2"><User className="w-4 h-4 text-sky-500" />Personal Information</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div><label className="block text-xs font-medium text-slate-600 mb-1">First Name *</label><input required value={appForm.firstName} onChange={(e) => setAppForm((f) => ({...f, firstName: e.target.value}))} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="Jane" /></div>
+                    <div><label className="block text-xs font-medium text-slate-600 mb-1">Last Name *</label><input required value={appForm.lastName} onChange={(e) => setAppForm((f) => ({...f, lastName: e.target.value}))} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="Smith" /></div>
+                  </div>
+                  <div><label className="block text-xs font-medium text-slate-600 mb-1">Email Address *</label><input required type="email" value={appForm.email} onChange={(e) => setAppForm((f) => ({...f, email: e.target.value}))} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="jane@email.com" /></div>
+                  <div><label className="block text-xs font-medium text-slate-600 mb-1">Phone Number *</label><input required type="tel" value={appForm.phone} onChange={(e) => setAppForm((f) => ({...f, phone: e.target.value}))} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="(555) 123-4567" /></div>
+                  <div><label className="block text-xs font-medium text-slate-600 mb-1">Date of Birth</label><input type="date" value={appForm.dob} onChange={(e) => setAppForm((f) => ({...f, dob: e.target.value}))} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" /></div>
+                </div>
+              ) : appStep === 2 ? (
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-slate-900 flex items-center gap-2"><Briefcase className="w-4 h-4 text-sky-500" />Employment & Income</h3>
+                  <div><label className="block text-xs font-medium text-slate-600 mb-1">Employer Name *</label><input required value={appForm.employer} onChange={(e) => setAppForm((f) => ({...f, employer: e.target.value}))} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="Acme Corp" /></div>
+                  <div><label className="block text-xs font-medium text-slate-600 mb-1">Monthly Income (USD) *</label><input required type="number" min="0" value={appForm.monthlyIncome} onChange={(e) => setAppForm((f) => ({...f, monthlyIncome: e.target.value}))} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="5000" /></div>
+                  <div><label className="block text-xs font-medium text-slate-600 mb-1">Length of Employment</label><input value={appForm.jobLength} onChange={(e) => setAppForm((f) => ({...f, jobLength: e.target.value}))} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="2 years" /></div>
+                </div>
+              ) : appStep === 3 ? (
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-slate-900 flex items-center gap-2"><Building2 className="w-4 h-4 text-sky-500" />Rental History</h3>
+                  <div><label className="block text-xs font-medium text-slate-600 mb-1">Previous Address</label><input value={appForm.prevAddress} onChange={(e) => setAppForm((f) => ({...f, prevAddress: e.target.value}))} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="123 Main St, Naples, FL 34102" /></div>
+                  <div><label className="block text-xs font-medium text-slate-600 mb-1">Previous Landlord Name</label><input value={appForm.prevLandlord} onChange={(e) => setAppForm((f) => ({...f, prevLandlord: e.target.value}))} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="John Doe" /></div>
+                  <div><label className="block text-xs font-medium text-slate-600 mb-1">Previous Landlord Phone</label><input type="tel" value={appForm.prevLandlordPhone} onChange={(e) => setAppForm((f) => ({...f, prevLandlordPhone: e.target.value}))} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="(555) 987-6543" /></div>
+                </div>
+              ) : (
+                <div className="space-y-5">
+                  <h3 className="font-semibold text-slate-900 flex items-center gap-2"><FileText className="w-4 h-4 text-sky-500" />Review & Submit</h3>
+                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 space-y-2 text-sm">
+                    <div className="flex justify-between"><span className="text-slate-500">Name</span><span className="font-medium">{appForm.firstName} {appForm.lastName}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Email</span><span className="font-medium">{appForm.email}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Phone</span><span className="font-medium">{appForm.phone}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Employer</span><span className="font-medium">{appForm.employer || "—"}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Monthly Income</span><span className="font-medium">{appForm.monthlyIncome ? `$${Number(appForm.monthlyIncome).toLocaleString()}` : "—"}</span></div>
+                  </div>
+                  <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 text-xs text-amber-700 flex items-start gap-2">
+                    <Upload className="w-4 h-4 shrink-0 mt-0.5" />
+                    <div><p className="font-semibold mb-0.5">ID Verification</p><p>Our team will contact you to collect a copy of your government-issued photo ID before finalizing your application.</p></div>
+                  </div>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" checked={appForm.agreeTerms} onChange={(e) => setAppForm((f) => ({...f, agreeTerms: e.target.checked}))} className="mt-0.5 w-4 h-4 rounded accent-sky-500 shrink-0" />
+                    <span className="text-sm text-slate-600">I confirm that all information provided is accurate and agree to the rental application terms.</span>
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {!appResult && (
+              <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between shrink-0">
+                <button
+                  onClick={() => appStep > 1 ? setAppStep((s) => s - 1) : setShowApplyModal(false)}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+                >
+                  {appStep > 1 ? "Back" : "Cancel"}
+                </button>
+                {appStep < 4 ? (
+                  <button
+                    onClick={() => {
+                      if (appStep === 1 && (!appForm.firstName || !appForm.lastName || !appForm.email || !appForm.phone)) return;
+                      if (appStep === 2 && (!appForm.employer || !appForm.monthlyIncome)) return;
+                      setAppStep((s) => s + 1);
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 transition-colors"
+                  >
+                    Continue
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSubmitApplication}
+                    disabled={!appForm.agreeTerms || appSubmitting}
+                    className="px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 disabled:opacity-50 transition-colors flex items-center gap-2"
+                  >
+                    {appSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                    Submit Application
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

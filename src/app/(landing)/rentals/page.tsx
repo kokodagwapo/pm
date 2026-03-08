@@ -21,6 +21,10 @@ import {
   ArrowRight,
   ExternalLink,
   ChevronDown,
+  Heart,
+  GitCompare,
+  Star,
+  Check,
 } from "lucide-react";
 
 const NEIGHBORHOODS = [
@@ -184,16 +188,106 @@ function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: (
   );
 }
 
+function CompareModal({
+  properties,
+  onClose,
+}: {
+  properties: any[];
+  onClose: () => void;
+}) {
+  const rows = [
+    { label: "Price/month", render: (p: any) => {
+      const u = p.units?.[0]; const r = u?.rentAmount ?? 0; const price = r > 500 ? r : r * 30;
+      return <span className="font-bold text-sky-600">{formatPrice(price)}</span>;
+    }},
+    { label: "Bedrooms", render: (p: any) => p.units?.[0]?.bedrooms ?? "—" },
+    { label: "Bathrooms", render: (p: any) => p.units?.[0]?.bathrooms ?? "—" },
+    { label: "Sq Ft", render: (p: any) => p.units?.[0]?.squareFootage ? `${p.units[0].squareFootage.toLocaleString()} sqft` : "—" },
+    { label: "Neighborhood", render: (p: any) => p.neighborhood ?? "Naples" },
+    { label: "Type", render: (p: any) => p.type ?? "—" },
+    { label: "Status", render: (p: any) => (
+      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${p.status === "available" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+        {p.status ?? "unknown"}
+      </span>
+    )},
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+          <h2 className="font-bold text-slate-900 text-lg flex items-center gap-2">
+            <GitCompare className="w-5 h-5 text-sky-500" />
+            Compare Properties
+          </h2>
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="overflow-auto flex-1">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-100">
+                <th className="text-left py-3 px-4 text-slate-400 font-medium w-28 shrink-0" />
+                {properties.map((p) => (
+                  <th key={p._id} className="py-3 px-4 text-left align-top">
+                    <div className="w-full h-32 rounded-xl overflow-hidden bg-slate-100 mb-2">
+                      {p.images?.[0] && <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />}
+                    </div>
+                    <p className="font-semibold text-slate-900 text-xs leading-snug line-clamp-2">{p.name}</p>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.label} className="border-b border-slate-50 hover:bg-slate-50/50">
+                  <td className="py-3 px-4 text-slate-500 font-medium">{row.label}</td>
+                  {properties.map((p) => (
+                    <td key={p._id} className="py-3 px-4 text-slate-800 font-medium">
+                      {typeof row.render === "function" ? row.render(p) : "—"}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+              <tr>
+                <td className="py-4 px-4" />
+                {properties.map((p) => (
+                  <td key={p._id} className="py-4 px-4">
+                    <Link href={`/properties/${p._id}`} className="block w-full py-2.5 rounded-xl bg-sky-500 text-white text-xs font-semibold text-center hover:bg-sky-600 transition-colors">
+                      View Details
+                    </Link>
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PropertyListCard({
   property,
   onHover,
   isHovered,
   isSelected,
+  isFavorited,
+  onToggleFavorite,
+  isInCompare,
+  onToggleCompare,
+  canAddToCompare,
 }: {
   property: any;
   onHover: (id: string | null) => void;
   isHovered: boolean;
   isSelected: boolean;
+  isFavorited: boolean;
+  onToggleFavorite: (id: string) => void;
+  isInCompare: boolean;
+  onToggleCompare: (id: string) => void;
+  canAddToCompare: boolean;
 }) {
   const unit = property.units?.[0];
   const bedrooms = unit?.bedrooms ?? 0;
@@ -230,6 +324,23 @@ function PropertyListCard({
             <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-500 text-white uppercase tracking-wide">
               For Rent
             </span>
+          </div>
+          <div className="absolute top-1.5 right-1.5 flex flex-col gap-1">
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleFavorite(property._id); }}
+              className={`w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-all ${isFavorited ? "bg-red-500 text-white" : "bg-white/90 text-slate-400 hover:text-red-400"}`}
+              title={isFavorited ? "Remove from saved" : "Save property"}
+            >
+              <Heart className={`w-3.5 h-3.5 ${isFavorited ? "fill-current" : ""}`} />
+            </button>
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleCompare(property._id); }}
+              disabled={!isInCompare && !canAddToCompare}
+              className={`w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-all disabled:opacity-40 ${isInCompare ? "bg-sky-500 text-white" : "bg-white/90 text-slate-400 hover:text-sky-500"}`}
+              title={isInCompare ? "Remove from compare" : "Add to compare"}
+            >
+              {isInCompare ? <Check className="w-3.5 h-3.5" /> : <GitCompare className="w-3.5 h-3.5" />}
+            </button>
           </div>
           {imageCount > 1 && (
             <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/50 text-white text-[10px] backdrop-blur-sm">
@@ -296,6 +407,10 @@ function RentalsContent() {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [showCompareModal, setShowCompareModal] = useState(false);
 
   const [searchText, setSearchText] = useState("");
   const [filterType, setFilterType] = useState("");
@@ -309,6 +424,27 @@ function RentalsContent() {
     () => properties.find((p) => p._id === selectedPropertyId) ?? null,
     [properties, selectedPropertyId]
   );
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("smartstart_favorites");
+      if (stored) setFavoriteIds(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  const toggleFavorite = useCallback((id: string) => {
+    setFavoriteIds((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      try { localStorage.setItem("smartstart_favorites", JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, []);
+
+  const toggleCompare = useCallback((id: string) => {
+    setCompareIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : prev.length < 3 ? [...prev, id] : prev
+    );
+  }, []);
 
   useEffect(() => {
     setSearchText(searchParams.get("search") || "");
@@ -546,6 +682,22 @@ function RentalsContent() {
                   </button>
                 );
               })}
+              <button
+                onClick={() => setShowFavoritesOnly((v) => !v)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap flex-shrink-0 border flex items-center gap-1 ${
+                  showFavoritesOnly
+                    ? "bg-red-500 text-white border-red-500 shadow-sm shadow-red-500/20"
+                    : "bg-white text-slate-600 border-slate-200 hover:border-red-300 hover:text-red-500 hover:bg-red-50"
+                }`}
+              >
+                <Heart className={`w-3 h-3 ${showFavoritesOnly ? "fill-current" : ""}`} />
+                Saved
+                {favoriteIds.length > 0 && (
+                  <span className={`px-1 py-0.5 rounded-full text-[10px] font-bold ${showFavoritesOnly ? "bg-white/30 text-white" : "bg-red-100 text-red-500"}`}>
+                    {favoriteIds.length}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
 
@@ -633,16 +785,36 @@ function RentalsContent() {
                   </button>
                 </div>
               ) : (
-                properties.map((property) => (
-                  <div key={property._id} id={`property-${property._id}`}>
-                    <PropertyListCard
-                      property={property}
-                      onHover={setHoveredPropertyId}
-                      isHovered={hoveredPropertyId === property._id}
-                      isSelected={selectedPropertyId === property._id}
-                    />
-                  </div>
-                ))
+                (() => {
+                  const displayed = showFavoritesOnly ? properties.filter((p) => favoriteIds.includes(p._id)) : properties;
+                  if (displayed.length === 0 && showFavoritesOnly) {
+                    return (
+                      <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+                        <Heart className="w-10 h-10 text-slate-200 mb-3" />
+                        <p className="text-slate-600 font-medium mb-1">No saved properties yet</p>
+                        <p className="text-slate-400 text-sm mb-4">Click the heart icon on a property to save it here</p>
+                        <button onClick={() => setShowFavoritesOnly(false)} className="px-4 py-2 rounded-lg bg-sky-500 text-white text-sm font-medium hover:bg-sky-600 transition-colors">
+                          Browse all properties
+                        </button>
+                      </div>
+                    );
+                  }
+                  return displayed.map((property) => (
+                    <div key={property._id} id={`property-${property._id}`}>
+                      <PropertyListCard
+                        property={property}
+                        onHover={setHoveredPropertyId}
+                        isHovered={hoveredPropertyId === property._id}
+                        isSelected={selectedPropertyId === property._id}
+                        isFavorited={favoriteIds.includes(property._id)}
+                        onToggleFavorite={toggleFavorite}
+                        isInCompare={compareIds.includes(property._id)}
+                        onToggleCompare={toggleCompare}
+                        canAddToCompare={compareIds.length < 3}
+                      />
+                    </div>
+                  ));
+                })()
               )}
 
               {/* Pagination */}
@@ -683,6 +855,62 @@ function RentalsContent() {
           </div>
         </div>
       </div>
+
+      {/* Floating comparison bar */}
+      {compareIds.length >= 1 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-slate-900 text-white rounded-2xl shadow-2xl px-4 py-3 border border-slate-700 backdrop-blur-md">
+          <div className="flex items-center gap-2">
+            {compareIds.map((id) => {
+              const p = properties.find((x) => x._id === id);
+              return (
+                <div key={id} className="relative">
+                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-700">
+                    {p?.images?.[0] && <img src={p.images[0]} alt="" className="w-full h-full object-cover" />}
+                  </div>
+                  <button
+                    onClick={() => toggleCompare(id)}
+                    className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-slate-600 hover:bg-red-500 text-white flex items-center justify-center transition-colors"
+                  >
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+              );
+            })}
+            {compareIds.length < 3 && (
+              <div className="w-10 h-10 rounded-lg border-2 border-dashed border-slate-600 flex items-center justify-center text-slate-500 text-xs">
+                +
+              </div>
+            )}
+          </div>
+          <div className="h-8 w-px bg-slate-700" />
+          <div>
+            <p className="text-xs text-slate-400 leading-none mb-0.5">Compare</p>
+            <p className="text-sm font-semibold leading-none">{compareIds.length} {compareIds.length === 1 ? "property" : "properties"}</p>
+          </div>
+          <button
+            onClick={() => setShowCompareModal(true)}
+            disabled={compareIds.length < 2}
+            className="ml-1 px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
+          >
+            Compare
+          </button>
+          <button
+            onClick={() => setCompareIds([])}
+            className="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+            title="Clear all"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Comparison modal */}
+      {showCompareModal && (
+        <CompareModal
+          properties={properties.filter((p) => compareIds.includes(p._id))}
+          onClose={() => setShowCompareModal(false)}
+        />
+      )}
     </div>
   );
 }

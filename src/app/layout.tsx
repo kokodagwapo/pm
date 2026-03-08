@@ -46,6 +46,13 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icons/icon.svg" />
+        <meta name="theme-color" content="#0ea5e9" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="SmartStartPM" />
       </head>
       <body className={`${inter.variable} ${inter.className} ${playfair.variable} ${montserrat.variable} font-light`} suppressHydrationWarning>
         <Providers>

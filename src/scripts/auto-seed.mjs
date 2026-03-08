@@ -164,6 +164,39 @@ async function run() {
       console.log(`  ${userCount} users already exist, skipping`);
     }
 
+    const promoCount = await db.collection('promocodes').countDocuments();
+    if (promoCount === 0) {
+      await db.collection('promocodes').insertMany([
+        {
+          code: 'WELCOME10',
+          description: '10% off your first booking',
+          discountType: 'percentage',
+          discountValue: 10,
+          maxUses: 100,
+          usedCount: 0,
+          minNights: 3,
+          expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+          active: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          code: 'SUMMER25',
+          description: '$25 off summer stays',
+          discountType: 'fixed',
+          discountValue: 25,
+          maxUses: 50,
+          usedCount: 0,
+          minNights: 5,
+          expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+          active: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]);
+      console.log('  Seeded 2 promo codes (WELCOME10, SUMMER25)');
+    }
+
     await mongoose.disconnect();
     console.log('Auto-seed complete');
   } catch (e) {
