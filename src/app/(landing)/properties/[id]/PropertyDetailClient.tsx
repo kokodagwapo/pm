@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LunaWidget } from "@/components/landing/LunaWidget";
+import { SinglePropertyMap } from "@/components/landing/SinglePropertyMap";
 import {
   Bed,
   Bath,
@@ -1191,8 +1192,8 @@ export function PropertyDetailClient({
                             onClick={() => handleUnitChange(i)}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
                               i === selectedUnitIndex
-                                ? "bg-sky-500 text-white border-sky-500 shadow-sm"
-                                : "bg-white text-slate-600 border-slate-200 hover:border-sky-300 hover:text-sky-600"
+                                ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                                : "bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-800"
                             }`}
                           >
                             {u.unitNumber || `Unit ${i + 1}`}
@@ -1216,10 +1217,10 @@ export function PropertyDetailClient({
                 {selectedDates && (
                   <div className="mb-6 rounded-2xl border border-slate-200 overflow-hidden shadow-md">
                     {/* Header */}
-                    <div className="px-5 py-3.5 bg-white border-b border-slate-100 flex items-center justify-between">
-                      <h3 className="font-semibold text-slate-900 flex items-center gap-2 text-sm">
-                        <span className="w-6 h-6 rounded-lg bg-sky-100 flex items-center justify-center shrink-0">
-                          <DollarSign className="w-3.5 h-3.5 text-sky-600" />
+                    <div className="px-5 py-3.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+                      <h3 className="font-semibold text-white flex items-center gap-2 text-sm">
+                        <span className="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                          <DollarSign className="w-3.5 h-3.5 text-amber-400" />
                         </span>
                         Booking Summary
                       </h3>
@@ -1235,7 +1236,7 @@ export function PropertyDetailClient({
                           setCouponError(null);
                           setShowCouponInput(false);
                         }}
-                        className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                        className="p-1 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
                         aria-label="Clear selection"
                       >
                         <X className="w-3.5 h-3.5" />
@@ -1368,7 +1369,7 @@ export function PropertyDetailClient({
                             {!showCouponInput ? (
                               <button
                                 onClick={() => setShowCouponInput(true)}
-                                className="flex items-center gap-1.5 text-xs text-sky-600 hover:text-sky-700 font-medium transition-colors"
+                                className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 font-medium transition-colors"
                               >
                                 <Tag className="w-3.5 h-3.5" />
                                 Have a promo code?
@@ -1455,7 +1456,7 @@ export function PropertyDetailClient({
                           <button
                             onClick={() => setShowInquiryForm((v) => !v)}
                             disabled={pricingLoading}
-                            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-sky-500 text-white font-semibold hover:bg-sky-600 active:bg-sky-700 disabled:opacity-50 transition-colors shadow-sm shadow-sky-500/20 text-sm"
+                            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 active:bg-slate-950 disabled:opacity-50 transition-colors shadow-md text-sm"
                           >
                             <Mail className="w-4 h-4" />
                             Request this Rental
@@ -1558,33 +1559,31 @@ export function PropertyDetailClient({
               <div ref={(el) => { sectionRefs.current.map = el; }}>
                 <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                   <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                    <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-orange-200" />
-                      Map
+                    <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                      <MapPin className="w-4 h-4 text-orange-400" />
+                      Location
                     </h2>
                   </div>
-                  <div className="relative">
-                    <iframe
-                      title="Property location"
-                      width="100%"
-                      height="400"
-                      style={{ border: 0 }}
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      src={mapSrc}
+                  <div className="relative h-[380px] bg-slate-100">
+                    <SinglePropertyMap
+                      lat={lat}
+                      lon={lon}
+                      address={fullAddress || "Naples, FL"}
+                      propertyName={property.name}
                     />
                   </div>
                   <div className="px-6 py-3 bg-white border-t border-slate-200 flex items-center justify-between">
                     <span className="text-sm text-slate-600 flex items-center gap-2">
-                      <MapPin className="w-4 h-4 shrink-0 text-sky-500" />
+                      <MapPin className="w-3.5 h-3.5 shrink-0 text-amber-400" />
                       {fullAddress || "Naples, FL"}
                     </span>
                     <a
-                      href={`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=16/${lat}/${lon}`}
+                      href={`https://www.google.com/maps?q=${lat},${lon}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-sky-600 hover:text-sky-700 font-medium"
+                      className="text-xs text-slate-600 hover:text-slate-900 font-medium flex items-center gap-1"
                     >
+                      <ExternalLink className="w-3 h-3" />
                       Open in Maps
                     </a>
                   </div>
@@ -1593,95 +1592,202 @@ export function PropertyDetailClient({
             </div>
 
             <aside className="lg:w-[380px] shrink-0">
-              <div className="sticky top-36">
-                <div className="rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
-                  <div className="p-6 bg-white">
-                    <div className="mb-1">
-                      <span className="text-3xl font-bold text-slate-900">
+              <div className="sticky top-36 space-y-4">
+
+                {/* Pricing + CTA card */}
+                <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xl overflow-hidden">
+                  {/* Header */}
+                  <div className="px-6 pt-6 pb-4">
+                    <div className="flex items-end gap-2 mb-1">
+                      <span className="text-4xl font-bold text-slate-900 leading-none tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                         {getRentDisplay(property)}
                       </span>
                       {getRentDisplay(property) !== "Contact for pricing" && (
-                        <span className="text-slate-500 text-sm">/month</span>
+                        <span className="text-slate-400 text-sm mb-1">/month</span>
                       )}
                     </div>
                     {baseRentPerNight > 0 && (
-                      <p className="text-sm text-slate-400 mb-6">
-                        From {formatPrice(Math.round(baseRentPerNight))}/night
+                      <p className="text-sm text-slate-400">
+                        From <span className="font-medium text-slate-600">{formatPrice(Math.round(baseRentPerNight))}</span>/night
                       </p>
                     )}
+                  </div>
 
-                    {selectedDates && pricingResult ? (
-                      <div className="mb-4">
-                        <div className="rounded-xl bg-sky-50 border border-sky-200 px-4 py-3 mb-3">
-                          <p className="text-xs text-sky-600 font-medium">Your selection</p>
-                          <p className="text-sm text-slate-800 font-semibold mt-0.5">
-                            {formatDateRange(selectedDates.startDate, selectedDates.endDate)}
+                  {/* Selected dates summary */}
+                  {selectedDates && (
+                    <div className="mx-5 mb-4 rounded-xl overflow-hidden border border-slate-100">
+                      <div className="grid grid-cols-2 divide-x divide-slate-100">
+                        <div className="px-4 py-3 bg-slate-50">
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Check-in</p>
+                          <p className="text-sm font-bold text-slate-900">
+                            {selectedDates.startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                           </p>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            {pricingResult.totalNights} nights · {formatPriceExact(pricingResult.calculatedPrice)} total
-                          </p>
+                          <p className="text-[10px] text-slate-400">{selectedDates.startDate.getFullYear()}</p>
                         </div>
-                        <button
-                          onClick={() => { setShowInquiryForm(true); scrollToInquiry(); }}
-                          className="block w-full py-3.5 rounded-xl bg-sky-500 text-white font-semibold text-center hover:bg-sky-600 transition-colors shadow-sm shadow-sky-500/20 mb-2 text-sm"
-                        >
-                          Request this Rental
-                        </button>
+                        <div className="px-4 py-3 bg-slate-50">
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Check-out</p>
+                          <p className="text-sm font-bold text-slate-900">
+                            {selectedDates.endDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                          </p>
+                          <p className="text-[10px] text-slate-400">{selectedDates.endDate.getFullYear()}</p>
+                        </div>
                       </div>
+
+                      {/* Price breakdown */}
+                      {pricingLoading ? (
+                        <div className="px-4 py-3 bg-white border-t border-slate-100 space-y-1.5 animate-pulse">
+                          <div className="flex justify-between">
+                            <div className="h-3 w-32 bg-slate-100 rounded" />
+                            <div className="h-3 w-14 bg-slate-100 rounded" />
+                          </div>
+                          <div className="h-px bg-slate-100" />
+                          <div className="flex justify-between">
+                            <div className="h-4 w-10 bg-slate-100 rounded" />
+                            <div className="h-4 w-20 bg-slate-100 rounded" />
+                          </div>
+                        </div>
+                      ) : pricingResult ? (
+                        <div className="px-4 py-3 bg-white border-t border-slate-100 space-y-1.5">
+                          <div className="flex items-center justify-between text-xs text-slate-500">
+                            <span>{formatPrice(Math.round(pricingResult.averagePricePerNight))}/night × {pricingResult.totalNights} nights</span>
+                            <span className="font-medium text-slate-700">{formatPriceExact(pricingResult.basePrice)}</span>
+                          </div>
+                          {pricingResult.discountsApplied?.length > 0 && pricingResult.discountsApplied.map((d: any, i: number) => (
+                            <div key={i} className="flex items-center justify-between text-xs text-emerald-600">
+                              <span className="flex items-center gap-1"><Tag className="w-3 h-3" />{d.label}{d.percentage ? ` (${d.percentage}% off)` : ""}</span>
+                              <span className="font-semibold">−{formatPriceExact(d.amount)}</span>
+                            </div>
+                          ))}
+                          {couponCode && (
+                            <div className="flex items-center justify-between text-xs text-emerald-600">
+                              <span className="flex items-center gap-1"><Tag className="w-3 h-3" />Promo: <span className="font-mono font-bold ml-0.5">{couponCode}</span></span>
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between pt-1.5 border-t border-slate-100">
+                            <span className="text-sm font-bold text-slate-900">Total</span>
+                            <span className="text-lg font-extrabold text-slate-900" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>{formatPriceExact(pricingResult.calculatedPrice)}</span>
+                          </div>
+                        </div>
+                      ) : baseRentPerNight > 0 ? (
+                        <div className="px-4 py-3 bg-white border-t border-slate-100">
+                          <div className="flex items-center justify-between text-xs text-slate-400">
+                            <span>Estimated total</span>
+                            <span className="font-medium text-slate-600">
+                              ~{formatPriceExact(baseRentPerNight * Math.max(1, Math.round((selectedDates.endDate.getTime() - selectedDates.startDate.getTime()) / 86400000)))}
+                            </span>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+
+                  {/* CTAs */}
+                  <div className="px-5 pb-5 space-y-2.5">
+                    {selectedDates && pricingResult ? (
+                      <button
+                        onClick={() => { setShowInquiryForm(true); scrollToInquiry(); }}
+                        className="w-full py-3.5 rounded-xl bg-slate-900 text-white font-semibold text-center hover:bg-slate-800 active:bg-slate-950 transition-colors shadow-lg shadow-slate-900/20 text-sm flex items-center justify-center gap-2"
+                      >
+                        <Mail className="w-4 h-4" />
+                        Request this Rental
+                      </button>
                     ) : (
                       <button
                         onClick={() => scrollToSection("availability")}
-                        className="block w-full py-3.5 rounded-xl bg-sky-500 text-white font-semibold text-center hover:bg-sky-600 transition-colors shadow-sm shadow-sky-500/20 mb-3 text-sm"
+                        className="w-full py-3.5 rounded-xl bg-slate-900 text-white font-semibold text-center hover:bg-slate-800 active:bg-slate-950 transition-colors shadow-lg shadow-slate-900/20 text-sm flex items-center justify-center gap-2"
                       >
+                        <Calendar className="w-4 h-4" />
                         Check Availability
                       </button>
                     )}
-
                     <Link
                       href="/contact"
-                      className="block w-full py-3 rounded-xl bg-white text-slate-700 font-medium text-center border border-slate-200 hover:bg-slate-50 transition-colors text-sm"
+                      className="block w-full py-3 rounded-xl bg-white text-slate-700 font-semibold text-center border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-colors text-sm"
                     >
                       Contact Us
                     </Link>
                   </div>
 
-                  <div className="px-6 py-4 bg-slate-50 border-t border-slate-200">
-                    <p className="text-xs text-slate-400 text-center">
-                      Select dates above to see instant pricing
-                    </p>
-                  </div>
+                  {/* Footer nudge */}
+                  {!selectedDates && (
+                    <div className="px-5 py-3 bg-slate-50/80 border-t border-slate-100 text-center">
+                      <p className="text-[11px] text-slate-400">
+                        Select dates above to see instant pricing
+                      </p>
+                    </div>
+                  )}
+                  {selectedDates && pricingResult && (
+                    <div className="px-5 py-3 bg-slate-50/80 border-t border-slate-100 text-center">
+                      <p className="text-[11px] text-slate-400">
+                        No payment required · Free inquiry
+                      </p>
+                    </div>
+                  )}
                 </div>
 
+                {/* Quick Facts card */}
                 {unit && (
-                  <div className="mt-4 rounded-2xl border border-slate-200 p-5">
-                    <h3 className="text-sm font-semibold text-slate-900 mb-3">Quick Facts</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-500">Property type</span>
-                        <span className="font-medium text-slate-800">{propertyType || "Rental"}</span>
+                  <div className="rounded-2xl bg-white border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div className="px-5 py-4 border-b border-slate-100">
+                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Quick Facts</h3>
+                    </div>
+                    <div className="divide-y divide-slate-50">
+                      <div className="flex items-center justify-between px-5 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
+                            <Home className="w-3.5 h-3.5 text-violet-600" />
+                          </div>
+                          <span className="text-sm text-slate-500">Property type</span>
+                        </div>
+                        <span className="text-sm font-semibold text-slate-900">{propertyType || "Rental"}</span>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-500">Bedrooms</span>
-                        <span className="font-medium text-slate-800">{unit.bedrooms}</span>
+                      <div className="flex items-center justify-between px-5 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-sky-100 flex items-center justify-center shrink-0">
+                            <Bed className="w-3.5 h-3.5 text-sky-600" />
+                          </div>
+                          <span className="text-sm text-slate-500">Bedrooms</span>
+                        </div>
+                        <span className="text-sm font-semibold text-slate-900">{unit.bedrooms}</span>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-500">Bathrooms</span>
-                        <span className="font-medium text-slate-800">{unit.bathrooms}</span>
+                      <div className="flex items-center justify-between px-5 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center shrink-0">
+                            <Bath className="w-3.5 h-3.5 text-rose-500" />
+                          </div>
+                          <span className="text-sm text-slate-500">Bathrooms</span>
+                        </div>
+                        <span className="text-sm font-semibold text-slate-900">{unit.bathrooms}</span>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-500">Max guests</span>
-                        <span className="font-medium text-slate-800">{totalGuests}</span>
+                      <div className="flex items-center justify-between px-5 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                            <Users className="w-3.5 h-3.5 text-amber-600" />
+                          </div>
+                          <span className="text-sm text-slate-500">Max guests</span>
+                        </div>
+                        <span className="text-sm font-semibold text-slate-900">{totalGuests}</span>
                       </div>
                       {unit.squareFootage && (
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-500">Area</span>
-                          <span className="font-medium text-slate-800">{unit.squareFootage} sq ft</span>
+                        <div className="flex items-center justify-between px-5 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+                              <Home className="w-3.5 h-3.5 text-emerald-600" />
+                            </div>
+                            <span className="text-sm text-slate-500">Area</span>
+                          </div>
+                          <span className="text-sm font-semibold text-slate-900">{unit.squareFootage.toLocaleString()} ft²</span>
                         </div>
                       )}
                       {property.neighborhood && (
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-500">Neighborhood</span>
-                          <span className="font-medium text-slate-800">{property.neighborhood}</span>
+                        <div className="flex items-center justify-between px-5 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center shrink-0">
+                              <MapPin className="w-3.5 h-3.5 text-orange-500" />
+                            </div>
+                            <span className="text-sm text-slate-500">Neighborhood</span>
+                          </div>
+                          <span className="text-sm font-semibold text-slate-900 text-right max-w-[140px] leading-tight">{property.neighborhood}</span>
                         </div>
                       )}
                     </div>
