@@ -14,42 +14,42 @@ const NEIGHBORHOOD_COORDS: Record<string, [number, number]> = {
   "Royal Arms":            [26.1500, -81.7900],
   "Villas of Whittenberg": [26.1880, -81.7850],
 
-  // ── Seed-35 communities ──────────────────────────────────────
-  "Vanderbilt Beach":      [26.2493, -81.8248],
-  "Gulf Shore":            [26.1831, -81.8128],
-  "Pelican Bay":           [26.2139, -81.7977],
-  "Moorings":              [26.1538, -81.8042],
+  // ── Seed-35 communities (GPS-verified) ───────────────────────
+  "Vanderbilt Beach":      [26.2542, -81.8224],  // 100 Vanderbilt Beach Rd
+  "Gulf Shore":            [26.1831, -81.8128],  // Gulf Shore Blvd N, Park Shore
+  "Pelican Bay":           [26.2312, -81.8056],  // Pelican Bay community center
+  "Moorings":              [26.1538, -81.8042],  // The Moorings, Gulf Shore Blvd N
   "The Moorings":          [26.1538, -81.8042],
-  "Park Shore":            [26.1924, -81.8133],
-  "Bay Colony":            [26.2282, -81.8046],
-  "Tiburón":               [26.2196, -81.8111],
-  "Tiburon":               [26.2196, -81.8111],
-  "Mediterra":             [26.3005, -81.7528],
+  "Park Shore":            [26.1979, -81.8124],  // Park Shore Marina, 4310 Gulf Shore Blvd N
+  "Bay Colony":            [26.2282, -81.8046],  // Bay Colony Dr, Pelican Bay north
+  "Tiburón":               [26.2469, -81.7661],  // 2620 Tiburon Drive, Naples 34109
+  "Tiburon":               [26.2469, -81.7661],
+  "Mediterra":             [26.3005, -81.7528],  // 16425 Carrara Way, north Naples
   "North Naples":          [26.2650, -81.7950],
-  "Downtown Naples":       [26.1388, -81.7985],
-  "Quail West":            [26.3118, -81.7505],
-  "Imperial Golf":         [26.2574, -81.7762],
-  "Bonita Beach":          [26.3544, -81.8357],
-  "Marco Island":          [25.9149, -81.7217],
+  "Downtown Naples":       [26.1388, -81.7985],  // 5th Ave S area
+  "Quail West":            [26.3118, -81.7505],  // 5265 Harrington Lake Dr N
+  "Imperial Golf":         [26.2574, -81.7762],  // 1705 Imperial Golf Course Blvd
+  "Bonita Beach":          [26.3544, -81.8357],  // Perdido Beach Blvd, Bonita Springs
+  "Marco Island":          [25.9149, -81.7217],  // Cape Marco Dr, Marco Island
   "Cape Marco":            [25.9149, -81.7217],
-  "Aqualane Shores":       [26.1305, -81.7990],
-  "Port Royal":            [26.1038, -81.8082],
-  "Coquina Sands":         [26.1467, -81.8065],
-  "Old Naples":            [26.1357, -81.8008],
+  "Aqualane Shores":       [26.1305, -81.7990],  // Banyan Blvd, Naples 34102
+  "Port Royal":            [26.1109, -81.7931],  // Gordon Dr, Naples 34102 (verified)
+  "Coquina Sands":         [26.1467, -81.8065],  // Sandpiper St, Naples 34102
+  "Old Naples":            [26.1357, -81.8008],  // 3rd St S, Naples 34102
   "Olde Naples":           [26.1357, -81.8008],
-  "Grey Oaks":             [26.1658, -81.8133],
-  "Twin Eagles":           [26.2773, -81.6601],
-  "Ave Maria":             [26.2688, -81.5891],
+  "Grey Oaks":             [26.1888, -81.7624],  // 2400 Grey Oaks Dr N (verified)
+  "Twin Eagles":           [26.2858, -81.6617],  // 11725 TwinEagles Blvd (verified)
+  "Ave Maria":             [26.3368, -81.4380],  // Ave Maria town center (verified)
   "Cape Coral":            [26.5783, -81.9695],
   "Bonita Springs":        [26.3397, -81.7786],
-  "Fiddler":               [26.0520, -81.6850],
-  "Fiddler's Creek":       [26.0520, -81.6850],
-  "Lely":                  [26.0852, -81.7321],
-  "Palmira":               [26.3100, -81.8003],
-  "Talis Park":            [26.3066, -81.8057],
-  "Hammock Bay":           [25.9643, -81.6981],
-  "Reflection Lakes":      [26.0850, -81.7153],
-  "Bayfront":              [26.1358, -81.7964],
+  "Fiddler":               [26.0820, -81.7140],  // Fiddler's Creek Pkwy (verified)
+  "Fiddler's Creek":       [26.0820, -81.7140],
+  "Lely":                  [26.0809, -81.6979],  // Lely Resort (verified)
+  "Palmira":               [26.3100, -81.8003],  // Palmira, Bonita Springs
+  "Talis Park":            [26.3066, -81.8057],  // Talis Park, north Naples
+  "Hammock Bay":           [25.9643, -81.6981],  // Hammock Bay, near Marco Island
+  "Reflection Lakes":      [26.0850, -81.7153],  // Reflection Lakes, east Naples
+  "Bayfront":              [26.1358, -81.7964],  // Bayfront, downtown Naples
 
   // ── Generic fallback ─────────────────────────────────────────
   "Naples":                [26.1420, -81.7948],
@@ -160,20 +160,20 @@ const POI_CATEGORIES: POICategory[] = [
     id: "parks", label: "Parks", emoji: "🌳", color: "#10b981",
     pois: [
       { name: "Sugden Regional Park", coords: [26.1356, -81.7625] },
-      { name: "North Collier Regional Park", coords: [26.2506, -81.7758] },
+      { name: "North Collier Regional Park", coords: [26.2632, -81.7469] },  // 15000 Livingston Rd (verified)
       { name: "Freedom Park", coords: [26.1752, -81.7752] },
       { name: "Barefoot Beach Preserve", coords: [26.3073, -81.8368] },
       { name: "Cocohatchee River Park", coords: [26.2940, -81.8126] },
-      { name: "Naples Botanical Garden", coords: [26.1447, -81.7557] },
+      { name: "Naples Botanical Garden", coords: [26.1068, -81.7711] },  // 4820 Bayshore Dr (verified)
     ],
   },
   {
     id: "hospitals", label: "Hospitals", emoji: "🏥", color: "#ef4444",
     pois: [
-      { name: "NCH Downtown Naples Hospital", coords: [26.1421, -81.7944] },
-      { name: "NCH North Naples Hospital", coords: [26.2580, -81.7805] },
+      { name: "NCH Downtown Naples Hospital", coords: [26.1422, -81.7943] },  // 350 7th St N (verified)
+      { name: "NCH North Naples Hospital", coords: [26.2732, -81.7899] },     // 11190 Health Park Blvd (verified)
       { name: "Physicians Regional Medical Center", coords: [26.1648, -81.7661] },
-      { name: "Naples Community Hospital ER", coords: [26.1425, -81.7940] },
+      { name: "Naples Community Hospital ER", coords: [26.1422, -81.7943] },
     ],
   },
   {
@@ -189,28 +189,28 @@ const POI_CATEGORIES: POICategory[] = [
   {
     id: "seedtotable", label: "Seed to Table", emoji: "🌱", color: "#84cc16",
     pois: [
-      { name: "Seed to Table — 1970 Immokalee Rd", coords: [26.2083, -81.7813] },
+      { name: "Seed to Table — 4835 Immokalee Rd", coords: [26.2742, -81.7529] },  // verified: 26.27415, -81.75287
     ],
   },
   {
     id: "wholefoods", label: "Whole Foods", emoji: "🥑", color: "#22c55e",
     pois: [
-      { name: "Whole Foods Market — Mercato", coords: [26.2167, -81.7970] },
+      { name: "Whole Foods Market — Mercato (9101 Strada Pl)", coords: [26.2549, -81.8001] },  // verified: 26.25487, -81.80007
     ],
   },
   {
     id: "barnesnoble", label: "Barnes & Noble", emoji: "📚", color: "#6366f1",
     pois: [
-      { name: "Barnes & Noble Naples", coords: [26.2154, -81.7960] },
+      { name: "Barnes & Noble — 4149 Tamiami Trail N", coords: [26.2063, -81.7989] },  // verified
     ],
   },
   {
     id: "golf", label: "Golf", emoji: "⛳", color: "#65a30d",
     pois: [
-      { name: "Tiburon Golf Club", coords: [26.2213, -81.8113] },
-      { name: "Naples Grande Golf Club", coords: [26.2028, -81.8079] },
-      { name: "Grey Oaks Country Club", coords: [26.1653, -81.8134] },
-      { name: "Lely Resort Golf & CC", coords: [26.0852, -81.7321] },
+      { name: "Tiburon Golf Club", coords: [26.2469, -81.7661] },         // 2620 Tiburon Drive (verified)
+      { name: "Naples Grande Golf Club", coords: [26.2111, -81.8072] },   // 475 Seagate Drive (verified)
+      { name: "Grey Oaks Country Club", coords: [26.1888, -81.7624] },    // 2400 Grey Oaks Dr N (verified)
+      { name: "Lely Resort Golf & CC", coords: [26.0809, -81.6979] },     // verified
       { name: "Pelican Bay Golf Course", coords: [26.2160, -81.8118] },
       { name: "Eagle Lakes Golf Club", coords: [26.0720, -81.7180] },
     ],
