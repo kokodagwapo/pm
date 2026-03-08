@@ -81,7 +81,7 @@ export function LandingHeader() {
               </svg>
             </div>
             <span className="font-[var(--font-montserrat)] font-semibold text-base sm:text-lg tracking-wide truncate">
-              SmartStartPM
+              SmartStart Property Management
             </span>
           </Link>
 

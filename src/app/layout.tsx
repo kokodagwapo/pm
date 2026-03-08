@@ -28,7 +28,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "SmartStartPM",
+  title: "SmartStart Property Management",
   description: "Property Management Software",
   icons: {
     icon: "/favicon.svg",
@@ -58,7 +58,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="SmartStartPM" />
+        <meta name="apple-mobile-web-app-title" content="SmartStart Property Management" />
       </head>
       <body className={`${inter.variable} ${inter.className} ${playfair.variable} ${montserrat.variable} ${plusJakarta.variable} font-light`} suppressHydrationWarning>
         <Providers>
