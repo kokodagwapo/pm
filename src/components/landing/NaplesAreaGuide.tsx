@@ -220,7 +220,7 @@ function SectionHeading({ icon: Icon, label, sub }: { icon: any; label: string; 
         <Icon className="w-[18px] h-[18px] text-white" />
       </div>
       <div>
-        <h2 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight leading-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+        <h2 className="text-xl md:text-2xl font-light text-slate-900 tracking-tight leading-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
           {label}
         </h2>
         {sub && <p className="text-sm text-slate-500 mt-1 font-normal leading-relaxed">{sub}</p>}

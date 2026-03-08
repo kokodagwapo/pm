@@ -635,11 +635,11 @@ export function PropertyDetailClient({
     <div className="min-h-screen bg-[#f8f7f4]">
       <LandingHeader />
 
-      <main className="pt-20 pb-16">
+      <main className="pt-[104px] pb-16">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <Link
             href="/rentals"
-            className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 mb-6 text-sm font-medium transition-colors"
+            className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 mb-6 text-sm font-medium transition-colors animate-pulse"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to all properties
@@ -777,7 +777,7 @@ export function PropertyDetailClient({
                   )}
                 </div>
 
-                <h1 className="text-[2rem] md:text-4xl lg:text-5xl font-bold text-slate-900 mb-2 leading-[1.15] tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                <h1 className="text-[2rem] md:text-4xl lg:text-5xl font-light text-slate-900 mb-2 leading-[1.15] tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                   {property.name}
                 </h1>
 
@@ -823,7 +823,7 @@ export function PropertyDetailClient({
 
                 {property.description && (
                   <div className="mb-10">
-                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-4 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>Property Description</h2>
+                    <h2 className="text-xl md:text-2xl font-light text-slate-900 mb-4 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>Property Description</h2>
                     <div className="relative">
                       <p className={`text-slate-600 text-[15px] leading-[1.8] whitespace-pre-line ${
                         !descExpanded && property.description.length > 400 ? "line-clamp-5" : ""
@@ -844,7 +844,7 @@ export function PropertyDetailClient({
 
                 {units.length > 0 && (
                   <div className="mb-10">
-                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-4 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>Sleeping Arrangement</h2>
+                    <h2 className="text-xl md:text-2xl font-light text-slate-900 mb-4 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>Sleeping Arrangement</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {units.map((u: any, i: number) => (
                         <div
@@ -869,7 +869,7 @@ export function PropertyDetailClient({
                 {(baseRentPerNight > 0 || seasonalPricingSummary.length > 0) && (
                   <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                     <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                      <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                      <h2 className="text-xl md:text-2xl font-light text-slate-900 flex items-center gap-2 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                         <DollarSign className="w-4 h-4 text-amber-500" />
                         Pricing
                       </h2>
@@ -1012,7 +1012,7 @@ export function PropertyDetailClient({
                 {property.amenities?.length > 0 && (
                   <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                     <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                      <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                      <h2 className="text-xl md:text-2xl font-light text-slate-900 flex items-center gap-2 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                         <Sparkles className="w-4 h-4 text-rose-400" />
                         Amenities
                       </h2>
@@ -1566,7 +1566,7 @@ export function PropertyDetailClient({
               <div ref={(el) => { sectionRefs.current.map = el; }}>
                 <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                   <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                    <h2 className="text-xl md:text-2xl font-light text-slate-900 flex items-center gap-2 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                       <MapPin className="w-4 h-4 text-orange-400" />
                       Location
                     </h2>
@@ -1607,7 +1607,7 @@ export function PropertyDetailClient({
                   {/* Header */}
                   <div className="px-6 pt-6 pb-4">
                     <div className="flex items-end gap-2 mb-1">
-                      <span className="text-4xl font-bold text-slate-900 leading-none tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                      <span className="text-4xl font-light text-slate-900 leading-none tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                         {getRentDisplay(property)}
                       </span>
                       {getRentDisplay(property) !== "Contact for pricing" && (
