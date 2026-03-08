@@ -4,15 +4,55 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Satellite, Map as MapIcon, Mountain } from "lucide-react";
 
 const NEIGHBORHOOD_COORDS: Record<string, [number, number]> = {
-  "Falling Waters": [26.1030, -81.7510],
-  "Winter Park": [26.1780, -81.7960],
-  "World Tennis Club": [26.1550, -81.7650],
-  "Glen Eagle": [26.1200, -81.7420],
-  "Moon Lake": [26.1650, -81.7800],
-  "Naples Park": [26.2650, -81.8080],
-  "Royal Arms": [26.1500, -81.7900],
+  // ── Existing communities ─────────────────────────────────────
+  "Falling Waters":        [26.1030, -81.7510],
+  "Winter Park":           [26.1780, -81.7960],
+  "World Tennis Club":     [26.1550, -81.7650],
+  "Glen Eagle":            [26.1200, -81.7420],
+  "Moon Lake":             [26.1650, -81.7800],
+  "Naples Park":           [26.2650, -81.8080],
+  "Royal Arms":            [26.1500, -81.7900],
   "Villas of Whittenberg": [26.1880, -81.7850],
-  "Naples": [26.1420, -81.7948],
+
+  // ── Seed-35 communities ──────────────────────────────────────
+  "Vanderbilt Beach":      [26.2493, -81.8248],
+  "Gulf Shore":            [26.1831, -81.8128],
+  "Pelican Bay":           [26.2139, -81.7977],
+  "Moorings":              [26.1538, -81.8042],
+  "The Moorings":          [26.1538, -81.8042],
+  "Park Shore":            [26.1924, -81.8133],
+  "Bay Colony":            [26.2282, -81.8046],
+  "Tiburón":               [26.2196, -81.8111],
+  "Tiburon":               [26.2196, -81.8111],
+  "Mediterra":             [26.3005, -81.7528],
+  "North Naples":          [26.2650, -81.7950],
+  "Downtown Naples":       [26.1388, -81.7985],
+  "Quail West":            [26.3118, -81.7505],
+  "Imperial Golf":         [26.2574, -81.7762],
+  "Bonita Beach":          [26.3544, -81.8357],
+  "Marco Island":          [25.9149, -81.7217],
+  "Cape Marco":            [25.9149, -81.7217],
+  "Aqualane Shores":       [26.1305, -81.7990],
+  "Port Royal":            [26.1038, -81.8082],
+  "Coquina Sands":         [26.1467, -81.8065],
+  "Old Naples":            [26.1357, -81.8008],
+  "Olde Naples":           [26.1357, -81.8008],
+  "Grey Oaks":             [26.1658, -81.8133],
+  "Twin Eagles":           [26.2773, -81.6601],
+  "Ave Maria":             [26.2688, -81.5891],
+  "Cape Coral":            [26.5783, -81.9695],
+  "Bonita Springs":        [26.3397, -81.7786],
+  "Fiddler":               [26.0520, -81.6850],
+  "Fiddler's Creek":       [26.0520, -81.6850],
+  "Lely":                  [26.0852, -81.7321],
+  "Palmira":               [26.3100, -81.8003],
+  "Talis Park":            [26.3066, -81.8057],
+  "Hammock Bay":           [25.9643, -81.6981],
+  "Reflection Lakes":      [26.0850, -81.7153],
+  "Bayfront":              [26.1358, -81.7964],
+
+  // ── Generic fallback ─────────────────────────────────────────
+  "Naples":                [26.1420, -81.7948],
 };
 
 const NAPLES_CENTER: [number, number] = [26.1700, -81.7800];
@@ -34,6 +74,8 @@ interface PropertyMapProps {
 }
 
 const coordCacheMap = new Map<string, [number, number]>();
+// Clear cache on module reload so new NEIGHBORHOOD_COORDS are always used
+coordCacheMap.clear();
 
 function getPropertyCoords(property: Property): [number, number] {
   if (coordCacheMap.has(property._id)) return coordCacheMap.get(property._id)!;
@@ -147,13 +189,13 @@ const POI_CATEGORIES: POICategory[] = [
   {
     id: "seedtotable", label: "Seed to Table", emoji: "🌱", color: "#84cc16",
     pois: [
-      { name: "Seed to Table Grocery", coords: [26.2083, -81.7827] },
+      { name: "Seed to Table — 1970 Immokalee Rd", coords: [26.2083, -81.7813] },
     ],
   },
   {
     id: "wholefoods", label: "Whole Foods", emoji: "🥑", color: "#22c55e",
     pois: [
-      { name: "Whole Foods Market Naples", coords: [26.2065, -81.7930] },
+      { name: "Whole Foods Market — Mercato", coords: [26.2167, -81.7970] },
     ],
   },
   {
