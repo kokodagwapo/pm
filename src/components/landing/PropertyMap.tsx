@@ -64,7 +64,7 @@ const NAPLES_CENTER: [number, number] = [26.1700, -81.7800];
 interface Property {
   _id: string;
   name: string;
-  address?: { city?: string; state?: string; street?: string };
+  address?: { city?: string; state?: string; street?: string; zipCode?: string };
   units?: Array<{ bedrooms?: number; bathrooms?: number; rentAmount?: number }>;
   images?: string[];
   neighborhood?: string;
@@ -115,19 +115,42 @@ function getPropertyCoords(property: Property): [number, number] {
   return getNeighborhoodFallback(property);
 }
 
-async function geocodeAddress(street: string, city: string, state: string): Promise<[number, number] | null> {
+async function geocodeAddress(street: string, city: string, state: string, zip?: string): Promise<[number, number] | null> {
   const key = `${street},${city},${state}`;
   if (geocodeCache.has(key)) return geocodeCache.get(key)!;
+  const HDR = { "User-Agent": "SmartStartPM/1.0 (property-map)" };
+  const NOM = "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us";
+  const ZIP_CENTROIDS: Record<string, [number, number]> = {
+    "34102": [26.1394, -81.8035], "34103": [26.1673, -81.8107],
+    "34104": [26.1400, -81.7404], "34105": [26.1656, -81.7626],
+    "34108": [26.2533, -81.8099], "34109": [26.2243, -81.7698],
+    "34110": [26.2742, -81.7913], "34112": [26.1022, -81.7461],
+    "34113": [26.0749, -81.7163], "34114": [26.0148, -81.6736],
+    "34116": [26.1642, -81.7049], "34119": [26.1950, -81.6936],
+    "34120": [26.2319, -81.6401],
+  };
   try {
-    const q = encodeURIComponent(`${street}, ${city}, ${state}, USA`);
-    const resp = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=us`,
-      { headers: { "User-Agent": "SmartStartPM/1.0 (property-map)" } }
-    );
-    if (!resp.ok) return null;
-    const data = await resp.json();
-    if (Array.isArray(data) && data.length > 0) {
-      const result: [number, number] = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+    const q1 = encodeURIComponent(`${street}, ${city}, ${state}, USA`);
+    const r1 = await fetch(`${NOM}&q=${q1}`, { headers: HDR });
+    const d1 = await r1.json();
+    if (Array.isArray(d1) && d1.length > 0) {
+      const result: [number, number] = [parseFloat(d1[0].lat), parseFloat(d1[0].lon)];
+      geocodeCache.set(key, result);
+      return result;
+    }
+    const streetName = street.replace(/^\d+\s+/, "");
+    if (streetName !== street) {
+      const q2 = encodeURIComponent(`${streetName}, ${city}, ${state}, USA`);
+      const r2 = await fetch(`${NOM}&q=${q2}`, { headers: HDR });
+      const d2 = await r2.json();
+      if (Array.isArray(d2) && d2.length > 0) {
+        const result: [number, number] = [parseFloat(d2[0].lat), parseFloat(d2[0].lon)];
+        geocodeCache.set(key, result);
+        return result;
+      }
+    }
+    if (zip && ZIP_CENTROIDS[zip]) {
+      const result = ZIP_CENTROIDS[zip];
       geocodeCache.set(key, result);
       return result;
     }
@@ -404,8 +427,8 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
 
       for (const property of queue) {
         if (cancelled) break;
-        const { street, city = "Naples", state = "FL" } = property.address!;
-        const coords = await geocodeAddress(street, city, state);
+        const { street, city = "Naples", state = "FL", zipCode } = property.address!;
+        const coords = await geocodeAddress(street, city, state, zipCode);
         if (cancelled) break;
         if (coords) {
           const marker = markersRef.current.get(property._id);
