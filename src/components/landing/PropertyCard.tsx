@@ -63,18 +63,18 @@ export function PropertyCard({ property }: PropertyCardProps) {
         </div>
 
         {/* Content */}
-        <div className="p-5">
-          <h3 className="font-[var(--font-playfair)] text-xl text-slate-900 font-semibold mb-2 line-clamp-2">
+        <div className="p-5" style={{ fontFamily: "var(--font-montserrat), var(--font-jakarta), system-ui, sans-serif" }}>
+          <h3 className="text-xl text-slate-900 mb-2 line-clamp-2" style={{ fontWeight: 300 }}>
             {property.name}
           </h3>
           {property.address && (
-            <p className="flex items-center gap-1.5 text-slate-600 text-sm mb-3">
-              <MapPin className="w-3.5 h-3.5 shrink-0" />
+            <p className="flex items-center gap-1.5 text-slate-900 text-sm mb-3" style={{ fontWeight: 300 }}>
+              <MapPin className="w-3.5 h-3.5 shrink-0 text-amber-400" />
               {property.address.city}
               {property.address.state && `, ${property.address.state}`}
             </p>
           )}
-          <div className="flex items-center gap-4 text-slate-700 text-sm">
+          <div className="flex items-center gap-4 text-slate-500 text-sm" style={{ fontWeight: 300 }}>
             <span className="flex items-center gap-1">
               <Bed className="w-4 h-4" />
               {bedrooms} BR

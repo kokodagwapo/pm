@@ -365,20 +365,20 @@ function PropertyListCard({
 
             {/* Name + Price row */}
             <div className="flex items-start justify-between gap-3 mb-1.5">
-              <h3 className="font-semibold text-slate-900 text-[13px] leading-snug line-clamp-2 flex-1 min-w-0" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+              <h3 className="font-light text-slate-900 text-[13px] leading-snug line-clamp-2 flex-1 min-w-0" style={{ fontFamily: "var(--font-montserrat), var(--font-jakarta), system-ui, sans-serif", fontWeight: 300 }}>
                 {property.name}
               </h3>
               <div className="text-right shrink-0">
-                <p className="text-[17px] font-bold text-slate-900 leading-none tracking-tight">
+                <p className="text-[17px] font-semibold text-slate-900 leading-none tracking-tight" style={{ fontFamily: "var(--font-montserrat), var(--font-jakarta), system-ui, sans-serif" }}>
                   {formatPrice(price)}
                 </p>
-                <p className="text-[10px] text-slate-400 mt-0.5 font-medium">/month</p>
+                <p className="text-[10px] text-slate-400 mt-0.5 font-normal">/month</p>
               </div>
             </div>
 
             {/* Address */}
             {(property.address?.street || property.address?.city) && (
-              <p className="flex items-center gap-1 text-slate-400 text-[11px] truncate">
+              <p className="flex items-center gap-1 text-slate-900 text-[11px] truncate" style={{ fontFamily: "var(--font-montserrat), var(--font-jakarta), system-ui, sans-serif", fontWeight: 300 }}>
                 <MapPin className="w-2.5 h-2.5 shrink-0 text-amber-400" />
                 <span className="truncate">
                   {property.address.street ? `${property.address.street}, ` : ""}
@@ -390,19 +390,19 @@ function PropertyListCard({
           </div>
 
           {/* Stats */}
-          <div className="flex items-center gap-3 mt-3 pt-2.5 border-t border-slate-100/80">
-            <span className="flex items-center gap-1 text-slate-500 text-[11px] font-medium">
+          <div className="flex items-center gap-3 mt-3 pt-2.5 border-t border-slate-100/80" style={{ fontFamily: "var(--font-montserrat), var(--font-jakarta), system-ui, sans-serif" }}>
+            <span className="flex items-center gap-1 text-slate-500 text-[11px]" style={{ fontWeight: 300 }}>
               <Bed className="w-3 h-3 text-slate-300" />
               {bedrooms} {bedrooms === 1 ? "Bed" : "Beds"}
             </span>
-            <span className="flex items-center gap-1 text-slate-500 text-[11px] font-medium">
+            <span className="flex items-center gap-1 text-slate-500 text-[11px]" style={{ fontWeight: 300 }}>
               <Bath className="w-3 h-3 text-slate-300" />
               {bathrooms} {bathrooms === 1 ? "Bath" : "Baths"}
             </span>
             {sqft > 0 && (
-              <span className="text-slate-400 text-[11px]">{sqft.toLocaleString()} ft²</span>
+              <span className="text-slate-400 text-[11px]" style={{ fontWeight: 300 }}>{sqft.toLocaleString()} ft²</span>
             )}
-            <span className="ml-auto flex items-center gap-0.5 text-slate-900 text-[11px] font-semibold opacity-0 group-hover:opacity-100 transition-all duration-200 shrink-0">
+            <span className="ml-auto flex items-center gap-0.5 text-slate-900 text-[11px] opacity-0 group-hover:opacity-100 transition-all duration-200 shrink-0" style={{ fontWeight: 500 }}>
               View <ArrowRight className="w-3 h-3" />
             </span>
           </div>
