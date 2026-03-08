@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LunaWidget } from "@/components/landing/LunaWidget";
 import { PropertyMap } from "@/components/landing/PropertyMap";
+import { NaplesAreaGuide } from "@/components/landing/NaplesAreaGuide";
 import Link from "next/link";
 import {
   Search,
@@ -745,14 +746,21 @@ function RentalsContent() {
 
         {/* Main content */}
         <div className="flex flex-1 overflow-hidden relative z-0" style={{ height: "calc(100vh - 224px)" }}>
-          {/* Map */}
-          <div className={`${mobileView === "map" ? "flex" : "hidden"} md:flex w-full md:w-1/2 lg:w-[55%] relative`} style={{ isolation: "isolate" }}>
-            <PropertyMap
-              properties={properties}
-              onMarkerClick={handleMarkerClick}
-              onMarkerHover={setHoveredPropertyId}
-              hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
-            />
+          {/* Map + Area Guide — left scrollable column */}
+          <div className={`${mobileView === "map" ? "flex" : "hidden"} md:flex flex-col w-full md:w-1/2 lg:w-[55%] overflow-y-auto bg-[#f8f7f4]`}>
+            {/* Map — fixed viewport height */}
+            <div className="relative w-full flex-shrink-0" style={{ height: "calc(100vh - 224px)", isolation: "isolate" }}>
+              <PropertyMap
+                properties={properties}
+                onMarkerClick={handleMarkerClick}
+                onMarkerHover={setHoveredPropertyId}
+                hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
+              />
+            </div>
+            {/* Naples Area Guide below the map */}
+            <div className="px-5 md:px-8 py-8 border-t border-slate-200">
+              <NaplesAreaGuide />
+            </div>
           </div>
 
           {/* Listings */}

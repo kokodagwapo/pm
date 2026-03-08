@@ -298,7 +298,7 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
       bounds.push(coords);
     });
 
-    if (bounds.length > 0) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+    map.setView(NAPLES_CENTER, 12);
   }, [properties, mapReady, onMarkerClick, onMarkerHover, tileMode]);
 
   useEffect(() => {
