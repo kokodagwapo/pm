@@ -73,25 +73,54 @@ interface PropertyMapProps {
   hoveredPropertyId?: string | null;
 }
 
-const coordCacheMap = new Map<string, [number, number]>();
-// Clear cache on module reload so new NEIGHBORHOOD_COORDS are always used
-coordCacheMap.clear();
+// Module-level caches — persist across renders and page navigations
+const geocodeCache = new Map<string, [number, number]>();
+const neighborhoodCacheMap = new Map<string, [number, number]>();
 
-function getPropertyCoords(property: Property): [number, number] {
-  if (coordCacheMap.has(property._id)) return coordCacheMap.get(property._id)!;
-  const neighborhood = property.neighborhood || property.name;
+function getNeighborhoodFallback(property: Property): [number, number] {
+  if (neighborhoodCacheMap.has(property._id)) return neighborhoodCacheMap.get(property._id)!;
+  const label = property.neighborhood || property.name;
   for (const [key, coords] of Object.entries(NEIGHBORHOOD_COORDS)) {
-    if (neighborhood.includes(key) || property.name.includes(key)) {
+    if (label.includes(key) || property.name.includes(key)) {
       const jitter = () => (Math.random() - 0.5) * 0.003;
       const result: [number, number] = [coords[0] + jitter(), coords[1] + jitter()];
-      coordCacheMap.set(property._id, result);
+      neighborhoodCacheMap.set(property._id, result);
       return result;
     }
   }
   const jitter = () => (Math.random() - 0.5) * 0.01;
   const result: [number, number] = [NAPLES_CENTER[0] + jitter(), NAPLES_CENTER[1] + jitter()];
-  coordCacheMap.set(property._id, result);
+  neighborhoodCacheMap.set(property._id, result);
   return result;
+}
+
+function getPropertyCoords(property: Property): [number, number] {
+  const street = property.address?.street;
+  if (street) {
+    const key = `${street},${property.address?.city || "Naples"},${property.address?.state || "FL"}`;
+    if (geocodeCache.has(key)) return geocodeCache.get(key)!;
+  }
+  return getNeighborhoodFallback(property);
+}
+
+async function geocodeAddress(street: string, city: string, state: string): Promise<[number, number] | null> {
+  const key = `${street},${city},${state}`;
+  if (geocodeCache.has(key)) return geocodeCache.get(key)!;
+  try {
+    const q = encodeURIComponent(`${street}, ${city}, ${state}, USA`);
+    const resp = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=us`,
+      { headers: { "User-Agent": "SmartStartPM/1.0 (property-map)" } }
+    );
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (Array.isArray(data) && data.length > 0) {
+      const result: [number, number] = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+      geocodeCache.set(key, result);
+      return result;
+    }
+  } catch {}
+  return null;
 }
 
 function formatPrice(amount: number): string {
@@ -345,6 +374,46 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
 
     map.setView(NAPLES_CENTER, 12);
   }, [properties, mapReady, onMarkerClick, onMarkerHover, tileMode]);
+
+  // Geocode actual street addresses after markers are placed and update positions
+  useEffect(() => {
+    if (!mapReady) return;
+    let cancelled = false;
+
+    const run = async () => {
+      const queue = properties.filter((p) => {
+        if (!p.address?.street) return false;
+        const key = `${p.address.street},${p.address.city || "Naples"},${p.address.state || "FL"}`;
+        return !geocodeCache.has(key);
+      });
+
+      for (const property of queue) {
+        if (cancelled) break;
+        const { street, city = "Naples", state = "FL" } = property.address!;
+        const coords = await geocodeAddress(street, city, state);
+        if (cancelled) break;
+        if (coords) {
+          const marker = markersRef.current.get(property._id);
+          if (marker) marker.setLatLng(coords);
+        }
+        await new Promise((res) => setTimeout(res, 1150));
+      }
+
+      // For already-cached addresses, update markers immediately
+      for (const property of properties) {
+        if (!property.address?.street) continue;
+        const key = `${property.address.street},${property.address.city || "Naples"},${property.address.state || "FL"}`;
+        const cached = geocodeCache.get(key);
+        if (cached) {
+          const marker = markersRef.current.get(property._id);
+          if (marker) marker.setLatLng(cached);
+        }
+      }
+    };
+
+    run();
+    return () => { cancelled = true; };
+  }, [properties, mapReady]);
 
   useEffect(() => {
     markersRef.current.forEach((marker, id) => {
