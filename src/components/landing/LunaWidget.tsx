@@ -31,7 +31,7 @@ interface PropertyContext {
 }
 
 interface LunaWidgetProps {
-  propertyContext: PropertyContext;
+  propertyContext?: PropertyContext;
   onRequestBooking?: () => void;
 }
 
@@ -68,27 +68,34 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
       const greeting: Message = {
         id: "greeting",
         role: "assistant",
-        content: `Hi! I'm Luna 👋 I'm here to help you with questions about **${propertyContext.propertyName}**. Ask me anything about the property, pricing, availability, or how to book!\n\nI speak multiple languages — just type in your native tongue and I'll reply in kind. 🌍`,
+        content: propertyContext?.propertyName
+        ? `Hi! I'm Luna 👋 I'm here to help you with questions about **${propertyContext.propertyName}**. Ask me anything about the property, pricing, availability, or how to book!\n\nI speak multiple languages — just type in your native tongue and I'll reply in kind. 🌍`
+        : `Hi! I'm Luna 👋 I'm your SmartStartPM assistant. I can help you find the perfect rental, answer questions about our properties in Naples, FL, explain pricing, or guide you through the booking process.\n\nI speak multiple languages — just type in your native tongue and I'll reply in kind. 🌍`,
         timestamp: new Date(),
       };
       setMessages([greeting]);
       setTimeout(() => inputRef.current?.focus(), 300);
     }
-  }, [isOpen, hasGreeted, propertyContext.propertyName]);
+  }, [isOpen, hasGreeted, propertyContext]);
 
   const buildContext = useCallback(() => {
-    const parts: string[] = [
-      `The visitor is currently viewing the property: "${propertyContext.propertyName}".`,
-    ];
-    if (propertyContext.neighborhood) parts.push(`Neighborhood: ${propertyContext.neighborhood}.`);
-    if (propertyContext.pricePerMonth) parts.push(`Monthly rent: $${propertyContext.pricePerMonth.toLocaleString()}.`);
-    if (propertyContext.pricePerNight) parts.push(`Nightly rate (approx): $${Math.round(propertyContext.pricePerNight)}/night.`);
-    if (propertyContext.bedrooms) parts.push(`Bedrooms: ${propertyContext.bedrooms}.`);
-    if (propertyContext.bathrooms) parts.push(`Bathrooms: ${propertyContext.bathrooms}.`);
-    if (propertyContext.availabilityStatus) parts.push(`Current status: ${propertyContext.availabilityStatus}.`);
-    parts.push(
-      "If the visitor wants to book or check specific date availability, encourage them to use the availability calendar on the page. If they want to speak with someone, let them know they can fill out the inquiry form below the calendar or call our office."
-    );
+    const parts: string[] = [];
+    if (propertyContext?.propertyName) {
+      parts.push(`The visitor is currently viewing the property: "${propertyContext.propertyName}".`);
+      if (propertyContext.neighborhood) parts.push(`Neighborhood: ${propertyContext.neighborhood}.`);
+      if (propertyContext.pricePerMonth) parts.push(`Monthly rent: $${propertyContext.pricePerMonth.toLocaleString()}.`);
+      if (propertyContext.pricePerNight) parts.push(`Nightly rate (approx): $${Math.round(propertyContext.pricePerNight)}/night.`);
+      if (propertyContext.bedrooms) parts.push(`Bedrooms: ${propertyContext.bedrooms}.`);
+      if (propertyContext.bathrooms) parts.push(`Bathrooms: ${propertyContext.bathrooms}.`);
+      if (propertyContext.availabilityStatus) parts.push(`Current status: ${propertyContext.availabilityStatus}.`);
+      parts.push(
+        "If the visitor wants to book or check specific date availability, encourage them to use the availability calendar on the page. If they want to speak with someone, let them know they can fill out the inquiry form below the calendar or call our office."
+      );
+    } else {
+      parts.push(
+        "You are on the SmartStartPM rentals listing page. The visitor is browsing available properties in Naples, FL and surrounding areas. Help them find the right rental by asking about their needs (beds, baths, budget, dates, neighborhood). You can describe our portfolio of luxury condos, single-family homes, and beachfront villas. Encourage them to click on any property card to see full details, or to contact us directly."
+      );
+    }
     parts.push(
       "IMPORTANT: You are multilingual. Detect the language the visitor is writing in and always reply in that same language. If they write in Spanish, reply in Spanish. If they write in French, reply in French. If they write in Portuguese, reply in Portuguese. Match their language exactly — never switch to English unless they write in English first."
     );

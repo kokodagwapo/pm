@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { LandingHeader } from "@/components/landing/LandingHeader";
+import { LunaWidget } from "@/components/landing/LunaWidget";
 import { PropertyMap } from "@/components/landing/PropertyMap";
 import Link from "next/link";
 import {
@@ -918,6 +919,8 @@ function RentalsContent() {
       )}
 
       {/* Comparison modal */}
+      <LunaWidget />
+
       {showCompareModal && (
         <CompareModal
           properties={properties.filter((p) => compareIds.includes(p._id))}
