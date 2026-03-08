@@ -348,6 +348,13 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
           return m;
         });
         poiMarkersRef.current.set(catId, markers);
+
+        if (cat.pois.length === 1) {
+          map.flyTo(cat.pois[0].coords, 16, { animate: true, duration: 0.8 });
+        } else {
+          const bounds = L.latLngBounds(cat.pois.map((p) => p.coords));
+          map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14, animate: true });
+        }
       }
       return next;
     });

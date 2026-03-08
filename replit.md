@@ -1,8 +1,13 @@
-# SmartStartPM
+# smartPM
 
 A Next.js 15 property management application using the App Router (`src/app/`).
 
 ## Recent Design Updates
+- **App rebranded to "smartPM"**: Updated `LandingHeader.tsx` with new compact logo and name.
+- **Minimalist mobile header**: Home icon logo, animated hamburger (3-bar → X), cleaner desktop nav links, compact "Portal" CTA button.
+- **Mobile filter bar redesigned**: Two-row layout — Row 1: full-width search + List/Map toggle; Row 2: horizontally scrollable type/beds/filters/search controls. Much cleaner on small screens.
+- **Mobile map view improved**: On mobile, map view now scrolls — map at fixed height (~60vh) with NaplesAreaGuide (FAQs & area info) scrollable below it, matching the desktop experience.
+- **POI map buttons fly-to**: Clicking a POI category (Seed to Table, Whole Foods, etc.) now flies the map to that location. Single-location POIs zoom to level 16; multi-location categories fit bounds.
 - **Glassmorphic UI**: All cards (Card, AnalyticsCard, FinancialCard, MetricCard) updated with `backdrop-blur-xl`, `bg-white/10 dark:bg-black/20`, transparent borders `border-white/20`, and `shadow-lg`.
 - **Dashboard modernized**: 5xl/6xl gradient heading, emoji-labeled section headers ("⚡ Action Items", "📊 Empire at a Glance", "💰 Financial Performance", "🏘️ Property Breakdown", "💳 Payment Status"), larger alert count numbers.
 - **Plus Jakarta Sans**: Applied to dashboard layout via `--font-jakarta`.

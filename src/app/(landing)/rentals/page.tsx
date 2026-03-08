@@ -544,64 +544,89 @@ function RentalsContent() {
     <div className="min-h-screen bg-[#f8f7f4] flex flex-col">
       <LandingHeader />
 
-      <div className="pt-[72px] flex flex-col flex-1">
-        {/* Sticky filter bar — refined */}
-        <div className="bg-white/95 backdrop-blur-md border-b border-slate-200/60 sticky top-[72px] z-30 shadow-sm">
-          <div className="px-4 py-3 space-y-2.5">
+      <div className="pt-[64px] flex flex-col flex-1">
+        {/* Sticky filter bar */}
+        <div className="bg-white/98 backdrop-blur-md border-b border-slate-100 sticky top-[60px] z-30 shadow-[0_1px_0_rgba(0,0,0,0.05)]">
+          <div className="px-3 sm:px-4 py-2.5 space-y-2">
 
-            {/* Row 1: Search + filters */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="relative flex-1 min-w-[200px] max-w-sm">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+            {/* Row 1: Search + List/Map toggle */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
                 <input
                   type="text"
                   value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && applyFilters()}
-                  placeholder="Search by name, neighborhood..."
-                  className="w-full pl-9 pr-4 py-2 rounded-full bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-all"
+                  placeholder="Search neighborhood, name..."
+                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/8 focus:border-slate-300 transition-all"
                 />
               </div>
 
-              <div className="relative">
+              {/* List/Map toggle — mobile only */}
+              <div className="flex md:hidden bg-slate-100 rounded-xl overflow-hidden shrink-0">
+                <button
+                  onClick={() => setMobileView("list")}
+                  className={`flex items-center gap-1 px-3 py-2 text-xs font-semibold transition-colors ${
+                    mobileView === "list" ? "bg-slate-900 text-white" : "text-slate-500"
+                  }`}
+                >
+                  <LayoutList className="w-3.5 h-3.5" />
+                  List
+                </button>
+                <button
+                  onClick={() => setMobileView("map")}
+                  className={`flex items-center gap-1 px-3 py-2 text-xs font-semibold transition-colors ${
+                    mobileView === "map" ? "bg-slate-900 text-white" : "text-slate-500"
+                  }`}
+                >
+                  <Map className="w-3.5 h-3.5" />
+                  Map
+                </button>
+              </div>
+            </div>
+
+            {/* Row 2: Selects + action buttons */}
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pb-0.5">
+              <div className="relative shrink-0">
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="appearance-none pl-3.5 pr-8 py-2 rounded-full bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all cursor-pointer font-medium"
+                  className="appearance-none pl-3 pr-7 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all cursor-pointer font-medium"
                 >
                   {PROPERTY_TYPES.map((opt) => (
                     <option key={opt.value || "all"} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
-                <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400">
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative shrink-0">
                 <select
                   value={filterBedrooms}
                   onChange={(e) => setFilterBedrooms(e.target.value)}
-                  className="appearance-none pl-3.5 pr-8 py-2 rounded-full bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all cursor-pointer font-medium"
+                  className="appearance-none pl-3 pr-7 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all cursor-pointer font-medium"
                 >
                   {BEDROOMS_OPTIONS.map((opt) => (
                     <option key={opt.value || "any"} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
-                <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400">
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </div>
               </div>
 
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full border text-sm font-medium transition-all ${
+                className={`shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-all ${
                   showFilters || hasActiveFilters
                     ? "bg-slate-900 border-slate-900 text-white"
-                    : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-400 hover:text-slate-800"
+                    : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-400"
                 }`}
               >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <SlidersHorizontal className="w-3 h-3" />
                 Filters
                 {activeFilterCount > 0 && (
                   <span className="w-4 h-4 rounded-full bg-amber-400 text-slate-900 text-[9px] font-bold flex items-center justify-center leading-none">
@@ -612,40 +637,40 @@ function RentalsContent() {
 
               <button
                 onClick={applyFilters}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 active:bg-slate-950 transition-colors shadow-sm"
+                className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-[13px] font-semibold hover:bg-slate-800 active:bg-slate-950 transition-colors"
               >
-                <Search className="w-3.5 h-3.5" />
+                <Search className="w-3 h-3" />
                 Search
               </button>
 
               {(searchText || hasActiveFilters) && (
                 <button
                   onClick={clearFilters}
-                  className="flex items-center gap-1 px-2.5 py-2 rounded-full text-sm text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-                  title="Clear all filters"
+                  className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[13px] text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-3 h-3" />
                   Clear
                 </button>
               )}
 
-              <div className="flex md:hidden ml-auto bg-slate-50 border border-slate-200 rounded-full overflow-hidden shadow-sm">
+              {/* Desktop List/Map toggle */}
+              <div className="hidden md:flex ml-auto bg-slate-100 rounded-xl overflow-hidden shrink-0">
                 <button
                   onClick={() => setMobileView("list")}
-                  className={`p-2 text-xs font-medium flex items-center gap-1.5 px-3 transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${
                     mobileView === "list" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
-                  <LayoutList className="w-4 h-4" />
+                  <LayoutList className="w-3.5 h-3.5" />
                   List
                 </button>
                 <button
                   onClick={() => setMobileView("map")}
-                  className={`p-2 text-xs font-medium flex items-center gap-1.5 px-3 transition-colors border-l border-slate-200 ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${
                     mobileView === "map" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
-                  <Map className="w-4 h-4" />
+                  <Map className="w-3.5 h-3.5" />
                   Map
                 </button>
               </div>
@@ -746,9 +771,26 @@ function RentalsContent() {
 
         {/* Main content */}
         <div className="flex flex-1 overflow-hidden relative z-0" style={{ height: "calc(100vh - 224px)" }}>
-          {/* Map + Area Guide — left scrollable column */}
-          <div className={`${mobileView === "map" ? "flex" : "hidden"} md:flex flex-col w-full md:w-1/2 lg:w-[55%] overflow-y-auto bg-[#f8f7f4]`}>
-            {/* Map — fixed viewport height */}
+
+          {/* MOBILE MAP VIEW — scrollable page with map + area guide below */}
+          {mobileView === "map" && (
+            <div className="flex md:hidden flex-col w-full overflow-y-auto bg-[#f8f7f4]">
+              <div className="relative w-full flex-shrink-0" style={{ height: "62vmax", minHeight: 320, maxHeight: "70vh", isolation: "isolate" }}>
+                <PropertyMap
+                  properties={properties}
+                  onMarkerClick={handleMarkerClick}
+                  onMarkerHover={setHoveredPropertyId}
+                  hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
+                />
+              </div>
+              <div className="px-4 py-6 border-t border-slate-200">
+                <NaplesAreaGuide />
+              </div>
+            </div>
+          )}
+
+          {/* Map + Area Guide — desktop left column */}
+          <div className="hidden md:flex flex-col w-full md:w-1/2 lg:w-[55%] overflow-y-auto bg-[#f8f7f4]">
             <div className="relative w-full flex-shrink-0" style={{ height: "calc(100vh - 224px)", isolation: "isolate" }}>
               <PropertyMap
                 properties={properties}
@@ -757,13 +799,12 @@ function RentalsContent() {
                 hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
               />
             </div>
-            {/* Naples Area Guide below the map */}
             <div className="px-5 md:px-8 py-8 border-t border-slate-200">
               <NaplesAreaGuide />
             </div>
           </div>
 
-          {/* Listings */}
+          {/* Listings — mobile list view + desktop right column */}
           <div className={`${mobileView === "list" ? "flex" : "hidden"} md:flex flex-col w-full md:w-1/2 lg:w-[45%] overflow-y-auto bg-[#f8f7f4] border-l border-slate-200/60`} style={{ isolation: "isolate" }}>
             <div className="p-3 space-y-2.5">
 
