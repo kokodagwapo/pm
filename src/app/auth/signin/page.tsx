@@ -157,6 +157,15 @@ export default function SignInPage() {
 
   return (
     <div className="fixed inset-0 h-screen w-screen overflow-auto bg-slate-900">
+      {/* Top bar */}
+      <div className="fixed top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-3" style={{background:"rgba(0,0,0,0.35)",backdropFilter:"blur(8px)"}}>
+        <span className="text-white/70 text-sm font-medium">SmartStart<strong className="text-white">PM</strong></span>
+        <a href="/rentals" style={{display:"inline-flex",alignItems:"center",gap:"6px",padding:"7px 18px",borderRadius:"999px",background:"#0ea5e9",color:"#fff",fontWeight:600,fontSize:"13px",textDecoration:"none"}}>
+          <Home style={{width:14,height:14}} />
+          Browse Rentals
+        </a>
+      </div>
+
       {/* Video background - same as landing hero */}
       <HeroVideo />
 
@@ -189,6 +198,13 @@ export default function SignInPage() {
             <p className="mt-2 text-sm text-white/80 font-[var(--font-montserrat)]">
               Manage your properties with ease
             </p>
+            <a
+              href="/rentals"
+              style={{display:"inline-flex",alignItems:"center",gap:"8px",marginTop:"20px",padding:"10px 24px",borderRadius:"999px",background:"#0ea5e9",color:"#fff",fontWeight:700,fontSize:"14px",textDecoration:"none",boxShadow:"0 4px 18px rgba(14,165,233,0.5)"}}
+            >
+              <Home style={{width:16,height:16}} />
+              Browse Available Rentals
+            </a>
           </div>
 
           {/* Glassmorphic Sign In Card */}
@@ -291,23 +307,6 @@ export default function SignInPage() {
                 Click to instantly log in as that role
               </p>
             </div>
-          </div>
-
-          <div className="text-center">
-            <a
-              href="/rentals"
-              className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-white text-sm transition-all duration-200 hover:scale-105 active:scale-95"
-              style={{
-                background: "linear-gradient(135deg, rgba(14,165,233,0.85) 0%, rgba(99,102,241,0.85) 100%)",
-                backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)",
-                border: "1px solid rgba(255,255,255,0.25)",
-                boxShadow: "0 4px 20px rgba(14,165,233,0.35), 0 0 0 1px rgba(255,255,255,0.08) inset",
-              }}
-            >
-              <Home className="h-4 w-4" />
-              View Rentals
-            </a>
           </div>
 
         </div>
