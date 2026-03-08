@@ -68,7 +68,7 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
       const greeting: Message = {
         id: "greeting",
         role: "assistant",
-        content: `Hi! I'm Luna 👋 I'm here to help you with questions about **${propertyContext.propertyName}**. Ask me anything about the property, pricing, availability, or how to book!`,
+        content: `Hi! I'm Luna 👋 I'm here to help you with questions about **${propertyContext.propertyName}**. Ask me anything about the property, pricing, availability, or how to book!\n\nI speak multiple languages — just type in your native tongue and I'll reply in kind. 🌍`,
         timestamp: new Date(),
       };
       setMessages([greeting]);
@@ -88,6 +88,9 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
     if (propertyContext.availabilityStatus) parts.push(`Current status: ${propertyContext.availabilityStatus}.`);
     parts.push(
       "If the visitor wants to book or check specific date availability, encourage them to use the availability calendar on the page. If they want to speak with someone, let them know they can fill out the inquiry form below the calendar or call our office."
+    );
+    parts.push(
+      "IMPORTANT: You are multilingual. Detect the language the visitor is writing in and always reply in that same language. If they write in Spanish, reply in Spanish. If they write in French, reply in French. If they write in Portuguese, reply in Portuguese. Match their language exactly — never switch to English unless they write in English first."
     );
     return parts.join(" ");
   }, [propertyContext]);
@@ -218,7 +221,7 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white font-semibold text-sm leading-none">Luna</p>
-              <p className="text-white/70 text-xs mt-0.5">AI Assistant · Online</p>
+              <p className="text-white/70 text-xs mt-0.5">AI Assistant · Multilingual · Online</p>
             </div>
             <button
               onClick={() => setAutoVoice(!autoVoice)}
@@ -307,7 +310,7 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask Luna anything..."
+              placeholder="Ask in any language…"
               className="flex-1 text-sm px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-400 transition-all"
               disabled={isLoading}
             />
