@@ -451,45 +451,57 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
       <div ref={mapRef} className="w-full h-full rounded-none" />
 
       {/* Compass Rose — top-left */}
-      <div className="absolute top-3 left-3 z-[1000] w-14 h-14 bg-black/55 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center shadow-lg select-none pointer-events-none">
-        <div className="relative w-10 h-10">
-          <span className="absolute top-0 left-1/2 -translate-x-1/2 text-white text-[9px] font-bold leading-none">N</span>
-          <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white/50 text-[8px] font-semibold leading-none">S</span>
-          <span className="absolute right-0 top-1/2 -translate-y-1/2 text-white/50 text-[8px] font-semibold leading-none">E</span>
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 text-white/50 text-[8px] font-semibold leading-none">W</span>
+      <div className="absolute top-3 left-3 z-[1000] w-16 h-16 select-none pointer-events-none"
+        style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))" }}
+      >
+        <div className="relative w-full h-full bg-black/60 backdrop-blur-md rounded-full border border-white/25 flex items-center justify-center">
+          {/* Cardinal labels */}
+          <span className="absolute top-1 left-1/2 -translate-x-1/2 text-white text-[10px] font-black leading-none tracking-tight">N</span>
+          <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-white/45 text-[9px] font-bold leading-none">S</span>
+          <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-white/45 text-[9px] font-bold leading-none">E</span>
+          <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-white/45 text-[9px] font-bold leading-none">W</span>
+          {/* Needle */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="relative w-1 h-7">
-              <div className="absolute top-0 left-0 w-full h-1/2 bg-red-500 rounded-t-full" />
-              <div className="absolute bottom-0 left-0 w-full h-1/2 bg-white/40 rounded-b-full" />
-            </div>
+            <svg width="10" height="28" viewBox="0 0 10 28">
+              <polygon points="5,0 9,14 5,12 1,14" fill="#ef4444" />
+              <polygon points="5,28 9,14 5,16 1,14" fill="rgba(255,255,255,0.35)" />
+            </svg>
           </div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-white/80 shadow" />
+          {/* Center dot */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-2 h-2 rounded-full bg-white shadow-sm" />
           </div>
         </div>
       </div>
 
-      {/* POI Filter strip — scrollable, below top */}
-      <div className="absolute top-3 left-20 right-3 z-[1000] overflow-x-auto scrollbar-hide">
-        <div className="flex gap-1.5 pb-0.5" style={{ width: "max-content" }}>
-          {POI_CATEGORIES.map((cat) => {
-            const active = activePOI.has(cat.id);
-            return (
-              <button
-                key={cat.id}
-                onClick={() => togglePOI(cat.id)}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition-all shadow-sm border ${
-                  active
-                    ? "text-white border-transparent shadow-md"
-                    : "bg-black/55 backdrop-blur-md text-white/80 border-white/15 hover:bg-black/70 hover:text-white"
-                }`}
-                style={active ? { background: cat.color, borderColor: "transparent" } : undefined}
-              >
-                <span className="text-sm leading-none">{cat.emoji}</span>
-                {cat.label}
-              </button>
-            );
-          })}
+      {/* POI Filter strip — scrollable with fade hint */}
+      <div className="absolute top-3 left-[76px] right-0 z-[1000]">
+        <div className="relative">
+          <div className="overflow-x-auto scrollbar-hide pr-8" style={{ WebkitOverflowScrolling: "touch" }}>
+            <div className="flex gap-1.5 pb-0.5 pl-0.5" style={{ width: "max-content" }}>
+              {POI_CATEGORIES.map((cat) => {
+                const active = activePOI.has(cat.id);
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => togglePOI(cat.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border shadow-sm ${
+                      active
+                        ? "text-white border-transparent shadow-md scale-105"
+                        : "bg-black/60 backdrop-blur-md text-white/85 border-white/15 hover:bg-black/75 hover:text-white hover:scale-105"
+                    }`}
+                    style={active ? { background: cat.color, borderColor: "transparent", boxShadow: `0 4px 14px ${cat.color}55` } : undefined}
+                  >
+                    <span className="text-sm leading-none">{cat.emoji}</span>
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          {/* Fade-right scroll hint */}
+          <div className="absolute right-0 top-0 bottom-0 w-8 pointer-events-none"
+            style={{ background: "linear-gradient(to right, transparent, rgba(0,0,0,0.4))" }} />
         </div>
       </div>
 
