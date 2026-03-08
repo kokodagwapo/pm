@@ -800,6 +800,9 @@ function RentalsContent() {
                 onMarkerClick={handleMarkerClick}
                 onMarkerHover={setHoveredPropertyId}
                 hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
+                neighborhoods={NEIGHBORHOODS}
+                activeNeighborhood={activeNeighborhood}
+                onNeighborhoodChange={handleNeighborhood}
               />
             </div>
             <div className="px-5 lg:px-8 py-8 border-t border-slate-200">

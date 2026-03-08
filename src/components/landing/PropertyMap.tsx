@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import { Satellite, Map as MapIcon, Mountain } from "lucide-react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import {
+  Satellite, Map as MapIcon, Mountain,
+  Waves, ShoppingBag, TreePine, Stethoscope, ShoppingCart,
+  Sprout, Leaf, BookOpen, Flag, PawPrint, Heart,
+} from "lucide-react";
 
 const NEIGHBORHOOD_COORDS: Record<string, [number, number]> = {
   // ── Existing communities ─────────────────────────────────────
@@ -66,11 +70,19 @@ interface Property {
   neighborhood?: string;
 }
 
+interface NeighborhoodFilter {
+  label: string;
+  value: string;
+}
+
 interface PropertyMapProps {
   properties: Property[];
   onMarkerClick?: (propertyId: string) => void;
   onMarkerHover?: (propertyId: string | null) => void;
   hoveredPropertyId?: string | null;
+  neighborhoods?: NeighborhoodFilter[];
+  activeNeighborhood?: string;
+  onNeighborhoodChange?: (value: string) => void;
 }
 
 // Module-level caches — persist across renders and page navigations
@@ -160,13 +172,14 @@ interface POICategory {
   id: string;
   label: string;
   emoji: string;
+  Icon: React.ComponentType<{ className?: string }>;
   color: string;
   pois: { name: string; coords: [number, number] }[];
 }
 
 const POI_CATEGORIES: POICategory[] = [
   {
-    id: "beaches", label: "Beaches", emoji: "🏖️", color: "#0ea5e9",
+    id: "beaches", label: "Beaches", emoji: "🏖️", Icon: Waves, color: "#0ea5e9",
     pois: [
       { name: "Vanderbilt Beach", coords: [26.2526, -81.8243] },
       { name: "Lowdermilk Park Beach", coords: [26.1442, -81.8125] },
@@ -176,7 +189,7 @@ const POI_CATEGORIES: POICategory[] = [
     ],
   },
   {
-    id: "malls", label: "Malls", emoji: "🛍️", color: "#a855f7",
+    id: "malls", label: "Malls", emoji: "🛍️", Icon: ShoppingBag, color: "#a855f7",
     pois: [
       { name: "Waterside Shops", coords: [26.2074, -81.7922] },
       { name: "Mercato", coords: [26.2220, -81.7967] },
@@ -186,27 +199,27 @@ const POI_CATEGORIES: POICategory[] = [
     ],
   },
   {
-    id: "parks", label: "Parks", emoji: "🌳", color: "#10b981",
+    id: "parks", label: "Parks", emoji: "🌳", Icon: TreePine, color: "#10b981",
     pois: [
       { name: "Sugden Regional Park", coords: [26.1356, -81.7625] },
-      { name: "North Collier Regional Park", coords: [26.2632, -81.7469] },  // 15000 Livingston Rd (verified)
+      { name: "North Collier Regional Park", coords: [26.2632, -81.7469] },
       { name: "Freedom Park", coords: [26.1752, -81.7752] },
       { name: "Barefoot Beach Preserve", coords: [26.3073, -81.8368] },
       { name: "Cocohatchee River Park", coords: [26.2940, -81.8126] },
-      { name: "Naples Botanical Garden", coords: [26.1068, -81.7711] },  // 4820 Bayshore Dr (verified)
+      { name: "Naples Botanical Garden", coords: [26.1068, -81.7711] },
     ],
   },
   {
-    id: "hospitals", label: "Hospitals", emoji: "🏥", color: "#ef4444",
+    id: "hospitals", label: "Hospitals", emoji: "🏥", Icon: Stethoscope, color: "#ef4444",
     pois: [
-      { name: "NCH Downtown Naples Hospital", coords: [26.1422, -81.7943] },  // 350 7th St N (verified)
-      { name: "NCH North Naples Hospital", coords: [26.2732, -81.7899] },     // 11190 Health Park Blvd (verified)
+      { name: "NCH Downtown Naples Hospital", coords: [26.1422, -81.7943] },
+      { name: "NCH North Naples Hospital", coords: [26.2732, -81.7899] },
       { name: "Physicians Regional Medical Center", coords: [26.1648, -81.7661] },
       { name: "Naples Community Hospital ER", coords: [26.1422, -81.7943] },
     ],
   },
   {
-    id: "groceries", label: "Groceries", emoji: "🛒", color: "#f59e0b",
+    id: "groceries", label: "Groceries", emoji: "🛒", Icon: ShoppingCart, color: "#f59e0b",
     pois: [
       { name: "Publix at Coastland", coords: [26.1636, -81.7928] },
       { name: "Publix at Mercato", coords: [26.2212, -81.7985] },
@@ -216,36 +229,36 @@ const POI_CATEGORIES: POICategory[] = [
     ],
   },
   {
-    id: "seedtotable", label: "Seed to Table", emoji: "🌱", color: "#84cc16",
+    id: "seedtotable", label: "Seed to Table", emoji: "🌱", Icon: Sprout, color: "#84cc16",
     pois: [
-      { name: "Seed to Table — 4835 Immokalee Rd", coords: [26.2742, -81.7529] },  // verified: 26.27415, -81.75287
+      { name: "Seed to Table — 4835 Immokalee Rd", coords: [26.2742, -81.7529] },
     ],
   },
   {
-    id: "wholefoods", label: "Whole Foods", emoji: "🥑", color: "#22c55e",
+    id: "wholefoods", label: "Whole Foods", emoji: "🥑", Icon: Leaf, color: "#22c55e",
     pois: [
-      { name: "Whole Foods Market — Mercato (9101 Strada Pl)", coords: [26.2549, -81.8001] },  // verified: 26.25487, -81.80007
+      { name: "Whole Foods Market — Mercato (9101 Strada Pl)", coords: [26.2549, -81.8001] },
     ],
   },
   {
-    id: "barnesnoble", label: "Barnes & Noble", emoji: "📚", color: "#6366f1",
+    id: "barnesnoble", label: "Barnes & Noble", emoji: "📚", Icon: BookOpen, color: "#6366f1",
     pois: [
-      { name: "Barnes & Noble — 4149 Tamiami Trail N", coords: [26.2063, -81.7989] },  // verified
+      { name: "Barnes & Noble — 4149 Tamiami Trail N", coords: [26.2063, -81.7989] },
     ],
   },
   {
-    id: "golf", label: "Golf", emoji: "⛳", color: "#65a30d",
+    id: "golf", label: "Golf", emoji: "⛳", Icon: Flag, color: "#65a30d",
     pois: [
-      { name: "Tiburon Golf Club", coords: [26.2469, -81.7661] },         // 2620 Tiburon Drive (verified)
-      { name: "Naples Grande Golf Club", coords: [26.2111, -81.8072] },   // 475 Seagate Drive (verified)
-      { name: "Grey Oaks Country Club", coords: [26.1888, -81.7624] },    // 2400 Grey Oaks Dr N (verified)
-      { name: "Lely Resort Golf & CC", coords: [26.0809, -81.6979] },     // verified
+      { name: "Tiburon Golf Club", coords: [26.2469, -81.7661] },
+      { name: "Naples Grande Golf Club", coords: [26.2111, -81.8072] },
+      { name: "Grey Oaks Country Club", coords: [26.1888, -81.7624] },
+      { name: "Lely Resort Golf & CC", coords: [26.0809, -81.6979] },
       { name: "Pelican Bay Golf Course", coords: [26.2160, -81.8118] },
       { name: "Eagle Lakes Golf Club", coords: [26.0720, -81.7180] },
     ],
   },
   {
-    id: "dogparks", label: "Dog Parks", emoji: "🐕", color: "#f97316",
+    id: "dogparks", label: "Dog Parks", emoji: "🐕", Icon: PawPrint, color: "#f97316",
     pois: [
       { name: "Naples North Dog Park", coords: [26.2654, -81.7847] },
       { name: "East Naples Dog Park", coords: [26.1078, -81.7477] },
@@ -253,7 +266,7 @@ const POI_CATEGORIES: POICategory[] = [
     ],
   },
   {
-    id: "seniors", label: "Senior Care", emoji: "🏡", color: "#ec4899",
+    id: "seniors", label: "Senior Care", emoji: "🏡", Icon: Heart, color: "#ec4899",
     pois: [
       { name: "Naples Senior Center", coords: [26.1533, -81.7692] },
       { name: "The Moorings Park", coords: [26.1853, -81.7955] },
@@ -265,7 +278,7 @@ const POI_CATEGORIES: POICategory[] = [
   },
 ];
 
-export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredPropertyId }: PropertyMapProps) {
+export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredPropertyId, neighborhoods, activeNeighborhood, onNeighborhoodChange }: PropertyMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef = useRef<Map<string, any>>(new Map());
@@ -293,8 +306,10 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
 
       const map = L.map(mapRef.current, { zoomControl: false, scrollWheelZoom: true }).setView(NAPLES_CENTER, 13);
 
-      const layer = TILE_LAYERS["satellite"];
-      baseTileRef.current = L.tileLayer(layer.base, { attribution: layer.attribution, maxZoom: 19 }).addTo(map);
+      const layer = TILE_LAYERS["modern"];
+      const opts: any = { attribution: layer.attribution, maxZoom: 19 };
+      if (layer.subdomains) opts.subdomains = layer.subdomains;
+      baseTileRef.current = L.tileLayer(layer.base, opts).addTo(map);
       if (layer.labels) {
         labelTileRef.current = L.tileLayer(layer.labels, { maxZoom: 19, opacity: 0.85 }).addTo(map);
       }
@@ -609,11 +624,11 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border shadow-sm ${
                       active
                         ? "text-white border-transparent shadow-md scale-105"
-                        : "bg-black/60 backdrop-blur-md text-white/85 border-white/15 hover:bg-black/75 hover:text-white hover:scale-105"
+                        : "bg-white/90 backdrop-blur-md text-slate-700 border-slate-200/60 hover:bg-white hover:text-slate-900 hover:scale-105 shadow-sm"
                     }`}
                     style={active ? { background: cat.color, borderColor: "transparent", boxShadow: `0 4px 14px ${cat.color}55` } : undefined}
                   >
-                    <span className="text-sm leading-none">{cat.emoji}</span>
+                    <cat.Icon className="w-3.5 h-3.5 shrink-0" />
                     <span>{cat.label}</span>
                   </button>
                 );
@@ -625,6 +640,36 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
             style={{ background: "linear-gradient(to right, transparent, rgba(0,0,0,0.4))" }} />
         </div>
       </div>
+
+      {/* Neighborhood filter chips — bottom overlay, only when provided */}
+      {neighborhoods && neighborhoods.length > 0 && onNeighborhoodChange && (
+        <div className="absolute bottom-[58px] left-3 right-3 z-[1000]">
+          <div className="relative">
+            <div className="overflow-x-auto scrollbar-hide pr-6" style={{ WebkitOverflowScrolling: "touch" }}>
+              <div className="flex gap-1.5 pb-0.5" style={{ width: "max-content" }}>
+                {neighborhoods.map((n) => {
+                  const isActive = n.value === "" ? !activeNeighborhood : activeNeighborhood === n.value;
+                  return (
+                    <button
+                      key={n.value || "all"}
+                      onClick={() => onNeighborhoodChange(n.value)}
+                      className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border shadow-sm ${
+                        isActive
+                          ? "bg-slate-900 text-white border-transparent shadow-md"
+                          : "bg-white/90 backdrop-blur-md text-slate-700 border-slate-200/60 hover:bg-white hover:text-slate-900"
+                      }`}
+                    >
+                      {n.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="absolute right-0 top-0 bottom-0 w-6 pointer-events-none"
+              style={{ background: "linear-gradient(to right, transparent, rgba(248,247,244,0.8))" }} />
+          </div>
+        </div>
+      )}
 
       {/* Tile mode toggle — centered bottom */}
       <div
