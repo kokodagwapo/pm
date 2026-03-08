@@ -83,7 +83,7 @@ export function AnalyticsCard({
   return (
     <Card
       className={cn(
-        "relative overflow-hidden border border-border/60 bg-white shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl p-0",
+        "relative overflow-hidden bg-white/10 dark:bg-black/20 shadow-lg hover:shadow-xl transition-all duration-200 rounded-2xl p-0",
         className
       )}
     >
@@ -145,9 +145,8 @@ export function FinancialCard({
   return (
     <div
       className={cn(
-        "flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 rounded-xl border",
-        variantClasses.background,
-        variantClasses.border,
+        "flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 rounded-2xl border backdrop-blur-lg",
+        "bg-white/10 dark:bg-black/20 border-white/20 dark:border-white/10",
         className
       )}
     >
@@ -172,7 +171,7 @@ export function MetricCard({
   const colors = iconColorClasses[iconColor];
 
   return (
-    <Card className={cn("rounded-2xl border-border/60 shadow-sm", className)}>
+    <Card className={cn("rounded-2xl bg-white/10 dark:bg-black/20 shadow-lg", className)}>
       <CardContent className="p-5">
         <div className="flex items-center gap-3 mb-3">
           {Icon && (
