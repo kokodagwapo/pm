@@ -325,24 +325,32 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
         </div>
       )}
 
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-4 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
-          isOpen
-            ? "bg-slate-700 hover:bg-slate-800 rotate-0"
-            : "bg-gradient-to-br from-sky-500 to-violet-500 hover:scale-110"
-        }`}
-        aria-label={isOpen ? "Close Luna" : "Chat with Luna"}
-      >
-        {isOpen ? (
-          <X className="w-6 h-6 text-white" />
-        ) : (
-          <div className="relative">
-            <MessageCircle className="w-6 h-6 text-white" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white animate-pulse" />
-          </div>
+      <div className="fixed bottom-6 right-4 z-50">
+        {!isOpen && (
+          <>
+            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-sky-400 to-violet-500 opacity-40 animate-ping" />
+            <span className="absolute inset-[-6px] rounded-full bg-gradient-to-br from-sky-400 to-violet-500 opacity-20 animate-ping" style={{ animationDelay: "0.4s" }} />
+          </>
         )}
-      </button>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`relative w-16 h-16 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 ${
+            isOpen
+              ? "bg-slate-700 hover:bg-slate-800"
+              : "bg-gradient-to-br from-sky-500 to-violet-500 hover:scale-110 shadow-sky-400/40"
+          }`}
+          aria-label={isOpen ? "Close Luna" : "Chat with Luna"}
+        >
+          {isOpen ? (
+            <X className="w-7 h-7 text-white" />
+          ) : (
+            <div className="relative">
+              <MessageCircle className="w-7 h-7 text-white" />
+              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-white animate-pulse" />
+            </div>
+          )}
+        </button>
+      </div>
     </>
   );
 }

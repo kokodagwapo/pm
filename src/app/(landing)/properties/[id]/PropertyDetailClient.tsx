@@ -5,6 +5,7 @@ import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LunaWidget } from "@/components/landing/LunaWidget";
 import { SinglePropertyMap } from "@/components/landing/SinglePropertyMap";
+import { NaplesAreaGuide } from "@/components/landing/NaplesAreaGuide";
 import {
   Bed,
   Bath,
@@ -645,16 +646,22 @@ export function PropertyDetailClient({
           </Link>
 
           <div className="relative mb-6">
-            {images.length <= 1 ? (
-              <div className="relative rounded-2xl overflow-hidden h-[420px]">
-                <img
-                  src={images[0]}
-                  alt={property.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[420px] rounded-2xl overflow-hidden">
+            {/* Mobile: always show single hero image */}
+            <div
+              className={`relative rounded-2xl overflow-hidden h-[260px] sm:h-[320px] ${images.length > 1 ? "md:hidden" : ""} cursor-pointer`}
+              onClick={() => { setGalleryIndex(0); setShowAllPhotos(true); }}
+            >
+              <img src={images[0]} alt={property.name} className="w-full h-full object-cover" />
+              {images.length > 1 && (
+                <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/60 text-white text-xs font-medium backdrop-blur-sm">
+                  <Grid3X3 className="w-3.5 h-3.5" /> {images.length} photos
+                </div>
+              )}
+            </div>
+
+            {/* Desktop: 4-col photo grid */}
+            {images.length > 1 && (
+              <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-2 h-[420px] rounded-2xl overflow-hidden">
                 <div
                   className="col-span-2 row-span-2 relative cursor-pointer group"
                   onClick={() => { setGalleryIndex(0); setShowAllPhotos(true); }}
@@ -691,7 +698,7 @@ export function PropertyDetailClient({
             {images.length > 1 && (
               <button
                 onClick={() => setShowAllPhotos(true)}
-                className="absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/95 backdrop-blur-sm shadow-lg text-slate-800 text-sm font-medium hover:bg-white transition-colors border border-slate-200"
+                className="absolute bottom-4 right-4 hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/95 backdrop-blur-sm shadow-lg text-slate-800 text-sm font-medium hover:bg-white transition-colors border border-slate-200"
               >
                 <Grid3X3 className="w-4 h-4" />
                 See all {images.length} photos
@@ -770,18 +777,18 @@ export function PropertyDetailClient({
                   )}
                 </div>
 
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-3 leading-tight tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                <h1 className="text-[2rem] md:text-4xl lg:text-5xl font-bold text-slate-900 mb-2 leading-[1.15] tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                   {property.name}
                 </h1>
 
                 {address && (
-                  <p className="flex items-center gap-2 text-slate-500 mb-5 text-sm">
+                  <p className="flex items-center gap-1.5 text-slate-500 mb-5 text-sm font-medium tracking-wide">
                     <MapPin className="w-3.5 h-3.5 shrink-0 text-amber-400" />
                     {fullAddress}
                   </p>
                 )}
 
-                <div className="flex flex-wrap items-center gap-4 pb-8 mb-8 border-b border-slate-100">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-3 pb-8 mb-8 border-b border-slate-100">
                   {unit && (
                     <>
                       <div className="flex items-center gap-2 text-slate-700">
@@ -816,9 +823,9 @@ export function PropertyDetailClient({
 
                 {property.description && (
                   <div className="mb-10">
-                    <h2 className="text-xl font-semibold text-slate-900 mb-4" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>Property Description</h2>
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-4 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>Property Description</h2>
                     <div className="relative">
-                      <p className={`text-slate-600 leading-relaxed whitespace-pre-line ${
+                      <p className={`text-slate-600 text-[15px] leading-[1.8] whitespace-pre-line ${
                         !descExpanded && property.description.length > 400 ? "line-clamp-5" : ""
                       }`}>
                         {property.description}
@@ -826,9 +833,9 @@ export function PropertyDetailClient({
                       {property.description.length > 400 && (
                         <button
                           onClick={() => setDescExpanded(!descExpanded)}
-                          className="mt-2 text-sky-600 font-medium text-sm hover:text-sky-700 transition-colors"
+                          className="mt-3 text-slate-900 font-semibold text-sm hover:text-slate-600 transition-colors underline underline-offset-4 decoration-slate-300"
                         >
-                          {descExpanded ? "Show less" : "View more"}
+                          {descExpanded ? "Show less" : "Read more"}
                         </button>
                       )}
                     </div>
@@ -837,7 +844,7 @@ export function PropertyDetailClient({
 
                 {units.length > 0 && (
                   <div className="mb-10">
-                    <h2 className="text-xl font-semibold text-slate-900 mb-4" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>Sleeping Arrangement</h2>
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-4 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>Sleeping Arrangement</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {units.map((u: any, i: number) => (
                         <div
@@ -862,7 +869,7 @@ export function PropertyDetailClient({
                 {(baseRentPerNight > 0 || seasonalPricingSummary.length > 0) && (
                   <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                     <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                      <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                      <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                         <DollarSign className="w-4 h-4 text-amber-500" />
                         Pricing
                       </h2>
@@ -1005,7 +1012,7 @@ export function PropertyDetailClient({
                 {property.amenities?.length > 0 && (
                   <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                     <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                      <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                      <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                         <Sparkles className="w-4 h-4 text-rose-400" />
                         Amenities
                       </h2>
@@ -1559,7 +1566,7 @@ export function PropertyDetailClient({
               <div ref={(el) => { sectionRefs.current.map = el; }}>
                 <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                   <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                    <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                       <MapPin className="w-4 h-4 text-orange-400" />
                       Location
                     </h2>
@@ -1589,6 +1596,7 @@ export function PropertyDetailClient({
                   </div>
                 </div>
               </div>
+              <NaplesAreaGuide />
             </div>
 
             <aside className="lg:w-[380px] shrink-0">

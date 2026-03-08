@@ -2,8 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest } from "next/server";
 import Review from "@/models/Review";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";
 import {
   createSuccessResponse,
@@ -17,7 +16,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) return createErrorResponse("Unauthorized", 401);
     if (!["admin", "manager"].includes((session.user as any).role)) {
       return createErrorResponse("Forbidden", 403);
@@ -52,7 +51,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) return createErrorResponse("Unauthorized", 401);
     if ((session.user as any).role !== "admin") return createErrorResponse("Forbidden", 403);
 
