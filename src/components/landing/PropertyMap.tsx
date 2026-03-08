@@ -504,12 +504,12 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
           padding: 5px 12px;
           border-radius: 999px;
           font-size: 11px;
-          font-weight: 700;
+          font-weight: 500;
           white-space: nowrap;
           text-align: center;
           cursor: pointer;
           transition: all 0.15s cubic-bezier(.4,0,.2,1);
-          letter-spacing: 0.02em;
+          letter-spacing: 0.04em;
           background: rgba(15,23,42,0.82);
           color: #f1f5f9;
           border: 1.5px solid rgba(255,255,255,0.18);
@@ -621,10 +621,10 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
                   <button
                     key={cat.id}
                     onClick={() => togglePOI(cat.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border shadow-sm ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wide whitespace-nowrap transition-all border shadow-sm ${
                       active
                         ? "text-white border-transparent shadow-md scale-105"
-                        : "bg-white/90 backdrop-blur-md text-slate-700 border-slate-200/60 hover:bg-white hover:text-slate-900 hover:scale-105 shadow-sm"
+                        : "bg-white/90 backdrop-blur-md text-slate-600 border-slate-200/60 hover:bg-white hover:text-slate-900 hover:scale-105 shadow-sm"
                     }`}
                     style={active ? { background: cat.color, borderColor: "transparent", boxShadow: `0 4px 14px ${cat.color}55` } : undefined}
                   >
@@ -653,10 +653,10 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
                     <button
                       key={n.value || "all"}
                       onClick={() => onNeighborhoodChange(n.value)}
-                      className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border shadow-sm ${
+                      className={`px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wide whitespace-nowrap transition-all border shadow-sm ${
                         isActive
                           ? "bg-slate-900 text-white border-transparent shadow-md"
-                          : "bg-white/90 backdrop-blur-md text-slate-700 border-slate-200/60 hover:bg-white hover:text-slate-900"
+                          : "bg-white/90 backdrop-blur-md text-slate-600 border-slate-200/60 hover:bg-white hover:text-slate-900"
                       }`}
                     >
                       {n.label}
@@ -682,7 +682,7 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
             <button
               key={mode}
               onClick={() => setTileMode(mode)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium tracking-wide transition-all ${
                 i > 0 ? "border-l border-white/10" : ""
               } ${
                 active

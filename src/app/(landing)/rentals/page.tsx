@@ -640,7 +640,7 @@ function RentalsContent() {
 
                 <button
                   onClick={applyFilters}
-                  className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-[13px] font-semibold hover:bg-slate-800 active:bg-slate-950 transition-colors"
+                  className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-[13px] font-medium tracking-wide hover:bg-slate-800 active:bg-slate-950 transition-colors"
                 >
                   <Search className="w-3 h-3" />
                   Search
@@ -715,7 +715,7 @@ function RentalsContent() {
                   <button
                     key={n.value}
                     onClick={() => handleNeighborhood(n.value)}
-                    className={`px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide transition-all whitespace-nowrap flex-shrink-0 border ${
+                    className={`px-3 py-1 rounded-full text-[11px] font-medium tracking-widest transition-all whitespace-nowrap flex-shrink-0 border ${
                       isActive
                         ? "bg-slate-900 text-white border-slate-900 shadow-sm"
                         : "bg-white text-slate-500 border-slate-200 hover:border-slate-400 hover:text-slate-800"
@@ -727,7 +727,7 @@ function RentalsContent() {
               })}
               <button
                 onClick={() => setShowFavoritesOnly((v) => !v)}
-                className={`px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide transition-all whitespace-nowrap flex-shrink-0 border flex items-center gap-1 ${
+                className={`px-3 py-1 rounded-full text-[11px] font-medium tracking-widest transition-all whitespace-nowrap flex-shrink-0 border flex items-center gap-1 ${
                   showFavoritesOnly
                     ? "bg-rose-500 text-white border-rose-500 shadow-sm"
                     : "bg-white text-slate-500 border-slate-200 hover:border-rose-300 hover:text-rose-500"
