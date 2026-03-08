@@ -570,16 +570,16 @@ export default function DashboardPage() {
   // Manager/Admin Dashboard
   return (
     <ResponsiveLayout className="space-y-6">
-      {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">
+      {/* Header Section - Modern Typography */}
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+        <div className="space-y-2">
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 mb-2.5">
             {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </p>
-          <h1 className="text-4xl font-extrabold tracking-tight leading-none">
-            {getGreeting()}, {user?.firstName}!
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight leading-none bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
+            {getGreeting()}, {user?.firstName}! 👋
           </h1>
-          <p className="text-sm text-muted-foreground mt-1.5 font-medium">
+          <p className="text-base text-muted-foreground/80 mt-3 font-medium">
             {t("dashboard.header.subtitle")}
           </p>
         </div>
@@ -615,42 +615,53 @@ export default function DashboardPage() {
         </Alert>
       )}
 
-      {/* Alerts Section - Always show the main 3 alerts */}
-      <div className="grid gap-3 md:grid-cols-3">
-        {alerts?.slice(0, 3).map((alert) => {
-          const styles = getAlertStyles(alert.type);
-          return (
-            <div
-              key={alert.id}
-              className={`group rounded-2xl border ${styles.border} ${styles.bg} px-5 py-4 cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.01]`}
-              onClick={() => handleAlertClick(alert.type)}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <AlertTriangle className={`h-3.5 w-3.5 shrink-0 ${styles.iconColor}`} />
-                    <h4 className={`font-bold text-sm tracking-tight ${styles.textColor}`}>
-                      {getAlertTitleText(alert)}
-                    </h4>
+      {/* Action Items - Today's Highlights */}
+      <div className="space-y-3">
+        <div className="flex items-baseline gap-2 px-1">
+          <h2 className="text-lg font-bold tracking-tight">⚡ Action Items</h2>
+          <p className="text-xs text-muted-foreground/70 font-medium">Things that need your attention today</p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          {alerts?.slice(0, 3).map((alert) => {
+            const styles = getAlertStyles(alert.type);
+            return (
+              <div
+                key={alert.id}
+                className={`group rounded-2xl backdrop-blur-lg border border-white/20 dark:border-white/10 ${styles.bg} px-5 py-4 cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02]`}
+                onClick={() => handleAlertClick(alert.type)}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <AlertTriangle className={`h-4 w-4 shrink-0 ${styles.iconColor}`} />
+                      <h4 className={`font-bold text-sm tracking-tight ${styles.textColor}`}>
+                        {getAlertTitleText(alert)}
+                      </h4>
+                    </div>
+                    <p className={`text-xs leading-snug ${styles.textColor} opacity-80`}>
+                      {getAlertMessageText(alert)}
+                    </p>
                   </div>
-                  <p className={`text-xs leading-snug ${styles.textColor} opacity-75`}>
-                    {getAlertMessageText(alert)}
-                  </p>
-                </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  <span className={`text-2xl font-extrabold leading-none ${styles.textColor}`}>
-                    {alert.count}
-                  </span>
-                  <ChevronRight className={`h-3.5 w-3.5 ${styles.iconColor} opacity-60`} />
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span className={`text-3xl font-extrabold leading-none ${styles.textColor}`}>
+                      {alert.count}
+                    </span>
+                    <ChevronRight className={`h-4 w-4 ${styles.iconColor} opacity-60`} />
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
-      {/* Main KPI Cards */}
-      <AnalyticsCardGrid>
+      {/* Main KPI Cards - Your Empire at a Glance */}
+      <div className="space-y-3">
+        <div className="flex items-baseline gap-2 px-1">
+          <h2 className="text-lg font-bold tracking-tight">📊 Here's Your Empire at a Glance</h2>
+          <p className="text-xs text-muted-foreground/70 font-medium">Key metrics from across all properties</p>
+        </div>
+        <AnalyticsCardGrid>
         <AnalyticsCard
           title={t("dashboard.cards.totalProperties.title")}
           value={overview?.totalProperties ?? 0}
@@ -735,13 +746,16 @@ export default function DashboardPage() {
           iconColor="info"
         />
       </AnalyticsCardGrid>
+      </div>
 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Left Column - Charts and Analytics */}
         <div className="lg:col-span-2 space-y-6">
           {/* Revenue & Expenses Trends */}
-          <Card className="hover-lift rounded-2xl border-border/60 shadow-sm">
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold tracking-tight px-1">💰 Financial Performance</h2>
+            <Card className="hover-lift rounded-2xl shadow-lg">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div>
@@ -882,11 +896,14 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
+          </div>
 
           {/* Property Type Distribution and Payment Status */}
           <div className="grid gap-6 md:grid-cols-2">
             {/* Property Distribution */}
-            <Card className="hover-lift rounded-2xl border-border/60 shadow-sm">
+            <div className="space-y-3">
+              <h3 className="text-base font-bold tracking-tight px-1">🏘️ Property Breakdown</h3>
+              <Card className="hover-lift rounded-2xl shadow-lg">
               <CardHeader className="pb-2">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">By Type</p>
                 <CardTitle className="flex items-center gap-2 text-base font-extrabold tracking-tight">
