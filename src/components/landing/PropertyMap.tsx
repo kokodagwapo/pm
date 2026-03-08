@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Satellite, Map as MapIcon } from "lucide-react";
+import { Satellite, Map as MapIcon, Mountain } from "lucide-react";
 
 const NEIGHBORHOOD_COORDS: Record<string, [number, number]> = {
   "Falling Waters": [26.1030, -81.7510],
@@ -63,19 +63,39 @@ function formatPrice(amount: number): string {
   return `$${amount}`;
 }
 
-type TileMode = "satellite" | "street";
+type TileMode = "satellite" | "modern" | "terrain";
 
-const TILE_LAYERS: Record<TileMode, { base: string; labels?: string; attribution: string }> = {
+const TILE_LAYERS: Record<TileMode, {
+  base: string;
+  labels?: string;
+  attribution: string;
+  subdomains?: string;
+  pillDark?: boolean;
+}> = {
   satellite: {
     base: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     labels: "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-    attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP",
+    attribution: "Tiles &copy; Esri &mdash; Esri, i-cubed, USDA, USGS, AEX, GeoEye",
+    pillDark: true,
   },
-  street: {
-    base: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    attribution: "&copy; OpenStreetMap &copy; CARTO",
+  modern: {
+    base: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> &copy; <a href='https://carto.com/'>CARTO</a>",
+    subdomains: "abcd",
+    pillDark: false,
+  },
+  terrain: {
+    base: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+    attribution: "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community",
+    pillDark: false,
   },
 };
+
+const TOGGLE_TABS: { mode: TileMode; label: string; Icon: any }[] = [
+  { mode: "satellite", label: "Satellite", Icon: Satellite },
+  { mode: "modern",   label: "Modern",    Icon: MapIcon   },
+  { mode: "terrain",  label: "3D Terrain", Icon: Mountain  },
+];
 
 export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredPropertyId }: PropertyMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -145,7 +165,7 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
 
     const layer = TILE_LAYERS[mode];
     const opts: any = { attribution: layer.attribution, maxZoom: 19 };
-    if (mode === "street") opts.subdomains = "abcd";
+    if (layer.subdomains) opts.subdomains = layer.subdomains;
     baseTileRef.current = L.tileLayer(layer.base, opts).addTo(map);
 
     if (layer.labels) {
@@ -156,6 +176,18 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
     }
 
     markersRef.current.forEach((marker) => marker.bringToFront?.());
+
+    markersRef.current.forEach((marker) => {
+      const el = marker.getElement();
+      if (!el) return;
+      const pill = el.querySelector(".map-price-pill");
+      if (!pill) return;
+      if (layer.pillDark) {
+        pill.classList.remove("pill-light-bg");
+      } else {
+        pill.classList.add("pill-light-bg");
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -173,6 +205,7 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
 
     const map = mapInstanceRef.current;
     const bounds: any[] = [];
+    const isLight = !TILE_LAYERS[tileMode].pillDark;
 
     properties.forEach((property) => {
       const coords = getPropertyCoords(property);
@@ -180,9 +213,10 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
       const rent = unit?.rentAmount ?? 0;
       const price = rent > 500 ? rent : rent * 30;
 
+      const pillClass = isLight ? "map-price-pill pill-light-bg" : "map-price-pill";
       const icon = L.divIcon({
         className: "custom-map-marker",
-        html: `<div class="map-price-pill" data-id="${property._id}">${formatPrice(price)}</div>`,
+        html: `<div class="${pillClass}" data-id="${property._id}">${formatPrice(price)}</div>`,
         iconSize: [76, 30],
         iconAnchor: [38, 30],
       });
@@ -199,7 +233,7 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
     if (bounds.length > 0) {
       map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }
-  }, [properties, mapReady, onMarkerClick, onMarkerHover]);
+  }, [properties, mapReady, onMarkerClick, onMarkerHover, tileMode]);
 
   useEffect(() => {
     markersRef.current.forEach((marker, id) => {
@@ -246,12 +280,18 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
           backdrop-filter: blur(6px);
           -webkit-backdrop-filter: blur(6px);
         }
+        .map-price-pill.pill-light-bg {
+          background: rgba(255,255,255,0.92);
+          color: #0f172a;
+          border: 1.5px solid rgba(15,23,42,0.15);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.18), 0 1px 0 rgba(255,255,255,0.8) inset;
+        }
         .map-price-pill:hover,
         .map-pill-active {
-          background: rgba(255,255,255,0.95);
-          color: #0f172a;
-          border-color: rgba(255,255,255,0.6);
-          box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 0 3px rgba(255,255,255,0.2);
+          background: rgba(255,255,255,0.97) !important;
+          color: #0f172a !important;
+          border-color: rgba(99,102,241,0.4) !important;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 0 0 3px rgba(99,102,241,0.2) !important;
           transform: scale(1.12) translateY(-2px);
           z-index: 999;
         }
@@ -261,7 +301,7 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
         }
         .leaflet-control-attribution {
           font-size: 9px !important;
-          background: rgba(0,0,0,0.55) !important;
+          background: rgba(0,0,0,0.45) !important;
           color: rgba(255,255,255,0.55) !important;
           backdrop-filter: blur(4px);
           border-radius: 4px 0 0 0;
@@ -271,7 +311,7 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
         }
         .leaflet-control-zoom {
           border: none !important;
-          box-shadow: 0 2px 16px rgba(0,0,0,0.4) !important;
+          box-shadow: 0 2px 16px rgba(0,0,0,0.3) !important;
           border-radius: 12px !important;
           overflow: hidden;
           margin-bottom: 60px !important;
@@ -282,42 +322,39 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
           height: 36px !important;
           line-height: 36px !important;
           font-size: 18px !important;
-          color: #f1f5f9 !important;
-          background: rgba(15,23,42,0.8) !important;
-          border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+          color: #1e293b !important;
+          background: rgba(255,255,255,0.92) !important;
+          border-bottom: 1px solid rgba(0,0,0,0.08) !important;
           backdrop-filter: blur(8px);
         }
         .leaflet-control-zoom a:hover {
-          background: rgba(30,41,59,0.95) !important;
+          background: rgba(241,245,249,1) !important;
         }
       `}</style>
 
       <div ref={mapRef} className="w-full h-full rounded-none" />
 
-      {/* Satellite / Street toggle */}
-      <div className="absolute bottom-4 right-4 z-[1000] flex rounded-xl overflow-hidden shadow-xl border border-white/10">
-        <button
-          onClick={() => setTileMode("satellite")}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${
-            tileMode === "satellite"
-              ? "bg-white text-slate-900"
-              : "bg-black/60 text-white/70 hover:bg-black/80 hover:text-white backdrop-blur-md"
-          }`}
-        >
-          <Satellite className="w-3.5 h-3.5" />
-          Satellite
-        </button>
-        <button
-          onClick={() => setTileMode("street")}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${
-            tileMode === "street"
-              ? "bg-white text-slate-900"
-              : "bg-black/60 text-white/70 hover:bg-black/80 hover:text-white backdrop-blur-md"
-          }`}
-        >
-          <MapIcon className="w-3.5 h-3.5" />
-          Dark
-        </button>
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] flex rounded-2xl overflow-hidden shadow-2xl border border-white/20"
+        style={{ backdropFilter: "blur(12px)" }}>
+        {TOGGLE_TABS.map(({ mode, label, Icon }, i) => {
+          const active = tileMode === mode;
+          return (
+            <button
+              key={mode}
+              onClick={() => setTileMode(mode)}
+              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold transition-all ${
+                i > 0 ? "border-l border-white/10" : ""
+              } ${
+                active
+                  ? "bg-white text-slate-900 shadow-inner"
+                  : "bg-black/55 text-white/75 hover:bg-black/70 hover:text-white"
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5 shrink-0" />
+              {label}
+            </button>
+          );
+        })}
       </div>
     </>
   );
