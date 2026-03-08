@@ -52,6 +52,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
   roles: UserRole[];
+  iconColor?: string;
   children?: NavItem[];
 }
 
@@ -67,6 +68,7 @@ const navigationSections: NavSection[] = [
         title: "nav.dashboard",
         href: "/dashboard",
         icon: Home,
+        iconColor: "text-sky-400",
         roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT],
       },
     ],
@@ -78,50 +80,54 @@ const navigationSections: NavSection[] = [
         title: "nav.properties",
         href: "/dashboard/properties",
         icon: Building2,
+        iconColor: "text-violet-400",
         roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER],
         children: [
-          { title: "nav.properties.all", href: "/dashboard/properties", icon: Building2, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
-          { title: "nav.properties.new", href: "/dashboard/properties/new", icon: Building2, roles: [UserRole.ADMIN, UserRole.MANAGER] },
-          { title: "nav.properties.available", href: "/dashboard/properties/available", icon: Key, roles: [UserRole.ADMIN, UserRole.MANAGER] },
-          { title: "nav.properties.allUnits", href: "/dashboard/properties/units", icon: Grid3X3, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
-          { title: "nav.properties.calendar", href: "/dashboard/properties/calendar", icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.properties.all", href: "/dashboard/properties", icon: Building2, iconColor: "text-violet-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.properties.new", href: "/dashboard/properties/new", icon: Building2, iconColor: "text-violet-400", roles: [UserRole.ADMIN, UserRole.MANAGER] },
+          { title: "nav.properties.available", href: "/dashboard/properties/available", icon: Key, iconColor: "text-violet-400", roles: [UserRole.ADMIN, UserRole.MANAGER] },
+          { title: "nav.properties.allUnits", href: "/dashboard/properties/units", icon: Grid3X3, iconColor: "text-violet-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.properties.calendar", href: "/dashboard/properties/calendar", icon: CalendarDays, iconColor: "text-violet-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
         ],
       },
       {
         title: "nav.tenants",
         href: "/dashboard/tenants",
         icon: Users,
+        iconColor: "text-emerald-400",
         roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER],
         children: [
-          { title: "nav.tenants.all", href: "/dashboard/tenants", icon: Users, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
-          { title: "nav.tenants.new", href: "/dashboard/tenants/new", icon: UserPlus, roles: [UserRole.ADMIN, UserRole.MANAGER] },
-          { title: "nav.tenants.applications", href: "/dashboard/tenants/applications", icon: UserPlus, roles: [UserRole.ADMIN, UserRole.MANAGER] },
+          { title: "nav.tenants.all", href: "/dashboard/tenants", icon: Users, iconColor: "text-emerald-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.tenants.new", href: "/dashboard/tenants/new", icon: UserPlus, iconColor: "text-emerald-400", roles: [UserRole.ADMIN, UserRole.MANAGER] },
+          { title: "nav.tenants.applications", href: "/dashboard/tenants/applications", icon: UserPlus, iconColor: "text-emerald-400", roles: [UserRole.ADMIN, UserRole.MANAGER] },
         ],
       },
       {
         title: "nav.owners",
         href: "/dashboard/owners",
         icon: User,
+        iconColor: "text-amber-400",
         roles: [UserRole.ADMIN, UserRole.MANAGER],
         children: [
-          { title: "nav.owners.all", href: "/dashboard/owners", icon: User, roles: [UserRole.ADMIN, UserRole.MANAGER] },
-          { title: "nav.owners.new", href: "/dashboard/owners/new", icon: UserPlus, roles: [UserRole.ADMIN] },
-          { title: "nav.owners.properties", href: "/dashboard/owners/properties", icon: Building2, roles: [UserRole.ADMIN, UserRole.MANAGER] },
+          { title: "nav.owners.all", href: "/dashboard/owners", icon: User, iconColor: "text-amber-400", roles: [UserRole.ADMIN, UserRole.MANAGER] },
+          { title: "nav.owners.new", href: "/dashboard/owners/new", icon: UserPlus, iconColor: "text-amber-400", roles: [UserRole.ADMIN] },
+          { title: "nav.owners.properties", href: "/dashboard/owners/properties", icon: Building2, iconColor: "text-amber-400", roles: [UserRole.ADMIN, UserRole.MANAGER] },
         ],
       },
       {
         title: "nav.leases",
         href: "/dashboard/leases",
         icon: FileText,
+        iconColor: "text-cyan-400",
         roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT],
         children: [
-          { title: "nav.leases.all", href: "/dashboard/leases", icon: FileText, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
-          { title: "nav.leases.new", href: "/dashboard/leases/new", icon: UserPlus, roles: [UserRole.ADMIN, UserRole.MANAGER] },
-          { title: "nav.leases.active", href: "/dashboard/leases/active", icon: FileText, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
-          { title: "nav.leases.expiring", href: "/dashboard/leases/expiring", icon: Calendar, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
-          { title: "nav.leases.invoices", href: "/dashboard/leases/invoices", icon: DollarSign, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
-          { title: "nav.leases.my", href: "/dashboard/leases/my-leases", icon: Home, roles: [UserRole.TENANT] },
-          { title: "nav.leases.documents", href: "/dashboard/leases/documents", icon: FileText, roles: [UserRole.TENANT] },
+          { title: "nav.leases.all", href: "/dashboard/leases", icon: FileText, iconColor: "text-cyan-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.leases.new", href: "/dashboard/leases/new", icon: UserPlus, iconColor: "text-cyan-400", roles: [UserRole.ADMIN, UserRole.MANAGER] },
+          { title: "nav.leases.active", href: "/dashboard/leases/active", icon: FileText, iconColor: "text-cyan-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.leases.expiring", href: "/dashboard/leases/expiring", icon: Calendar, iconColor: "text-cyan-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.leases.invoices", href: "/dashboard/leases/invoices", icon: DollarSign, iconColor: "text-cyan-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.leases.my", href: "/dashboard/leases/my-leases", icon: Home, iconColor: "text-cyan-400", roles: [UserRole.TENANT] },
+          { title: "nav.leases.documents", href: "/dashboard/leases/documents", icon: FileText, iconColor: "text-cyan-400", roles: [UserRole.TENANT] },
         ],
       },
     ],
@@ -133,19 +139,21 @@ const navigationSections: NavSection[] = [
         title: "nav.rentalRequests",
         href: "/dashboard/rental-requests",
         icon: ClipboardList,
+        iconColor: "text-teal-400",
         roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER],
         children: [
-          { title: "nav.rentalRequests.all", href: "/dashboard/rental-requests", icon: ListChecks, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.rentalRequests.all", href: "/dashboard/rental-requests", icon: ListChecks, iconColor: "text-teal-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
         ],
       },
       {
         title: "nav.rentals",
         href: "/dashboard/rentals",
         icon: Send,
+        iconColor: "text-teal-400",
         roles: [UserRole.TENANT],
         children: [
-          { title: "nav.rentals.request", href: "/dashboard/rentals/request", icon: Send, roles: [UserRole.TENANT] },
-          { title: "nav.rentals.myRequests", href: "/dashboard/rentals/my-requests", icon: ListChecks, roles: [UserRole.TENANT] },
+          { title: "nav.rentals.request", href: "/dashboard/rentals/request", icon: Send, iconColor: "text-teal-400", roles: [UserRole.TENANT] },
+          { title: "nav.rentals.myRequests", href: "/dashboard/rentals/my-requests", icon: ListChecks, iconColor: "text-teal-400", roles: [UserRole.TENANT] },
         ],
       },
     ],
@@ -157,12 +165,13 @@ const navigationSections: NavSection[] = [
         title: "nav.maintenance",
         href: "/dashboard/maintenance",
         icon: Wrench,
+        iconColor: "text-orange-400",
         roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT],
         children: [
-          { title: "nav.maintenance.all", href: "/dashboard/maintenance", icon: Wrench, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
-          { title: "nav.maintenance.emergency", href: "/dashboard/maintenance/emergency", icon: Bell, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
-          { title: "nav.maintenance.submit", href: "/dashboard/maintenance/new", icon: Wrench, roles: [UserRole.TENANT] },
-          { title: "nav.maintenance.mine", href: "/dashboard/maintenance/my-requests", icon: Wrench, roles: [UserRole.TENANT] },
+          { title: "nav.maintenance.all", href: "/dashboard/maintenance", icon: Wrench, iconColor: "text-orange-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.maintenance.emergency", href: "/dashboard/maintenance/emergency", icon: Bell, iconColor: "text-orange-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.maintenance.submit", href: "/dashboard/maintenance/new", icon: Wrench, iconColor: "text-orange-400", roles: [UserRole.TENANT] },
+          { title: "nav.maintenance.mine", href: "/dashboard/maintenance/my-requests", icon: Wrench, iconColor: "text-orange-400", roles: [UserRole.TENANT] },
         ],
       },
     ],
@@ -174,12 +183,13 @@ const navigationSections: NavSection[] = [
         title: "nav.payments",
         href: "/dashboard/payments",
         icon: CreditCard,
+        iconColor: "text-emerald-400",
         roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT],
         children: [
-          { title: "nav.payments.all", href: "/dashboard/payments", icon: CreditCard, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
-          { title: "nav.payments.overdue", href: "/dashboard/payments/overdue", icon: DollarSign, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
-          { title: "nav.payments.payRent", href: "/dashboard/payments/pay-rent", icon: DollarSign, roles: [UserRole.TENANT] },
-          { title: "nav.payments.history", href: "/dashboard/payments/history", icon: BarChart3, roles: [UserRole.TENANT] },
+          { title: "nav.payments.all", href: "/dashboard/payments", icon: CreditCard, iconColor: "text-emerald-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.payments.overdue", href: "/dashboard/payments/overdue", icon: DollarSign, iconColor: "text-emerald-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.payments.payRent", href: "/dashboard/payments/pay-rent", icon: DollarSign, iconColor: "text-emerald-400", roles: [UserRole.TENANT] },
+          { title: "nav.payments.history", href: "/dashboard/payments/history", icon: BarChart3, iconColor: "text-emerald-400", roles: [UserRole.TENANT] },
         ],
       },
     ],
@@ -191,11 +201,12 @@ const navigationSections: NavSection[] = [
         title: "nav.analytics",
         href: "/dashboard/analytics",
         icon: BarChart3,
+        iconColor: "text-purple-400",
         roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER],
         children: [
-          { title: "nav.analytics.financial", href: "/dashboard/analytics/financial", icon: DollarSign, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
-          { title: "nav.analytics.occupancy", href: "/dashboard/analytics/occupancy", icon: Building2, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
-          { title: "nav.analytics.maintenance", href: "/dashboard/analytics/maintenance", icon: Wrench, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.analytics.financial", href: "/dashboard/analytics/financial", icon: DollarSign, iconColor: "text-purple-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.analytics.occupancy", href: "/dashboard/analytics/occupancy", icon: Building2, iconColor: "text-purple-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.analytics.maintenance", href: "/dashboard/analytics/maintenance", icon: Wrench, iconColor: "text-purple-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
         ],
       },
     ],
@@ -203,15 +214,16 @@ const navigationSections: NavSection[] = [
   {
     title: "nav.section.communication",
     items: [
-      { title: "nav.messages", href: "/dashboard/messages", icon: MessageSquare, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
+      { title: "nav.messages", href: "/dashboard/messages", icon: MessageSquare, iconColor: "text-sky-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
       {
         title: "nav.aiHelp",
         href: "/dashboard/ai-help",
         icon: Bot,
+        iconColor: "text-rose-400",
         roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT],
         children: [
-          { title: "nav.aiHelp.luna", href: "/dashboard/ai-help?assistant=luna", icon: Bot, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
-          { title: "nav.aiHelp.faq", href: "/dashboard/ai-help/faq", icon: HelpCircle, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
+          { title: "nav.aiHelp.luna", href: "/dashboard/ai-help?assistant=luna", icon: Bot, iconColor: "text-rose-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
+          { title: "nav.aiHelp.faq", href: "/dashboard/ai-help/faq", icon: HelpCircle, iconColor: "text-rose-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
         ],
       },
     ],
@@ -219,7 +231,7 @@ const navigationSections: NavSection[] = [
   {
     title: "nav.section.events",
     items: [
-      { title: "nav.calendar", href: "/dashboard/calendar", icon: Calendar, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
+      { title: "nav.calendar", href: "/dashboard/calendar", icon: Calendar, iconColor: "text-cyan-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
     ],
   },
   {
@@ -229,22 +241,24 @@ const navigationSections: NavSection[] = [
         title: "nav.admin",
         href: "/dashboard/admin",
         icon: Shield,
+        iconColor: "text-red-400",
         roles: [UserRole.ADMIN],
         children: [
-          { title: "nav.admin.overview", href: "/dashboard/admin", icon: Shield, roles: [UserRole.ADMIN] },
-          { title: "nav.admin.users", href: "/dashboard/admin/users", icon: Users, roles: [UserRole.ADMIN] },
-          { title: "nav.admin.users.new", href: "/dashboard/admin/users/new", icon: UserPlus, roles: [UserRole.ADMIN] },
-          { title: "nav.admin.users.roles", href: "/dashboard/admin/users/roles", icon: Shield, roles: [UserRole.ADMIN] },
+          { title: "nav.admin.overview", href: "/dashboard/admin", icon: Shield, iconColor: "text-red-400", roles: [UserRole.ADMIN] },
+          { title: "nav.admin.users", href: "/dashboard/admin/users", icon: Users, iconColor: "text-red-400", roles: [UserRole.ADMIN] },
+          { title: "nav.admin.users.new", href: "/dashboard/admin/users/new", icon: UserPlus, iconColor: "text-red-400", roles: [UserRole.ADMIN] },
+          { title: "nav.admin.users.roles", href: "/dashboard/admin/users/roles", icon: Shield, iconColor: "text-red-400", roles: [UserRole.ADMIN] },
         ],
       },
       {
         title: "nav.settings",
         href: "/dashboard/settings",
         icon: Settings,
+        iconColor: "text-slate-400",
         roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT],
         children: [
-          { title: "nav.settings.profile", href: "/dashboard/settings/profile", icon: User, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
-          { title: "nav.settings.display", href: "/dashboard/settings/display", icon: Palette, roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.settings.profile", href: "/dashboard/settings/profile", icon: User, iconColor: "text-slate-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
+          { title: "nav.settings.display", href: "/dashboard/settings/display", icon: Palette, iconColor: "text-slate-400", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
         ],
       },
     ],
@@ -315,9 +329,9 @@ const NavItemComponent = memo(function NavItemComponent({
 
         <item.icon
           className={cn(
-            "shrink-0 transition-transform duration-200",
+            "shrink-0 transition-colors duration-200",
             level === 0 ? "h-4 w-4" : "h-3.5 w-3.5",
-            isParentActive && "text-primary",
+            isParentActive ? "text-primary" : (item.iconColor ?? "text-foreground/50"),
           )}
         />
 
