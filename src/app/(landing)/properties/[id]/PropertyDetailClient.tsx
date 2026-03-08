@@ -222,34 +222,39 @@ export function PropertyDetailClient({
       .finally(() => setLoading(false));
   }, [id, initialProperty]);
 
-  const geocodeAddress = useCallback(async (street: string, city: string, state: string, zip: string) => {
-    const NOM = "https://nominatim.openstreetmap.org/search?format=json&limit=1";
-    const HDR = { "Accept-Language": "en", "User-Agent": "SmartStartPM/1.0" };
+  const geocodeAddress = useCallback((street: string, _city: string, _state: string, zip: string) => {
+    const STREET_COORDS: Record<string, [number, number]> = {
+      "arctic circle":       [26.1364, -81.7631],
+      "falling waters blvd": [26.1030, -81.7510],
+      "georgetown blvd":     [26.1282, -81.7816],
+      "tamiami trail n":     [26.1600, -81.7976],
+      "olympic dr":          [26.2230, -81.7690],
+      "harwich ct":          [26.1200, -81.7420],
+      "moon lake cir":       [26.1650, -81.7800],
+      "109th ave n":         [26.2650, -81.8080],
+      "whitten dr":          [26.1432, -81.7374],
+    };
     const ZIP_CENTROIDS: Record<string, [number, number]> = {
       "34102": [26.1394, -81.8035], "34103": [26.1673, -81.8107],
       "34104": [26.1400, -81.7404], "34105": [26.1656, -81.7626],
       "34108": [26.2533, -81.8099], "34109": [26.2243, -81.7698],
       "34110": [26.2742, -81.7913], "34112": [26.1022, -81.7461],
       "34113": [26.0749, -81.7163], "34114": [26.0148, -81.6736],
-      "34116": [26.1642, -81.7049], "34119": [26.1950, -81.6936],
+      "34116": [26.1642, -81.7049], "34119": [26.1030, -81.7510],
       "34120": [26.2319, -81.6401],
     };
-    const parse = (d: any[]) => d?.[0]?.lat ? { lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon) } : null;
-    try {
-      const fullAddr = `${street}, ${city}, ${state} ${zip}`;
-      const r1 = await fetch(`${NOM}&q=${encodeURIComponent(fullAddr)}`, { headers: HDR });
-      const d1 = parse(await r1.json());
-      if (d1) { setMapCoords(d1); return; }
-      const streetName = street.replace(/^\d+\s+/, "");
-      const r2 = await fetch(`${NOM}&q=${encodeURIComponent(`${streetName}, ${city}, ${state}`)}`, { headers: HDR });
-      const d2 = parse(await r2.json());
-      if (d2) { setMapCoords(d2); return; }
-      if (ZIP_CENTROIDS[zip]) {
-        setMapCoords({ lat: ZIP_CENTROIDS[zip][0], lon: ZIP_CENTROIDS[zip][1] });
-        return;
-      }
-    } catch {}
-    setMapCoords({ lat: 26.142, lon: -81.7948 });
+    const streetKey = street.replace(/^\d+\s+/, "").toLowerCase().trim();
+    if (STREET_COORDS[streetKey]) {
+      const b = STREET_COORDS[streetKey];
+      setMapCoords({ lat: b[0], lon: b[1] });
+      return;
+    }
+    if (zip && ZIP_CENTROIDS[zip]) {
+      const b = ZIP_CENTROIDS[zip];
+      setMapCoords({ lat: b[0], lon: b[1] });
+      return;
+    }
+    setMapCoords({ lat: 26.1700, lon: -81.7800 });
   }, []);
 
   const units = property?.units || [];
@@ -528,8 +533,8 @@ export function PropertyDetailClient({
     ? String(property.type).charAt(0).toUpperCase() + String(property.type).slice(1)
     : null;
   const status = property?.status;
-  const lat = mapCoords?.lat ?? 26.142;
-  const lon = mapCoords?.lon ?? -81.7948;
+  const lat = mapCoords?.lat ?? 26.1700;
+  const lon = mapCoords?.lon ?? -81.7800;
   const bbox = `${lon - 0.02},${lat - 0.02},${lon + 0.02},${lat + 0.02}`;
   const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${lat},${lon}`;
 

@@ -119,7 +119,7 @@ function getPropertyCoords(property: Property): [number, number] {
   const streetKey = rawStreet.replace(/^\d+\s+/, "").toLowerCase().trim();
   if (STREET_COORDS[streetKey]) {
     const b = STREET_COORDS[streetKey];
-    const r: [number, number] = [b[0] + jitter(0.003), b[1] + jitter(0.003)];
+    const r: [number, number] = [b[0] + jitter(0.008), b[1] + jitter(0.008)];
     coordsCache.set(property._id, r);
     return r;
   }
