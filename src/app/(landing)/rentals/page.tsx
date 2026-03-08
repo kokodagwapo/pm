@@ -563,8 +563,8 @@ function RentalsContent() {
                 />
               </div>
 
-              {/* List/Map toggle — mobile only */}
-              <div className="flex md:hidden bg-slate-100 rounded-xl overflow-hidden shrink-0">
+              {/* List/Map toggle — below lg only */}
+              <div className="flex lg:hidden bg-slate-100 rounded-xl overflow-hidden shrink-0">
                 <button
                   onClick={() => setMobileView("list")}
                   className={`flex items-center gap-1 px-3 py-2 text-xs font-semibold transition-colors ${
@@ -653,8 +653,8 @@ function RentalsContent() {
                 </button>
               )}
 
-              {/* Desktop List/Map toggle */}
-              <div className="hidden md:flex ml-auto bg-slate-100 rounded-xl overflow-hidden shrink-0">
+              {/* Desktop List/Map toggle — lg+ only */}
+              <div className="hidden lg:flex ml-auto bg-slate-100 rounded-xl overflow-hidden shrink-0">
                 <button
                   onClick={() => setMobileView("list")}
                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${
@@ -774,7 +774,7 @@ function RentalsContent() {
 
           {/* MOBILE MAP VIEW — scrollable page with map + area guide below */}
           {mobileView === "map" && (
-            <div className="flex md:hidden flex-col w-full overflow-y-auto bg-[#f8f7f4]">
+            <div className="flex lg:hidden flex-col w-full overflow-y-auto bg-[#f8f7f4]">
               <div className="relative w-full flex-shrink-0" style={{ height: "62vmax", minHeight: 320, maxHeight: "70vh", isolation: "isolate" }}>
                 <PropertyMap
                   properties={properties}
@@ -789,8 +789,8 @@ function RentalsContent() {
             </div>
           )}
 
-          {/* Map + Area Guide — desktop left column */}
-          <div className="hidden md:flex flex-col w-full md:w-1/2 lg:w-[55%] overflow-y-auto bg-[#f8f7f4]">
+          {/* Map + Area Guide — desktop/large tablet left column (lg+) */}
+          <div className="hidden lg:flex flex-col w-full lg:w-[55%] overflow-y-auto bg-[#f8f7f4]">
             <div className="relative w-full flex-shrink-0" style={{ height: "calc(100vh - 200px)", minHeight: 400, isolation: "isolate" }}>
               <PropertyMap
                 properties={properties}
@@ -799,13 +799,13 @@ function RentalsContent() {
                 hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
               />
             </div>
-            <div className="px-5 md:px-8 py-8 border-t border-slate-200">
+            <div className="px-5 lg:px-8 py-8 border-t border-slate-200">
               <NaplesAreaGuide />
             </div>
           </div>
 
-          {/* Listings — mobile list view + desktop right column */}
-          <div className={`${mobileView === "list" ? "flex" : "hidden"} md:flex flex-col w-full md:w-1/2 lg:w-[45%] overflow-y-auto bg-[#f8f7f4] border-l border-slate-200/60`} style={{ isolation: "isolate" }}>
+          {/* Listings — phone/tablet list view + lg+ right column */}
+          <div className={`${mobileView === "list" ? "flex" : "hidden"} lg:flex flex-col w-full lg:w-[45%] overflow-y-auto bg-[#f8f7f4] border-l border-slate-200/60`} style={{ isolation: "isolate" }}>
             <div className="p-3 space-y-2.5">
 
               {/* Featured selected property card */}
