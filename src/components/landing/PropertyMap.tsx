@@ -245,7 +245,7 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
   const labelTileRef = useRef<any>(null);
   const [mapReady, setMapReady] = useState(false);
   const [loadError, setLoadError] = useState(false);
-  const [tileMode, setTileMode] = useState<TileMode>("satellite");
+  const [tileMode, setTileMode] = useState<TileMode>("modern");
   const [activePOI, setActivePOI] = useState<Set<string>>(new Set());
 
   useEffect(() => {

@@ -6,8 +6,6 @@ import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
   { href: "/rentals", label: "Rentals" },
-  { href: "/rentals?type=sale", label: "Sales" },
-  { href: "/management", label: "Management" },
 ];
 
 const HEADER_H = 48; // px — single source of truth
