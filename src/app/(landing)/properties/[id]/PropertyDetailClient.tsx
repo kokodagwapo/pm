@@ -109,11 +109,10 @@ function getAmenityIcon(name: string) {
 }
 
 const BASE_NAV_SECTIONS = [
-  { id: "description", label: "Description" },
-  { id: "pricing", label: "Pricing" },
-  { id: "details", label: "Details" },
-  { id: "amenities", label: "Amenities" },
-  { id: "availability", label: "Availability" },
+  { id: "description", label: "Overview", icon: FileText },
+  { id: "pricing", label: "Pricing", icon: DollarSign },
+  { id: "amenities", label: "Amenities", icon: Sparkles },
+  { id: "availability", label: "Availability", icon: Calendar },
 ];
 
 function StarRating({ value, max = 5, size = 4 }: { value: number; max?: number; size?: number }) {
@@ -264,9 +263,9 @@ export function PropertyDetailClient({
 
   const navSections = useMemo(() => {
     const sections = [...BASE_NAV_SECTIONS];
-    if (property?.virtualTourUrl) sections.splice(4, 0, { id: "tour", label: "Virtual Tour" });
-    sections.push({ id: "reviews", label: "Reviews" });
-    sections.push({ id: "map", label: "Map" });
+    if (property?.virtualTourUrl) sections.splice(4, 0, { id: "tour", label: "Tour", icon: Video });
+    sections.push({ id: "reviews", label: "Reviews", icon: Star });
+    sections.push({ id: "map", label: "Map", icon: MapPin });
     return sections;
   }, [property?.virtualTourUrl]);
 
@@ -701,23 +700,31 @@ export function PropertyDetailClient({
 
           <div className="sticky top-[72px] z-30 bg-white border-b border-slate-200 -mx-4 md:-mx-8 px-4 md:px-8 mb-8">
             <div className="flex items-center justify-between">
-              <nav className="flex gap-1 overflow-x-auto no-scrollbar py-1 flex-1">
-                {navSections.map((section) => (
-                  <button
-                    key={section.id}
-                    onClick={() => scrollToSection(section.id)}
-                    className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative ${
-                      activeSection === section.id
-                        ? "text-sky-600"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    {section.label}
-                    {activeSection === section.id && (
-                      <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-sky-500 rounded-full" />
-                    )}
-                  </button>
-                ))}
+              <nav className="flex gap-0.5 overflow-x-auto no-scrollbar py-1 flex-1">
+                {navSections.map((section) => {
+                  const Icon = section.icon;
+                  const iconColors: Record<string, string> = {
+                    description: "text-sky-300", overview: "text-sky-300", pricing: "text-amber-200", amenities: "text-rose-200",
+                    availability: "text-emerald-200", tour: "text-violet-200", reviews: "text-cyan-200", map: "text-orange-200",
+                  };
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => scrollToSection(section.id)}
+                      className={`flex items-center gap-1.5 px-3 py-3 text-sm font-medium whitespace-nowrap transition-colors relative ${
+                        activeSection === section.id
+                          ? "text-slate-900"
+                          : "text-slate-500 hover:text-slate-700"
+                      }`}
+                    >
+                      {Icon && <Icon className={`w-4 h-4 ${iconColors[section.id] || "text-sky-300"}`} />}
+                      {section.label}
+                      {activeSection === section.id && (
+                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sky-400 rounded-full" />
+                      )}
+                    </button>
+                  );
+                })}
               </nav>
               <div className="flex items-center gap-1 shrink-0 pl-2">
                 <button
@@ -855,7 +862,7 @@ export function PropertyDetailClient({
                   <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                     <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
                       <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                        <DollarSign className="w-5 h-5 text-sky-500" />
+                        <DollarSign className="w-5 h-5 text-amber-200" />
                         Pricing
                       </h2>
                     </div>
@@ -997,7 +1004,10 @@ export function PropertyDetailClient({
                 {property.amenities?.length > 0 && (
                   <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                     <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                      <h2 className="text-lg font-semibold text-slate-900">Amenities & Features</h2>
+                      <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-rose-200" />
+                        Amenities
+                      </h2>
                     </div>
                     <div className="p-6">
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -1008,7 +1018,7 @@ export function PropertyDetailClient({
                               key={i}
                               className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors"
                             >
-                              <Icon className="w-4 h-4 text-sky-500 shrink-0" />
+                              <Icon className="w-4 h-4 text-rose-200 shrink-0" />
                               <span className="text-sm text-slate-700">{a.name}</span>
                             </div>
                           );
@@ -1029,8 +1039,8 @@ export function PropertyDetailClient({
                     <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                       <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                         <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                          <Video className="w-5 h-5 text-sky-500" />
-                          Virtual Tour
+                          <Video className="w-5 h-5 text-violet-200" />
+                          Tour
                         </h2>
                         <a href={property.virtualTourUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-sky-600 hover:text-sky-700 font-medium">
                           Open full tour <ExternalLink className="w-3 h-3" />
@@ -1066,8 +1076,8 @@ export function PropertyDetailClient({
                 <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                   <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                      <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
-                      Guest Reviews
+                      <Star className="w-5 h-5 text-cyan-200 fill-cyan-200" />
+                      Reviews
                       {reviews.length > 0 && (
                         <span className="text-sm font-normal text-slate-500 ml-1">({reviews.length})</span>
                       )}
@@ -1165,8 +1175,8 @@ export function PropertyDetailClient({
                 <div className="mb-6 rounded-2xl border border-slate-200 overflow-hidden">
                   <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
                     <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-sky-500" />
-                      Availability & Booking
+                      <Calendar className="w-5 h-5 text-emerald-200" />
+                      Availability
                     </h2>
                     <p className="text-sm text-slate-500 mt-1">
                       Select your dates to see real-time pricing
@@ -1549,8 +1559,8 @@ export function PropertyDetailClient({
                 <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
                   <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
                     <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-sky-500" />
-                      Location
+                      <MapPin className="w-5 h-5 text-orange-200" />
+                      Map
                     </h2>
                   </div>
                   <div className="relative">
