@@ -137,11 +137,11 @@ function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: (
         {property.neighborhood && (
           <p className="text-[9px] font-bold uppercase tracking-widest text-amber-600/80 mb-1">{property.neighborhood}</p>
         )}
-        <h3 className="font-semibold text-slate-900 text-base leading-tight line-clamp-2 mb-1.5" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+        <h3 className="text-slate-900 text-base leading-tight line-clamp-2 mb-1.5" style={{ fontFamily: "var(--font-montserrat), var(--font-jakarta), system-ui, sans-serif", fontWeight: 300 }}>
           {property.name}
         </h3>
         {(property.address?.street || property.address?.city) && (
-          <p className="flex items-center gap-1 text-slate-400 text-xs mb-3 truncate">
+          <p className="flex items-center gap-1 text-slate-900 text-xs mb-3 truncate" style={{ fontFamily: "var(--font-montserrat), var(--font-jakarta), system-ui, sans-serif", fontWeight: 300 }}>
             <MapPin className="w-2.5 h-2.5 shrink-0 text-amber-400" />
             {property.address.street ? `${property.address.street}, ` : ""}
             {property.address.city}
@@ -299,18 +299,18 @@ function PropertyListCard({
   return (
     <Link href={`/properties/${property._id}`}>
       <div
-        className={`group flex bg-white rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer ${
+        className={`group flex flex-col sm:flex-row bg-white rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer ${
           isSelected
             ? "ring-2 ring-amber-400 ring-offset-1 shadow-lg opacity-70"
             : isHovered
-            ? "shadow-xl ring-2 ring-slate-900/10 ring-offset-1 -translate-y-0.5"
-            : "shadow-sm hover:shadow-xl border border-slate-100 hover:-translate-y-0.5"
+            ? "shadow-xl ring-2 ring-slate-900/10 ring-offset-1"
+            : "shadow-sm hover:shadow-xl border border-slate-100"
         }`}
         onMouseEnter={() => onHover(property._id)}
         onMouseLeave={() => onHover(null)}
       >
         {/* Image */}
-        <div className="relative w-[190px] min-w-[190px] h-[155px] overflow-hidden bg-slate-100">
+        <div className="relative w-full h-[175px] sm:w-[180px] sm:min-w-[180px] sm:h-[155px] overflow-hidden bg-slate-100">
           <img
             src={imageUrl}
             alt={property.name}
@@ -770,7 +770,7 @@ function RentalsContent() {
         </div>
 
         {/* Main content */}
-        <div className="flex flex-1 overflow-hidden relative z-0" style={{ height: "calc(100vh - 224px)" }}>
+        <div className="flex flex-1 overflow-hidden relative z-0 min-h-0">
 
           {/* MOBILE MAP VIEW — scrollable page with map + area guide below */}
           {mobileView === "map" && (
@@ -791,7 +791,7 @@ function RentalsContent() {
 
           {/* Map + Area Guide — desktop left column */}
           <div className="hidden md:flex flex-col w-full md:w-1/2 lg:w-[55%] overflow-y-auto bg-[#f8f7f4]">
-            <div className="relative w-full flex-shrink-0" style={{ height: "calc(100vh - 224px)", isolation: "isolate" }}>
+            <div className="relative w-full flex-shrink-0" style={{ height: "calc(100vh - 200px)", minHeight: 400, isolation: "isolate" }}>
               <PropertyMap
                 properties={properties}
                 onMarkerClick={handleMarkerClick}
@@ -921,7 +921,7 @@ function RentalsContent() {
 
       {/* Floating comparison bar */}
       {compareIds.length >= 1 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-slate-900 text-white rounded-2xl shadow-2xl px-4 py-3 border border-slate-700 backdrop-blur-md">
+        <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 sm:gap-3 bg-slate-900 text-white rounded-2xl shadow-2xl px-3 sm:px-4 py-2.5 sm:py-3 border border-slate-700 backdrop-blur-md max-w-[calc(100vw-2rem)]">
           <div className="flex items-center gap-2">
             {compareIds.map((id) => {
               const p = properties.find((x) => x._id === id);
