@@ -571,31 +571,34 @@ export default function DashboardPage() {
   return (
     <ResponsiveLayout className="space-y-6">
       {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">
+            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+          </p>
+          <h1 className="text-4xl font-extrabold tracking-tight leading-none">
             {getGreeting()}, {user?.firstName}!
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground mt-1.5 font-medium">
             {t("dashboard.header.subtitle")}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 shrink-0">
           <Button
             variant="outline"
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="gap-2"
+            className="gap-2 rounded-xl text-xs font-semibold h-9"
           >
             <RefreshCw
-              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+              className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`}
             />
             {t("dashboard.actions.refresh")}
           </Button>
           <Link href="/dashboard/analytics">
-            <Button size="sm" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
+            <Button size="sm" className="gap-2 rounded-xl text-xs font-semibold h-9">
+              <BarChart3 className="h-3.5 w-3.5" />
               {t("dashboard.actions.analytics")}
             </Button>
           </Link>
@@ -613,35 +616,33 @@ export default function DashboardPage() {
       )}
 
       {/* Alerts Section - Always show the main 3 alerts */}
-      <div className="grid gap-4  md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-3">
         {alerts?.slice(0, 3).map((alert) => {
           const styles = getAlertStyles(alert.type);
           return (
             <div
               key={alert.id}
-              className={`rounded-xl border-l-4 border ${styles.border} ${styles.bg} px-4 py-2 cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02]`}
+              className={`group rounded-2xl border ${styles.border} ${styles.bg} px-5 py-4 cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.01]`}
               onClick={() => handleAlertClick(alert.type)}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <AlertTriangle className={`h-4 w-4 ${styles.iconColor}`} />
-                    <h4 className={`font-medium text-sm ${styles.textColor}`}>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <AlertTriangle className={`h-3.5 w-3.5 shrink-0 ${styles.iconColor}`} />
+                    <h4 className={`font-bold text-sm tracking-tight ${styles.textColor}`}>
                       {getAlertTitleText(alert)}
                     </h4>
-                    <span
-                      className={`text-md font-bold ${styles.textColor} ml-auto`}
-                    >
-                      {alert.count}
-                    </span>
                   </div>
-                  <p className={`text-xs ${styles.textColor} opacity-80`}>
+                  <p className={`text-xs leading-snug ${styles.textColor} opacity-75`}>
                     {getAlertMessageText(alert)}
                   </p>
                 </div>
-                <ChevronRight
-                  className={`h-4 w-4 ${styles.iconColor} shrink-0 mt-1`}
-                />
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  <span className={`text-2xl font-extrabold leading-none ${styles.textColor}`}>
+                    {alert.count}
+                  </span>
+                  <ChevronRight className={`h-3.5 w-3.5 ${styles.iconColor} opacity-60`} />
+                </div>
               </div>
             </div>
           );
@@ -740,20 +741,21 @@ export default function DashboardPage() {
         {/* Left Column - Charts and Analytics */}
         <div className="lg:col-span-2 space-y-6">
           {/* Revenue & Expenses Trends */}
-          <Card className="hover-lift">
-            <CardHeader>
+          <Card className="hover-lift rounded-2xl border-border/60 shadow-sm">
+            <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <LineChart className="h-5 w-5 text-primary" />
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">Financial Performance</p>
+                  <CardTitle className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
+                    <LineChart className="h-4 w-4 text-sky-500" />
                     {t("dashboard.charts.revenueExpenses.title")}
                   </CardTitle>
-                  <CardDescription className="text-muted-foreground">
+                  <CardDescription className="text-xs mt-0.5">
                     {t("dashboard.charts.revenueExpenses.description")}
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <select className="text-sm border rounded px-2 py-1 bg-background">
+                  <select className="text-xs border border-border/60 rounded-lg px-2.5 py-1.5 bg-background font-medium">
                     <option>2024</option>
                     <option>2023</option>
                     <option>2022</option>
@@ -884,13 +886,14 @@ export default function DashboardPage() {
           {/* Property Type Distribution and Payment Status */}
           <div className="grid gap-6 md:grid-cols-2">
             {/* Property Distribution */}
-            <Card className="hover-lift">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PieChart className="h-5 w-5 text-primary" />
+            <Card className="hover-lift rounded-2xl border-border/60 shadow-sm">
+              <CardHeader className="pb-2">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">By Type</p>
+                <CardTitle className="flex items-center gap-2 text-base font-extrabold tracking-tight">
+                  <PieChart className="h-4 w-4 text-violet-500" />
                   {t("dashboard.charts.propertyDistribution.title")}
                 </CardTitle>
-                <CardDescription className="text-muted-foreground">
+                <CardDescription className="text-xs">
                   {t("dashboard.charts.propertyDistribution.description")}
                 </CardDescription>
               </CardHeader>
@@ -966,23 +969,24 @@ export default function DashboardPage() {
             </Card>
 
             {/* Payment Status */}
-            <Card className="hover-lift">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-success" />
+            <Card className="hover-lift rounded-2xl border-border/60 shadow-sm">
+              <CardHeader className="pb-2">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">This Month</p>
+                <CardTitle className="flex items-center gap-2 text-base font-extrabold tracking-tight">
+                  <CreditCard className="h-4 w-4 text-emerald-500" />
                   {t("dashboard.paymentStatus.title")}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs">
                   {t("dashboard.paymentStatus.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">
+                    <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wide">
                       {t("dashboard.paymentStatus.collected")}
                     </span>
-                    <span className="text-sm font-bold text-success">
+                    <span className="text-sm font-extrabold text-emerald-600">
                       {formatCurrency(payments?.collected ?? 0)}
                     </span>
                   </div>
@@ -997,19 +1001,19 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-2">
-                  <div className="text-center p-3 bg-warning/10 rounded-lg">
-                    <div className="text-lg font-bold text-warning">
+                  <div className="text-center p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                    <div className="text-lg font-extrabold text-amber-600 tracking-tight">
                       {formatCurrency(payments?.pending ?? 0)}
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-[10px] font-semibold uppercase tracking-widest text-amber-500/70 mt-0.5">
                       {t("dashboard.paymentStatus.pending")}
                     </div>
                   </div>
-                  <div className="text-center p-3 bg-error/10 rounded-lg">
-                    <div className="text-lg font-bold text-error">
+                  <div className="text-center p-3 bg-rose-50 border border-rose-100 rounded-xl">
+                    <div className="text-lg font-extrabold text-rose-600 tracking-tight">
                       {formatCurrency(payments?.overdue ?? 0)}
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-[10px] font-semibold uppercase tracking-widest text-rose-500/70 mt-0.5">
                       {t("dashboard.paymentStatus.overdue")}
                     </div>
                   </div>
@@ -1022,15 +1026,16 @@ export default function DashboardPage() {
         {/* Right Column - Activities and Tasks */}
         <div className="space-y-6">
           {/* Recent Activities */}
-          <Card className="hover-lift">
-            <CardHeader>
+          <Card className="hover-lift rounded-2xl border-border/60 shadow-sm">
+            <CardHeader className="pb-2">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">Live Feed</p>
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-primary" />
+                <CardTitle className="flex items-center gap-2 text-base font-extrabold tracking-tight">
+                  <Activity className="h-4 w-4 text-sky-500" />
                   {t("dashboard.recentActivity.title")}
                 </CardTitle>
               </div>
-              <CardDescription>
+              <CardDescription className="text-xs">
                 {t("dashboard.recentActivity.description")}
               </CardDescription>
             </CardHeader>
@@ -1091,15 +1096,16 @@ export default function DashboardPage() {
           </Card>
 
           {/* Upcoming Tasks */}
-          <Card className="hover-lift">
-            <CardHeader>
+          <Card className="hover-lift rounded-2xl border-border/60 shadow-sm">
+            <CardHeader className="pb-2">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">Action Items</p>
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <ClipboardList className="h-5 w-5 text-warning" />
+                <CardTitle className="flex items-center gap-2 text-base font-extrabold tracking-tight">
+                  <ClipboardList className="h-4 w-4 text-amber-500" />
                   {t("dashboard.tasks.title")}
                 </CardTitle>
               </div>
-              <CardDescription>
+              <CardDescription className="text-xs">
                 {t("dashboard.tasks.description")}
               </CardDescription>
             </CardHeader>

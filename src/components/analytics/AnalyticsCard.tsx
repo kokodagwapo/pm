@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 import { formatCurrency as formatCurrencyValue } from "@/lib/formatters";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 export interface AnalyticsCardProps {
   title: string;
@@ -37,33 +37,33 @@ export interface MetricCardProps {
 }
 
 const iconColorClasses = {
-  primary: "text-primary bg-primary/10",
-  success: "text-success bg-success/10",
-  warning: "text-warning bg-warning/10",
-  error: "text-error bg-error/10",
-  info: "text-info bg-info/10",
+  primary:  { icon: "text-sky-600",     bg: "bg-sky-50     border-sky-100"     },
+  success:  { icon: "text-emerald-600", bg: "bg-emerald-50 border-emerald-100" },
+  warning:  { icon: "text-amber-600",   bg: "bg-amber-50   border-amber-100"   },
+  error:    { icon: "text-rose-600",    bg: "bg-rose-50    border-rose-100"    },
+  info:     { icon: "text-violet-600",  bg: "bg-violet-50  border-violet-100"  },
 };
 
 const financialVariantClasses = {
   success: {
-    background: "bg-gradient-to-r from-success/15 to-success/8",
-    border: "border-success/15",
-    text: "text-success",
+    background: "bg-gradient-to-br from-emerald-50 to-white",
+    border: "border-emerald-100",
+    text: "text-emerald-700",
   },
   warning: {
-    background: "bg-gradient-to-r from-warning/15 to-warning/8",
-    border: "border-warning/15",
-    text: "text-warning",
+    background: "bg-gradient-to-br from-amber-50 to-white",
+    border: "border-amber-100",
+    text: "text-amber-700",
   },
   error: {
-    background: "bg-gradient-to-r from-error/15 to-error/8",
-    border: "border-error/15",
-    text: "text-error",
+    background: "bg-gradient-to-br from-rose-50 to-white",
+    border: "border-rose-100",
+    text: "text-rose-700",
   },
   info: {
-    background: "bg-gradient-to-r from-info/15 to-info/8",
-    border: "border-info/15",
-    text: "text-info",
+    background: "bg-gradient-to-br from-violet-50 to-white",
+    border: "border-violet-100",
+    text: "text-violet-700",
   },
 };
 
@@ -74,49 +74,60 @@ export function AnalyticsCard({
   icon: Icon,
   iconColor = "primary",
   trend,
-  variant = "default",
   className,
   children,
 }: AnalyticsCardProps) {
   const TrendIcon = trend?.icon;
+  const colors = iconColorClasses[iconColor];
 
   return (
     <Card
-      className={cn("hover:shadow-md transition-shadow py-4 gap-2", className)}
+      className={cn(
+        "relative overflow-hidden border border-border/60 bg-white shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl p-0",
+        className
+      )}
     >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {Icon && (
-          <div className={cn("p-2 rounded-lg", iconColorClasses[iconColor])}>
-            <Icon className="h-4 w-4" />
-          </div>
-        )}
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between mb-3">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60 leading-none pr-2">
+            {title}
+          </p>
+          {Icon && (
+            <div className={cn("p-2 rounded-xl border shrink-0", colors.bg)}>
+              <Icon className={cn("h-3.5 w-3.5", colors.icon)} />
+            </div>
+          )}
+        </div>
+
+        <div className="text-[1.85rem] font-extrabold tracking-tight text-foreground leading-none mb-2">
+          {value}
+        </div>
+
         {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
+          <p className="text-[11px] text-muted-foreground/70 leading-snug">{description}</p>
         )}
+
         {trend && (
-          <div className="flex items-center text-xs mt-2">
+          <div className="flex items-center gap-1 mt-2">
             {TrendIcon && (
               <TrendIcon
                 className={cn(
-                  "h-3 w-3 mr-1",
-                  trend.isPositive ? "text-green-600" : "text-red-600"
+                  "h-3 w-3",
+                  trend.isPositive ? "text-emerald-500" : "text-rose-500"
                 )}
               />
             )}
             <span
               className={cn(
-                "flex items-center",
-                trend.isPositive ? "text-green-600" : "text-red-600"
+                "text-xs font-semibold",
+                trend.isPositive ? "text-emerald-600" : "text-rose-600"
               )}
             >
               {trend.value}
             </span>
           </div>
         )}
+
         {children}
       </CardContent>
     </Card>
@@ -134,23 +145,16 @@ export function FinancialCard({
   return (
     <div
       className={cn(
-        "flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 lg:p-4 rounded-xl border",
+        "flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 rounded-xl border",
         variantClasses.background,
         variantClasses.border,
         className
       )}
     >
-      <span
-        className={cn(
-          "font-semibold text-sm lg:text-base",
-          variantClasses.text
-        )}
-      >
+      <span className={cn("font-semibold text-sm", variantClasses.text)}>
         {label}
       </span>
-      <span
-        className={cn("font-bold text-base lg:text-lg", variantClasses.text)}
-      >
+      <span className={cn("text-xl font-extrabold tracking-tight", variantClasses.text)}>
         {formatCurrencyValue(amount)}
       </span>
     </div>
@@ -165,22 +169,24 @@ export function MetricCard({
   iconColor = "primary",
   className,
 }: MetricCardProps) {
+  const colors = iconColorClasses[iconColor];
+
   return (
-    <Card className={cn("hover:shadow-md transition-shadow", className)}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-3 text-lg">
+    <Card className={cn("rounded-2xl border-border/60 shadow-sm", className)}>
+      <CardContent className="p-5">
+        <div className="flex items-center gap-3 mb-3">
           {Icon && (
-            <div className={cn("p-2 rounded-lg", iconColorClasses[iconColor])}>
-              <Icon className="h-5 w-5" />
+            <div className={cn("p-2 rounded-xl border", colors.bg)}>
+              <Icon className={cn("h-5 w-5", colors.icon)} />
             </div>
           )}
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="text-2xl font-bold">{value}</div>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+            {title}
+          </p>
+        </div>
+        <div className="text-2xl font-extrabold tracking-tight text-foreground">{value}</div>
         {subtitle && (
-          <p className="text-xs text-muted-foreground">{subtitle}</p>
+          <p className="text-[11px] text-muted-foreground/70 mt-1">{subtitle}</p>
         )}
       </CardContent>
     </Card>
@@ -197,7 +203,7 @@ export function AnalyticsCardGrid({
   return (
     <div
       className={cn(
-        "grid grid-4 gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5",
+        "grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5",
         className
       )}
     >
