@@ -55,17 +55,15 @@ export function LandingHeader() {
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 select-none touch-manipulation shrink-0"
+            className="flex items-center select-none touch-manipulation shrink-0"
           >
-            <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-black shrink-0 transition-colors ${isLight ? "bg-slate-900 text-white" : "bg-white/15 text-white"}`}>
-              s
-            </div>
-            <span
-              className={`text-[15px] tracking-[-0.02em] ${isLight ? "text-slate-900" : "text-white"}`}
-              style={{ fontWeight: 300, letterSpacing: "-0.02em" }}
-            >
-              smart<span style={{ fontWeight: 600 }}>PM</span>
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={isLight ? "/images/logo-light.svg" : "/images/logo-dark.svg"}
+              alt="SmartStartPM"
+              height={28}
+              style={{ height: 28, width: "auto", display: "block" }}
+            />
           </Link>
 
           {/* Desktop nav */}
