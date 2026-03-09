@@ -156,7 +156,7 @@ export default function SignInPage() {
   ];
 
   return (
-    <div className="fixed inset-0 h-screen w-screen overflow-auto bg-slate-900">
+    <div className="fixed inset-0 h-screen w-screen overflow-auto bg-slate-900" suppressHydrationWarning>
       {/* Video background - same as landing hero */}
       <HeroVideo />
 

@@ -1,0 +1,53 @@
+## Error Type
+Recoverable Error
+
+## Error Message
+Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <ScrollAndFocusHandler segmentPath={[...]}>
+      <InnerScrollAndFocusHandler segmentPath={[...]} focusAndScrollRef={{apply:false, ...}}>
+        <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+          <LoadingBoundary loading={null}>
+            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <InnerLayoutRouter url="/auth/signin" tree={[...]} cacheNode={{lazyData:null, ...}} segmentPath={[...]}>
+                    <SegmentViewNode type="page" pagePath="auth/signi...">
+                      <SegmentTrieNode>
+                      <ClientPageRoot Component={function SignInPage} searchParams={{}} params={{}}>
+                        <SignInPage params={Promise} searchParams={Promise}>
+                          <div className="fixed inse...">
+                            <HeroVideo>
+                            <main className="relative z...">
+                              <div className="w-full max...">
+-                               <div className="text-center">
+                    ...
+                  ...
+        ...
+
+
+
+    at div (<anonymous>:null:null)
+    at SignInPage (src/app/auth/signin/page.tsx:149:3)
+
+## Code Frame
+  147 |       setIsLoading(false);
+  148 |     }
+> 149 |   };
+      |   ^
+  150 |
+  151 |   const demoAccounts = [
+  152 |     { label: "Super Admin", role: "admin", email: "hi@smartstart.us", password: "SmartStart2025", icon: Shield, color: "bg-red-500/90 hover:bg-red-600/90" },
+
+Next.js version: 15.5.9 (Turbopack)
