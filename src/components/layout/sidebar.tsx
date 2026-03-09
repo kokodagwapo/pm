@@ -46,6 +46,18 @@ import { UserRole } from "@/types";
 import { useTheme } from "next-themes";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 
+function safeTranslate(t: (key: string) => string, key: string): string {
+  const result = t(key);
+  if (/^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+$/i.test(result)) {
+    const last = result.split(".").pop() || result;
+    return last
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (s) => s.toUpperCase())
+      .trim();
+  }
+  return result;
+}
+
 interface NavItem {
   title: string;
   href: string;
@@ -339,7 +351,7 @@ const NavItemComponent = memo(function NavItemComponent({
         {!isCollapsed && (
           <>
             <span className={cn("flex-1 truncate font-medium tracking-[-0.01em]")}>
-              {t(item.title)}
+              {safeTranslate(t, item.title)}
             </span>
             {item.badge && (
               <span className="ml-auto flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
@@ -464,7 +476,7 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
           <div key={sectionIndex}>
             {section.title && !isCollapsed && (
               <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-foreground/50">
-                {t(section.title)}
+                {safeTranslate(t, section.title)}
               </p>
             )}
             <div className="space-y-0.5">
