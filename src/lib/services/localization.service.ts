@@ -1142,6 +1142,14 @@ export class LocalizationService {
   }
 
   // Message translation
+  private keyToReadable(key: string): string {
+    const lastSegment = key.split(".").pop() || key;
+    return lastSegment
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (s) => s.toUpperCase())
+      .trim();
+  }
+
   public translate(key: string, options?: TranslateOptions): string {
     const { language, defaultValue, values } = options || {};
 
@@ -1150,8 +1158,8 @@ export class LocalizationService {
     ).toLowerCase();
 
     const entry = this.translations[key];
-    const base =
-      (entry && (entry[languageCode] || entry["en"])) || defaultValue || key;
+    const translation = entry && (entry[languageCode] || entry["en"]);
+    const base = translation || defaultValue || this.keyToReadable(key);
 
     if (!values) {
       return base;
