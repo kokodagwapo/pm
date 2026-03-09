@@ -867,17 +867,9 @@ export class LocalizationService {
   private translations: Record<string, Record<string, string>> = translations;
 
   private constructor() {
-    // Initialize with browser locale if available
+    // Always default to English; only switch if user has explicitly saved a locale preference
     if (typeof window !== "undefined") {
-      this.currentLocale = navigator.language || "en-US";
-      if (!LOCALES[this.currentLocale]) {
-        // Fallback to language code only
-        const langCode = this.currentLocale.split("-")[0];
-        const fallbackLocale = Object.keys(LOCALES).find((locale) =>
-          locale.startsWith(langCode)
-        );
-        this.currentLocale = fallbackLocale || "en-US";
-      }
+      this.currentLocale = "en-US";
       const savedCurrency = (() => {
         try {
           return localStorage.getItem("SmartStartPM-currency") || undefined;
