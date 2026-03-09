@@ -108,6 +108,7 @@
   "nav.admin.users": "User Management",
   "nav.admin.users.new": "Invite User",
   "nav.admin.users.roles": "Roles & Permissions",
+  "nav.admin.apiKeys": "API Keys",
 
   "units.status.available": "Available",
   "units.status.occupied": "Occupied",

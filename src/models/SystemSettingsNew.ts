@@ -85,9 +85,19 @@ export interface ISystemSettingsNew extends Document {
     sms: {
       enabled: boolean;
       provider: "twilio" | "aws" | "custom";
-      apiKey?: string; // Should be encrypted
-      apiSecret?: string; // Should be encrypted
+      apiKey?: string;
+      apiSecret?: string;
       fromNumber?: string;
+    };
+    openai: {
+      enabled: boolean;
+      apiKey?: string;
+      model?: string;
+    };
+    gemini: {
+      enabled: boolean;
+      apiKey?: string;
+      model?: string;
     };
   };
 
@@ -233,9 +243,19 @@ const systemSettingsNewSchema = new Schema<ISystemSettingsNew>(
           enum: ["twilio", "aws", "custom"],
           default: "twilio",
         },
-        apiKey: { type: String }, // Should be encrypted
-        apiSecret: { type: String }, // Should be encrypted
+        apiKey: { type: String },
+        apiSecret: { type: String },
         fromNumber: { type: String },
+      },
+      openai: {
+        enabled: { type: Boolean, default: false },
+        apiKey: { type: String },
+        model: { type: String, default: "gpt-4o" },
+      },
+      gemini: {
+        enabled: { type: Boolean, default: false },
+        apiKey: { type: String },
+        model: { type: String, default: "gemini-1.5-pro" },
       },
     },
 

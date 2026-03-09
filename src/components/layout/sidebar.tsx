@@ -248,6 +248,7 @@ const navigationSections: NavSection[] = [
           { title: "nav.admin.users", href: "/dashboard/admin/users", icon: Users, iconColor: "text-red-400", roles: [UserRole.ADMIN] },
           { title: "nav.admin.users.new", href: "/dashboard/admin/users/new", icon: UserPlus, iconColor: "text-red-400", roles: [UserRole.ADMIN] },
           { title: "nav.admin.users.roles", href: "/dashboard/admin/users/roles", icon: Shield, iconColor: "text-red-400", roles: [UserRole.ADMIN] },
+          { title: "nav.admin.apiKeys", href: "/dashboard/admin/api-keys", icon: Key, iconColor: "text-red-400", roles: [UserRole.ADMIN] },
         ],
       },
       {
