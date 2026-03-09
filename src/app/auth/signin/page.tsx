@@ -148,15 +148,12 @@ export default function SignInPage() {
     }
   };
 
-  const allDemoAccounts = [
+  const demoAccounts = [
     { label: "Super Admin", role: "admin", email: "hi@smartstart.us", password: "SmartStart2025", icon: Shield, color: "bg-red-500/90 hover:bg-red-600/90" },
-    { label: "Property Manager", role: "manager", email: "manager@smartstart.us", password: "SmartStart2025", icon: Users, color: "bg-blue-500/90 hover:bg-blue-600/90" },
+    { label: "Manager", role: "manager", email: "manager@smartstart.us", password: "SmartStart2025", icon: Users, color: "bg-blue-500/90 hover:bg-blue-600/90" },
     { label: "Owner", role: "owner", email: "owner@smartstart.us", password: "SmartStart2025", icon: Building2, color: "bg-purple-500/90 hover:bg-purple-600/90" },
     { label: "Tenant", role: "tenant", email: "tenant@smartstart.us", password: "SmartStart2025", icon: Home, color: "bg-green-500/90 hover:bg-green-600/90" },
   ];
-  const demoAccounts = process.env.NODE_ENV === "production"
-    ? allDemoAccounts.filter((a) => a.role !== "admin")
-    : allDemoAccounts;
 
   return (
     <div className="fixed inset-0 h-screen w-screen overflow-auto bg-slate-900" suppressHydrationWarning>
