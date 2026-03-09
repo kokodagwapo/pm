@@ -1,0 +1,68 @@
+## Error Type
+Recoverable Error
+
+## Error Message
+Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+      <RedirectBoundary>
+        <RedirectErrorBoundary router={{...}}>
+          <InnerLayoutRouter url="/auth/signin" tree={[...]} cacheNode={{lazyData:null, ...}} segmentPath={[...]}>
+            <SegmentViewNode type="page" pagePath="auth/signi...">
+              <SegmentTrieNode>
+              <ClientPageRoot Component={function SignInPage} searchParams={{}} params={{}}>
+                <SignInPage params={Promise} searchParams={Promise}>
+                  <div className="fixed inse...">
+                    <HeroVideo>
+                    <main className="relative z...">
+                      <div className="w-full max...">
+                        <div>
+                        <div className="rounded-2x..." style={{...}}>
+                          <div>
+                          <form>
+                          <div className="mt-6 pt-6 ...">
+                            <div>
+                            <div className="grid grid-...">
++                             <button
++                               type="button"
++                               className="flex flex-col items-center justify-center gap-1 min-h-[48px] py-3 rounded-l..."
++                               onClick={function onClick}
++                               disabled={false}
++                             >
+-                             <a
+-                               href="/api/auth/demo-login?role=admin"
+-                               className="flex flex-col items-center justify-center gap-1 min-h-[48px] py-3 rounded-l..."
+-                             >
+                              ...
+                            ...
+            ...
+          ...
+
+
+
+    at button (<anonymous>:null:null)
+    at <unknown> (src/app/auth/signin/page.tsx:261:65)
+    at Array.map (<anonymous>:null:null)
+    at SignInPage (src/app/auth/signin/page.tsx:261:65)
+
+## Code Frame
+  259 |                 {isLoading ? (
+  260 |                   <span className="flex items-center justify-center gap-2">
+> 261 |                     <Loader2 className="h-4 w-4 animate-spin" />
+      |                                                                 ^
+  262 |                     Signing in...
+  263 |                   </span>
+  264 |                 ) : (
+
+Next.js version: 15.5.9 (Turbopack)
