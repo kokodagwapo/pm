@@ -267,7 +267,8 @@ export default function SignInPage() {
               </button>
             </form>
 
-            {/* Quick Login */}
+            {/* Quick Login — development only */}
+            {process.env.NODE_ENV !== "production" && (
             <div className="mt-6 pt-6 border-t border-white/20">
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="h-4 w-4 text-amber-400" />
@@ -293,6 +294,7 @@ export default function SignInPage() {
                 Click to instantly log in as that role
               </p>
             </div>
+            )}
           </div>
 
           {/* View Rentals */}
