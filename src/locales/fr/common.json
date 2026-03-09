@@ -103,6 +103,7 @@
   "nav.admin.users": "Tous les utilisateurs",
   "nav.admin.users.new": "Ajouter un utilisateur",
   "nav.admin.users.roles": "Rôles des utilisateurs",
+  "nav.admin.apiKeys": "Clés API",
 
   "units.status.available": "Disponible",
   "units.status.occupied": "Occupé",
