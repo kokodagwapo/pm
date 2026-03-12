@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
 import { useEffect, useState, useCallback, memo } from "react";
 import { useSession, signOut } from "next-auth/react";
+import { FlickeringGridBackground } from "@/components/ui/flickering-grid-background";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -174,7 +175,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const user = session?.user;
 
   return (
-    <div className="flex h-[100dvh] bg-background overflow-hidden">
+    <div className="relative flex h-[100dvh] overflow-hidden">
+      <FlickeringGridBackground />
+      <div className="relative z-10 flex flex-1 min-w-0 h-full overflow-hidden">
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
@@ -216,6 +219,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Role-specific demo guide */}
       <DemoGuide />
+      </div>
     </div>
   );
 }

@@ -34,19 +34,19 @@ const DEFAULT_BRANDING: Branding = {
 };
 
 const glassCard = {
-  background: "rgba(255,255,255,0.06)",
-  backdropFilter: "blur(6px)",
-  WebkitBackdropFilter: "blur(6px)",
-  border: "1px solid rgba(255,255,255,0.2)",
+  background: "rgba(255,255,255,0.08)",
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
+  border: "1px solid rgba(255,255,255,0.15)",
   boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
 };
 
 const glassInput = {
-  background: "rgba(255,255,255,0.08)",
+  background: "rgba(255,255,255,0.06)",
   backdropFilter: "blur(4px)",
   WebkitBackdropFilter: "blur(4px)",
-  border: "1px solid rgba(255,255,255,0.2)",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+  border: "1px solid rgba(255,255,255,0.12)",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
 };
 
 export default function SignInPage() {
@@ -156,9 +156,11 @@ export default function SignInPage() {
   ];
 
   return (
-    <div className="fixed inset-0 h-screen w-screen overflow-auto bg-slate-900" suppressHydrationWarning>
+    <div className="fixed inset-0 h-screen w-screen overflow-auto" suppressHydrationWarning>
       {/* Video background - same as landing hero */}
       <HeroVideo />
+      {/* Subtle overlay for readability - almost transparent */}
+      <div className="fixed inset-0 z-[1] bg-black/20" aria-hidden />
 
       {/* Content */}
       <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-12">
@@ -175,18 +177,18 @@ export default function SignInPage() {
                   alt={branding.companyName}
                   width={160}
                   height={48}
-                  className="h-12 w-auto max-w-40 object-contain brightness-0 invert"
+                  className="h-12 w-auto max-w-40 object-contain"
                   onError={() => setLogoError(true)}
                 />
               )}
             </div>
             <h2
-              className="mt-6 text-2xl sm:text-3xl font-[var(--font-playfair)] font-bold text-white drop-shadow-lg"
-              style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}
+              className="mt-6 text-2xl sm:text-3xl font-[var(--font-playfair)] font-bold text-white drop-shadow-sm"
+              style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
             >
               Sign in to your account
             </h2>
-            <p className="mt-2 text-sm text-white/80 font-[var(--font-montserrat)]">
+            <p className="mt-2 text-sm text-slate-300 font-[var(--font-montserrat)]">
               Manage your properties with ease
             </p>
           </div>
@@ -197,35 +199,35 @@ export default function SignInPage() {
             style={glassCard}
           >
             <div className="mb-6">
-              <h3 className="text-xl font-semibold text-black font-[var(--font-montserrat)]">
+              <h3 className="text-xl font-semibold text-white font-[var(--font-montserrat)]">
                 Welcome back
               </h3>
-              <p className="mt-1 text-sm text-black/80">
+              <p className="mt-1 text-sm text-slate-300">
                 Enter your credentials to access your account
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/20 border border-red-400/40 text-red-100 text-sm">
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/20 border border-red-400/40 text-red-200 text-sm">
                   <AlertCircle className="h-4 w-4 shrink-0" />
                   {error}
                 </div>
               )}
 
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-black/90">
+                <label htmlFor="email" className="text-sm font-medium text-slate-200">
                   Email address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-black/70" />
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
-                    className="w-full min-h-[48px] pl-10 pr-4 py-3 rounded-xl text-base text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all"
+                    className="w-full min-h-[48px] pl-10 pr-4 py-3 rounded-xl text-base text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 transition-all"
                     style={glassInput}
                     required
                   />
@@ -233,18 +235,18 @@ export default function SignInPage() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-black/90">
+                <label htmlFor="password" className="text-sm font-medium text-slate-200">
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-black/70" />
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 transition-all"
                     style={glassInput}
                     required
                   />
@@ -254,7 +256,7 @@ export default function SignInPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full min-h-[48px] py-3 rounded-xl font-medium text-black bg-white/20 hover:bg-white/30 border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all touch-manipulation"
+                className="w-full min-h-[48px] py-3 rounded-xl font-medium text-white bg-white/20 hover:bg-white/30 border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all touch-manipulation"
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -268,10 +270,10 @@ export default function SignInPage() {
             </form>
 
             {/* Quick Login */}
-            <div className="mt-6 pt-6 border-t border-white/20">
+            <div className="mt-6 pt-6 border-t border-white/15">
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="h-4 w-4 text-amber-400" />
-                <span className="text-sm font-medium text-black/80">
+                <span className="text-sm font-medium text-slate-200">
                   Dev Quick Login
                 </span>
               </div>
@@ -289,7 +291,7 @@ export default function SignInPage() {
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-black/60 mt-2 text-center">
+              <p className="text-xs text-slate-400 mt-2 text-center">
                 Click to instantly log in as that role
               </p>
             </div>
@@ -300,7 +302,7 @@ export default function SignInPage() {
             <a
               href="/rentals"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-white font-semibold text-sm transition-all hover:scale-105"
-              style={{ background: "linear-gradient(135deg, #0ea5e9, #2563eb)", boxShadow: "0 4px 20px rgba(14,165,233,0.45)" }}
+              style={{ background: "linear-gradient(135deg, #0ea5e9, #2563eb)", boxShadow: "0 4px 20px rgba(14,165,233,0.35)" }}
             >
               <Home className="h-4 w-4" />
               View Rentals
