@@ -1261,7 +1261,7 @@ export const securitySettingsSchema = z.object({
 
 export const displaySettingsSchema = z.object({
   // Core theme settings
-  theme: z.enum(["light", "dark", "system"]).default("system"),
+  theme: z.enum(["light", "dark", "system"]).default("light"),
 
   // Language settings (short language code like "en", "es")
   language: z.string().default("en"),

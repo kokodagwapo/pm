@@ -147,7 +147,7 @@ const displaySettingsSchema = new Schema<IDisplaySettings>(
     theme: {
       type: String,
       enum: ["light", "dark", "system"],
-      default: "system",
+      default: "light",
     },
     language: { type: String, default: "en" },
     timezone: { type: String, default: "America/New_York" },
@@ -370,7 +370,7 @@ displaySettingsSchema.statics.createDefaultDisplay = function (userId: string) {
   return this.create({
     userId,
     // Core settings used by the simplified UI
-    theme: "system",
+    theme: "light",
     currency: "USD",
     // Branding configuration with default logos
     branding: {
