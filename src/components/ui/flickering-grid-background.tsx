@@ -22,11 +22,11 @@ export function FlickeringGridBackground({ className }: FlickeringGridBackground
     >
       <FlickeringGrid
         className="absolute inset-0 size-full"
-        squareSize={4}
-        gridGap={6}
+        squareSize={2}
+        gridGap={10}
         color={color}
-        maxOpacity={0.4}
-        flickerChance={0.1}
+        maxOpacity={0.18}
+        flickerChance={0.06}
       />
     </div>
   );
