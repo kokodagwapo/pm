@@ -5,9 +5,7 @@
   "common.saving": "Sine-save...",
   "common.cancel": "Kanselahin",
   "common.dismiss": "Isara",
-
   "common.clearFilters": "I-clear ang mga Filter",
-
   "common.upload.title": "Mag-upload ng mga larawan ng ari-arian",
   "common.upload.titleDisabled": "Hindi pinapayagan ang pag-upload",
   "common.upload.titleDragActive": "I-drop ang mga larawan dito!",
@@ -25,7 +23,6 @@
   "common.upload.imageNumber": "Larawan {number}",
   "common.upload.readyToUpload": "{count} larawang handa na para i-upload",
   "common.upload.reviewDescription": "Suriin ang iyong mga larawan. Maaari kang mag-alis ng mga indibidwal na larawan o i-clear lahat para magsimulang muli.",
-
   "nav.dashboard": "Dashboard",
   "nav.section.management": "Pamamahala",
   "nav.section.operations": "Operasyon",
@@ -35,23 +32,19 @@
   "nav.section.events": "Iskedyul",
   "nav.section.settings": "Mga Setting",
   "nav.section.administration": "Administrasyon",
-
   "nav.properties": "Mga Ari-arian",
   "nav.properties.all": "Lahat ng Ari-arian",
   "nav.properties.new": "Magdagdag ng Ari-arian",
   "nav.properties.available": "Mga Available na Unit",
   "nav.properties.allUnits": "Lahat ng Unit",
-
   "nav.tenants": "Mga Nangungupahan",
   "nav.tenants.all": "Lahat ng Nangungupahan",
   "nav.tenants.new": "Magdagdag ng Nangungupahan",
   "nav.tenants.applications": "Mga Aplikasyon",
-
   "nav.owners": "Mga May-ari",
   "nav.owners.all": "Lahat ng May-ari",
   "nav.owners.new": "Magdagdag ng May-ari",
   "nav.owners.properties": "Mga Ari-arian",
-
   "nav.leases": "Mga Kontrata",
   "nav.leases.all": "Lahat ng Kontrata",
   "nav.leases.new": "Bagong Kontrata",
@@ -60,78 +53,62 @@
   "nav.leases.invoices": "Mga Invoice",
   "nav.leases.my": "Aking mga Kontrata",
   "nav.leases.documents": "Mga Dokumento",
-
   "nav.maintenance": "Pagpapanatili",
   "nav.maintenance.all": "Lahat ng Kahilingan",
   "nav.maintenance.emergency": "Emergency",
   "nav.maintenance.submit": "Magsumite ng Kahilingan",
   "nav.maintenance.mine": "Aking mga Kahilingan",
-
   "nav.payments": "Mga Bayad",
   "nav.payments.all": "Lahat ng Bayad",
   "nav.payments.overdue": "Nalagpasan na",
   "nav.payments.payRent": "Magbayad ng Upa",
   "nav.payments.history": "Kasaysayan ng Bayad",
-
   "nav.analytics": "Analytics",
   "nav.analytics.overview": "Pangkalahatang-tanaw",
   "nav.analytics.financial": "Mga Ulat na Pinansyal",
   "nav.analytics.occupancy": "Pagiging Puno",
   "nav.analytics.maintenance": "Mga Istatistika ng Pagpapanatili",
-
   "nav.messages": "Mga Mensahe",
   "nav.announcements": "Mga Anunsyo",
   "nav.calendar": "Kalendaryo",
   "nav.aiHelp": "Luna AI",
   "nav.aiHelp.luna": "AI Chat",
   "nav.aiHelp.faq": "Help Center",
-
   "nav.settings": "Mga Setting",
   "nav.settings.display": "Display",
   "nav.settings.profile": "Aking Profile",
   "nav.settings.notifications": "Mga Abiso",
   "nav.settings.billing": "Pagsingil at Mga Plano",
-
   "nav.section.rentals": "Mga Paupahan",
-
   "nav.properties.calendar": "Kalendaryo ng Ari-arian",
-
   "nav.rentalRequests": "Mga Kahilingan sa Pagpapaupa",
   "nav.rentalRequests.all": "Lahat ng Kahilingan",
-
   "nav.rentals": "Mga Paupahan",
   "nav.rentals.request": "Humiling ng Paupahan",
   "nav.rentals.myRequests": "Aking mga Kahilingan",
-
   "nav.admin": "Admin Panel",
   "nav.admin.overview": "Pangkalahatang-tanaw",
   "nav.admin.users": "Pamamahala ng Gumagamit",
   "nav.admin.users.new": "Mag-imbita ng Gumagamit",
   "nav.admin.users.roles": "Mga Papel at Pahintulot",
   "nav.admin.apiKeys": "Mga API Key",
-
   "units.status.available": "Available",
   "units.status.occupied": "May Nakatira",
   "units.status.maintenance": "Pagpapanatili",
   "units.status.unavailable": "Hindi Available",
-
   "properties.allUnits.header.title": "Lahat ng Unit",
   "properties.allUnits.header.subtitle": "I-browse ang bawat unit sa lahat ng ari-arian",
-
   "header.menu.profile": "Profile",
   "header.menu.settings": "Mga Setting",
   "header.menu.logout": "Mag-logout",
-
   "common.showing": "Ipinapakita",
   "common.previous": "Nakaraan",
   "common.next": "Susunod",
   "common.page": "Pahina",
   "common.of": "ng",
   "common.perPage": "bawat pahina",
-
   "landing.cta.portal": "Portal",
   "common.language": "Wika",
-
   "landing.eyebrow": "Enterprise Property Management",
   "landing.hero.line1": "Pamahalaan nang mas matalino,",
   "landing.hero.line2": "hindi mas mahirap",
@@ -147,5 +124,22 @@
   "landing.feature.portals.desc": "Mga self-service na tool para sa mga tenant, transparent na ulat para sa mga may-ari.",
   "landing.feature.security.title": "Enterprise Security",
   "landing.feature.security.desc": "Role-based access control, mga audit log, at encrypted storage.",
-  "landing.footer.wordmark": "SmartStartPM · Platform ng Property Intelligence"
+  "landing.footer.wordmark": "SmartStartPM · Platform ng Property Intelligence",
+  "rentals.search.placeholder": "Search neighborhoods, properties...",
+  "rentals.view.list": "List",
+  "rentals.view.map": "Map",
+  "rentals.filters.reset": "Reset Filters",
+  "rentals.filters.saved": "Saved",
+  "rentals.results.property": "Property",
+  "rentals.results.properties": "Properties",
+  "rentals.results.all": "All Properties",
+  "rentals.noResults.title": "No results found",
+  "rentals.noResults.subtitle": "Try adjusting your filters or search terms",
+  "rentals.noResults.clearFilters": "Clear all filters",
+  "rentals.noSaved.title": "No saved properties",
+  "rentals.noSaved.subtitle": "Browse our listings and save your favorites",
+  "rentals.noSaved.browseAll": "Browse all properties",
+  "rentals.compare.bar.property": "Property",
+  "rentals.compare.bar.properties": "Properties",
+  "rentals.compare.bar.compare": "Compare"
 }

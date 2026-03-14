@@ -5,9 +5,7 @@
   "common.saving": "Salvataggio...",
   "common.cancel": "Annulla",
   "common.dismiss": "Chiudi",
-
   "common.clearFilters": "Rimuovi Filtri",
-
   "common.upload.title": "Carica immagini proprietà",
   "common.upload.titleDisabled": "Caricamento disabilitato",
   "common.upload.titleDragActive": "Rilascia le immagini qui!",
@@ -25,7 +23,6 @@
   "common.upload.imageNumber": "Immagine {number}",
   "common.upload.readyToUpload": "{count} immagine{plural} pronta per il caricamento",
   "common.upload.reviewDescription": "Rivedi le immagini. Puoi rimuovere quelle singole o tutte per ricominciare.",
-
   "nav.dashboard": "Dashboard",
   "nav.section.management": "Gestione",
   "nav.section.operations": "Operazioni",
@@ -35,23 +32,19 @@
   "nav.section.events": "Calendario",
   "nav.section.settings": "Impostazioni",
   "nav.section.administration": "Amministrazione",
-
   "nav.properties": "Proprietà",
   "nav.properties.all": "Tutte le Proprietà",
   "nav.properties.new": "Aggiungi Proprietà",
   "nav.properties.available": "Unità Disponibili",
   "nav.properties.allUnits": "Tutte le Unità",
-
   "nav.tenants": "Inquilini",
   "nav.tenants.all": "Tutti gli Inquilini",
   "nav.tenants.new": "Aggiungi Inquilino",
   "nav.tenants.applications": "Candidature",
-
   "nav.owners": "Proprietari",
   "nav.owners.all": "Tutti i Proprietari",
   "nav.owners.new": "Aggiungi Proprietario",
   "nav.owners.properties": "Proprietà",
-
   "nav.leases": "Contratti",
   "nav.leases.all": "Tutti i Contratti",
   "nav.leases.new": "Nuovo Contratto",
@@ -60,78 +53,62 @@
   "nav.leases.invoices": "Fatture",
   "nav.leases.my": "I Miei Contratti",
   "nav.leases.documents": "Documenti",
-
   "nav.maintenance": "Manutenzione",
   "nav.maintenance.all": "Tutte le Richieste",
   "nav.maintenance.emergency": "Emergenza",
   "nav.maintenance.submit": "Invia Richiesta",
   "nav.maintenance.mine": "Le Mie Richieste",
-
   "nav.payments": "Pagamenti",
   "nav.payments.all": "Tutti i Pagamenti",
   "nav.payments.overdue": "In Ritardo",
   "nav.payments.payRent": "Paga Affitto",
   "nav.payments.history": "Storico Pagamenti",
-
   "nav.analytics": "Analisi",
   "nav.analytics.overview": "Panoramica",
   "nav.analytics.financial": "Report Finanziari",
   "nav.analytics.occupancy": "Occupazione",
   "nav.analytics.maintenance": "Statistiche Manutenzione",
-
   "nav.messages": "Messaggi",
   "nav.announcements": "Annunci",
   "nav.calendar": "Calendario",
   "nav.aiHelp": "Luna AI",
   "nav.aiHelp.luna": "Chat AI",
   "nav.aiHelp.faq": "Centro Assistenza",
-
   "nav.settings": "Impostazioni",
   "nav.settings.display": "Visualizzazione",
   "nav.settings.profile": "Il Mio Profilo",
   "nav.settings.notifications": "Notifiche",
   "nav.settings.billing": "Fatturazione e Piani",
-
   "nav.section.rentals": "Affitti",
-
   "nav.properties.calendar": "Calendario Proprietà",
-
   "nav.rentalRequests": "Richieste di Affitto",
   "nav.rentalRequests.all": "Tutte le Richieste",
-
   "nav.rentals": "Affitti",
   "nav.rentals.request": "Richiedi Affitto",
   "nav.rentals.myRequests": "Le Mie Richieste",
-
   "nav.admin": "Pannello Admin",
   "nav.admin.overview": "Panoramica",
   "nav.admin.users": "Gestione Utenti",
   "nav.admin.users.new": "Invita Utente",
   "nav.admin.users.roles": "Ruoli e Permessi",
   "nav.admin.apiKeys": "Chiavi API",
-
   "units.status.available": "Disponibile",
   "units.status.occupied": "Occupato",
   "units.status.maintenance": "Manutenzione",
   "units.status.unavailable": "Non Disponibile",
-
   "properties.allUnits.header.title": "Tutte le Unità",
   "properties.allUnits.header.subtitle": "Sfoglia tutte le unità di tutte le proprietà",
-
   "header.menu.profile": "Profilo",
   "header.menu.settings": "Impostazioni",
   "header.menu.logout": "Esci",
-
   "common.showing": "Mostrando",
   "common.previous": "Precedente",
   "common.next": "Successivo",
   "common.page": "Pagina",
   "common.of": "di",
   "common.perPage": "per pagina",
-
   "landing.cta.portal": "Portale",
   "common.language": "Lingua",
-
   "landing.eyebrow": "Gestione Immobiliare Aziendale",
   "landing.hero.line1": "Gestisci in modo più intelligente,",
   "landing.hero.line2": "non più difficile",
@@ -147,5 +124,22 @@
   "landing.feature.portals.desc": "Strumenti self-service per gli inquilini, report trasparenti per i proprietari.",
   "landing.feature.security.title": "Sicurezza aziendale",
   "landing.feature.security.desc": "Controllo degli accessi basato sui ruoli, log di audit e archiviazione crittografata.",
-  "landing.footer.wordmark": "SmartStartPM · Piattaforma di intelligence immobiliare"
+  "landing.footer.wordmark": "SmartStartPM · Piattaforma di intelligence immobiliare",
+  "rentals.search.placeholder": "Search neighborhoods, properties...",
+  "rentals.view.list": "List",
+  "rentals.view.map": "Map",
+  "rentals.filters.reset": "Reset Filters",
+  "rentals.filters.saved": "Saved",
+  "rentals.results.property": "Property",
+  "rentals.results.properties": "Properties",
+  "rentals.results.all": "All Properties",
+  "rentals.noResults.title": "No results found",
+  "rentals.noResults.subtitle": "Try adjusting your filters or search terms",
+  "rentals.noResults.clearFilters": "Clear all filters",
+  "rentals.noSaved.title": "No saved properties",
+  "rentals.noSaved.subtitle": "Browse our listings and save your favorites",
+  "rentals.noSaved.browseAll": "Browse all properties",
+  "rentals.compare.bar.property": "Property",
+  "rentals.compare.bar.properties": "Properties",
+  "rentals.compare.bar.compare": "Compare"
 }

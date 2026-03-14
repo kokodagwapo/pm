@@ -103,10 +103,8 @@
   "common.of": "sur",
   "common.perPage": "par page",
   "nav.admin.apiKeys": "Clés API",
-
   "landing.cta.portal": "Portail",
   "common.language": "Langue",
-
   "landing.eyebrow": "Gestion Immobilière d'Entreprise",
   "landing.hero.line1": "Gérez plus intelligemment,",
   "landing.hero.line2": "pas plus dur",
@@ -122,5 +120,22 @@
   "landing.feature.portals.desc": "Outils en libre-service pour les locataires, rapports transparents pour les propriétaires.",
   "landing.feature.security.title": "Sécurité d'entreprise",
   "landing.feature.security.desc": "Contrôle d'accès basé sur les rôles, journaux d'audit et stockage chiffré.",
-  "landing.footer.wordmark": "SmartStartPM · Plateforme d'intelligence immobilière"
+  "landing.footer.wordmark": "SmartStartPM · Plateforme d'intelligence immobilière",
+  "rentals.search.placeholder": "Search neighborhoods, properties...",
+  "rentals.view.list": "List",
+  "rentals.view.map": "Map",
+  "rentals.filters.reset": "Reset Filters",
+  "rentals.filters.saved": "Saved",
+  "rentals.results.property": "Property",
+  "rentals.results.properties": "Properties",
+  "rentals.results.all": "All Properties",
+  "rentals.noResults.title": "No results found",
+  "rentals.noResults.subtitle": "Try adjusting your filters or search terms",
+  "rentals.noResults.clearFilters": "Clear all filters",
+  "rentals.noSaved.title": "No saved properties",
+  "rentals.noSaved.subtitle": "Browse our listings and save your favorites",
+  "rentals.noSaved.browseAll": "Browse all properties",
+  "rentals.compare.bar.property": "Property",
+  "rentals.compare.bar.properties": "Properties",
+  "rentals.compare.bar.compare": "Compare"
 }

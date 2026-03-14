@@ -147,5 +147,23 @@
   "landing.feature.portals.desc": "Self-service tools for tenants, transparent reporting for owners.",
   "landing.feature.security.title": "Enterprise Security",
   "landing.feature.security.desc": "Role-based access control, audit logs, and encrypted storage.",
-  "landing.footer.wordmark": "SmartStartPM · Property Intelligence Platform"
+  "landing.footer.wordmark": "SmartStartPM · Property Intelligence Platform",
+
+  "rentals.search.placeholder": "Search neighborhoods, properties...",
+  "rentals.view.list": "List",
+  "rentals.view.map": "Map",
+  "rentals.filters.reset": "Reset Filters",
+  "rentals.filters.saved": "Saved",
+  "rentals.results.property": "Property",
+  "rentals.results.properties": "Properties",
+  "rentals.results.all": "All Properties",
+  "rentals.noResults.title": "No results found",
+  "rentals.noResults.subtitle": "Try adjusting your filters or search terms",
+  "rentals.noResults.clearFilters": "Clear all filters",
+  "rentals.noSaved.title": "No saved properties",
+  "rentals.noSaved.subtitle": "Browse our listings and save your favorites",
+  "rentals.noSaved.browseAll": "Browse all properties",
+  "rentals.compare.bar.property": "Property",
+  "rentals.compare.bar.properties": "Properties",
+  "rentals.compare.bar.compare": "Compare"
 }
