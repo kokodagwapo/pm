@@ -13,6 +13,15 @@ const FEATURE_KEYS = [
   { icon: Shield,    titleKey: "landing.feature.security.title",  descKey: "landing.feature.security.desc" },
 ];
 
+// Border classes for 2×2 grid dividers
+// mobile: border-b on all except last; sm+: border-r on left column, border-b on top row
+const CARD_BORDERS = [
+  "border-b border-white/[0.07] sm:border-r sm:border-white/[0.07]",
+  "border-b border-white/[0.07]",
+  "border-b border-white/[0.07] sm:border-b-0 sm:border-r sm:border-white/[0.07]",
+  "border-b-0",
+];
+
 export default function HomePage() {
   const { t } = useLocalizationContext();
 
@@ -21,97 +30,85 @@ export default function HomePage() {
       <LandingHeader />
 
       <main className="text-white">
-        {/* ── Fixed video + gradient ── */}
+        {/* Fixed video + gradient overlay */}
         <HeroVideo />
         <div
           className="fixed inset-0 z-[1] pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.62) 100%)",
-          }}
+          style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.58) 0%, rgba(0,0,0,0.26) 42%, rgba(0,0,0,0.66) 100%)" }}
         />
 
-        {/* ── Hero ──────────────────────────────────────────────────────── */}
-        <section className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 pt-24 pb-20 text-center">
-          <div className="max-w-4xl mx-auto">
+        {/* ── Hero ─────────────────────────────────────────────────────── */}
+        <section className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-5 sm:px-8 pt-20 sm:pt-28 pb-12 sm:pb-20">
+          <div className="w-full max-w-3xl mx-auto">
 
             {/* Eyebrow */}
-            <p className="inline-block text-[10px] sm:text-[11px] tracking-[0.38em] uppercase text-white/35 mb-10 font-light">
+            <p className="text-[9px] sm:text-[10px] tracking-[0.32em] uppercase font-light text-white/30 mb-6 sm:mb-9">
               {t("landing.eyebrow")}
             </p>
 
-            {/* Headline */}
-            <h1
-              className="text-5xl sm:text-7xl md:text-[6.25rem] leading-[1.02] tracking-tight mb-8"
-              style={{ fontWeight: 200 }}
-            >
+            {/* Headline — 4xl mobile → 6xl sm → 8xl md+ */}
+            <h1 className="text-4xl sm:text-6xl md:text-8xl leading-tight sm:leading-none tracking-tight mb-5 sm:mb-7" style={{ fontWeight: 200 }}>
               {t("landing.hero.line1")}
               <br />
-              <em className="not-italic text-white/50" style={{ fontWeight: 100 }}>
+              <em className="not-italic text-white/42" style={{ fontWeight: 100 }}>
                 {t("landing.hero.line2")}
               </em>
             </h1>
 
             {/* Sub-copy */}
-            <p
-              className="text-sm sm:text-[15px] text-white/40 max-w-md mx-auto leading-relaxed mb-14 tracking-wide"
-              style={{ fontWeight: 300 }}
-            >
+            <p className="text-sm sm:text-[15px] text-white/38 max-w-[260px] sm:max-w-sm md:max-w-md mx-auto leading-[1.80] tracking-wide mb-9 sm:mb-12 md:mb-14" style={{ fontWeight: 300 }}>
               {t("landing.hero.subtext")}
             </p>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              {/* Primary — clean white pill */}
+            {/* CTAs — stacked + full-width on mobile, inline on sm+ */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 w-full max-w-[280px] sm:max-w-none mx-auto">
               <Link
                 href="/auth/signin"
-                className="group relative inline-flex items-center gap-2 h-11 px-7 rounded-full bg-white text-slate-900 text-sm tracking-wide overflow-hidden transition-all duration-300 hover:shadow-[0_0_28px_rgba(255,255,255,0.25)]"
+                className="group inline-flex items-center justify-center gap-2 h-12 sm:h-11 px-8 rounded-full bg-white text-slate-900 text-sm tracking-wide transition-all duration-300 hover:shadow-[0_0_28px_rgba(255,255,255,0.22)] active:scale-[0.97]"
                 style={{ fontWeight: 300 }}
               >
                 {t("landing.cta.signin")}
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" />
+                <ArrowRight className="w-3.5 h-3.5 shrink-0 group-hover:translate-x-0.5 transition-transform duration-200" />
               </Link>
-
-              {/* Secondary — ghost pill */}
               <Link
                 href="/rentals"
-                className="inline-flex items-center h-11 px-7 rounded-full text-white/50 text-sm tracking-wide border border-white/12 hover:border-white/28 hover:text-white/80 transition-all duration-300"
+                className="inline-flex items-center justify-center h-12 sm:h-11 px-8 rounded-full border border-white/[0.14] text-white/50 text-sm tracking-wide transition-all duration-300 hover:border-white/[0.28] hover:text-white/78 active:scale-[0.97]"
                 style={{ fontWeight: 300 }}
               >
                 {t("landing.cta.browse")}
               </Link>
             </div>
+
           </div>
         </section>
 
-        {/* ── Features (scrolls over video with solid backdrop) ───────── */}
-        <section
-          className="relative z-10 pb-28"
-          style={{ background: "rgba(3, 7, 18, 0.88)", backdropFilter: "blur(1px)" }}
-        >
-          <div className="max-w-5xl mx-auto px-6">
-            {/* Section eyebrow */}
-            <p className="text-center text-[9px] tracking-[0.38em] uppercase text-white/20 mb-10 font-light pt-16">
+        {/* ── Features — solid dark section, scrolls over video ─────── */}
+        <section className="relative z-10" style={{ background: "rgba(3, 7, 18, 0.92)", backdropFilter: "blur(1px)" }}>
+          <div className="max-w-4xl mx-auto px-5 sm:px-8 pt-10 sm:pt-14 pb-14 sm:pb-20">
+
+            {/* Section label */}
+            <p className="text-center text-[8px] sm:text-[9px] tracking-[0.34em] uppercase font-light text-white/18 mb-7 sm:mb-9">
               {t("landing.features.label")}
             </p>
 
-            {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 border border-white/[0.07] rounded-2xl overflow-hidden divide-y sm:divide-y-0 divide-x-0 sm:divide-x divide-white/[0.07]">
+            {/* 2 × 2 feature grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 border border-white/[0.07] rounded-2xl overflow-hidden">
               {FEATURE_KEYS.map(({ icon: Icon, titleKey, descKey }, idx) => (
                 <div
                   key={titleKey}
-                  className={`group p-8 flex gap-5 items-start bg-white/[0.025] hover:bg-white/[0.05] transition-colors duration-300 ${
-                    idx === 2 ? "sm:border-t sm:border-white/[0.07]" : ""
-                  } ${idx === 3 ? "sm:border-t sm:border-white/[0.07]" : ""}`}
+                  className={`group flex gap-4 items-start p-5 sm:p-6 md:p-7 bg-white/[0.02] hover:bg-white/[0.045] transition-colors duration-300 ${CARD_BORDERS[idx]}`}
                 >
-                  <div className="w-7 h-7 rounded-md bg-white/[0.07] flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-white/10 transition-colors">
-                    <Icon className="w-3.5 h-3.5 text-white/35" />
+                  {/* Icon */}
+                  <div className="w-8 h-8 shrink-0 mt-0.5 rounded-lg bg-white/[0.06] group-hover:bg-white/[0.10] transition-colors flex items-center justify-center">
+                    <Icon className="w-3.5 h-3.5 text-white/28" />
                   </div>
-                  <div>
-                    <p className="text-[13px] text-white/70 tracking-wide mb-1.5" style={{ fontWeight: 300 }}>
+
+                  {/* Text — left-aligned inside left-edge content */}
+                  <div className="min-w-0 text-left">
+                    <p className="text-[12.5px] sm:text-[13px] text-white/65 tracking-wide mb-1.5" style={{ fontWeight: 300 }}>
                       {t(titleKey)}
                     </p>
-                    <p className="text-xs text-white/30 leading-relaxed" style={{ fontWeight: 300 }}>
+                    <p className="text-[11px] sm:text-xs text-white/28 leading-[1.70]" style={{ fontWeight: 300 }}>
                       {t(descKey)}
                     </p>
                   </div>
@@ -119,10 +116,11 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Bottom wordmark */}
-            <p className="text-center text-[9px] tracking-[0.32em] uppercase text-white/12 mt-16 font-light">
+            {/* Wordmark */}
+            <p className="text-center text-[8px] tracking-[0.28em] uppercase font-light text-white/10 mt-10 sm:mt-12">
               {t("landing.footer.wordmark")}
             </p>
+
           </div>
         </section>
       </main>
