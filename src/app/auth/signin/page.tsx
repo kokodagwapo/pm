@@ -36,19 +36,19 @@ const DEFAULT_BRANDING: Branding = {
 };
 
 const glassCard = {
-  background: "rgba(255,255,255,0.08)",
-  backdropFilter: "blur(12px)",
-  WebkitBackdropFilter: "blur(12px)",
-  border: "1px solid rgba(255,255,255,0.15)",
-  boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+  background: "rgba(255,255,255,0.07)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  border: "1px solid rgba(255,255,255,0.12)",
+  boxShadow: "0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)",
 };
 
 const glassInput = {
-  background: "rgba(255,255,255,0.06)",
+  background: "rgba(255,255,255,0.05)",
   backdropFilter: "blur(4px)",
   WebkitBackdropFilter: "blur(4px)",
-  border: "1px solid rgba(255,255,255,0.12)",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+  border: "1px solid rgba(255,255,255,0.10)",
+  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.1)",
 };
 
 export default function SignInPage() {
@@ -156,7 +156,15 @@ export default function SignInPage() {
   return (
     <div className="fixed inset-0 h-screen w-screen overflow-auto" suppressHydrationWarning>
       <HeroVideo />
-      <div className="fixed inset-0 z-[1] bg-black/20" aria-hidden />
+      {/* Elegant gradient overlay */}
+      <div
+        className="fixed inset-0 z-[1] pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.30) 40%, rgba(0,0,0,0.65) 100%)",
+        }}
+        aria-hidden
+      />
 
       {/* Language switcher — top right corner */}
       <div className="fixed top-4 right-4 z-20">
@@ -165,12 +173,12 @@ export default function SignInPage() {
 
       {/* Content */}
       <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-12">
-        <div className="w-full max-w-lg space-y-6 sm:space-y-8 animate-fade-in-up">
+        <div className="w-full max-w-[440px] space-y-6 sm:space-y-8">
           {/* Header */}
           <div className="text-center">
             <div className="flex justify-center items-center">
               {logoError ? (
-                <Building2 className="h-14 w-14 text-white/90" />
+                <Building2 className="h-12 w-12 text-white/80" />
               ) : (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
@@ -178,77 +186,94 @@ export default function SignInPage() {
                   alt={branding.companyName}
                   width={160}
                   height={48}
-                  className="h-12 w-auto max-w-40 object-contain"
+                  className="h-11 w-auto max-w-40 object-contain"
                   onError={() => setLogoError(true)}
                 />
               )}
             </div>
             <h2
-              className="mt-6 text-2xl sm:text-3xl font-[var(--font-playfair)] font-bold text-white drop-shadow-sm"
-              style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
+              className="mt-7 text-3xl sm:text-4xl text-white tracking-tight"
+              style={{ fontWeight: 200 }}
             >
               {t("auth.signin.title")}
             </h2>
-            <p className="mt-2 text-sm text-slate-300 font-[var(--font-montserrat)]">
+            <p
+              className="mt-2 text-sm text-white/40 tracking-wide"
+              style={{ fontWeight: 300 }}
+            >
               {t("auth.signin.subtitle")}
             </p>
           </div>
 
           {/* Glassmorphic Sign In Card */}
           <div
-            className="rounded-2xl p-4 sm:p-6 md:p-8 transition-all duration-300"
+            className="rounded-3xl p-6 sm:p-8"
             style={glassCard}
           >
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold text-white font-[var(--font-montserrat)]">
+            <div className="mb-7">
+              <h3
+                className="text-lg text-white tracking-wide"
+                style={{ fontWeight: 300 }}
+              >
                 {t("auth.signin.welcomeBack")}
               </h3>
-              <p className="mt-1 text-sm text-slate-300">
+              <p
+                className="mt-1 text-xs text-white/35 tracking-wide"
+                style={{ fontWeight: 300 }}
+              >
                 {t("auth.signin.credentials")}
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/20 border border-red-400/40 text-red-200 text-sm">
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/20 border border-red-400/30 text-red-200 text-xs">
                   <AlertCircle className="h-4 w-4 shrink-0" />
                   {error}
                 </div>
               )}
 
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-slate-200">
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="email"
+                  className="block text-xs tracking-wide text-white/45"
+                  style={{ fontWeight: 300 }}
+                >
                   {t("auth.signin.emailLabel")}
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Mail className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" />
                   <input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t("auth.signin.emailPlaceholder")}
-                    className="w-full min-h-[48px] pl-10 pr-4 py-3 rounded-xl text-base text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 transition-all"
-                    style={glassInput}
+                    className="w-full min-h-[46px] pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-white/25 transition-all"
+                    style={{ ...glassInput, fontWeight: 300 }}
                     required
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-slate-200">
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="password"
+                  className="block text-xs tracking-wide text-white/45"
+                  style={{ fontWeight: 300 }}
+                >
                   {t("auth.signin.passwordLabel")}
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Lock className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" />
                   <input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={t("auth.signin.passwordPlaceholder")}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 transition-all"
-                    style={glassInput}
+                    className="w-full min-h-[46px] pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-white/25 transition-all"
+                    style={{ ...glassInput, fontWeight: 300 }}
                     required
                   />
                 </div>
@@ -257,11 +282,12 @@ export default function SignInPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full min-h-[48px] py-3 rounded-xl font-medium text-white bg-white/20 hover:bg-white/30 border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all touch-manipulation"
+                className="w-full min-h-[46px] py-3 rounded-xl text-sm tracking-wide text-white bg-white/12 hover:bg-white/20 border border-white/20 hover:border-white/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all touch-manipulation mt-2"
+                style={{ fontWeight: 300 }}
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     {t("auth.signin.signingIn")}
                   </span>
                 ) : (
@@ -271,10 +297,13 @@ export default function SignInPage() {
             </form>
 
             {/* Quick Login */}
-            <div className="mt-6 pt-6 border-t border-white/15">
+            <div className="mt-7 pt-6 border-t border-white/10">
               <div className="flex items-center gap-2 mb-3">
-                <Zap className="h-4 w-4 text-amber-400" />
-                <span className="text-sm font-medium text-slate-200">
+                <Zap className="h-3.5 w-3.5 text-amber-400/80" />
+                <span
+                  className="text-xs tracking-wide text-white/40"
+                  style={{ fontWeight: 300 }}
+                >
                   {t("auth.signin.devQuickLogin")}
                 </span>
               </div>
@@ -285,14 +314,18 @@ export default function SignInPage() {
                     type="button"
                     onClick={() => handleQuickLogin(account.email, account.password)}
                     disabled={isLoading}
-                    className={`flex flex-col items-center justify-center gap-1 min-h-[48px] py-3 rounded-lg text-white text-xs font-medium transition-all touch-manipulation ${account.color}`}
+                    className={`flex flex-col items-center justify-center gap-1.5 min-h-[52px] py-3 rounded-xl text-white text-[11px] tracking-wide transition-all touch-manipulation ${account.color}`}
+                    style={{ fontWeight: 300 }}
                   >
-                    <account.icon className="h-4 w-4" />
+                    <account.icon className="h-3.5 w-3.5" />
                     {account.label}
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-slate-400 mt-2 text-center">
+              <p
+                className="text-[10px] text-white/25 mt-2.5 text-center tracking-wide"
+                style={{ fontWeight: 300 }}
+              >
                 {t("auth.signin.devClickToLogin")}
               </p>
             </div>
@@ -302,10 +335,10 @@ export default function SignInPage() {
           <div className="text-center">
             <a
               href="/rentals"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-white font-semibold text-sm transition-all hover:scale-105"
-              style={{ background: "linear-gradient(135deg, #0ea5e9, #2563eb)", boxShadow: "0 4px 20px rgba(14,165,233,0.35)" }}
+              className="inline-flex items-center gap-2 h-[42px] px-7 rounded-full border border-white/15 text-white/50 text-xs tracking-wide hover:border-white/30 hover:text-white/80 transition-all duration-300"
+              style={{ fontWeight: 300 }}
             >
-              <Home className="h-4 w-4" />
+              <Home className="h-3.5 w-3.5" />
               {t("auth.signin.viewRentals")}
             </a>
           </div>

@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
+import { HeroVideo } from "@/components/landing/HeroVideo";
 import { ArrowRight, Building2, BarChart3, Users, Shield } from "lucide-react";
 
 const FEATURES = [
   {
     icon: Building2,
     title: "Full Portfolio Management",
-    desc: "Track properties, units, leases, and maintenance from one place.",
+    desc: "Track properties, units, leases, and maintenance from one unified place.",
   },
   {
     icon: BarChart3,
@@ -30,44 +31,65 @@ export default function HomePage() {
     <>
       <LandingHeader />
 
-      <main className="min-h-screen bg-slate-950 text-white">
-        {/* Hero */}
-        <section className="relative flex flex-col items-center justify-center min-h-screen px-4 pt-24 pb-16 text-center overflow-hidden">
-          {/* Background glow */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-600/20 rounded-full blur-3xl" />
-            <div className="absolute top-2/3 left-1/3 w-[400px] h-[400px] bg-sky-500/15 rounded-full blur-3xl" />
-          </div>
+      <main className="text-white">
+        {/* ── Fixed video + gradient layers ── */}
+        <HeroVideo />
+        <div
+          className="fixed inset-0 z-[1] pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.28) 45%, rgba(0,0,0,0.60) 100%)",
+          }}
+        />
 
-          <div className="relative max-w-3xl mx-auto space-y-6">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs text-white/60 tracking-wide uppercase">
+        {/* ── Hero ─────────────────────────────────────────────────────── */}
+        <section className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 pt-24 pb-20 text-center">
+          <div className="max-w-4xl mx-auto">
+            {/* Eyebrow */}
+            <p
+              className="inline-block text-[10px] sm:text-xs tracking-[0.35em] uppercase text-white/40 mb-10 font-light"
+            >
               Enterprise Property Management
-            </span>
-
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight">
-              Manage properties
-              <br />
-              <span className="bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent">
-                smarter, not harder
-              </span>
-            </h1>
-
-            <p className="text-base sm:text-lg text-white/55 max-w-xl mx-auto leading-relaxed">
-              SmartStartPM brings together leases, maintenance, tenant communications, and
-              financial analytics — in one beautifully simple platform.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            {/* Headline */}
+            <h1
+              className="text-5xl sm:text-7xl md:text-[6rem] leading-[1.02] tracking-tight mb-8"
+              style={{ fontWeight: 200 }}
+            >
+              Manage smarter,
+              <br />
+              <em
+                className="not-italic text-white/55"
+                style={{ fontWeight: 100 }}
+              >
+                not harder
+              </em>
+            </h1>
+
+            {/* Sub-copy */}
+            <p
+              className="text-sm sm:text-base text-white/45 max-w-md mx-auto leading-relaxed mb-12 tracking-wide"
+              style={{ fontWeight: 300 }}
+            >
+              SmartStartPM brings leases, maintenance, tenant communications,
+              and financial analytics into one beautifully simple platform.
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href="/auth/signin"
-                className="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-colors"
+                className="group inline-flex items-center gap-2.5 h-[46px] px-8 rounded-full bg-white text-slate-900 text-sm tracking-wide hover:bg-white/92 transition-all duration-300"
+                style={{ fontWeight: 300 }}
               >
                 Sign in to Portal
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" />
               </Link>
               <Link
                 href="/rentals"
-                className="inline-flex items-center gap-2 h-11 px-6 rounded-xl border border-white/15 text-white/80 font-medium text-sm hover:bg-white/8 hover:text-white transition-colors"
+                className="inline-flex items-center h-[46px] px-8 rounded-full border border-white/20 text-white/60 text-sm tracking-wide hover:border-white/40 hover:text-white/90 transition-all duration-300"
+                style={{ fontWeight: 300 }}
               >
                 Browse Rentals
               </Link>
@@ -75,22 +97,53 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Features */}
-        <section className="max-w-5xl mx-auto px-4 pb-24 grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {FEATURES.map(({ icon: Icon, title, desc }) => (
-            <div
-              key={title}
-              className="rounded-2xl border border-white/8 bg-white/4 p-6 flex gap-4 items-start hover:bg-white/6 transition-colors"
+        {/* ── Features ─────────────────────────────────────────────────── */}
+        <section
+          className="relative z-10 pb-28"
+          style={{ background: "rgba(2, 6, 20, 0.85)", backdropFilter: "blur(2px)" }}
+        >
+          <div className="max-w-5xl mx-auto px-6">
+            {/* Section label */}
+            <p
+              className="text-center text-[10px] tracking-[0.35em] uppercase text-white/25 mb-10 font-light pt-16"
             >
-              <div className="w-10 h-10 rounded-xl bg-violet-500/15 flex items-center justify-center shrink-0">
-                <Icon className="w-5 h-5 text-violet-400" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm text-white/90">{title}</p>
-                <p className="text-sm text-white/45 mt-1 leading-relaxed">{desc}</p>
-              </div>
+              Platform Capabilities
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/5 rounded-2xl overflow-hidden border border-white/8">
+              {FEATURES.map(({ icon: Icon, title, desc }) => (
+                <div
+                  key={title}
+                  className="group p-8 flex gap-5 items-start bg-white/[0.03] hover:bg-white/[0.06] transition-colors duration-300"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-white/8 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-white/12 transition-colors">
+                    <Icon className="w-4 h-4 text-white/40" />
+                  </div>
+                  <div>
+                    <p
+                      className="text-sm text-white/75 tracking-wide mb-1.5"
+                      style={{ fontWeight: 300 }}
+                    >
+                      {title}
+                    </p>
+                    <p
+                      className="text-xs text-white/35 leading-relaxed"
+                      style={{ fontWeight: 300 }}
+                    >
+                      {desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+
+            {/* Bottom wordmark */}
+            <p
+              className="text-center text-[10px] tracking-[0.3em] uppercase text-white/15 mt-14 font-light"
+            >
+              SmartStartPM · Property Intelligence Platform
+            </p>
+          </div>
         </section>
       </main>
     </>

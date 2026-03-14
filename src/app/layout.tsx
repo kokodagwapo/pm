@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-  weight: ["300", "400", "500", "600"],
+  weight: ["100", "200", "300", "400", "500", "600"],
   display: "swap",
 });
 const playfair = Playfair_Display({
