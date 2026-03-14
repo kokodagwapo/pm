@@ -104,10 +104,10 @@ export function LandingHeader() {
               <span className={`block w-[18px] h-[1px] rounded-full transition-all duration-300 ${isLight ? "bg-slate-700" : "bg-white/80"} ${open ? "-rotate-45 -translate-y-[6px]" : ""}`} />
             </button>
 
-            {/* Portal CTA */}
+            {/* Portal CTA — hidden on xs, visible on sm+ */}
             <Link
               href="/auth/signin"
-              className={`h-8 flex items-center px-3.5 rounded-lg text-[12px] transition-all touch-manipulation ${
+              className={`hidden sm:flex h-8 items-center px-3.5 rounded-lg text-[12px] transition-all touch-manipulation ${
                 isLight
                   ? "bg-slate-900 text-white hover:bg-slate-800"
                   : "bg-white/10 text-white/90 border border-white/15 hover:bg-white/20"

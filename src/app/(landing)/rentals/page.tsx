@@ -296,7 +296,7 @@ function PropertyListCard({
   const imageCount = property.images?.length ?? 0;
 
   return (
-    <Link href={`/properties/${property._id}`}>
+    <Link href={`/properties/${property._id}`} className="block w-full overflow-hidden">
       <div
         className={`group flex flex-col sm:flex-row bg-white rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer ${
           isSelected
@@ -548,7 +548,7 @@ function RentalsContent() {
   const hasActiveFilters = !!(activeType || activeBedrooms || activeMinPrice || activeMaxPrice || activeSearch || activeNeighborhood);
 
   return (
-    <div className="min-h-screen bg-[#f8f7f4] flex flex-col">
+    <div className="min-h-screen bg-[#f8f7f4] flex flex-col overflow-x-hidden w-full">
       <LandingHeader />
 
       <div className="pt-[48px] flex flex-col flex-1">
@@ -823,8 +823,8 @@ function RentalsContent() {
           </div>
 
           {/* Listings — phone/tablet list view + lg+ right column */}
-          <div className={`${mobileView === "list" ? "flex" : "hidden"} lg:flex flex-col w-full lg:w-[45%] overflow-y-auto bg-[#f8f7f4] border-l border-slate-200/60`} style={{ isolation: "isolate" }}>
-            <div className="p-3 space-y-2.5">
+          <div className={`${mobileView === "list" ? "flex" : "hidden"} lg:flex flex-col w-full lg:w-[45%] overflow-y-auto overflow-x-hidden bg-[#f8f7f4] border-l border-slate-200/60`} style={{ isolation: "isolate" }}>
+            <div className="p-3 space-y-2.5 w-full overflow-x-hidden">
 
               {/* Featured selected property card */}
               {selectedProperty && (

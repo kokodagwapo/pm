@@ -231,10 +231,11 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
             Desktop: floating card, anchored bottom-right
           */}
           <div
-            className="fixed z-50 flex flex-col bg-white border border-slate-200 shadow-2xl overflow-hidden
-              rounded-2xl
-              inset-x-2 bottom-20 top-[56px]
-              sm:inset-auto sm:top-auto sm:right-4 sm:bottom-24 sm:w-[360px] sm:max-h-[560px]"
+            className="fixed z-50 flex flex-col bg-white shadow-2xl overflow-hidden
+              border-x-0 border border-slate-200
+              rounded-t-2xl rounded-b-none
+              inset-x-0 bottom-0 top-[48px]
+              sm:inset-auto sm:border-x sm:rounded-2xl sm:top-auto sm:right-4 sm:bottom-24 sm:w-[360px] sm:max-h-[560px]"
           >
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-sky-500 to-violet-500 shrink-0">
@@ -353,8 +354,8 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
         </>
       )}
 
-      {/* ── Trigger / close button ─────────────────────────── */}
-      <div className="fixed bottom-5 right-4 z-50">
+      {/* ── Trigger / close button — hidden on mobile when open (header has close) ── */}
+      <div className={`fixed bottom-5 right-4 z-50 ${isOpen ? "hidden sm:flex" : "flex"}`}>
         {/* Open-state pulse rings */}
         {!isOpen && (
           <>
