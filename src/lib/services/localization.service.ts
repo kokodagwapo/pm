@@ -3,7 +3,7 @@
  * Centralized service for multi-currency and localization support
  */
 
-import { translations } from "@/locales";
+import { catalogsByLanguage } from "@/locales";
 
 export type MessageCatalog = Record<string, string>;
 
@@ -874,7 +874,7 @@ export class LocalizationService {
   private currentCurrency: string = "USD";
   private exchangeRates: Map<string, ExchangeRate> = new Map();
 
-  private translations: Record<string, Record<string, string>> = translations;
+  private translations: Record<string, Record<string, string>> = {};
 
   private constructor() {
     // Always default to English; only switch if user has explicitly saved a locale preference
@@ -1164,11 +1164,12 @@ export class LocalizationService {
     const { language, defaultValue, values } = options || {};
 
     const languageCode = (
-      language || this.currentLocale.split("-")[0]
+      language?.split("-")[0] || this.currentLocale.split("-")[0]
     ).toLowerCase();
 
-    const entry = this.translations[key];
-    const translation = entry && (entry[languageCode] || entry["en"]);
+    const catalog = catalogsByLanguage[languageCode] || catalogsByLanguage["en"];
+    const fallbackCatalog = catalogsByLanguage["en"];
+    const translation = catalog?.[key] || fallbackCatalog?.[key];
     const base = translation || defaultValue || this.keyToReadable(key);
 
     if (!values) {

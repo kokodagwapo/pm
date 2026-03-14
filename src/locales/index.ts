@@ -131,7 +131,7 @@ const mergeCatalogs = (...sources: LanguageCatalog[]): LanguageCatalog => {
   return Object.assign({}, ...sources);
 };
 
-const catalogsByLanguage: Record<string, LanguageCatalog> = {
+export const catalogsByLanguage: Record<string, LanguageCatalog> = {
   en: mergeCatalogs(
     enCommon, enAuth, enTour, enSettings, enDashboard, enProperties, enTenants,
     enLeases, enMaintenance, enPayments, enAnalytics, enMessages, enCalendar, enAdmin
