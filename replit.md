@@ -5,7 +5,7 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 ## Internationalization (i18n)
 - **9 languages supported**: English (en), German (de), Spanish (es), French (fr), Italian (it), Chinese Simplified (zh), Japanese (ja), Filipino (fil), Russian (ru)
 - **LanguageSwitcher component**: `src/components/ui/LanguageSwitcher.tsx` — dropdown with flag emojis and native labels; `variant="light"|"dark"` prop; integrated into `LandingHeader` and the sign-in page
-- **Translation files**: `src/locales/{lang}/*.json` — each language has `common.json`, `auth.json`, `dashboard.json`, `settings.json`, `properties.json`, `tenants.json`, `leases.json`, `maintenance.json`, `payments.json`, `analytics.json`, `messages.json`, `calendar.json`, `admin.json`
+- **Translation files**: `src/locales/{lang}/*.json` — each language has `common.json`, `auth.json`, `tour.json`, `dashboard.json`, `settings.json`, `properties.json`, `tenants.json`, `leases.json`, `maintenance.json`, `payments.json`, `analytics.json`, `messages.json`, `calendar.json`, `admin.json`
 - **Catalog registration**: `src/locales/index.ts` — merges all JSON files per language into the `translations` map used by `LocalizationProvider`
 - **Localization service**: `src/lib/services/localization.service.ts` — LOCALES map includes all 9 languages including `fil-PH`
 - **Translated pages**: Dashboard (full), Sign-in (full), Rentals (key UI strings); all pages fallback to English for missing keys

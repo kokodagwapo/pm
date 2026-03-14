@@ -1,0 +1,40 @@
+{
+  "tour.header.title": "Admin Tour Guide",
+  "tour.header.subtitle": "AI Assistant · Voice & Chat · Online",
+  "tour.toggle.open": "Tour Guide",
+  "tour.toggle.start": "START HERE",
+  "tour.toggle.close": "Close",
+
+  "tour.step.0.title": "Welcome to your Command Center",
+  "tour.step.0.body": "You have the keys to the kingdom! This tour will walk you through all the powerful tools at your disposal. Use the chat or voice assistant below anytime for help.",
+
+  "tour.step.1.title": "Live Stats at a Glance",
+  "tour.step.1.body": "The six stat cards at the top show real-time KPIs — total users, properties, revenue, system health, active sessions, and database status. They refresh automatically.",
+
+  "tour.step.2.title": "User Management",
+  "tour.step.2.body": "The Users tab shows all registered users with their roles, status, and last activity. You can activate, suspend, or view any account from the action menu on the right.",
+
+  "tour.step.3.title": "System Health & Alerts",
+  "tour.step.3.body": "The Overview tab surfaces real-time system alerts and recent activity. The System tab gives you deeper service-by-service health metrics and database status.",
+
+  "tour.step.4.title": "Properties & Leases",
+  "tour.step.4.body": "Head to Properties in the sidebar to manage your full portfolio. Each property has its own calendar, unit management, pricing rules, and booking blocks.",
+
+  "tour.step.5.title": "Messages & AI Assistant",
+  "tour.step.5.body": "Use Messages to communicate directly with tenants and owners. The AI Help section gives you an FAQ and an AI chat assistant that understands your entire platform.",
+
+  "tour.step.6.title": "You're all set!",
+  "tour.step.6.body": "That's the full tour. Remember — the AI assistant below is always here to help you navigate, answer questions, or look up anything in the system.",
+
+  "tour.chat.placeholder": "Ask anything about the dashboard…",
+  "tour.chat.listening": "Listening… speak now",
+  "tour.chat.welcome": "Hi! I'm your admin AI assistant. I'm here alongside this guided tour to answer any questions, explain features, or help you navigate SmartStartPM. Ask me anything — by text or voice!",
+  "tour.chat.error": "Connection error. Please try again.",
+  "tour.chat.errorRetry": "I'm having trouble connecting right now. Please try again!",
+
+  "tour.action.faqs": "Browse FAQs",
+  "tour.action.messages": "Message Manager",
+  "tour.action.done": "Done",
+
+  "tour.voice.notSupported": "Speech recognition is not supported in your browser. Try Chrome or Edge."
+}

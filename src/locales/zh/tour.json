@@ -1,0 +1,40 @@
+{
+  "tour.header.title": "管理员导览",
+  "tour.header.subtitle": "AI助手 · 语音与聊天 · 在线",
+  "tour.toggle.open": "导览",
+  "tour.toggle.start": "从这里开始",
+  "tour.toggle.close": "关闭",
+
+  "tour.step.0.title": "欢迎来到您的指挥中心",
+  "tour.step.0.body": "您拥有王国的钥匙！本导览将带您了解所有强大的工具。随时使用下方的聊天或语音助手获取帮助。",
+
+  "tour.step.1.title": "一目了然的实时统计",
+  "tour.step.1.body": "顶部的六个统计卡显示实时KPI — 总用户数、物业、收入、系统健康、活跃会话和数据库状态。自动刷新。",
+
+  "tour.step.2.title": "用户管理",
+  "tour.step.2.body": "用户选项卡显示所有注册用户的角色、状态和最后活动时间。您可以从右侧的操作菜单激活、暂停或查看任何账户。",
+
+  "tour.step.3.title": "系统健康与警报",
+  "tour.step.3.body": "概览选项卡显示实时系统警报和最近活动。系统选项卡提供更详细的各服务健康指标和数据库状态。",
+
+  "tour.step.4.title": "物业与租约",
+  "tour.step.4.body": "前往侧边栏中的物业管理您的完整投资组合。每个物业都有自己的日历、单元管理、定价规则和预订限制。",
+
+  "tour.step.5.title": "消息与AI助手",
+  "tour.step.5.body": "使用消息直接与租户和业主沟通。AI帮助区提供常见问题解答和了解整个平台的AI聊天助手。",
+
+  "tour.step.6.title": "一切就绪！",
+  "tour.step.6.body": "这就是完整的导览。请记住 — 下方的AI助手随时为您提供导航、回答问题或查找系统中的任何内容。",
+
+  "tour.chat.placeholder": "询问关于仪表板的任何问题…",
+  "tour.chat.listening": "正在聆听… 请说话",
+  "tour.chat.welcome": "您好！我是您的管理员AI助手。我在这个导览旁边回答您的任何问题，解释功能，或帮助您使用SmartStartPM。随时用文字或语音问我！",
+  "tour.chat.error": "连接错误。请重试。",
+  "tour.chat.errorRetry": "我现在无法连接。请重试！",
+
+  "tour.action.faqs": "浏览常见问题",
+  "tour.action.messages": "消息管理",
+  "tour.action.done": "完成",
+
+  "tour.voice.notSupported": "您的浏览器不支持语音识别。请尝试使用Chrome或Edge。"
+}

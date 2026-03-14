@@ -1,0 +1,40 @@
+{
+  "tour.header.title": "Admin-Tourführer",
+  "tour.header.subtitle": "KI-Assistent · Sprache & Chat · Online",
+  "tour.toggle.open": "Tour starten",
+  "tour.toggle.start": "HIER STARTEN",
+  "tour.toggle.close": "Schließen",
+
+  "tour.step.0.title": "Willkommen in Ihrer Kommandozentrale",
+  "tour.step.0.body": "Sie haben die Schlüssel zum Königreich! Diese Tour führt Sie durch alle leistungsstarken Tools, die Ihnen zur Verfügung stehen. Nutzen Sie den Chat oder Sprachassistenten unten jederzeit für Hilfe.",
+
+  "tour.step.1.title": "Live-Statistiken auf einen Blick",
+  "tour.step.1.body": "Die sechs Statistikkarten oben zeigen Echtzeit-KPIs — Gesamtbenutzer, Immobilien, Umsatz, Systemzustand, aktive Sitzungen und Datenbankstatus. Sie aktualisieren sich automatisch.",
+
+  "tour.step.2.title": "Benutzerverwaltung",
+  "tour.step.2.body": "Der Reiter Benutzer zeigt alle registrierten Benutzer mit ihren Rollen, Status und letzter Aktivität. Sie können Konten aktivieren, sperren oder über das Aktionsmenü anzeigen.",
+
+  "tour.step.3.title": "Systemzustand & Warnungen",
+  "tour.step.3.body": "Der Übersichts-Reiter zeigt Echtzeit-Systemwarnungen und kürzliche Aktivitäten. Der System-Reiter gibt Ihnen tiefere Metriken zur Gesundheit einzelner Dienste und zum Datenbankstatus.",
+
+  "tour.step.4.title": "Immobilien & Mietverträge",
+  "tour.step.4.body": "Gehen Sie zu Immobilien in der Seitenleiste, um Ihr gesamtes Portfolio zu verwalten. Jede Immobilie hat ihren eigenen Kalender, Einheitenverwaltung, Preisregeln und Buchungssperren.",
+
+  "tour.step.5.title": "Nachrichten & KI-Assistent",
+  "tour.step.5.body": "Nutzen Sie Nachrichten zur direkten Kommunikation mit Mietern und Eigentümern. Der KI-Hilfe-Bereich bietet FAQ und einen KI-Chatassistenten, der Ihre gesamte Plattform versteht.",
+
+  "tour.step.6.title": "Alles bereit!",
+  "tour.step.6.body": "Das war die vollständige Tour. Denken Sie daran — der KI-Assistent unten ist immer da, um Ihnen bei der Navigation zu helfen, Fragen zu beantworten oder etwas im System nachzuschlagen.",
+
+  "tour.chat.placeholder": "Fragen Sie alles über das Dashboard…",
+  "tour.chat.listening": "Zuhören… Sprechen Sie jetzt",
+  "tour.chat.welcome": "Hallo! Ich bin Ihr Admin-KI-Assistent. Ich stehe Ihnen bei dieser geführten Tour zur Seite, um Fragen zu beantworten, Funktionen zu erklären oder bei der Navigation zu helfen. Fragen Sie mich alles — per Text oder Sprache!",
+  "tour.chat.error": "Verbindungsfehler. Bitte versuchen Sie es erneut.",
+  "tour.chat.errorRetry": "Ich habe derzeit Verbindungsprobleme. Bitte versuchen Sie es erneut!",
+
+  "tour.action.faqs": "FAQs durchsuchen",
+  "tour.action.messages": "Nachrichtenmanager",
+  "tour.action.done": "Fertig",
+
+  "tour.voice.notSupported": "Spracherkennung wird in Ihrem Browser nicht unterstützt. Versuchen Sie Chrome oder Edge."
+}

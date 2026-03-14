@@ -1,5 +1,6 @@
 import enCommon from "./en/common.json";
 import enAuth from "./en/auth.json";
+import enTour from "./en/tour.json";
 import enSettings from "./en/settings.json";
 import enDashboard from "./en/dashboard.json";
 import enProperties from "./en/properties.json";
@@ -13,6 +14,7 @@ import enCalendar from "./en/calendar.json";
 import enAdmin from "./en/admin.json";
 import esCommon from "./es/common.json";
 import esAuth from "./es/auth.json";
+import esTour from "./es/tour.json";
 import esSettings from "./es/settings.json";
 import esDashboard from "./es/dashboard.json";
 import esProperties from "./es/properties.json";
@@ -26,6 +28,7 @@ import esCalendar from "./es/calendar.json";
 import esAdmin from "./es/admin.json";
 import frCommon from "./fr/common.json";
 import frAuth from "./fr/auth.json";
+import frTour from "./fr/tour.json";
 import frSettings from "./fr/settings.json";
 import frDashboard from "./fr/dashboard.json";
 import frProperties from "./fr/properties.json";
@@ -39,6 +42,7 @@ import frCalendar from "./fr/calendar.json";
 import frAdmin from "./fr/admin.json";
 import deCommon from "./de/common.json";
 import deAuth from "./de/auth.json";
+import deTour from "./de/tour.json";
 import deSettings from "./de/settings.json";
 import deDashboard from "./de/dashboard.json";
 import deProperties from "./de/properties.json";
@@ -52,6 +56,7 @@ import deCalendar from "./de/calendar.json";
 import deAdmin from "./de/admin.json";
 import itCommon from "./it/common.json";
 import itAuth from "./it/auth.json";
+import itTour from "./it/tour.json";
 import itDashboard from "./it/dashboard.json";
 import itSettings from "./it/settings.json";
 import itProperties from "./it/properties.json";
@@ -65,6 +70,7 @@ import itCalendar from "./it/calendar.json";
 import itAdmin from "./it/admin.json";
 import zhCommon from "./zh/common.json";
 import zhAuth from "./zh/auth.json";
+import zhTour from "./zh/tour.json";
 import zhDashboard from "./zh/dashboard.json";
 import zhSettings from "./zh/settings.json";
 import zhProperties from "./zh/properties.json";
@@ -78,6 +84,7 @@ import zhCalendar from "./zh/calendar.json";
 import zhAdmin from "./zh/admin.json";
 import jaCommon from "./ja/common.json";
 import jaAuth from "./ja/auth.json";
+import jaTour from "./ja/tour.json";
 import jaDashboard from "./ja/dashboard.json";
 import jaSettings from "./ja/settings.json";
 import jaProperties from "./ja/properties.json";
@@ -91,6 +98,7 @@ import jaCalendar from "./ja/calendar.json";
 import jaAdmin from "./ja/admin.json";
 import filCommon from "./fil/common.json";
 import filAuth from "./fil/auth.json";
+import filTour from "./fil/tour.json";
 import filDashboard from "./fil/dashboard.json";
 import filSettings from "./fil/settings.json";
 import filProperties from "./fil/properties.json";
@@ -104,6 +112,7 @@ import filCalendar from "./fil/calendar.json";
 import filAdmin from "./fil/admin.json";
 import ruCommon from "./ru/common.json";
 import ruAuth from "./ru/auth.json";
+import ruTour from "./ru/tour.json";
 import ruDashboard from "./ru/dashboard.json";
 import ruSettings from "./ru/settings.json";
 import ruProperties from "./ru/properties.json";
@@ -124,39 +133,39 @@ const mergeCatalogs = (...sources: LanguageCatalog[]): LanguageCatalog => {
 
 const catalogsByLanguage: Record<string, LanguageCatalog> = {
   en: mergeCatalogs(
-    enCommon, enAuth, enSettings, enDashboard, enProperties, enTenants,
+    enCommon, enAuth, enTour, enSettings, enDashboard, enProperties, enTenants,
     enLeases, enMaintenance, enPayments, enAnalytics, enMessages, enCalendar, enAdmin
   ),
   es: mergeCatalogs(
-    esCommon, esAuth, esSettings, esDashboard, esProperties, esTenants,
+    esCommon, esAuth, esTour, esSettings, esDashboard, esProperties, esTenants,
     esLeases, esMaintenance, esPayments, esAnalytics, esMessages, esCalendar, esAdmin
   ),
   fr: mergeCatalogs(
-    frCommon, frAuth, frSettings, frDashboard, frProperties, frTenants,
+    frCommon, frAuth, frTour, frSettings, frDashboard, frProperties, frTenants,
     frLeases, frMaintenance, frPayments, frAnalytics, frMessages, frCalendar, frAdmin
   ),
   de: mergeCatalogs(
-    deCommon, deAuth, deSettings, deDashboard, deProperties, deTenants,
+    deCommon, deAuth, deTour, deSettings, deDashboard, deProperties, deTenants,
     deLeases, deMaintenance, dePayments, deAnalytics, deMessages, deCalendar, deAdmin
   ),
   it: mergeCatalogs(
-    itCommon, itAuth, itDashboard, itSettings, itProperties, itTenants,
+    itCommon, itAuth, itTour, itDashboard, itSettings, itProperties, itTenants,
     itLeases, itMaintenance, itPayments, itAnalytics, itMessages, itCalendar, itAdmin
   ),
   zh: mergeCatalogs(
-    zhCommon, zhAuth, zhDashboard, zhSettings, zhProperties, zhTenants,
+    zhCommon, zhAuth, zhTour, zhDashboard, zhSettings, zhProperties, zhTenants,
     zhLeases, zhMaintenance, zhPayments, zhAnalytics, zhMessages, zhCalendar, zhAdmin
   ),
   ja: mergeCatalogs(
-    jaCommon, jaAuth, jaDashboard, jaSettings, jaProperties, jaTenants,
+    jaCommon, jaAuth, jaTour, jaDashboard, jaSettings, jaProperties, jaTenants,
     jaLeases, jaMaintenance, jaPayments, jaAnalytics, jaMessages, jaCalendar, jaAdmin
   ),
   fil: mergeCatalogs(
-    filCommon, filAuth, filDashboard, filSettings, filProperties, filTenants,
+    filCommon, filAuth, filTour, filDashboard, filSettings, filProperties, filTenants,
     filLeases, filMaintenance, filPayments, filAnalytics, filMessages, filCalendar, filAdmin
   ),
   ru: mergeCatalogs(
-    ruCommon, ruAuth, ruDashboard, ruSettings, ruProperties, ruTenants,
+    ruCommon, ruAuth, ruTour, ruDashboard, ruSettings, ruProperties, ruTenants,
     ruLeases, ruMaintenance, ruPayments, ruAnalytics, ruMessages, ruCalendar, ruAdmin
   ),
 };

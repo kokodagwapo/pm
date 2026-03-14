@@ -1,0 +1,40 @@
+{
+  "tour.header.title": "Guía del Tour Admin",
+  "tour.header.subtitle": "Asistente IA · Voz y Chat · En línea",
+  "tour.toggle.open": "Tour Guiado",
+  "tour.toggle.start": "EMPIEZA AQUÍ",
+  "tour.toggle.close": "Cerrar",
+
+  "tour.step.0.title": "Bienvenido a tu Centro de Comando",
+  "tour.step.0.body": "¡Tienes las llaves del reino! Este tour te guiará por todas las herramientas poderosas a tu disposición. Usa el chat o asistente de voz abajo en cualquier momento para obtener ayuda.",
+
+  "tour.step.1.title": "Estadísticas en tiempo real",
+  "tour.step.1.body": "Las seis tarjetas de estadísticas en la parte superior muestran KPIs en tiempo real — usuarios totales, propiedades, ingresos, salud del sistema, sesiones activas y estado de la base de datos.",
+
+  "tour.step.2.title": "Gestión de Usuarios",
+  "tour.step.2.body": "La pestaña Usuarios muestra todos los usuarios registrados con sus roles, estado y última actividad. Puedes activar, suspender o ver cualquier cuenta desde el menú de acciones.",
+
+  "tour.step.3.title": "Salud del Sistema y Alertas",
+  "tour.step.3.body": "La pestaña Resumen muestra alertas del sistema en tiempo real y actividad reciente. La pestaña Sistema te da métricas de salud por servicio y estado de la base de datos.",
+
+  "tour.step.4.title": "Propiedades y Contratos",
+  "tour.step.4.body": "Ve a Propiedades en la barra lateral para gestionar tu cartera completa. Cada propiedad tiene su propio calendario, gestión de unidades, reglas de precios y bloqueos de reservas.",
+
+  "tour.step.5.title": "Mensajes y Asistente IA",
+  "tour.step.5.body": "Usa Mensajes para comunicarte directamente con inquilinos y propietarios. La sección de Ayuda IA te ofrece una FAQ y un asistente de chat IA que entiende toda tu plataforma.",
+
+  "tour.step.6.title": "¡Todo listo!",
+  "tour.step.6.body": "Ese fue el tour completo. Recuerda — el asistente IA de abajo siempre está aquí para ayudarte a navegar, responder preguntas o buscar cualquier cosa en el sistema.",
+
+  "tour.chat.placeholder": "Pregunta cualquier cosa sobre el panel…",
+  "tour.chat.listening": "Escuchando… habla ahora",
+  "tour.chat.welcome": "¡Hola! Soy tu asistente IA admin. Estoy aquí junto a este tour guiado para responder preguntas, explicar funciones o ayudarte a navegar SmartStartPM. ¡Pregúntame lo que quieras — por texto o voz!",
+  "tour.chat.error": "Error de conexión. Por favor intenta de nuevo.",
+  "tour.chat.errorRetry": "Tengo problemas para conectarme ahora. ¡Por favor intenta de nuevo!",
+
+  "tour.action.faqs": "Ver FAQs",
+  "tour.action.messages": "Gestor de Mensajes",
+  "tour.action.done": "Listo",
+
+  "tour.voice.notSupported": "El reconocimiento de voz no está disponible en tu navegador. Prueba Chrome o Edge."
+}

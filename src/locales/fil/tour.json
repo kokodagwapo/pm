@@ -1,0 +1,40 @@
+{
+  "tour.header.title": "Admin Tour Guide",
+  "tour.header.subtitle": "AI Assistant · Boses at Chat · Online",
+  "tour.toggle.open": "Tour Guide",
+  "tour.toggle.start": "MAGSIMULA DITO",
+  "tour.toggle.close": "Isara",
+
+  "tour.step.0.title": "Maligayang pagdating sa iyong Command Center",
+  "tour.step.0.body": "Nasa iyo na ang mga susi sa kaharian! Gagabayan ka ng tour na ito sa lahat ng makapangyarihang tool na makukuha mo. Gamitin ang chat o voice assistant sa ibaba anumang oras para sa tulong.",
+
+  "tour.step.1.title": "Mga Live na Estadistika sa Isang Tingin",
+  "tour.step.1.body": "Ang anim na stat cards sa itaas ay nagpapakita ng real-time na KPIs — kabuuang mga user, ari-arian, kita, kalusugan ng sistema, aktibong sesyon, at katayuan ng database. Awtomatiko silang nagre-refresh.",
+
+  "tour.step.2.title": "Pamamahala ng User",
+  "tour.step.2.body": "Ipinapakita ng Users tab ang lahat ng nakarehistrong user na may kanilang mga papel, katayuan, at huling aktibidad. Maaari kang mag-activate, mag-suspend, o tingnan ang anumang account mula sa action menu.",
+
+  "tour.step.3.title": "Kalusugan ng Sistema at Mga Alerto",
+  "tour.step.3.body": "Ipinapakita ng Overview tab ang real-time na mga alerto ng sistema at kamakailang aktibidad. Ang System tab ay nagbibigay ng mas malalim na mga sukatan ng kalusugan ng bawat serbisyo at katayuan ng database.",
+
+  "tour.step.4.title": "Mga Ari-arian at Mga Kasunduan",
+  "tour.step.4.body": "Pumunta sa Mga Ari-arian sa sidebar para pamahalaan ang iyong buong portfolio. Ang bawat ari-arian ay may sariling kalendaryo, pamamahala ng unit, mga panuntunan sa pagpepresyo, at mga pagbabara sa booking.",
+
+  "tour.step.5.title": "Mga Mensahe at AI Assistant",
+  "tour.step.5.body": "Gamitin ang Mga Mensahe para makipag-ugnayan nang direkta sa mga nangungupahan at may-ari. Ang seksyon ng AI Help ay nagbibigay sa iyo ng FAQ at AI chat assistant na nakakaunawa sa iyong buong platform.",
+
+  "tour.step.6.title": "Handa ka na!",
+  "tour.step.6.body": "Iyon na ang buong tour. Tandaan — ang AI assistant sa ibaba ay laging nandito para tulungan kang mag-navigate, sagutin ang mga tanong, o hanapin ang anumang bagay sa sistema.",
+
+  "tour.chat.placeholder": "Magtanong ng kahit ano tungkol sa dashboard…",
+  "tour.chat.listening": "Nakikinig… magsalita na",
+  "tour.chat.welcome": "Kumusta! Ako ang iyong admin AI assistant. Nandito ako kasabay ng guided tour na ito para sagutin ang anumang tanong, ipaliwanag ang mga feature, o tulungan kang mag-navigate sa SmartStartPM. Itanong sa akin ang kahit ano — sa text o boses!",
+  "tour.chat.error": "Error sa koneksyon. Pakisubukang muli.",
+  "tour.chat.errorRetry": "May problema ako sa pagkonekta ngayon. Pakisubukang muli!",
+
+  "tour.action.faqs": "I-browse ang FAQs",
+  "tour.action.messages": "Manager ng Mensahe",
+  "tour.action.done": "Tapos na",
+
+  "tour.voice.notSupported": "Hindi sinusuportahan ng iyong browser ang voice recognition. Subukan ang Chrome o Edge."
+}
