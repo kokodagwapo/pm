@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LunaWidget } from "@/components/landing/LunaWidget";
 import { PropertyMap } from "@/components/landing/PropertyMap";
@@ -413,6 +414,7 @@ function PropertyListCard({
 function RentalsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { t } = useLocalizationContext();
   const [properties, setProperties] = useState<any[]>([]);
   const [pagination, setPagination] = useState({ page: 1, total: 0, pages: 0 });
   const [loading, setLoading] = useState(true);
@@ -569,7 +571,7 @@ function RentalsContent() {
                     pushFilters({ search: searchText || undefined });
                   }
                 }}
-                placeholder="Search neighborhoods, properties…"
+                placeholder={t("rentals.search.placeholder")}
                 className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[13px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 transition-all"
               />
             </div>
@@ -639,7 +641,7 @@ function RentalsContent() {
                 title="Clear all filters"
               >
                 <RotateCcw className="w-3 h-3" />
-                <span className="hidden sm:inline">Reset</span>
+                <span className="hidden sm:inline">{t("rentals.filters.reset")}</span>
               </button>
             )}
 
@@ -652,7 +654,7 @@ function RentalsContent() {
                 }`}
               >
                 <LayoutList className="w-3.5 h-3.5" />
-                <span>List</span>
+                <span>{t("rentals.view.list")}</span>
               </button>
               <button
                 onClick={() => setMobileView("map")}
@@ -661,7 +663,7 @@ function RentalsContent() {
                 }`}
               >
                 <Map className="w-3.5 h-3.5" />
-                <span>Map</span>
+                <span>{t("rentals.view.map")}</span>
               </button>
             </div>
           </div>
@@ -758,7 +760,7 @@ function RentalsContent() {
                 }`}
               >
                 <Heart className={`w-3 h-3 ${showFavoritesOnly ? "fill-current" : ""}`} />
-                Saved
+                {t("rentals.filters.saved")}
                 {favoriteIds.length > 0 && (
                   <span className={`ml-0.5 px-1 rounded-full text-[9px] font-bold leading-4 ${showFavoritesOnly ? "bg-white/30 text-white" : "bg-rose-100 text-rose-500"}`}>
                     {favoriteIds.length}
@@ -775,7 +777,7 @@ function RentalsContent() {
                 </span>
               ) : (
                 <span className="text-[11px] text-slate-400 whitespace-nowrap">
-                  <strong className="text-slate-700 font-medium">{pagination.total}</strong> {pagination.total === 1 ? "property" : "properties"}
+                  <strong className="text-slate-700 font-medium">{pagination.total}</strong> {pagination.total === 1 ? t("rentals.results.property") : t("rentals.results.properties")}
                 </span>
               )}
             </div>
@@ -837,7 +839,7 @@ function RentalsContent() {
                 <div className="flex items-center gap-2 py-1">
                   <div className="flex-1 h-px bg-slate-200" />
                   <span className="text-xs text-slate-400 font-medium whitespace-nowrap">
-                    All {pagination.total} properties
+                    {t("rentals.results.all").replace("{count}", String(pagination.total))}
                   </span>
                   <div className="flex-1 h-px bg-slate-200" />
                 </div>
@@ -854,13 +856,13 @@ function RentalsContent() {
                   <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
                     <Home className="w-6 h-6 text-slate-400" />
                   </div>
-                  <p className="text-slate-700 font-medium mb-1">No properties found</p>
-                  <p className="text-slate-400 text-sm mb-4">Try adjusting your filters or clearing the search</p>
+                  <p className="text-slate-700 font-medium mb-1">{t("rentals.noResults.title")}</p>
+                  <p className="text-slate-400 text-sm mb-4">{t("rentals.noResults.subtitle")}</p>
                   <button
                     onClick={clearFilters}
                     className="px-4 py-2 rounded-lg bg-sky-500 text-white text-sm font-medium hover:bg-sky-600 transition-colors"
                   >
-                    Clear all filters
+                    {t("rentals.noResults.clearFilters")}
                   </button>
                 </div>
               ) : (
@@ -870,10 +872,10 @@ function RentalsContent() {
                     return (
                       <div className="flex flex-col items-center justify-center py-16 text-center px-6">
                         <Heart className="w-10 h-10 text-slate-200 mb-3" />
-                        <p className="text-slate-600 font-medium mb-1">No saved properties yet</p>
-                        <p className="text-slate-400 text-sm mb-4">Click the heart icon on a property to save it here</p>
+                        <p className="text-slate-600 font-medium mb-1">{t("rentals.noSaved.title")}</p>
+                        <p className="text-slate-400 text-sm mb-4">{t("rentals.noSaved.subtitle")}</p>
                         <button onClick={() => setShowFavoritesOnly(false)} className="px-4 py-2 rounded-lg bg-sky-500 text-white text-sm font-medium hover:bg-sky-600 transition-colors">
-                          Browse all properties
+                          {t("rentals.noSaved.browseAll")}
                         </button>
                       </div>
                     );
@@ -963,15 +965,15 @@ function RentalsContent() {
           </div>
           <div className="h-8 w-px bg-slate-700" />
           <div>
-            <p className="text-xs text-slate-400 leading-none mb-0.5">Compare</p>
-            <p className="text-sm font-semibold leading-none">{compareIds.length} {compareIds.length === 1 ? "property" : "properties"}</p>
+            <p className="text-xs text-slate-400 leading-none mb-0.5">{t("rentals.compare.bar.compare")}</p>
+            <p className="text-sm font-semibold leading-none">{compareIds.length} {compareIds.length === 1 ? t("rentals.compare.bar.property") : t("rentals.compare.bar.properties")}</p>
           </div>
           <button
             onClick={() => setShowCompareModal(true)}
             disabled={compareIds.length < 2}
             className="ml-1 px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
           >
-            Compare
+            {t("rentals.compare.bar.compare")}
           </button>
           <button
             onClick={() => setCompareIds([])}

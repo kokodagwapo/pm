@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 const NAV_LINKS = [
   { href: "/rentals", label: "Rentals" },
@@ -83,6 +84,12 @@ export function LandingHeader() {
           </nav>
 
           <div className="flex items-center gap-2">
+            {/* Language Switcher */}
+            <LanguageSwitcher
+              variant={isLight ? "light" : "dark"}
+              align="right"
+            />
+
             {/* Hamburger — mobile */}
             <button
               aria-label={open ? "Close menu" : "Open menu"}

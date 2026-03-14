@@ -1,0 +1,140 @@
+{
+  "dashboard.greeting.morning": "おはようございます",
+  "dashboard.greeting.afternoon": "こんにちは",
+  "dashboard.greeting.evening": "こんばんは",
+
+  "dashboard.header.subtitle": "物件ポートフォリオの概要です",
+
+  "dashboard.actions.refresh": "更新",
+  "dashboard.actions.analytics": "分析を見る",
+  "dashboard.actions.retry": "再試行",
+
+  "dashboard.error.unavailable.title": "ダッシュボードが利用できません",
+  "dashboard.error.unavailable.description": "{error} — ページを更新してみてください。",
+
+  "dashboard.error.staleData.title": "一部のデータが古い可能性があります",
+  "dashboard.error.staleData.description": "{error} — 更新して最新データを取得してください。",
+
+  "dashboard.alerts.overduePayments.title": "支払い遅延",
+  "dashboard.alerts.overduePayments.message.withCount": "{count} 人の入居者が5日以上支払いを滞納しています",
+  "dashboard.alerts.overduePayments.message.zero": "支払いはすべて問題ありません",
+
+  "dashboard.alerts.urgentMaintenance.title": "緊急修理",
+  "dashboard.alerts.urgentMaintenance.message.withCount": "{count} 件の緊急修理が対応を必要としています",
+  "dashboard.alerts.urgentMaintenance.message.zero": "緊急メンテナンスはありません",
+
+  "dashboard.alerts.expiringLeases.title": "契約期限切れ間近",
+  "dashboard.alerts.expiringLeases.message.withCount": "{count} 件の契約が30日以内に期限切れになります",
+  "dashboard.alerts.expiringLeases.message.zero": "期限切れ間近の契約はありません",
+
+  "dashboard.alerts.pendingApplications.title": "新規申請者",
+  "dashboard.alerts.pendingApplications.message.withCount": "{count} 件の申請があなたを待っています",
+
+  "dashboard.cards.totalProperties.title": "あなたのポートフォリオ",
+  "dashboard.cards.totalProperties.description": "管理中の有効な物件",
+
+  "dashboard.cards.occupancyRate.title": "入居率",
+  "dashboard.cards.occupancyRate.description": "{total} 室中 {occupied} 室が埋まっています",
+
+  "dashboard.cards.monthlyRevenue.title": "月間収入",
+  "dashboard.cards.monthlyRevenue.description": "今月の収入",
+
+  "dashboard.cards.collectionRate.title": "回収率",
+  "dashboard.cards.collectionRate.description": "家賃回収の効率",
+
+  "dashboard.cards.activeTenants.title": "入居者数",
+  "dashboard.cards.activeTenants.description": "{count} 件の新規申請が保留中",
+
+  "dashboard.cards.maintenanceRequests.title": "修理リスト",
+  "dashboard.cards.maintenanceRequests.description": "{count} 件が緊急",
+
+  "dashboard.cards.vacantUnits.title": "空き物件",
+  "dashboard.cards.vacantUnits.description": "ポートフォリオ全体の空室率 {rate}",
+
+  "dashboard.cards.averageRent.title": "平均家賃/室",
+  "dashboard.cards.averageRent.description": "1室あたりの月平均",
+
+  "dashboard.cards.leaseRenewals.title": "もうすぐ更新",
+  "dashboard.cards.leaseRenewals.description": "今後30日間で期限が切れる契約",
+
+  "dashboard.cards.recentEvents.title": "最近の活動",
+  "dashboard.cards.recentEvents.description": "{count} 件が緊急対応が必要",
+
+  "dashboard.charts.revenueExpenses.title": "収支状況",
+  "dashboard.charts.revenueExpenses.description": "月次収入と支出",
+  "dashboard.charts.revenueExpenses.legend.revenue": "収入",
+  "dashboard.charts.revenueExpenses.legend.expenses": "支出",
+  "dashboard.charts.revenueExpenses.empty": "この期間のデータがありません",
+
+  "dashboard.charts.propertyDistribution.title": "ポートフォリオ構成",
+  "dashboard.charts.propertyDistribution.description": "物件タイプ別の内訳",
+  "dashboard.charts.propertyDistribution.total": "合計",
+
+  "dashboard.paymentStatus.title": "支払い状況",
+  "dashboard.paymentStatus.description": "今月の家賃状況",
+  "dashboard.paymentStatus.collected": "収納済み",
+  "dashboard.paymentStatus.pending": "保留中",
+  "dashboard.paymentStatus.overdue": "延滞",
+
+  "dashboard.recentActivity.title": "最近の動き",
+  "dashboard.recentActivity.description": "ポートフォリオの最新情報",
+  "dashboard.recentActivity.empty": "最近の活動はありません",
+  "dashboard.recentActivity.viewAll": "すべて見る",
+
+  "dashboard.upcomingTasks.title": "今後のタスク",
+  "dashboard.upcomingTasks.description": "今後数日間に対応が必要なこと",
+  "dashboard.upcomingTasks.empty": "今後のタスクはありません",
+  "dashboard.upcomingTasks.viewAll": "すべて見る",
+  "dashboard.upcomingTasks.due": "期限",
+  "dashboard.upcomingTasks.overdue": "延滞",
+  "dashboard.upcomingTasks.today": "今日",
+
+  "dashboard.priority.high": "高",
+  "dashboard.priority.urgent": "緊急",
+  "dashboard.priority.medium": "中",
+  "dashboard.priority.low": "低",
+
+  "dashboard.time.justNow": "たった今",
+  "dashboard.time.minutesAgo": "{count} 分前",
+  "dashboard.time.hoursAgo": "{count} 時間前",
+  "dashboard.time.daysAgo": "{count} 日前",
+
+  "dashboard.tenant.welcome": "ホームベースへようこそ",
+  "dashboard.tenant.activeLeases": "有効な契約",
+  "dashboard.tenant.totalLeases": "合計 {count} 件の契約",
+  "dashboard.tenant.outstandingPayments": "未払い",
+  "dashboard.tenant.totalPayments": "合計 {count} 件の支払い",
+  "dashboard.tenant.maintenanceRequests": "修繕リクエスト",
+  "dashboard.tenant.openRequests": "未対応のリクエスト",
+  "dashboard.tenant.notifications": "通知",
+  "dashboard.tenant.unreadMessages": "未読メッセージ",
+  "dashboard.tenant.leaseSnapshot": "契約詳細",
+  "dashboard.tenant.leaseSnapshotDescription": "あなたの契約の重要な詳細",
+  "dashboard.tenant.property": "物件",
+  "dashboard.tenant.leasePeriod": "契約期間",
+  "dashboard.tenant.monthlyRent": "月額家賃",
+  "dashboard.tenant.leaseType": "契約タイプ",
+  "dashboard.tenant.leaseId": "契約ID",
+  "dashboard.tenant.noLeaseMessage": "契約が設定されると、重要な詳細がここに表示されます。",
+  "dashboard.tenant.latestActivity": "最新の活動",
+  "dashboard.tenant.latestActivityDescription": "最近の通知とメンテナンス更新",
+  "dashboard.tenant.allCaughtUp": "すべて確認済みです！",
+  "dashboard.tenant.recentPayments": "最近の支払い",
+  "dashboard.tenant.noRecentPayments": "最近の支払いはありません",
+  "dashboard.tenant.paidOn": "{date} に支払い済み",
+  "dashboard.tenant.upcomingPayments": "今後の支払い",
+  "dashboard.tenant.noUpcomingPayments": "今後の支払いはありません",
+  "dashboard.tenant.dueOn": "期限 {date}",
+  "dashboard.tenant.unableToLoad": "ダッシュボードを読み込めませんでした",
+  "dashboard.tenant.loadError": "ダッシュボードデータの読み込み中に問題が発生しました。",
+  "dashboard.tenant.tryAgain": "再試行",
+  "dashboard.tenant.dashboardRefreshed": "ダッシュボードを更新しました",
+  "dashboard.tenant.failedToLoad": "ダッシュボードデータの読み込みに失敗しました",
+
+  "dashboard.tenant.status.active": "有効",
+  "dashboard.tenant.status.expired": "期限切れ",
+  "dashboard.tenant.status.upcoming": "開始予定",
+  "dashboard.tenant.status.terminated": "終了",
+  "dashboard.tenant.activityType.notification": "通知",
+  "dashboard.tenant.activityType.maintenance": "メンテナンス"
+}

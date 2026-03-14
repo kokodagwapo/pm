@@ -1,0 +1,140 @@
+{
+  "dashboard.greeting.morning": "Magandang umaga",
+  "dashboard.greeting.afternoon": "Magandang hapon",
+  "dashboard.greeting.evening": "Magandang gabi",
+
+  "dashboard.header.subtitle": "Narito ang iyong buod ng portfolio ng ari-arian",
+
+  "dashboard.actions.refresh": "I-refresh",
+  "dashboard.actions.analytics": "Tingnan ang Analytics",
+  "dashboard.actions.retry": "Subukan Muli",
+
+  "dashboard.error.unavailable.title": "Hindi available ang Dashboard",
+  "dashboard.error.unavailable.description": "{error} — subukang i-refresh ang pahina.",
+
+  "dashboard.error.staleData.title": "Maaaring hindi updated ang ilang data",
+  "dashboard.error.staleData.description": "{error} — pindutin ang refresh para makuha ang pinakabagong numero.",
+
+  "dashboard.alerts.overduePayments.title": "Nahuling mga Bayad",
+  "dashboard.alerts.overduePayments.message.withCount": "{count} na nangungupahan ang higit sa 5 araw na nahuling magbayad",
+  "dashboard.alerts.overduePayments.message.zero": "Lahat ay nakatupad sa bayad",
+
+  "dashboard.alerts.urgentMaintenance.title": "Ayusin Ngayon",
+  "dashboard.alerts.urgentMaintenance.message.withCount": "{count} na agarang pagkukumpuni ang nangangailangan ng iyong pansin",
+  "dashboard.alerts.urgentMaintenance.message.zero": "Walang agarang pagpapanatili",
+
+  "dashboard.alerts.expiringLeases.title": "Mga Kontratang Mag-e-expire",
+  "dashboard.alerts.expiringLeases.message.withCount": "{count} na kontrata ang magtatapos sa loob ng 30 araw",
+  "dashboard.alerts.expiringLeases.message.zero": "Walang kontratang mag-e-expire sa lalong madaling panahon",
+
+  "dashboard.alerts.pendingApplications.title": "Mga Bagong Aplikante",
+  "dashboard.alerts.pendingApplications.message.withCount": "{count} na aplikasyon ang naghihintay sa iyo",
+
+  "dashboard.cards.totalProperties.title": "Iyong Portfolio",
+  "dashboard.cards.totalProperties.description": "Mga aktibong ari-arian sa ilalim ng pamamahala",
+
+  "dashboard.cards.occupancyRate.title": "Rate ng Pagiging Puno",
+  "dashboard.cards.occupancyRate.description": "{occupied} sa {total} na unit ang napuno",
+
+  "dashboard.cards.monthlyRevenue.title": "Buwanang Kita",
+  "dashboard.cards.monthlyRevenue.description": "Nakolekta ngayong buwan",
+
+  "dashboard.cards.collectionRate.title": "Rate ng Koleksyon",
+  "dashboard.cards.collectionRate.description": "Gaano kahusay na pumasok ang upa",
+
+  "dashboard.cards.activeTenants.title": "Mga Nangungupahan",
+  "dashboard.cards.activeTenants.description": "{count} na bagong aplikasyon ang nakabinbin",
+
+  "dashboard.cards.maintenanceRequests.title": "Listahan ng Pagkukumpuni",
+  "dashboard.cards.maintenanceRequests.description": "{count} ang minarkahang urgent",
+
+  "dashboard.cards.vacantUnits.title": "Available Ngayon",
+  "dashboard.cards.vacantUnits.description": "{rate} na bakante sa buong portfolio",
+
+  "dashboard.cards.averageRent.title": "Avg. Upa / Unit",
+  "dashboard.cards.averageRent.description": "Buwanang average bawat unit",
+
+  "dashboard.cards.leaseRenewals.title": "Malapit nang Mag-renew",
+  "dashboard.cards.leaseRenewals.description": "Mga kontratang matatapos sa susunod na 30 araw",
+
+  "dashboard.cards.recentEvents.title": "Kamakailang Aktibidad",
+  "dashboard.cards.recentEvents.description": "{count} ang nangangailangan ng agarang pansin",
+
+  "dashboard.charts.revenueExpenses.title": "Pera Papasok at Palabas",
+  "dashboard.charts.revenueExpenses.description": "Buwanang kita kumpara sa gastos",
+  "dashboard.charts.revenueExpenses.legend.revenue": "Kita",
+  "dashboard.charts.revenueExpenses.legend.expenses": "Gastos",
+  "dashboard.charts.revenueExpenses.empty": "Walang available na data para sa panahong ito",
+
+  "dashboard.charts.propertyDistribution.title": "Halo ng Portfolio",
+  "dashboard.charts.propertyDistribution.description": "Breakdown ayon sa uri ng ari-arian",
+  "dashboard.charts.propertyDistribution.total": "Kabuuan",
+
+  "dashboard.paymentStatus.title": "Snapshot ng Bayad",
+  "dashboard.paymentStatus.description": "Kung saan nakatayo ang iyong upa ngayong buwan",
+  "dashboard.paymentStatus.collected": "Nakolekta",
+  "dashboard.paymentStatus.pending": "Nakabinbin",
+  "dashboard.paymentStatus.overdue": "Nahulog na",
+
+  "dashboard.recentActivity.title": "Mga Nangyayari",
+  "dashboard.recentActivity.description": "Pinakabago sa iyong portfolio",
+  "dashboard.recentActivity.empty": "Walang kamakailang aktibidad",
+  "dashboard.recentActivity.viewAll": "Tingnan Lahat",
+
+  "dashboard.upcomingTasks.title": "Mga Paparating na Gawain",
+  "dashboard.upcomingTasks.description": "Mga bagay na kailangang gawin sa susunod na ilang araw",
+  "dashboard.upcomingTasks.empty": "Walang paparating na gawain",
+  "dashboard.upcomingTasks.viewAll": "Tingnan Lahat",
+  "dashboard.upcomingTasks.due": "Deadline",
+  "dashboard.upcomingTasks.overdue": "Nahulog na",
+  "dashboard.upcomingTasks.today": "Ngayon",
+
+  "dashboard.priority.high": "Mataas",
+  "dashboard.priority.urgent": "Urgent",
+  "dashboard.priority.medium": "Katamtaman",
+  "dashboard.priority.low": "Mababa",
+
+  "dashboard.time.justNow": "Kamakailan lang",
+  "dashboard.time.minutesAgo": "{count} minuto na ang nakalipas",
+  "dashboard.time.hoursAgo": "{count} oras na ang nakalipas",
+  "dashboard.time.daysAgo": "{count} araw na ang nakalipas",
+
+  "dashboard.tenant.welcome": "Maligayang pagdating sa iyong home base",
+  "dashboard.tenant.activeLeases": "Mga Aktibong Kontrata",
+  "dashboard.tenant.totalLeases": "{count} kabuuang kontrata",
+  "dashboard.tenant.outstandingPayments": "Mga Natitirang Bayad",
+  "dashboard.tenant.totalPayments": "{count} kabuuang bayad",
+  "dashboard.tenant.maintenanceRequests": "Mga Kahilingan sa Pagpapanatili",
+  "dashboard.tenant.openRequests": "Mga bukas na kahilingan",
+  "dashboard.tenant.notifications": "Mga Abiso",
+  "dashboard.tenant.unreadMessages": "Mga hindi pa nababasang mensahe",
+  "dashboard.tenant.leaseSnapshot": "Buod ng Kontrata",
+  "dashboard.tenant.leaseSnapshotDescription": "Ang mga pangunahing detalye ng iyong kontrata",
+  "dashboard.tenant.property": "Ari-arian",
+  "dashboard.tenant.leasePeriod": "Panahon ng Kontrata",
+  "dashboard.tenant.monthlyRent": "Buwanang Upa",
+  "dashboard.tenant.leaseType": "Uri ng Kontrata",
+  "dashboard.tenant.leaseId": "ID ng Kontrata",
+  "dashboard.tenant.noLeaseMessage": "Kapag na-set up ang isang kontrata, makikita dito ang lahat ng pangunahing detalye.",
+  "dashboard.tenant.latestActivity": "Pinakabagong Aktibidad",
+  "dashboard.tenant.latestActivityDescription": "Mga kamakailang abiso at update sa pagpapanatili",
+  "dashboard.tenant.allCaughtUp": "Wala ka nang dapat gawin!",
+  "dashboard.tenant.recentPayments": "Mga Kamakailang Bayad",
+  "dashboard.tenant.noRecentPayments": "Walang kamakailang bayad",
+  "dashboard.tenant.paidOn": "Binayaran noong {date}",
+  "dashboard.tenant.upcomingPayments": "Mga Paparating na Bayad",
+  "dashboard.tenant.noUpcomingPayments": "Walang paparating na bayad",
+  "dashboard.tenant.dueOn": "Deadline {date}",
+  "dashboard.tenant.unableToLoad": "Hindi Ma-load ang Dashboard",
+  "dashboard.tenant.loadError": "May nangyaring mali habang ino-load ang iyong data ng dashboard.",
+  "dashboard.tenant.tryAgain": "Subukan Muli",
+  "dashboard.tenant.dashboardRefreshed": "Na-refresh ang dashboard",
+  "dashboard.tenant.failedToLoad": "Nabigo ang pag-load ng data ng dashboard",
+
+  "dashboard.tenant.status.active": "Aktibo",
+  "dashboard.tenant.status.expired": "Nag-expire na",
+  "dashboard.tenant.status.upcoming": "Paparating",
+  "dashboard.tenant.status.terminated": "Natapos na",
+  "dashboard.tenant.activityType.notification": "Abiso",
+  "dashboard.tenant.activityType.maintenance": "Pagpapanatili"
+}

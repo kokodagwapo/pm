@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { HeroVideo } from "@/components/landing/HeroVideo";
+import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import {
   Loader2,
   Building2,
@@ -50,6 +52,7 @@ const glassInput = {
 };
 
 export default function SignInPage() {
+  const { t } = useLocalizationContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -85,7 +88,7 @@ export default function SignInPage() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password");
+        setError(t("auth.signin.invalidCredentials"));
         setIsLoading(false);
       } else if (result?.ok) {
         setTimeout(() => {
@@ -93,7 +96,7 @@ export default function SignInPage() {
         }, 100);
       }
     } catch {
-      setError("An error occurred during sign in");
+      setError(t("auth.signin.error"));
       setIsLoading(false);
     }
   };
@@ -102,7 +105,6 @@ export default function SignInPage() {
     setIsLoading(true);
     setError("");
     try {
-      // First try the standard signIn approach
       const result = await signIn("credentials", {
         email: demoEmail,
         password: demoPassword,
@@ -110,14 +112,11 @@ export default function SignInPage() {
       });
 
       if (result?.error) {
-        // If signIn returns an error, try direct form submission as fallback
         console.warn("signIn returned error, trying direct approach:", result.error);
 
-        // Get CSRF token
         const csrfRes = await fetch("/api/auth/csrf");
         const { csrfToken } = await csrfRes.json();
 
-        // Direct POST to credentials callback
         const callbackRes = await fetch("/api/auth/callback/credentials", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -133,17 +132,16 @@ export default function SignInPage() {
         if (callbackRes.ok || callbackRes.redirected) {
           window.location.href = "/dashboard";
         } else {
-          setError("Login failed. Please try again.");
+          setError(t("auth.signin.loginFailed"));
           setIsLoading(false);
         }
       } else if (result?.ok) {
         window.location.href = "/dashboard";
       } else {
-        // result is undefined or has no error/ok - try redirect anyway
         window.location.href = "/dashboard";
       }
     } catch {
-      setError("An error occurred during sign in");
+      setError(t("auth.signin.error"));
       setIsLoading(false);
     }
   };
@@ -157,10 +155,13 @@ export default function SignInPage() {
 
   return (
     <div className="fixed inset-0 h-screen w-screen overflow-auto" suppressHydrationWarning>
-      {/* Video background - same as landing hero */}
       <HeroVideo />
-      {/* Subtle overlay for readability - almost transparent */}
       <div className="fixed inset-0 z-[1] bg-black/20" aria-hidden />
+
+      {/* Language switcher — top right corner */}
+      <div className="fixed top-4 right-4 z-20">
+        <LanguageSwitcher variant="dark" align="right" />
+      </div>
 
       {/* Content */}
       <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-12">
@@ -186,10 +187,10 @@ export default function SignInPage() {
               className="mt-6 text-2xl sm:text-3xl font-[var(--font-playfair)] font-bold text-white drop-shadow-sm"
               style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
             >
-              Sign in to your account
+              {t("auth.signin.title")}
             </h2>
             <p className="mt-2 text-sm text-slate-300 font-[var(--font-montserrat)]">
-              Manage your properties with ease
+              {t("auth.signin.subtitle")}
             </p>
           </div>
 
@@ -200,10 +201,10 @@ export default function SignInPage() {
           >
             <div className="mb-6">
               <h3 className="text-xl font-semibold text-white font-[var(--font-montserrat)]">
-                Welcome back
+                {t("auth.signin.welcomeBack")}
               </h3>
               <p className="mt-1 text-sm text-slate-300">
-                Enter your credentials to access your account
+                {t("auth.signin.credentials")}
               </p>
             </div>
 
@@ -217,7 +218,7 @@ export default function SignInPage() {
 
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium text-slate-200">
-                  Email address
+                  {t("auth.signin.emailLabel")}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -226,7 +227,7 @@ export default function SignInPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
+                    placeholder={t("auth.signin.emailPlaceholder")}
                     className="w-full min-h-[48px] pl-10 pr-4 py-3 rounded-xl text-base text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 transition-all"
                     style={glassInput}
                     required
@@ -236,7 +237,7 @@ export default function SignInPage() {
 
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-medium text-slate-200">
-                  Password
+                  {t("auth.signin.passwordLabel")}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -245,7 +246,7 @@ export default function SignInPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder={t("auth.signin.passwordPlaceholder")}
                     className="w-full pl-10 pr-4 py-3 rounded-xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 transition-all"
                     style={glassInput}
                     required
@@ -261,10 +262,10 @@ export default function SignInPage() {
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Signing in...
+                    {t("auth.signin.signingIn")}
                   </span>
                 ) : (
-                  "Sign in"
+                  t("auth.signin.signIn")
                 )}
               </button>
             </form>
@@ -274,7 +275,7 @@ export default function SignInPage() {
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="h-4 w-4 text-amber-400" />
                 <span className="text-sm font-medium text-slate-200">
-                  Dev Quick Login
+                  {t("auth.signin.devQuickLogin")}
                 </span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -292,7 +293,7 @@ export default function SignInPage() {
                 ))}
               </div>
               <p className="text-xs text-slate-400 mt-2 text-center">
-                Click to instantly log in as that role
+                {t("auth.signin.devClickToLogin")}
               </p>
             </div>
           </div>
@@ -305,7 +306,7 @@ export default function SignInPage() {
               style={{ background: "linear-gradient(135deg, #0ea5e9, #2563eb)", boxShadow: "0 4px 20px rgba(14,165,233,0.35)" }}
             >
               <Home className="h-4 w-4" />
-              View Rentals
+              {t("auth.signin.viewRentals")}
             </a>
           </div>
 

@@ -856,6 +856,16 @@ export const LOCALES: Record<string, Locale> = {
     firstDayOfWeek: 0,
     rtl: true,
   },
+  "fil-PH": {
+    code: "fil-PH",
+    name: "Filipino (Philippines)",
+    nativeName: "Filipino (Pilipinas)",
+    currency: "PHP",
+    dateFormat: "MM/DD/YYYY",
+    timeFormat: "12h",
+    firstDayOfWeek: 0,
+    rtl: false,
+  },
 };
 
 export class LocalizationService {

@@ -1,0 +1,140 @@
+{
+  "dashboard.greeting.morning": "Buongiorno",
+  "dashboard.greeting.afternoon": "Buon pomeriggio",
+  "dashboard.greeting.evening": "Buonasera",
+
+  "dashboard.header.subtitle": "Ecco una panoramica del tuo portafoglio immobiliare",
+
+  "dashboard.actions.refresh": "Aggiorna",
+  "dashboard.actions.analytics": "Vedi Analisi",
+  "dashboard.actions.retry": "Riprova",
+
+  "dashboard.error.unavailable.title": "Dashboard non disponibile",
+  "dashboard.error.unavailable.description": "{error} — prova ad aggiornare la pagina.",
+
+  "dashboard.error.staleData.title": "Alcuni dati potrebbero non essere aggiornati",
+  "dashboard.error.staleData.description": "{error} — aggiorna per caricare gli ultimi dati.",
+
+  "dashboard.alerts.overduePayments.title": "Pagamenti in Ritardo",
+  "dashboard.alerts.overduePayments.message.withCount": "{count} inquilini hanno pagamenti in ritardo di oltre 5 giorni",
+  "dashboard.alerts.overduePayments.message.zero": "Tutti i pagamenti sono in regola",
+
+  "dashboard.alerts.urgentMaintenance.title": "Manutenzione Urgente",
+  "dashboard.alerts.urgentMaintenance.message.withCount": "{count} riparazioni urgenti richiedono la tua attenzione",
+  "dashboard.alerts.urgentMaintenance.message.zero": "Nessuna manutenzione urgente",
+
+  "dashboard.alerts.expiringLeases.title": "Contratti in Scadenza",
+  "dashboard.alerts.expiringLeases.message.withCount": "{count} contratti scadono entro 30 giorni",
+  "dashboard.alerts.expiringLeases.message.zero": "Nessun contratto in scadenza",
+
+  "dashboard.alerts.pendingApplications.title": "Nuovi Candidati",
+  "dashboard.alerts.pendingApplications.message.withCount": "{count} candidature in attesa",
+
+  "dashboard.cards.totalProperties.title": "Il Tuo Portafoglio",
+  "dashboard.cards.totalProperties.description": "Proprietà attive in gestione",
+
+  "dashboard.cards.occupancyRate.title": "Tasso di Occupazione",
+  "dashboard.cards.occupancyRate.description": "{occupied} di {total} unità occupate",
+
+  "dashboard.cards.monthlyRevenue.title": "Entrate Mensili",
+  "dashboard.cards.monthlyRevenue.description": "Incassato questo mese",
+
+  "dashboard.cards.collectionRate.title": "Tasso di Incasso",
+  "dashboard.cards.collectionRate.description": "Efficienza di riscossione affitti",
+
+  "dashboard.cards.activeTenants.title": "Inquilini Attivi",
+  "dashboard.cards.activeTenants.description": "{count} nuove candidature in attesa",
+
+  "dashboard.cards.maintenanceRequests.title": "Richieste di Manutenzione",
+  "dashboard.cards.maintenanceRequests.description": "{count} urgenti",
+
+  "dashboard.cards.vacantUnits.title": "Unità Disponibili",
+  "dashboard.cards.vacantUnits.description": "{rate} di vacancy nel portafoglio",
+
+  "dashboard.cards.averageRent.title": "Affitto Medio/Unità",
+  "dashboard.cards.averageRent.description": "Media mensile per unità",
+
+  "dashboard.cards.leaseRenewals.title": "Rinnovi Imminenti",
+  "dashboard.cards.leaseRenewals.description": "Contratti in scadenza nei prossimi 30 giorni",
+
+  "dashboard.cards.recentEvents.title": "Attività Recente",
+  "dashboard.cards.recentEvents.description": "{count} richiedono attenzione urgente",
+
+  "dashboard.charts.revenueExpenses.title": "Entrate e Uscite",
+  "dashboard.charts.revenueExpenses.description": "Performance finanziaria mensile",
+  "dashboard.charts.revenueExpenses.legend.revenue": "Entrate",
+  "dashboard.charts.revenueExpenses.legend.expenses": "Uscite",
+  "dashboard.charts.revenueExpenses.empty": "Nessun dato disponibile per questo periodo",
+
+  "dashboard.charts.propertyDistribution.title": "Distribuzione Portafoglio",
+  "dashboard.charts.propertyDistribution.description": "Suddivisione per tipo di proprietà",
+  "dashboard.charts.propertyDistribution.total": "Totale",
+
+  "dashboard.paymentStatus.title": "Stato Pagamenti",
+  "dashboard.paymentStatus.description": "Situazione degli affitti questo mese",
+  "dashboard.paymentStatus.collected": "Incassato",
+  "dashboard.paymentStatus.pending": "In attesa",
+  "dashboard.paymentStatus.overdue": "In ritardo",
+
+  "dashboard.recentActivity.title": "Attività Recente",
+  "dashboard.recentActivity.description": "Ultimi aggiornamenti nel portafoglio",
+  "dashboard.recentActivity.empty": "Nessuna attività recente",
+  "dashboard.recentActivity.viewAll": "Vedi tutto",
+
+  "dashboard.upcomingTasks.title": "Attività Imminenti",
+  "dashboard.upcomingTasks.description": "Cose da fare nei prossimi giorni",
+  "dashboard.upcomingTasks.empty": "Nessuna attività imminente",
+  "dashboard.upcomingTasks.viewAll": "Vedi tutto",
+  "dashboard.upcomingTasks.due": "Scade",
+  "dashboard.upcomingTasks.overdue": "In ritardo",
+  "dashboard.upcomingTasks.today": "Oggi",
+
+  "dashboard.priority.high": "Alta",
+  "dashboard.priority.urgent": "Urgente",
+  "dashboard.priority.medium": "Media",
+  "dashboard.priority.low": "Bassa",
+
+  "dashboard.time.justNow": "Proprio ora",
+  "dashboard.time.minutesAgo": "{count} minuti fa",
+  "dashboard.time.hoursAgo": "{count} ore fa",
+  "dashboard.time.daysAgo": "{count} giorni fa",
+
+  "dashboard.tenant.welcome": "Benvenuto nella tua area personale",
+  "dashboard.tenant.activeLeases": "Contratti Attivi",
+  "dashboard.tenant.totalLeases": "{count} contratti totali",
+  "dashboard.tenant.outstandingPayments": "Pagamenti in Sospeso",
+  "dashboard.tenant.totalPayments": "{count} pagamenti totali",
+  "dashboard.tenant.maintenanceRequests": "Richieste di Manutenzione",
+  "dashboard.tenant.openRequests": "Richieste aperte",
+  "dashboard.tenant.notifications": "Notifiche",
+  "dashboard.tenant.unreadMessages": "Messaggi non letti",
+  "dashboard.tenant.leaseSnapshot": "Dettaglio Contratto",
+  "dashboard.tenant.leaseSnapshotDescription": "I dettagli essenziali del tuo contratto",
+  "dashboard.tenant.property": "Proprietà",
+  "dashboard.tenant.leasePeriod": "Periodo Contratto",
+  "dashboard.tenant.monthlyRent": "Affitto Mensile",
+  "dashboard.tenant.leaseType": "Tipo di Contratto",
+  "dashboard.tenant.leaseId": "ID Contratto",
+  "dashboard.tenant.noLeaseMessage": "Una volta impostato un contratto, i dettagli appariranno qui.",
+  "dashboard.tenant.latestActivity": "Ultima Attività",
+  "dashboard.tenant.latestActivityDescription": "Notifiche recenti e aggiornamenti manutenzione",
+  "dashboard.tenant.allCaughtUp": "Sei in pari!",
+  "dashboard.tenant.recentPayments": "Pagamenti Recenti",
+  "dashboard.tenant.noRecentPayments": "Nessun pagamento recente",
+  "dashboard.tenant.paidOn": "Pagato il {date}",
+  "dashboard.tenant.upcomingPayments": "Pagamenti Imminenti",
+  "dashboard.tenant.noUpcomingPayments": "Nessun pagamento imminente",
+  "dashboard.tenant.dueOn": "Scadenza {date}",
+  "dashboard.tenant.unableToLoad": "Impossibile Caricare il Dashboard",
+  "dashboard.tenant.loadError": "Si è verificato un errore durante il caricamento.",
+  "dashboard.tenant.tryAgain": "Riprova",
+  "dashboard.tenant.dashboardRefreshed": "Dashboard aggiornato",
+  "dashboard.tenant.failedToLoad": "Impossibile caricare i dati del dashboard",
+
+  "dashboard.tenant.status.active": "Attivo",
+  "dashboard.tenant.status.expired": "Scaduto",
+  "dashboard.tenant.status.upcoming": "Imminente",
+  "dashboard.tenant.status.terminated": "Terminato",
+  "dashboard.tenant.activityType.notification": "Notifica",
+  "dashboard.tenant.activityType.maintenance": "Manutenzione"
+}

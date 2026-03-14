@@ -1,0 +1,140 @@
+{
+  "dashboard.greeting.morning": "Доброе утро",
+  "dashboard.greeting.afternoon": "Добрый день",
+  "dashboard.greeting.evening": "Добрый вечер",
+
+  "dashboard.header.subtitle": "Вот обзор вашего портфеля недвижимости",
+
+  "dashboard.actions.refresh": "Обновить",
+  "dashboard.actions.analytics": "Аналитика",
+  "dashboard.actions.retry": "Повторить",
+
+  "dashboard.error.unavailable.title": "Дашборд недоступен",
+  "dashboard.error.unavailable.description": "{error} — попробуйте обновить страницу.",
+
+  "dashboard.error.staleData.title": "Некоторые данные могут быть устаревшими",
+  "dashboard.error.staleData.description": "{error} — нажмите обновить для получения актуальных данных.",
+
+  "dashboard.alerts.overduePayments.title": "Просроченные платежи",
+  "dashboard.alerts.overduePayments.message.withCount": "{count} арендаторов просрочили оплату более чем на 5 дней",
+  "dashboard.alerts.overduePayments.message.zero": "Все платежи в порядке",
+
+  "dashboard.alerts.urgentMaintenance.title": "Срочный ремонт",
+  "dashboard.alerts.urgentMaintenance.message.withCount": "{count} срочных ремонтов требуют вашего внимания",
+  "dashboard.alerts.urgentMaintenance.message.zero": "Нет срочных заявок на обслуживание",
+
+  "dashboard.alerts.expiringLeases.title": "Истекающие договоры",
+  "dashboard.alerts.expiringLeases.message.withCount": "{count} договоров истекают в течение 30 дней",
+  "dashboard.alerts.expiringLeases.message.zero": "Нет договоров с близким сроком окончания",
+
+  "dashboard.alerts.pendingApplications.title": "Новые заявки",
+  "dashboard.alerts.pendingApplications.message.withCount": "{count} заявок ожидают рассмотрения",
+
+  "dashboard.cards.totalProperties.title": "Ваш портфель",
+  "dashboard.cards.totalProperties.description": "Активные объекты под управлением",
+
+  "dashboard.cards.occupancyRate.title": "Заполняемость",
+  "dashboard.cards.occupancyRate.description": "{occupied} из {total} единиц занято",
+
+  "dashboard.cards.monthlyRevenue.title": "Ежемесячный доход",
+  "dashboard.cards.monthlyRevenue.description": "Собрано в этом месяце",
+
+  "dashboard.cards.collectionRate.title": "Процент сбора",
+  "dashboard.cards.collectionRate.description": "Эффективность сбора аренды",
+
+  "dashboard.cards.activeTenants.title": "Активные арендаторы",
+  "dashboard.cards.activeTenants.description": "{count} новых заявок в ожидании",
+
+  "dashboard.cards.maintenanceRequests.title": "Заявки на ремонт",
+  "dashboard.cards.maintenanceRequests.description": "{count} срочных",
+
+  "dashboard.cards.vacantUnits.title": "Доступно сейчас",
+  "dashboard.cards.vacantUnits.description": "Вакантность {rate} по портфелю",
+
+  "dashboard.cards.averageRent.title": "Средняя аренда / ед.",
+  "dashboard.cards.averageRent.description": "Ежемесячный средний показатель на единицу",
+
+  "dashboard.cards.leaseRenewals.title": "Скоро продление",
+  "dashboard.cards.leaseRenewals.description": "Договоры, истекающие в следующие 30 дней",
+
+  "dashboard.cards.recentEvents.title": "Последняя активность",
+  "dashboard.cards.recentEvents.description": "{count} требуют срочного внимания",
+
+  "dashboard.charts.revenueExpenses.title": "Доходы и расходы",
+  "dashboard.charts.revenueExpenses.description": "Ежемесячные доходы против расходов",
+  "dashboard.charts.revenueExpenses.legend.revenue": "Доходы",
+  "dashboard.charts.revenueExpenses.legend.expenses": "Расходы",
+  "dashboard.charts.revenueExpenses.empty": "Нет данных за этот период",
+
+  "dashboard.charts.propertyDistribution.title": "Состав портфеля",
+  "dashboard.charts.propertyDistribution.description": "Разбивка по типу объекта",
+  "dashboard.charts.propertyDistribution.total": "Итого",
+
+  "dashboard.paymentStatus.title": "Статус платежей",
+  "dashboard.paymentStatus.description": "Состояние аренды в этом месяце",
+  "dashboard.paymentStatus.collected": "Собрано",
+  "dashboard.paymentStatus.pending": "В ожидании",
+  "dashboard.paymentStatus.overdue": "Просрочено",
+
+  "dashboard.recentActivity.title": "Последние события",
+  "dashboard.recentActivity.description": "Последние обновления по портфелю",
+  "dashboard.recentActivity.empty": "Нет последних событий",
+  "dashboard.recentActivity.viewAll": "Посмотреть все",
+
+  "dashboard.upcomingTasks.title": "Предстоящие задачи",
+  "dashboard.upcomingTasks.description": "Что нужно сделать в ближайшие дни",
+  "dashboard.upcomingTasks.empty": "Нет предстоящих задач",
+  "dashboard.upcomingTasks.viewAll": "Посмотреть все",
+  "dashboard.upcomingTasks.due": "Срок",
+  "dashboard.upcomingTasks.overdue": "Просрочено",
+  "dashboard.upcomingTasks.today": "Сегодня",
+
+  "dashboard.priority.high": "Высокий",
+  "dashboard.priority.urgent": "Срочный",
+  "dashboard.priority.medium": "Средний",
+  "dashboard.priority.low": "Низкий",
+
+  "dashboard.time.justNow": "Только что",
+  "dashboard.time.minutesAgo": "{count} минут назад",
+  "dashboard.time.hoursAgo": "{count} часов назад",
+  "dashboard.time.daysAgo": "{count} дней назад",
+
+  "dashboard.tenant.welcome": "Добро пожаловать",
+  "dashboard.tenant.activeLeases": "Активные договоры",
+  "dashboard.tenant.totalLeases": "Всего {count} договоров",
+  "dashboard.tenant.outstandingPayments": "Невыплаченные платежи",
+  "dashboard.tenant.totalPayments": "Всего {count} платежей",
+  "dashboard.tenant.maintenanceRequests": "Заявки на обслуживание",
+  "dashboard.tenant.openRequests": "Открытые заявки",
+  "dashboard.tenant.notifications": "Уведомления",
+  "dashboard.tenant.unreadMessages": "Непрочитанные сообщения",
+  "dashboard.tenant.leaseSnapshot": "Сводка по договору",
+  "dashboard.tenant.leaseSnapshotDescription": "Ключевые данные вашего договора",
+  "dashboard.tenant.property": "Объект",
+  "dashboard.tenant.leasePeriod": "Срок аренды",
+  "dashboard.tenant.monthlyRent": "Ежемесячная аренда",
+  "dashboard.tenant.leaseType": "Тип договора",
+  "dashboard.tenant.leaseId": "ID договора",
+  "dashboard.tenant.noLeaseMessage": "После настройки договора здесь появятся ключевые детали.",
+  "dashboard.tenant.latestActivity": "Последняя активность",
+  "dashboard.tenant.latestActivityDescription": "Последние уведомления и обновления по обслуживанию",
+  "dashboard.tenant.allCaughtUp": "Всё в порядке!",
+  "dashboard.tenant.recentPayments": "Последние платежи",
+  "dashboard.tenant.noRecentPayments": "Нет последних платежей",
+  "dashboard.tenant.paidOn": "Оплачено {date}",
+  "dashboard.tenant.upcomingPayments": "Предстоящие платежи",
+  "dashboard.tenant.noUpcomingPayments": "Нет предстоящих платежей",
+  "dashboard.tenant.dueOn": "Срок {date}",
+  "dashboard.tenant.unableToLoad": "Не удалось загрузить дашборд",
+  "dashboard.tenant.loadError": "Произошла ошибка при загрузке данных дашборда.",
+  "dashboard.tenant.tryAgain": "Повторить",
+  "dashboard.tenant.dashboardRefreshed": "Дашборд обновлён",
+  "dashboard.tenant.failedToLoad": "Не удалось загрузить данные дашборда",
+
+  "dashboard.tenant.status.active": "Активный",
+  "dashboard.tenant.status.expired": "Истёкший",
+  "dashboard.tenant.status.upcoming": "Предстоящий",
+  "dashboard.tenant.status.terminated": "Расторгнутый",
+  "dashboard.tenant.activityType.notification": "Уведомление",
+  "dashboard.tenant.activityType.maintenance": "Обслуживание"
+}

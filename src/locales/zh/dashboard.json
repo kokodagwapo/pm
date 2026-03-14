@@ -1,0 +1,140 @@
+{
+  "dashboard.greeting.morning": "早上好",
+  "dashboard.greeting.afternoon": "下午好",
+  "dashboard.greeting.evening": "晚上好",
+
+  "dashboard.header.subtitle": "这是您的物业组合概览",
+
+  "dashboard.actions.refresh": "刷新",
+  "dashboard.actions.analytics": "查看分析",
+  "dashboard.actions.retry": "重试",
+
+  "dashboard.error.unavailable.title": "控制台暂时不可用",
+  "dashboard.error.unavailable.description": "{error} — 请尝试刷新页面。",
+
+  "dashboard.error.staleData.title": "部分数据可能不是最新的",
+  "dashboard.error.staleData.description": "{error} — 点击刷新获取最新数据。",
+
+  "dashboard.alerts.overduePayments.title": "逾期付款",
+  "dashboard.alerts.overduePayments.message.withCount": "{count} 位租户的付款已逾期超过5天",
+  "dashboard.alerts.overduePayments.message.zero": "所有付款均已到位",
+
+  "dashboard.alerts.urgentMaintenance.title": "紧急维修",
+  "dashboard.alerts.urgentMaintenance.message.withCount": "{count} 项紧急维修需要您的关注",
+  "dashboard.alerts.urgentMaintenance.message.zero": "无紧急维修",
+
+  "dashboard.alerts.expiringLeases.title": "即将到期的租约",
+  "dashboard.alerts.expiringLeases.message.withCount": "{count} 份租约将在30天内到期",
+  "dashboard.alerts.expiringLeases.message.zero": "暂无即将到期的租约",
+
+  "dashboard.alerts.pendingApplications.title": "新申请人",
+  "dashboard.alerts.pendingApplications.message.withCount": "{count} 份申请待处理",
+
+  "dashboard.cards.totalProperties.title": "您的组合",
+  "dashboard.cards.totalProperties.description": "管理中的有效物业",
+
+  "dashboard.cards.occupancyRate.title": "入住率",
+  "dashboard.cards.occupancyRate.description": "{total} 个单元中已入住 {occupied} 个",
+
+  "dashboard.cards.monthlyRevenue.title": "月度收入",
+  "dashboard.cards.monthlyRevenue.description": "本月已收款",
+
+  "dashboard.cards.collectionRate.title": "收款率",
+  "dashboard.cards.collectionRate.description": "租金收缴效率",
+
+  "dashboard.cards.activeTenants.title": "活跃租户",
+  "dashboard.cards.activeTenants.description": "{count} 份新申请待处理",
+
+  "dashboard.cards.maintenanceRequests.title": "维修请求",
+  "dashboard.cards.maintenanceRequests.description": "{count} 项紧急",
+
+  "dashboard.cards.vacantUnits.title": "空置单元",
+  "dashboard.cards.vacantUnits.description": "组合空置率 {rate}",
+
+  "dashboard.cards.averageRent.title": "平均租金/单元",
+  "dashboard.cards.averageRent.description": "每单元月均租金",
+
+  "dashboard.cards.leaseRenewals.title": "即将续约",
+  "dashboard.cards.leaseRenewals.description": "未来30天到期的租约",
+
+  "dashboard.cards.recentEvents.title": "近期活动",
+  "dashboard.cards.recentEvents.description": "{count} 项需要紧急关注",
+
+  "dashboard.charts.revenueExpenses.title": "收支情况",
+  "dashboard.charts.revenueExpenses.description": "月度收支对比",
+  "dashboard.charts.revenueExpenses.legend.revenue": "收入",
+  "dashboard.charts.revenueExpenses.legend.expenses": "支出",
+  "dashboard.charts.revenueExpenses.empty": "该时段暂无数据",
+
+  "dashboard.charts.propertyDistribution.title": "组合构成",
+  "dashboard.charts.propertyDistribution.description": "按物业类型细分",
+  "dashboard.charts.propertyDistribution.total": "总计",
+
+  "dashboard.paymentStatus.title": "付款快照",
+  "dashboard.paymentStatus.description": "本月租金状况",
+  "dashboard.paymentStatus.collected": "已收",
+  "dashboard.paymentStatus.pending": "待收",
+  "dashboard.paymentStatus.overdue": "逾期",
+
+  "dashboard.recentActivity.title": "近期动态",
+  "dashboard.recentActivity.description": "组合最新更新",
+  "dashboard.recentActivity.empty": "暂无近期活动",
+  "dashboard.recentActivity.viewAll": "查看全部",
+
+  "dashboard.upcomingTasks.title": "即将到期的任务",
+  "dashboard.upcomingTasks.description": "未来几天需要处理的事项",
+  "dashboard.upcomingTasks.empty": "暂无即将到期的任务",
+  "dashboard.upcomingTasks.viewAll": "查看全部",
+  "dashboard.upcomingTasks.due": "到期",
+  "dashboard.upcomingTasks.overdue": "逾期",
+  "dashboard.upcomingTasks.today": "今天",
+
+  "dashboard.priority.high": "高",
+  "dashboard.priority.urgent": "紧急",
+  "dashboard.priority.medium": "中",
+  "dashboard.priority.low": "低",
+
+  "dashboard.time.justNow": "刚刚",
+  "dashboard.time.minutesAgo": "{count} 分钟前",
+  "dashboard.time.hoursAgo": "{count} 小时前",
+  "dashboard.time.daysAgo": "{count} 天前",
+
+  "dashboard.tenant.welcome": "欢迎回来",
+  "dashboard.tenant.activeLeases": "有效租约",
+  "dashboard.tenant.totalLeases": "共 {count} 份租约",
+  "dashboard.tenant.outstandingPayments": "未结款项",
+  "dashboard.tenant.totalPayments": "共 {count} 笔付款",
+  "dashboard.tenant.maintenanceRequests": "维修请求",
+  "dashboard.tenant.openRequests": "待处理请求",
+  "dashboard.tenant.notifications": "通知",
+  "dashboard.tenant.unreadMessages": "未读消息",
+  "dashboard.tenant.leaseSnapshot": "租约详情",
+  "dashboard.tenant.leaseSnapshotDescription": "您的租约基本信息",
+  "dashboard.tenant.property": "物业",
+  "dashboard.tenant.leasePeriod": "租约期限",
+  "dashboard.tenant.monthlyRent": "月租金",
+  "dashboard.tenant.leaseType": "租约类型",
+  "dashboard.tenant.leaseId": "租约编号",
+  "dashboard.tenant.noLeaseMessage": "设置租约后，关键详情将在此处显示。",
+  "dashboard.tenant.latestActivity": "最新动态",
+  "dashboard.tenant.latestActivityDescription": "最近通知和维修更新",
+  "dashboard.tenant.allCaughtUp": "全部已处理！",
+  "dashboard.tenant.recentPayments": "近期付款",
+  "dashboard.tenant.noRecentPayments": "暂无近期付款",
+  "dashboard.tenant.paidOn": "付款日期 {date}",
+  "dashboard.tenant.upcomingPayments": "即将到来的付款",
+  "dashboard.tenant.noUpcomingPayments": "暂无即将到来的付款",
+  "dashboard.tenant.dueOn": "到期日 {date}",
+  "dashboard.tenant.unableToLoad": "无法加载控制台",
+  "dashboard.tenant.loadError": "加载控制台数据时出现问题。",
+  "dashboard.tenant.tryAgain": "重试",
+  "dashboard.tenant.dashboardRefreshed": "控制台已刷新",
+  "dashboard.tenant.failedToLoad": "控制台数据加载失败",
+
+  "dashboard.tenant.status.active": "有效",
+  "dashboard.tenant.status.expired": "已到期",
+  "dashboard.tenant.status.upcoming": "即将开始",
+  "dashboard.tenant.status.terminated": "已终止",
+  "dashboard.tenant.activityType.notification": "通知",
+  "dashboard.tenant.activityType.maintenance": "维修"
+}
