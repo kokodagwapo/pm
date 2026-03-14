@@ -127,5 +127,25 @@
   "common.next": "Successivo",
   "common.page": "Pagina",
   "common.of": "di",
-  "common.perPage": "per pagina"
+  "common.perPage": "per pagina",
+
+  "landing.cta.portal": "Portale",
+  "common.language": "Lingua",
+
+  "landing.eyebrow": "Gestione Immobiliare Aziendale",
+  "landing.hero.line1": "Gestisci in modo più intelligente,",
+  "landing.hero.line2": "non più difficile",
+  "landing.hero.subtext": "SmartStartPM unisce contratti, manutenzione, comunicazioni con gli inquilini e analisi finanziarie in un'unica piattaforma meravigliosamente semplice.",
+  "landing.cta.signin": "Accedi al portale",
+  "landing.cta.browse": "Esplora gli affitti",
+  "landing.features.label": "Capacità della piattaforma",
+  "landing.feature.portfolio.title": "Gestione completa del portafoglio",
+  "landing.feature.portfolio.desc": "Monitora proprietà, unità, contratti e manutenzione da un unico posto.",
+  "landing.feature.analytics.title": "Analisi in tempo reale",
+  "landing.feature.analytics.desc": "Dashboard finanziari, tassi di occupazione e previsioni di fatturato.",
+  "landing.feature.portals.title": "Portali inquilini e proprietari",
+  "landing.feature.portals.desc": "Strumenti self-service per gli inquilini, report trasparenti per i proprietari.",
+  "landing.feature.security.title": "Sicurezza aziendale",
+  "landing.feature.security.desc": "Controllo degli accessi basato sui ruoli, log di audit e archiviazione crittografata.",
+  "landing.footer.wordmark": "SmartStartPM · Piattaforma di intelligence immobiliare"
 }

@@ -102,5 +102,25 @@
   "common.page": "Page",
   "common.of": "sur",
   "common.perPage": "par page",
-  "nav.admin.apiKeys": "Clés API"
+  "nav.admin.apiKeys": "Clés API",
+
+  "landing.cta.portal": "Portail",
+  "common.language": "Langue",
+
+  "landing.eyebrow": "Gestion Immobilière d'Entreprise",
+  "landing.hero.line1": "Gérez plus intelligemment,",
+  "landing.hero.line2": "pas plus dur",
+  "landing.hero.subtext": "SmartStartPM réunit contrats, maintenance, communications locataires et analyses financières en une plateforme élégamment simple.",
+  "landing.cta.signin": "Se connecter au portail",
+  "landing.cta.browse": "Parcourir les locations",
+  "landing.features.label": "Capacités de la plateforme",
+  "landing.feature.portfolio.title": "Gestion complète du portefeuille",
+  "landing.feature.portfolio.desc": "Suivez les propriétés, unités, baux et maintenances depuis un seul endroit.",
+  "landing.feature.analytics.title": "Analyses en temps réel",
+  "landing.feature.analytics.desc": "Tableaux de bord financiers, taux d'occupation et prévisions de revenus.",
+  "landing.feature.portals.title": "Portails locataires & propriétaires",
+  "landing.feature.portals.desc": "Outils en libre-service pour les locataires, rapports transparents pour les propriétaires.",
+  "landing.feature.security.title": "Sécurité d'entreprise",
+  "landing.feature.security.desc": "Contrôle d'accès basé sur les rôles, journaux d'audit et stockage chiffré.",
+  "landing.footer.wordmark": "SmartStartPM · Plateforme d'intelligence immobilière"
 }

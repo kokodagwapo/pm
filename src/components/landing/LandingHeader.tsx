@@ -4,14 +4,12 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
-
-const NAV_LINKS = [
-  { href: "/rentals", label: "Rentals" },
-];
+import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 
 const HEADER_H = 48; // px — single source of truth
 
 export function LandingHeader() {
+  const { t } = useLocalizationContext();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -67,20 +65,17 @@ export function LandingHeader() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-0.5">
-            {NAV_LINKS.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={`px-3 py-1.5 rounded-lg text-[13px] transition-colors ${
-                  isLight
-                    ? "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
-                    : "text-white/60 hover:text-white hover:bg-white/8"
-                }`}
-                style={{ fontWeight: 300 }}
-              >
-                {l.label}
-              </Link>
-            ))}
+            <Link
+              href="/rentals"
+              className={`px-3 py-1.5 rounded-lg text-[13px] transition-colors ${
+                isLight
+                  ? "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                  : "text-white/60 hover:text-white hover:bg-white/8"
+              }`}
+              style={{ fontWeight: 300 }}
+            >
+              {t("nav.rentals")}
+            </Link>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -114,7 +109,7 @@ export function LandingHeader() {
               }`}
               style={{ fontWeight: 500 }}
             >
-              Portal
+              {t("landing.cta.portal")}
             </Link>
           </div>
         </div>
@@ -143,25 +138,22 @@ export function LandingHeader() {
           onClick={(e) => e.stopPropagation()}
         >
           <nav className="p-2">
-            {NAV_LINKS.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                onClick={() => setOpen(false)}
-                className={`flex items-center h-11 px-3 rounded-xl text-[14px] transition-all touch-manipulation ${
-                  isLight
-                    ? "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
-                    : "text-white/80 hover:bg-white/8 hover:text-white"
-                }`}
-                style={{ fontWeight: 300 }}
-              >
-                {l.label}
-              </Link>
-            ))}
+            <Link
+              href="/rentals"
+              onClick={() => setOpen(false)}
+              className={`flex items-center h-11 px-3 rounded-xl text-[14px] transition-all touch-manipulation ${
+                isLight
+                  ? "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                  : "text-white/80 hover:bg-white/8 hover:text-white"
+              }`}
+              style={{ fontWeight: 300 }}
+            >
+              {t("nav.rentals")}
+            </Link>
             <div className={`my-1 border-t ${isLight ? "border-slate-100" : "border-white/8"}`} />
             {/* Language switcher row in mobile menu */}
             <div className="flex items-center h-11 px-3 gap-2">
-              <span className={`text-[13px] flex-1 ${isLight ? "text-slate-500" : "text-white/50"}`}>Language</span>
+              <span className={`text-[13px] flex-1 ${isLight ? "text-slate-500" : "text-white/50"}`}>{t("common.language")}</span>
               <LanguageSwitcher variant={isLight ? "light" : "dark"} align="right" />
             </div>
             <div className={`my-1 border-t ${isLight ? "border-slate-100" : "border-white/8"}`} />
@@ -175,7 +167,7 @@ export function LandingHeader() {
               }`}
               style={{ fontWeight: 500 }}
             >
-              Client Portal
+              {t("landing.cta.signin")}
               <span className={`text-xs ${isLight ? "text-slate-400" : "text-white/30"}`}>→</span>
             </Link>
           </nav>

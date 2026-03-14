@@ -127,5 +127,25 @@
   "common.next": "Susunod",
   "common.page": "Pahina",
   "common.of": "ng",
-  "common.perPage": "bawat pahina"
+  "common.perPage": "bawat pahina",
+
+  "landing.cta.portal": "Portal",
+  "common.language": "Wika",
+
+  "landing.eyebrow": "Enterprise Property Management",
+  "landing.hero.line1": "Pamahalaan nang mas matalino,",
+  "landing.hero.line2": "hindi mas mahirap",
+  "landing.hero.subtext": "Pinagsama ng SmartStartPM ang mga lease, maintenance, komunikasyon ng tenant, at analytics sa isang simpleng platform.",
+  "landing.cta.signin": "Mag-sign in sa Portal",
+  "landing.cta.browse": "I-browse ang mga Rental",
+  "landing.features.label": "Mga Kakayahan ng Platform",
+  "landing.feature.portfolio.title": "Kumpletong Pamamahala ng Portfolio",
+  "landing.feature.portfolio.desc": "Subaybayan ang mga ari-arian, unit, lease, at maintenance mula sa isang lugar.",
+  "landing.feature.analytics.title": "Real-Time Analytics",
+  "landing.feature.analytics.desc": "Mga financial dashboard, rate ng occupancy, at revenue forecasting.",
+  "landing.feature.portals.title": "Mga Portal ng Tenant at May-ari",
+  "landing.feature.portals.desc": "Mga self-service na tool para sa mga tenant, transparent na ulat para sa mga may-ari.",
+  "landing.feature.security.title": "Enterprise Security",
+  "landing.feature.security.desc": "Role-based access control, mga audit log, at encrypted storage.",
+  "landing.footer.wordmark": "SmartStartPM · Platform ng Property Intelligence"
 }

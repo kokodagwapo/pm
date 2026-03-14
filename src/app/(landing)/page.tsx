@@ -1,136 +1,118 @@
+"use client";
+
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroVideo } from "@/components/landing/HeroVideo";
+import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { ArrowRight, Building2, BarChart3, Users, Shield } from "lucide-react";
 
-const FEATURES = [
-  {
-    icon: Building2,
-    title: "Full Portfolio Management",
-    desc: "Track properties, units, leases, and maintenance from one unified place.",
-  },
-  {
-    icon: BarChart3,
-    title: "Real-Time Analytics",
-    desc: "Financial dashboards, occupancy rates, and revenue forecasting.",
-  },
-  {
-    icon: Users,
-    title: "Tenant & Owner Portals",
-    desc: "Self-service tools for tenants, transparent reporting for owners.",
-  },
-  {
-    icon: Shield,
-    title: "Enterprise Security",
-    desc: "Role-based access control, audit logs, and encrypted storage.",
-  },
+const FEATURE_KEYS = [
+  { icon: Building2, titleKey: "landing.feature.portfolio.title", descKey: "landing.feature.portfolio.desc" },
+  { icon: BarChart3,  titleKey: "landing.feature.analytics.title", descKey: "landing.feature.analytics.desc" },
+  { icon: Users,     titleKey: "landing.feature.portals.title",   descKey: "landing.feature.portals.desc" },
+  { icon: Shield,    titleKey: "landing.feature.security.title",  descKey: "landing.feature.security.desc" },
 ];
 
 export default function HomePage() {
+  const { t } = useLocalizationContext();
+
   return (
     <>
       <LandingHeader />
 
       <main className="text-white">
-        {/* ── Fixed video + gradient layers ── */}
+        {/* ── Fixed video + gradient ── */}
         <HeroVideo />
         <div
           className="fixed inset-0 z-[1] pointer-events-none"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.28) 45%, rgba(0,0,0,0.60) 100%)",
+              "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.62) 100%)",
           }}
         />
 
-        {/* ── Hero ─────────────────────────────────────────────────────── */}
+        {/* ── Hero ──────────────────────────────────────────────────────── */}
         <section className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 pt-24 pb-20 text-center">
           <div className="max-w-4xl mx-auto">
+
             {/* Eyebrow */}
-            <p
-              className="inline-block text-[10px] sm:text-xs tracking-[0.35em] uppercase text-white/40 mb-10 font-light"
-            >
-              Enterprise Property Management
+            <p className="inline-block text-[10px] sm:text-[11px] tracking-[0.38em] uppercase text-white/35 mb-10 font-light">
+              {t("landing.eyebrow")}
             </p>
 
             {/* Headline */}
             <h1
-              className="text-5xl sm:text-7xl md:text-[6rem] leading-[1.02] tracking-tight mb-8"
+              className="text-5xl sm:text-7xl md:text-[6.25rem] leading-[1.02] tracking-tight mb-8"
               style={{ fontWeight: 200 }}
             >
-              Manage smarter,
+              {t("landing.hero.line1")}
               <br />
-              <em
-                className="not-italic text-white/55"
-                style={{ fontWeight: 100 }}
-              >
-                not harder
+              <em className="not-italic text-white/50" style={{ fontWeight: 100 }}>
+                {t("landing.hero.line2")}
               </em>
             </h1>
 
             {/* Sub-copy */}
             <p
-              className="text-sm sm:text-base text-white/45 max-w-md mx-auto leading-relaxed mb-12 tracking-wide"
+              className="text-sm sm:text-[15px] text-white/40 max-w-md mx-auto leading-relaxed mb-14 tracking-wide"
               style={{ fontWeight: 300 }}
             >
-              SmartStartPM brings leases, maintenance, tenant communications,
-              and financial analytics into one beautifully simple platform.
+              {t("landing.hero.subtext")}
             </p>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              {/* Primary — clean white pill */}
               <Link
                 href="/auth/signin"
-                className="group inline-flex items-center gap-2.5 h-[46px] px-8 rounded-full bg-white text-slate-900 text-sm tracking-wide hover:bg-white/92 transition-all duration-300"
+                className="group relative inline-flex items-center gap-2 h-11 px-7 rounded-full bg-white text-slate-900 text-sm tracking-wide overflow-hidden transition-all duration-300 hover:shadow-[0_0_28px_rgba(255,255,255,0.25)]"
                 style={{ fontWeight: 300 }}
               >
-                Sign in to Portal
+                {t("landing.cta.signin")}
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" />
               </Link>
+
+              {/* Secondary — ghost pill */}
               <Link
                 href="/rentals"
-                className="inline-flex items-center h-[46px] px-8 rounded-full border border-white/20 text-white/60 text-sm tracking-wide hover:border-white/40 hover:text-white/90 transition-all duration-300"
+                className="inline-flex items-center h-11 px-7 rounded-full text-white/50 text-sm tracking-wide border border-white/12 hover:border-white/28 hover:text-white/80 transition-all duration-300"
                 style={{ fontWeight: 300 }}
               >
-                Browse Rentals
+                {t("landing.cta.browse")}
               </Link>
             </div>
           </div>
         </section>
 
-        {/* ── Features ─────────────────────────────────────────────────── */}
+        {/* ── Features (scrolls over video with solid backdrop) ───────── */}
         <section
           className="relative z-10 pb-28"
-          style={{ background: "rgba(2, 6, 20, 0.85)", backdropFilter: "blur(2px)" }}
+          style={{ background: "rgba(3, 7, 18, 0.88)", backdropFilter: "blur(1px)" }}
         >
           <div className="max-w-5xl mx-auto px-6">
-            {/* Section label */}
-            <p
-              className="text-center text-[10px] tracking-[0.35em] uppercase text-white/25 mb-10 font-light pt-16"
-            >
-              Platform Capabilities
+            {/* Section eyebrow */}
+            <p className="text-center text-[9px] tracking-[0.38em] uppercase text-white/20 mb-10 font-light pt-16">
+              {t("landing.features.label")}
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/5 rounded-2xl overflow-hidden border border-white/8">
-              {FEATURES.map(({ icon: Icon, title, desc }) => (
+            {/* Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 border border-white/[0.07] rounded-2xl overflow-hidden divide-y sm:divide-y-0 divide-x-0 sm:divide-x divide-white/[0.07]">
+              {FEATURE_KEYS.map(({ icon: Icon, titleKey, descKey }, idx) => (
                 <div
-                  key={title}
-                  className="group p-8 flex gap-5 items-start bg-white/[0.03] hover:bg-white/[0.06] transition-colors duration-300"
+                  key={titleKey}
+                  className={`group p-8 flex gap-5 items-start bg-white/[0.025] hover:bg-white/[0.05] transition-colors duration-300 ${
+                    idx === 2 ? "sm:border-t sm:border-white/[0.07]" : ""
+                  } ${idx === 3 ? "sm:border-t sm:border-white/[0.07]" : ""}`}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-white/8 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-white/12 transition-colors">
-                    <Icon className="w-4 h-4 text-white/40" />
+                  <div className="w-7 h-7 rounded-md bg-white/[0.07] flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-white/10 transition-colors">
+                    <Icon className="w-3.5 h-3.5 text-white/35" />
                   </div>
                   <div>
-                    <p
-                      className="text-sm text-white/75 tracking-wide mb-1.5"
-                      style={{ fontWeight: 300 }}
-                    >
-                      {title}
+                    <p className="text-[13px] text-white/70 tracking-wide mb-1.5" style={{ fontWeight: 300 }}>
+                      {t(titleKey)}
                     </p>
-                    <p
-                      className="text-xs text-white/35 leading-relaxed"
-                      style={{ fontWeight: 300 }}
-                    >
-                      {desc}
+                    <p className="text-xs text-white/30 leading-relaxed" style={{ fontWeight: 300 }}>
+                      {t(descKey)}
                     </p>
                   </div>
                 </div>
@@ -138,10 +120,8 @@ export default function HomePage() {
             </div>
 
             {/* Bottom wordmark */}
-            <p
-              className="text-center text-[10px] tracking-[0.3em] uppercase text-white/15 mt-14 font-light"
-            >
-              SmartStartPM · Property Intelligence Platform
+            <p className="text-center text-[9px] tracking-[0.32em] uppercase text-white/12 mt-16 font-light">
+              {t("landing.footer.wordmark")}
             </p>
           </div>
         </section>

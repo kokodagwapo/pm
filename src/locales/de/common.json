@@ -102,5 +102,25 @@
   "common.page": "Seite",
   "common.of": "von",
   "common.perPage": "pro Seite",
-  "nav.admin.apiKeys": "API-Schlüssel"
+  "nav.admin.apiKeys": "API-Schlüssel",
+
+  "landing.cta.portal": "Portal",
+  "common.language": "Sprache",
+
+  "landing.eyebrow": "Unternehmens-Immobilienverwaltung",
+  "landing.hero.line1": "Smarter verwalten,",
+  "landing.hero.line2": "nicht schwerer",
+  "landing.hero.subtext": "SmartStartPM vereint Mietverträge, Wartung, Mieterkommunikation und Finanzanalysen in einer wunderschön einfachen Plattform.",
+  "landing.cta.signin": "Am Portal anmelden",
+  "landing.cta.browse": "Mietangebote durchsuchen",
+  "landing.features.label": "Plattformfunktionen",
+  "landing.feature.portfolio.title": "Vollständige Portfolio-Verwaltung",
+  "landing.feature.portfolio.desc": "Verwalten Sie Immobilien, Einheiten, Mietverträge und Wartung von einem zentralen Ort.",
+  "landing.feature.analytics.title": "Echtzeit-Analysen",
+  "landing.feature.analytics.desc": "Finanzdashboards, Belegungsraten und Umsatzprognosen.",
+  "landing.feature.portals.title": "Mieter- & Eigentümerportale",
+  "landing.feature.portals.desc": "Self-Service-Tools für Mieter, transparente Berichte für Eigentümer.",
+  "landing.feature.security.title": "Unternehmenssicherheit",
+  "landing.feature.security.desc": "Rollenbasierte Zugriffskontrolle, Prüfprotokolle und verschlüsselte Speicherung.",
+  "landing.footer.wordmark": "SmartStartPM · Immobilien-Intelligence-Plattform"
 }

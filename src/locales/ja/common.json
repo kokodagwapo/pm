@@ -127,5 +127,25 @@
   "common.next": "次へ",
   "common.page": "ページ",
   "common.of": "/",
-  "common.perPage": "件/ページ"
+  "common.perPage": "件/ページ",
+
+  "landing.cta.portal": "ポータル",
+  "common.language": "言語",
+
+  "landing.eyebrow": "エンタープライズ不動産管理",
+  "landing.hero.line1": "よりスマートに管理する、",
+  "landing.hero.line2": "より困難ではなく",
+  "landing.hero.subtext": "SmartStartPMは、リース、メンテナンス、テナントコミュニケーション、財務分析を美しくシンプルなプラットフォームに統合します。",
+  "landing.cta.signin": "ポータルにサインイン",
+  "landing.cta.browse": "賃貸を閲覧",
+  "landing.features.label": "プラットフォーム機能",
+  "landing.feature.portfolio.title": "完全なポートフォリオ管理",
+  "landing.feature.portfolio.desc": "一か所から物件、ユニット、リース、メンテナンスを追跡。",
+  "landing.feature.analytics.title": "リアルタイム分析",
+  "landing.feature.analytics.desc": "財務ダッシュボード、稼働率、収益予測。",
+  "landing.feature.portals.title": "テナント＆オーナーポータル",
+  "landing.feature.portals.desc": "テナント向けセルフサービスツール、オーナー向け透明なレポート。",
+  "landing.feature.security.title": "エンタープライズセキュリティ",
+  "landing.feature.security.desc": "ロールベースのアクセス制御、監査ログ、暗号化ストレージ。",
+  "landing.footer.wordmark": "SmartStartPM · 不動産インテリジェンスプラットフォーム"
 }

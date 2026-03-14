@@ -127,5 +127,25 @@
   "common.next": "Далее",
   "common.page": "Страница",
   "common.of": "из",
-  "common.perPage": "на странице"
+  "common.perPage": "на странице",
+
+  "landing.cta.portal": "Портал",
+  "common.language": "Язык",
+
+  "landing.eyebrow": "Корпоративное управление недвижимостью",
+  "landing.hero.line1": "Управляйте умнее,",
+  "landing.hero.line2": "а не сложнее",
+  "landing.hero.subtext": "SmartStartPM объединяет аренду, обслуживание, коммуникации с арендаторами и финансовую аналитику в одной красивой платформе.",
+  "landing.cta.signin": "Войти в портал",
+  "landing.cta.browse": "Просмотр аренды",
+  "landing.features.label": "Возможности платформы",
+  "landing.feature.portfolio.title": "Полное управление портфелем",
+  "landing.feature.portfolio.desc": "Отслеживайте объекты, единицы, аренду и обслуживание из одного места.",
+  "landing.feature.analytics.title": "Аналитика в реальном времени",
+  "landing.feature.analytics.desc": "Финансовые панели мониторинга, показатели заполняемости и прогнозирование доходов.",
+  "landing.feature.portals.title": "Порталы арендаторов и владельцев",
+  "landing.feature.portals.desc": "Инструменты самообслуживания для арендаторов, прозрачные отчёты для владельцев.",
+  "landing.feature.security.title": "Корпоративная безопасность",
+  "landing.feature.security.desc": "Контроль доступа на основе ролей, журналы аудита и зашифрованное хранилище.",
+  "landing.footer.wordmark": "SmartStartPM · Платформа управления недвижимостью"
 }

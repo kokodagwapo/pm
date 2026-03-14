@@ -127,5 +127,25 @@
   "common.next": "Next",
   "common.page": "Page",
   "common.of": "of",
-  "common.perPage": "per page"
+  "common.perPage": "per page",
+
+  "landing.cta.portal": "Portal",
+  "common.language": "Language",
+
+  "landing.eyebrow": "Enterprise Property Management",
+  "landing.hero.line1": "Manage smarter,",
+  "landing.hero.line2": "not harder",
+  "landing.hero.subtext": "SmartStartPM brings leases, maintenance, tenant communications, and financial analytics into one beautifully simple platform.",
+  "landing.cta.signin": "Sign in to Portal",
+  "landing.cta.browse": "Browse Rentals",
+  "landing.features.label": "Platform Capabilities",
+  "landing.feature.portfolio.title": "Full Portfolio Management",
+  "landing.feature.portfolio.desc": "Track properties, units, leases, and maintenance from one unified place.",
+  "landing.feature.analytics.title": "Real-Time Analytics",
+  "landing.feature.analytics.desc": "Financial dashboards, occupancy rates, and revenue forecasting.",
+  "landing.feature.portals.title": "Tenant & Owner Portals",
+  "landing.feature.portals.desc": "Self-service tools for tenants, transparent reporting for owners.",
+  "landing.feature.security.title": "Enterprise Security",
+  "landing.feature.security.desc": "Role-based access control, audit logs, and encrypted storage.",
+  "landing.footer.wordmark": "SmartStartPM · Property Intelligence Platform"
 }

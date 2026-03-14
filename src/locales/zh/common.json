@@ -127,5 +127,25 @@
   "common.next": "下一页",
   "common.page": "页",
   "common.of": "共",
-  "common.perPage": "每页"
+  "common.perPage": "每页",
+
+  "landing.cta.portal": "门户",
+  "common.language": "语言",
+
+  "landing.eyebrow": "企业级物业管理",
+  "landing.hero.line1": "更智能地管理，",
+  "landing.hero.line2": "而非更难",
+  "landing.hero.subtext": "SmartStartPM 将租约、维护、租户沟通和财务分析整合到一个精美简洁的平台中。",
+  "landing.cta.signin": "登录门户",
+  "landing.cta.browse": "浏览租赁",
+  "landing.features.label": "平台功能",
+  "landing.feature.portfolio.title": "完整组合管理",
+  "landing.feature.portfolio.desc": "从一个地方跟踪物业、单元、租约和维护。",
+  "landing.feature.analytics.title": "实时分析",
+  "landing.feature.analytics.desc": "财务仪表板、入住率和收入预测。",
+  "landing.feature.portals.title": "租户与业主门户",
+  "landing.feature.portals.desc": "为租户提供自助服务工具，为业主提供透明报告。",
+  "landing.feature.security.title": "企业安全",
+  "landing.feature.security.desc": "基于角色的访问控制、审计日志和加密存储。",
+  "landing.footer.wordmark": "SmartStartPM · 物业智能平台"
 }

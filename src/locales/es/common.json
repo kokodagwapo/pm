@@ -105,5 +105,25 @@
   "common.page": "Página",
   "common.of": "de",
   "common.perPage": "por página",
-  "nav.admin.apiKeys": "Claves API"
+  "nav.admin.apiKeys": "Claves API",
+
+  "landing.cta.portal": "Portal",
+  "common.language": "Idioma",
+
+  "landing.eyebrow": "Gestión Inmobiliaria Empresarial",
+  "landing.hero.line1": "Gestiona de forma más inteligente,",
+  "landing.hero.line2": "no más difícil",
+  "landing.hero.subtext": "SmartStartPM une contratos, mantenimiento, comunicaciones con inquilinos y análisis financieros en una plataforma bellamente simple.",
+  "landing.cta.signin": "Iniciar sesión en el portal",
+  "landing.cta.browse": "Explorar alquileres",
+  "landing.features.label": "Capacidades de la plataforma",
+  "landing.feature.portfolio.title": "Gestión completa del portafolio",
+  "landing.feature.portfolio.desc": "Controla propiedades, unidades, contratos y mantenimiento desde un solo lugar.",
+  "landing.feature.analytics.title": "Análisis en tiempo real",
+  "landing.feature.analytics.desc": "Paneles financieros, tasas de ocupación y previsión de ingresos.",
+  "landing.feature.portals.title": "Portales de inquilinos y propietarios",
+  "landing.feature.portals.desc": "Herramientas de autoservicio para inquilinos, informes transparentes para propietarios.",
+  "landing.feature.security.title": "Seguridad empresarial",
+  "landing.feature.security.desc": "Control de acceso por roles, registros de auditoría y almacenamiento cifrado.",
+  "landing.footer.wordmark": "SmartStartPM · Plataforma de inteligencia inmobiliaria"
 }
