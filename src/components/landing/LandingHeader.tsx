@@ -44,6 +44,7 @@ export function LandingHeader() {
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-colors duration-200 ${headerBg}`}
         style={{ height: HEADER_H }}
+        suppressHydrationWarning
       >
         <div
           className="h-full max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4"

@@ -29,7 +29,7 @@ export default function HomePage() {
     <>
       <LandingHeader />
 
-      <main className="text-white">
+      <main className="text-white" suppressHydrationWarning>
         {/* Fixed video + gradient overlay */}
         <HeroVideo />
         <div
