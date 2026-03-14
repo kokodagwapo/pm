@@ -21,6 +21,7 @@ import { useUserAvatar } from "@/components/providers/UserAvatarProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { InlinePreloader } from "@/components/ui/preloader";
 import { DemoGuide } from "@/components/demo/DemoGuide";
 
@@ -73,6 +74,8 @@ const MobileHeader = memo(function MobileHeader({
         </div>
 
         
+        <LanguageSwitcher variant="light" align="right" />
+
         <div className="text-foreground">
           <NotificationBell />
         </div>

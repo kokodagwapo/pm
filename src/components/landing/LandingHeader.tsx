@@ -159,6 +159,12 @@ export function LandingHeader() {
               </Link>
             ))}
             <div className={`my-1 border-t ${isLight ? "border-slate-100" : "border-white/8"}`} />
+            {/* Language switcher row in mobile menu */}
+            <div className="flex items-center h-11 px-3 gap-2">
+              <span className={`text-[13px] flex-1 ${isLight ? "text-slate-500" : "text-white/50"}`}>Language</span>
+              <LanguageSwitcher variant={isLight ? "light" : "dark"} align="right" />
+            </div>
+            <div className={`my-1 border-t ${isLight ? "border-slate-100" : "border-white/8"}`} />
             <Link
               href="/auth/signin"
               onClick={() => setOpen(false)}

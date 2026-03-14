@@ -8,7 +8,8 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Translation files**: `src/locales/{lang}/*.json` — each language has `common.json`, `auth.json`, `tour.json`, `dashboard.json`, `settings.json`, `properties.json`, `tenants.json`, `leases.json`, `maintenance.json`, `payments.json`, `analytics.json`, `messages.json`, `calendar.json`, `admin.json`
 - **Catalog registration**: `src/locales/index.ts` — merges all JSON files per language into the `translations` map used by `LocalizationProvider`
 - **Localization service**: `src/lib/services/localization.service.ts` — LOCALES map includes all 9 languages including `fil-PH`
-- **Translated pages**: Dashboard (full), Sign-in (full), Rentals (key UI strings); all pages fallback to English for missing keys
+- **Translated pages**: Home `/` (new landing page), Dashboard (full), Sign-in (full), Rentals (key UI strings); all pages fallback to English for missing keys
+- **LanguageSwitcher placement**: LandingHeader top bar (all landing pages incl. `/`), LandingHeader mobile dropdown menu, Dashboard `MobileHeader` (top bar, light variant), AdminTourWidget panel header (dark variant), Sign-in page (fixed overlay)
 - **Provider scope**: `LocalizationProvider` wraps the entire app via `src/components/providers/index.tsx`
 
 ## Recent Design Updates

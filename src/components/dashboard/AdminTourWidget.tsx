@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import {
   X,
   Send,
@@ -242,6 +243,7 @@ export function AdminTourWidget() {
                 <p className="text-white font-semibold text-sm leading-none">{t("tour.header.title")}</p>
                 <p className="text-white/70 text-xs mt-0.5">{t("tour.header.subtitle")}</p>
               </div>
+              <LanguageSwitcher variant="dark" align="right" className="shrink-0" />
               <button
                 onClick={() => setAutoVoice(!autoVoice)}
                 className={`p-1.5 rounded-lg transition-colors ${autoVoice ? "bg-white/30 text-white" : "text-white/60 hover:text-white hover:bg-white/20"}`}
