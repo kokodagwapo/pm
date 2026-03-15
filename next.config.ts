@@ -18,6 +18,8 @@ const replitDevOrigins: string[] = [
 const nextConfig: NextConfig = {
   allowedDevOrigins: replitDevOrigins,
 
+  serverExternalPackages: ["mongodb"],
+
   eslint: {
     ignoreDuringBuilds: true,
   },
