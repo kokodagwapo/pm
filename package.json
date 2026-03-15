@@ -80,7 +80,7 @@
     "react-hook-form": "^7.60.0",
     "react-is": "^19.2.4",
     "react-leaflet": "^5.0.0",
-    "recharts": "^3.0.2",
+    "recharts": "^2.15.3",
     "sharp": "^0.34.5",
     "sonner": "^2.0.6",
     "stripe": "^19.1.0",

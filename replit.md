@@ -23,7 +23,7 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **FlickeringGridBackground**: Removed from dashboard layout for cleaner appearance.
 
 ## Stack
-- **Framework**: Next.js 15.5.9 (App Router)
+- **Framework**: Next.js 15.5.12 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4 with Radix UI components
 - **Database**: MongoDB via Mongoose (local via Nix)
