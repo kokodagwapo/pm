@@ -30,7 +30,7 @@ function getStripeInstance() {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -51,6 +51,7 @@ export async function PUT(
       );
     }
 
+    const { id } = await params;
     const body = await request.json();
     const { amount, frequency, dayOfMonth, dayOfWeek, isActive } = body;
 
@@ -58,7 +59,7 @@ export async function PUT(
 
     // Find the recurring payment setup
     const recurringPayment = await RecurringPayment.findOne({
-      _id: params.id,
+      _id: id,
       tenantId: session.user.id,
     });
 
@@ -246,7 +247,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -267,11 +268,13 @@ export async function DELETE(
       );
     }
 
+    const { id } = await params;
+
     await connectDB();
 
     // Find the recurring payment setup
     const recurringPayment = await RecurringPayment.findOne({
-      _id: params.id,
+      _id: id,
       tenantId: session.user.id,
     });
 
@@ -301,7 +304,7 @@ export async function DELETE(
     }
 
     // Delete the recurring payment setup
-    await RecurringPayment.findByIdAndDelete(params.id);
+    await RecurringPayment.findByIdAndDelete(id);
 
     const response = createApiSuccessResponse<null>(
       null,

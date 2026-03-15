@@ -114,10 +114,10 @@ export const PATCH = withRoleAndDB([
   async (
     user,
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) => {
     try {
-      const conversationId = params.id;
+      const { id: conversationId } = await params;
 
       if (!isValidObjectId(conversationId)) {
         return createErrorResponse("Invalid conversation ID", 400);

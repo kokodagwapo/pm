@@ -23,10 +23,10 @@ export const POST = withRoleAndDB(
   async (
     user,
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) => {
     try {
-      const leaseId = params.id;
+      const { id: leaseId } = await params;
 
       if (!Types.ObjectId.isValid(leaseId)) {
         return createErrorResponse("Invalid lease ID", 400);
@@ -94,10 +94,10 @@ export const PUT = withRoleAndDB(
   async (
     user,
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) => {
     try {
-      const leaseId = params.id;
+      const { id: leaseId } = await params;
 
       if (!Types.ObjectId.isValid(leaseId)) {
         return createErrorResponse("Invalid lease ID", 400);
@@ -177,10 +177,10 @@ export const GET = withRoleAndDB(
   async (
     user,
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) => {
     try {
-      const leaseId = params.id;
+      const { id: leaseId } = await params;
 
       if (!Types.ObjectId.isValid(leaseId)) {
         return createErrorResponse("Invalid lease ID", 400);
@@ -282,10 +282,10 @@ export const PATCH = withRoleAndDB(
   async (
     user,
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) => {
     try {
-      const leaseId = params.id;
+      const { id: leaseId } = await params;
 
       if (!Types.ObjectId.isValid(leaseId)) {
         return createErrorResponse("Invalid lease ID", 400);

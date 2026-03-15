@@ -308,22 +308,23 @@ export const userLogs = withRoleAndDB([
   async (
     user,
     request: NextRequest,
-    { params }: { params: { userId: string } }
+    { params }: { params: Promise<{ userId: string }> }
   ) => {
     try {
+      const { userId } = await params;
       const { searchParams } = new URL(request.url);
       const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
       const offset = parseInt(searchParams.get("offset") || "0");
 
       const logs = await auditService.getActivityForUser(
-        params.userId,
+        userId,
         limit,
         offset
       );
 
       return createSuccessResponse({
         logs,
-        userId: params.userId,
+        userId,
         pagination: {
           limit,
           offset,
@@ -345,22 +346,23 @@ export const resourceLogs = withRoleAndDB([
   async (
     user,
     request: NextRequest,
-    { params }: { params: { resourceType: string; resourceId: string } }
+    { params }: { params: Promise<{ resourceType: string; resourceId: string }> }
   ) => {
     try {
+      const { resourceType, resourceId } = await params;
       const { searchParams } = new URL(request.url);
       const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
 
       const logs = await auditService.getActivityForResource(
-        params.resourceType,
-        params.resourceId,
+        resourceType,
+        resourceId,
         limit
       );
 
       return createSuccessResponse({
         logs,
-        resourceType: params.resourceType,
-        resourceId: params.resourceId,
+        resourceType,
+        resourceId,
       });
     } catch (error) {
       console.error("Failed to fetch resource audit logs:", error);
