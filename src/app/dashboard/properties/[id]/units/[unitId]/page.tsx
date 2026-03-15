@@ -180,6 +180,10 @@ export default function UnitDetailsPage() {
   const [showDocUpload, setShowDocUpload] = useState(false);
 
   useEffect(() => {
+    if (!unitId || unitId === "undefined" || unitId === "null") {
+      router.replace(`/dashboard/properties/${propertyId}`);
+      return;
+    }
     fetchUnitDetails();
     fetchPropertyDetails();
   }, [propertyId, unitId]);

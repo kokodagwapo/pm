@@ -117,7 +117,7 @@ function UnitCard({ unit, onViewDetails }: UnitCardProps) {
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
           <div className="flex space-x-2">
             <Link
-              href={`/dashboard/properties/${unit._id}/units/${unit.unitId}`}
+              href={unit.unitId ? `/dashboard/properties/${unit._id}/units/${unit.unitId}` : `/dashboard/properties/${unit._id}`}
             >
               <Button
                 size="sm"
@@ -852,7 +852,7 @@ export default function AvailablePropertiesPage() {
                           <div className="min-w-0 flex-1">
                             <div className="font-medium text-gray-900 dark:text-gray-100">
                               <Link
-                                href={`/dashboard/properties/${unit._id}/units/${unit.unitId}`}
+                                href={unit.unitId ? `/dashboard/properties/${unit._id}/units/${unit.unitId}` : `/dashboard/properties/${unit._id}`}
                                 className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                               >
                                 {t("properties.available.card.unit")}{" "}
