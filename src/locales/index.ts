@@ -171,12 +171,3 @@ export const catalogsByLanguage: Record<string, LanguageCatalog> = {
 };
 
 export const translations: Record<string, Record<string, string>> = {};
-
-for (const [language, catalog] of Object.entries(catalogsByLanguage)) {
-  for (const [key, value] of Object.entries(catalog)) {
-    if (!translations[key]) {
-      translations[key] = {};
-    }
-    translations[key][language] = value;
-  }
-}
