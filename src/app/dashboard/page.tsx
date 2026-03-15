@@ -571,17 +571,14 @@ export default function DashboardPage() {
   return (
     <ResponsiveLayout className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground mb-3">
-            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-          </p>
-          <h1 className="text-3xl md:text-4xl font-light tracking-[-0.02em] leading-tight text-foreground">
-            {getGreeting()}, <span className="font-normal">{user?.firstName}</span>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <h1 className="text-sm font-medium text-foreground">
+            {getGreeting()}, {user?.firstName}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1.5">
-            {t("dashboard.header.subtitle")}
-          </p>
+          <span className="text-xs text-muted-foreground">
+            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+          </span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <Button
