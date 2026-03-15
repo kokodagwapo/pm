@@ -367,40 +367,34 @@ export default function PropertyDetailsPage() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        {/* Left side - Back button */}
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => router.push("/dashboard/properties")}
-          className="flex items-center space-x-1"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>{t("properties.details.actions.backToList")}</span>
-        </Button>
-
-        {/* Center - Property name and badges */}
-        <div className="flex-1 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => router.push("/dashboard/properties")}
+            className="shrink-0 flex items-center space-x-1"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>{t("properties.details.actions.backToList")}</span>
+          </Button>
+          <h1 className="text-lg font-semibold text-foreground truncate">
             {property?.name || t("properties.details.unknownProperty")}
           </h1>
-          <div className="flex items-center justify-center space-x-2 mt-2">
-            {property?.status && (
-              <Badge variant="outline">
-                {t(`properties.status.${property.status}`)}
-              </Badge>
-            )}
-            {property?.type && (
-              <Badge variant="secondary">
-                {t(`properties.type.${property.type}`)}
-              </Badge>
-            )}
-          </div>
+          {property?.status && (
+            <Badge variant="outline" className="shrink-0">
+              {t(`properties.status.${property.status}`)}
+            </Badge>
+          )}
+          {property?.type && (
+            <Badge variant="secondary" className="shrink-0">
+              {t(`properties.type.${property.type}`)}
+            </Badge>
+          )}
         </div>
 
-        {/* Right side - Action Buttons */}
         {canModifyProperty() && (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 shrink-0">
             <Button
               size="sm"
               variant="outline"
@@ -419,8 +413,6 @@ export default function PropertyDetailsPage() {
               <Edit className="h-4 w-4" />
               <span>{t("properties.details.actions.editProperty")}</span>
             </Button>
-
-            {/* DISABLED: Delete functionality temporarily disabled */}
             <Button
               size="sm"
               variant="outline"
