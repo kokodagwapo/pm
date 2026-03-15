@@ -570,16 +570,16 @@ export default function DashboardPage() {
   // Manager/Admin Dashboard
   return (
     <ResponsiveLayout className="space-y-6">
-      {/* Header Section - Modern Typography */}
-      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-        <div className="space-y-2">
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 mb-2.5">
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground mb-3">
             {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </p>
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight leading-none bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
-            {getGreeting()}, {user?.firstName}! 👋
+          <h1 className="text-3xl md:text-4xl font-light tracking-[-0.02em] leading-tight text-foreground">
+            {getGreeting()}, <span className="font-normal">{user?.firstName}</span>
           </h1>
-          <p className="text-base text-muted-foreground/80 mt-3 font-medium">
+          <p className="text-sm text-muted-foreground mt-1.5">
             {t("dashboard.header.subtitle")}
           </p>
         </div>
@@ -589,7 +589,7 @@ export default function DashboardPage() {
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="gap-2 rounded-xl text-xs font-semibold h-9"
+            className="gap-2 text-xs h-8 rounded-lg border-border"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`}
@@ -597,7 +597,7 @@ export default function DashboardPage() {
             {t("dashboard.actions.refresh")}
           </Button>
           <Link href="/dashboard/analytics">
-            <Button size="sm" className="gap-2 rounded-xl text-xs font-semibold h-9">
+            <Button size="sm" className="gap-2 text-xs h-8 rounded-lg">
               <BarChart3 className="h-3.5 w-3.5" />
               {t("dashboard.actions.analytics")}
             </Button>
@@ -615,11 +615,11 @@ export default function DashboardPage() {
         </Alert>
       )}
 
-      {/* Action Items - Today's Highlights */}
+      {/* Action Items */}
       <div className="space-y-3">
-        <div className="flex items-baseline gap-2 px-1">
-          <h2 className="text-lg font-bold tracking-tight">⚡ Action Items</h2>
-          <p className="text-xs text-muted-foreground/70 font-medium">Things that need your attention today</p>
+        <div className="flex items-baseline gap-3 px-0.5">
+          <h2 className="text-sm font-medium tracking-[-0.01em] text-foreground">Action Items</h2>
+          <p className="text-xs text-muted-foreground">Needs your attention</p>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
           {alerts?.slice(0, 3).map((alert) => {
@@ -627,23 +627,23 @@ export default function DashboardPage() {
             return (
               <div
                 key={alert.id}
-                className={`group rounded-2xl backdrop-blur-lg border border-white/20 dark:border-white/10 ${styles.bg} px-5 py-4 cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02]`}
+                className={`group rounded-xl border ${styles.border} ${styles.bg} px-4 py-3.5 cursor-pointer hover:shadow-sm transition-all duration-200`}
                 onClick={() => handleAlertClick(alert.type)}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <AlertTriangle className={`h-4 w-4 shrink-0 ${styles.iconColor}`} />
-                      <h4 className={`font-bold text-sm tracking-tight ${styles.textColor}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <AlertTriangle className={`h-3.5 w-3.5 shrink-0 ${styles.iconColor}`} />
+                      <h4 className={`font-medium text-sm ${styles.textColor}`}>
                         {getAlertTitleText(alert)}
                       </h4>
                     </div>
-                    <p className={`text-xs leading-snug ${styles.textColor} opacity-80`}>
+                    <p className={`text-xs leading-relaxed ${styles.textColor} opacity-70`}>
                       {getAlertMessageText(alert)}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className={`text-3xl font-extrabold leading-none ${styles.textColor}`}>
+                    <span className={`text-2xl font-semibold leading-none ${styles.textColor}`}>
                       {alert.count}
                     </span>
                     <ChevronRight className={`h-4 w-4 ${styles.iconColor} opacity-60`} />
@@ -655,11 +655,11 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Main KPI Cards - Your Empire at a Glance */}
+      {/* KPI Cards */}
       <div className="space-y-3">
-        <div className="flex items-baseline gap-2 px-1">
-          <h2 className="text-lg font-bold tracking-tight">📊 Here's Your Empire at a Glance</h2>
-          <p className="text-xs text-muted-foreground/70 font-medium">Key metrics from across all properties</p>
+        <div className="flex items-baseline gap-3 px-0.5">
+          <h2 className="text-sm font-medium tracking-[-0.01em] text-foreground">Overview</h2>
+          <p className="text-xs text-muted-foreground">Key metrics across all properties</p>
         </div>
         <AnalyticsCardGrid>
         <AnalyticsCard
@@ -754,14 +754,13 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Revenue & Expenses Trends */}
           <div className="space-y-3">
-            <h2 className="text-lg font-bold tracking-tight px-1">💰 Financial Performance</h2>
-            <Card className="hover-lift rounded-2xl shadow-lg">
+            <h2 className="text-sm font-medium tracking-[-0.01em] text-foreground px-0.5">Financial Performance</h2>
+            <Card className="rounded-xl border border-border shadow-sm">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">Financial Performance</p>
-                  <CardTitle className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
-                    <LineChart className="h-4 w-4 text-sky-500" />
+                  <CardTitle className="flex items-center gap-2 text-base font-medium tracking-tight">
+                    <LineChart className="h-4 w-4 text-primary/60" />
                     {t("dashboard.charts.revenueExpenses.title")}
                   </CardTitle>
                   <CardDescription className="text-xs mt-0.5">
@@ -769,7 +768,7 @@ export default function DashboardPage() {
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <select className="text-xs border border-border/60 rounded-lg px-2.5 py-1.5 bg-background font-medium">
+                  <select className="text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background text-muted-foreground">
                     <option>2024</option>
                     <option>2023</option>
                     <option>2022</option>
@@ -902,12 +901,11 @@ export default function DashboardPage() {
           <div className="grid gap-6 md:grid-cols-2">
             {/* Property Distribution */}
             <div className="space-y-3">
-              <h3 className="text-base font-bold tracking-tight px-1">🏘️ Property Breakdown</h3>
-              <Card className="hover-lift rounded-2xl shadow-lg">
+              <h3 className="text-sm font-medium tracking-[-0.01em] text-foreground px-0.5">Property Breakdown</h3>
+              <Card className="rounded-xl border border-border shadow-sm">
               <CardHeader className="pb-2">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">By Type</p>
-                <CardTitle className="flex items-center gap-2 text-base font-extrabold tracking-tight">
-                  <PieChart className="h-4 w-4 text-violet-500" />
+                <CardTitle className="flex items-center gap-2 text-base font-medium tracking-tight">
+                  <PieChart className="h-4 w-4 text-primary/60" />
                   {t("dashboard.charts.propertyDistribution.title")}
                 </CardTitle>
                 <CardDescription className="text-xs">
@@ -988,12 +986,11 @@ export default function DashboardPage() {
 
             {/* Payment Status */}
             <div className="space-y-3">
-              <h3 className="text-base font-bold tracking-tight px-1">💳 Payment Status</h3>
-              <Card className="hover-lift rounded-2xl shadow-lg">
+              <h3 className="text-sm font-medium tracking-[-0.01em] text-foreground px-0.5">Payment Status</h3>
+              <Card className="rounded-xl border border-border shadow-sm">
               <CardHeader className="pb-2">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">This Month</p>
-                <CardTitle className="flex items-center gap-2 text-base font-extrabold tracking-tight">
-                  <CreditCard className="h-4 w-4 text-emerald-500" />
+                <CardTitle className="flex items-center gap-2 text-base font-medium tracking-tight">
+                  <CreditCard className="h-4 w-4 text-emerald-500/70" />
                   {t("dashboard.paymentStatus.title")}
                 </CardTitle>
                 <CardDescription className="text-xs">
@@ -1003,10 +1000,10 @@ export default function DashboardPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wide">
+                    <span className="text-xs text-muted-foreground">
                       {t("dashboard.paymentStatus.collected")}
                     </span>
-                    <span className="text-sm font-extrabold text-emerald-600">
+                    <span className="text-sm font-semibold text-emerald-600">
                       {formatCurrency(payments?.collected ?? 0)}
                     </span>
                   </div>
@@ -1021,19 +1018,19 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-2">
-                  <div className="text-center p-3 bg-amber-50 border border-amber-100 rounded-xl">
-                    <div className="text-lg font-extrabold text-amber-600 tracking-tight">
+                  <div className="text-center p-3 bg-amber-50/60 border border-amber-100/80 rounded-lg">
+                    <div className="text-base font-semibold text-amber-600 tracking-tight">
                       {formatCurrency(payments?.pending ?? 0)}
                     </div>
-                    <div className="text-[10px] font-semibold uppercase tracking-widest text-amber-500/70 mt-0.5">
+                    <div className="text-[10px] text-amber-500/80 mt-0.5">
                       {t("dashboard.paymentStatus.pending")}
                     </div>
                   </div>
-                  <div className="text-center p-3 bg-rose-50 border border-rose-100 rounded-xl">
-                    <div className="text-lg font-extrabold text-rose-600 tracking-tight">
+                  <div className="text-center p-3 bg-rose-50/60 border border-rose-100/80 rounded-lg">
+                    <div className="text-base font-semibold text-rose-600 tracking-tight">
                       {formatCurrency(payments?.overdue ?? 0)}
                     </div>
-                    <div className="text-[10px] font-semibold uppercase tracking-widest text-rose-500/70 mt-0.5">
+                    <div className="text-[10px] text-rose-500/80 mt-0.5">
                       {t("dashboard.paymentStatus.overdue")}
                     </div>
                   </div>
@@ -1047,12 +1044,11 @@ export default function DashboardPage() {
         {/* Right Column - Activities and Tasks */}
         <div className="space-y-6">
           {/* Recent Activities */}
-          <Card className="hover-lift rounded-2xl border-border/60 shadow-sm">
+          <Card className="rounded-xl border border-border shadow-sm">
             <CardHeader className="pb-2">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">Live Feed</p>
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-base font-extrabold tracking-tight">
-                  <Activity className="h-4 w-4 text-sky-500" />
+                <CardTitle className="flex items-center gap-2 text-base font-medium tracking-tight">
+                  <Activity className="h-4 w-4 text-primary/60" />
                   {t("dashboard.recentActivity.title")}
                 </CardTitle>
               </div>
@@ -1117,12 +1113,11 @@ export default function DashboardPage() {
           </Card>
 
           {/* Upcoming Tasks */}
-          <Card className="hover-lift rounded-2xl border-border/60 shadow-sm">
+          <Card className="rounded-xl border border-border shadow-sm">
             <CardHeader className="pb-2">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 mb-1">Action Items</p>
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-base font-extrabold tracking-tight">
-                  <ClipboardList className="h-4 w-4 text-amber-500" />
+                <CardTitle className="flex items-center gap-2 text-base font-medium tracking-tight">
+                  <ClipboardList className="h-4 w-4 text-amber-500/70" />
                   {t("dashboard.tasks.title")}
                 </CardTitle>
               </div>

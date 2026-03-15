@@ -83,28 +83,28 @@ export function AnalyticsCard({
   return (
     <Card
       className={cn(
-        "relative overflow-hidden bg-white/10 dark:bg-black/20 shadow-lg hover:shadow-xl transition-all duration-200 rounded-2xl p-0",
+        "relative overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-all duration-200 rounded-xl p-0",
         className
       )}
     >
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between mb-3">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60 leading-none pr-2">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between mb-2.5">
+          <p className="text-[11px] font-medium text-muted-foreground leading-none pr-2">
             {title}
           </p>
           {Icon && (
-            <div className={cn("p-2 rounded-xl border shrink-0", colors.bg)}>
+            <div className={cn("p-1.5 rounded-lg border shrink-0", colors.bg)}>
               <Icon className={cn("h-3.5 w-3.5", colors.icon)} />
             </div>
           )}
         </div>
 
-        <div className="text-[1.85rem] font-extrabold tracking-tight text-foreground leading-none mb-2">
+        <div className="text-2xl font-semibold tracking-tight text-foreground leading-none mb-1.5">
           {value}
         </div>
 
         {description && (
-          <p className="text-[11px] text-muted-foreground/70 leading-snug">{description}</p>
+          <p className="text-[11px] text-muted-foreground leading-snug">{description}</p>
         )}
 
         {trend && (
@@ -145,15 +145,15 @@ export function FinancialCard({
   return (
     <div
       className={cn(
-        "flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 rounded-2xl border backdrop-blur-lg",
-        "bg-white/10 dark:bg-black/20 border-white/20 dark:border-white/10",
+        "flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 rounded-xl border",
+        "bg-card border-border",
         className
       )}
     >
-      <span className={cn("font-semibold text-sm", variantClasses.text)}>
+      <span className={cn("font-medium text-sm", variantClasses.text)}>
         {label}
       </span>
-      <span className={cn("text-xl font-extrabold tracking-tight", variantClasses.text)}>
+      <span className={cn("text-xl font-semibold tracking-tight", variantClasses.text)}>
         {formatCurrencyValue(amount)}
       </span>
     </div>
@@ -171,19 +171,19 @@ export function MetricCard({
   const colors = iconColorClasses[iconColor];
 
   return (
-    <Card className={cn("rounded-2xl bg-white/10 dark:bg-black/20 shadow-lg", className)}>
-      <CardContent className="p-5">
-        <div className="flex items-center gap-3 mb-3">
+    <Card className={cn("rounded-xl bg-card border border-border shadow-sm", className)}>
+      <CardContent className="p-4">
+        <div className="flex items-center gap-3 mb-2.5">
           {Icon && (
-            <div className={cn("p-2 rounded-xl border", colors.bg)}>
-              <Icon className={cn("h-5 w-5", colors.icon)} />
+            <div className={cn("p-1.5 rounded-lg border", colors.bg)}>
+              <Icon className={cn("h-4 w-4", colors.icon)} />
             </div>
           )}
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+          <p className="text-[11px] font-medium text-muted-foreground">
             {title}
           </p>
         </div>
-        <div className="text-2xl font-extrabold tracking-tight text-foreground">{value}</div>
+        <div className="text-2xl font-semibold tracking-tight text-foreground">{value}</div>
         {subtitle && (
           <p className="text-[11px] text-muted-foreground/70 mt-1">{subtitle}</p>
         )}

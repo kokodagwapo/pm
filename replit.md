@@ -12,17 +12,15 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **LanguageSwitcher placement**: LandingHeader top bar (all landing pages incl. `/`), LandingHeader mobile dropdown menu, Dashboard `MobileHeader` (top bar, light variant), AdminTourWidget panel header (dark variant), Sign-in page (fixed overlay)
 - **Provider scope**: `LocalizationProvider` wraps the entire app via `src/components/providers/index.tsx`
 
-## Recent Design Updates
-- **App rebranded to "smartPM"**: Updated `LandingHeader.tsx` with new compact logo and name.
-- **Minimalist mobile header**: Home icon logo, animated hamburger (3-bar → X), cleaner desktop nav links, compact "Portal" CTA button.
-- **Mobile filter bar redesigned**: Two-row layout — Row 1: full-width search + List/Map toggle; Row 2: horizontally scrollable type/beds/filters/search controls. Much cleaner on small screens.
-- **Mobile map view improved**: On mobile, map view now scrolls — map at fixed height (~60vh) with NaplesAreaGuide (FAQs & area info) scrollable below it, matching the desktop experience.
-- **POI map buttons fly-to**: Clicking a POI category (Seed to Table, Whole Foods, etc.) now flies the map to that location. Single-location POIs zoom to level 16; multi-location categories fit bounds.
-- **Glassmorphic UI**: All cards (Card, AnalyticsCard, FinancialCard, MetricCard) updated with `backdrop-blur-xl`, `bg-white/10 dark:bg-black/20`, transparent borders `border-white/20`, and `shadow-lg`.
-- **Dashboard modernized**: 5xl/6xl gradient heading, emoji-labeled section headers ("⚡ Action Items", "📊 Empire at a Glance", "💰 Financial Performance", "🏘️ Property Breakdown", "💳 Payment Status"), larger alert count numbers.
+## Design System — Modern Minimalist (March 2026)
+- **Color palette**: Neutral zinc scale (background `#fafafa`, foreground `#18181b`, borders `#e4e4e7`). Primary indigo (`#4f46e5`). Dark mode uses `#09090b` / `#fafafa` / `#27272a` zinc tones.
+- **Typography**: Light/normal weight headings (font-light for hero, font-medium for section labels), no bold/extrabold. 11px uppercase tracking labels for metadata.
+- **Cards**: `rounded-xl border border-border shadow-sm` — flat, clean, no glassmorphism in dashboard. Hover: `shadow-md`.
+- **Sidebar**: White background, `w-60`, clean border. Active nav uses `text-primary bg-primary/8 font-medium`. Muted-foreground for inactive items.
+- **Dashboard**: Emoji-free section headers. Lighter greeting (font-light). KPI cards with compact padding. Charts in bordered cards.
+- **Landing page**: Preserved cinematic dark aesthetic with video background, ultra-thin typography (weight 100-300).
 - **Plus Jakarta Sans**: Applied to dashboard layout via `--font-jakarta`.
-- **Sidebar pastel icons**: Each nav item has a distinct pastel `iconColor` (sky, violet, emerald, amber, cyan, teal, orange, purple, rose, red, slate).
-- **Nav labels modernized**: Dashboard→Home, Properties→Listings, Tenants→Residents, Leases→Contracts, Maintenance→Work Orders, Payments→Billing, Analytics→Reports, Messages→Inbox, AI Help→Luna AI, Calendar→Schedule, Settings→Preferences, Admin→Control Panel.
+- **FlickeringGridBackground**: Removed from dashboard layout for cleaner appearance.
 
 ## Stack
 - **Framework**: Next.js 15.5.9 (App Router)

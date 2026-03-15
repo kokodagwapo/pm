@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
 import { useEffect, useState, useCallback, memo } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { FlickeringGridBackground } from "@/components/ui/flickering-grid-background";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -45,7 +44,7 @@ const MobileHeader = memo(function MobileHeader({
   router: any;
 }) {
   return (
-    <header className="flex h-14 md:h-16 items-center justify-between border-b border-border/30 bg-background/95 backdrop-blur-sm px-3 md:px-6 shrink-0 sticky top-0 z-30">
+    <header className="flex h-14 items-center justify-between border-b border-border bg-card px-3 md:px-6 shrink-0 sticky top-0 z-30">
       <div className="flex items-center gap-2 md:gap-4">
         <Button
           variant="ghost"
@@ -61,7 +60,7 @@ const MobileHeader = memo(function MobileHeader({
           <input
             type="search"
             placeholder="Search..."
-            className="w-40 md:w-56 lg:w-72 rounded-lg border border-border bg-background text-foreground pl-9 pr-3 py-2 text-sm placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-colors"
+            className="w-40 md:w-56 lg:w-72 rounded-lg border border-border bg-background text-foreground pl-9 pr-3 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-colors"
           />
         </div>
       </div>
@@ -178,8 +177,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const user = session?.user;
 
   return (
-    <div className="relative flex h-[100dvh] overflow-hidden">
-      <FlickeringGridBackground />
+    <div className="relative flex h-[100dvh] overflow-hidden bg-background">
       <div className="relative z-10 flex flex-1 min-w-0 h-full overflow-hidden">
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
@@ -215,8 +213,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto overscroll-contain">
-          <div className="p-3 md:p-6 min-h-full">{children}</div>
+        <main className="flex-1 overflow-y-auto overscroll-contain bg-background">
+          <div className="p-4 md:p-6 lg:p-8 min-h-full">{children}</div>
         </main>
       </div>
 

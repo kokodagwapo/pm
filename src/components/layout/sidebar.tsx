@@ -325,13 +325,13 @@ const NavItemComponent = memo(function NavItemComponent({
           level === 0 && "px-3 py-2 text-sm",
           level > 0 && "ml-5 pl-3 pr-3 py-1.5 text-xs",
           /* default state */
-          !isParentActive && "text-foreground/85 hover:text-foreground hover:bg-accent/60 active:bg-accent active:scale-[0.98]",
+          !isParentActive && "text-muted-foreground hover:text-foreground hover:bg-accent active:bg-accent active:scale-[0.98]",
           /* active top-level */
-          isParentActive && level === 0 && "text-primary bg-primary/8 font-semibold hover:bg-primary/12 active:bg-primary/16",
+          isParentActive && level === 0 && "text-primary bg-primary/8 font-medium hover:bg-primary/10",
           /* active child */
-          isActive && level > 0 && "text-primary bg-primary/8 font-semibold",
+          isActive && level > 0 && "text-primary bg-primary/8 font-medium",
           /* non-active child */
-          !isActive && level > 0 && "text-foreground/80 hover:text-foreground hover:bg-accent/50 active:scale-[0.98]",
+          !isActive && level > 0 && "text-muted-foreground hover:text-foreground hover:bg-accent active:scale-[0.98]",
           isCollapsed && level === 0 && "justify-center px-2",
         )}
       >
@@ -350,18 +350,18 @@ const NavItemComponent = memo(function NavItemComponent({
 
         {!isCollapsed && (
           <>
-            <span className={cn("flex-1 truncate font-medium tracking-[-0.01em]")}>
+            <span className="flex-1 truncate tracking-[-0.01em]">
               {safeTranslate(t, item.title)}
             </span>
             {item.badge && (
-              <span className="ml-auto flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
+              <span className="ml-auto flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
                 {item.badge}
               </span>
             )}
             {hasChildren && filteredChildren && filteredChildren.length > 0 && (
               <ChevronDown
                 className={cn(
-                  "h-3.5 w-3.5 shrink-0 text-foreground/40 transition-transform duration-250 ease-out",
+                  "h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-250 ease-out",
                   isExpanded && "rotate-180",
                 )}
               />
@@ -433,15 +433,15 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex flex-col h-[100dvh] md:h-full bg-card/95 border-r border-border/40",
-        "w-64 transition-all duration-300 ease-out",
+        "flex flex-col h-[100dvh] md:h-full bg-card border-r border-border",
+        "w-60 transition-all duration-300 ease-out",
         "[font-family:var(--font-jakarta),var(--font-inter),system-ui,sans-serif]",
         isCollapsed && "w-16",
         className,
       )}
     >
       {/* Header */}
-      <div className="flex items-center h-16 px-3 border-b border-border/40 shrink-0">
+      <div className="flex items-center h-14 px-3 border-b border-border shrink-0">
         {!isCollapsed && (
           <Link href="/dashboard" className="flex items-center opacity-90 hover:opacity-100 transition-opacity">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -458,7 +458,7 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            "ml-auto h-7 w-7 shrink-0 text-foreground/40 hover:text-foreground/70 hover:bg-accent/60 transition-all duration-200",
+            "ml-auto h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200",
             isCollapsed && "mx-auto",
           )}
         >
@@ -475,7 +475,7 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
         {filteredSections.map((section, sectionIndex) => (
           <div key={sectionIndex}>
             {section.title && !isCollapsed && (
-              <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-foreground/50">
+              <p className="px-3 pb-1 text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
                 {safeTranslate(t, section.title)}
               </p>
             )}
@@ -501,8 +501,8 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
 
       {/* User Profile */}
       {!isCollapsed && (
-        <div className="px-3 py-3 border-t border-border/40 shrink-0">
-          <div className="flex items-center gap-2.5 p-2 rounded-xl bg-accent/40 hover:bg-accent/60 transition-colors cursor-default">
+        <div className="px-3 py-3 border-t border-border shrink-0">
+          <div className="flex items-center gap-2.5 p-2 rounded-lg bg-accent hover:bg-accent/80 transition-colors cursor-default">
             <Avatar className="h-7 w-7 shrink-0">
               <AvatarImage src={avatarUrl || session.user?.avatar || ""} alt={session.user?.firstName || ""} />
               <AvatarFallback className="text-[10px] font-medium">
