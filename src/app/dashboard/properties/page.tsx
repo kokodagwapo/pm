@@ -1465,26 +1465,90 @@ export default function PropertiesPage() {
               )}
             </>
           ) : viewMode === "rows" ? (
-            /* Row View */
+            /* Row View with Featured Images */
             <>
-              <div className="space-y-4">
-                {properties.map((property) => (
-                  <PropertyRowCard
-                    key={property._id}
-                    property={property}
-                    onEdit={(property) =>
-                      router.push(`/dashboard/properties/${property._id}/edit`)
-                    }
-                    onDelete={handleDeleteClick}
-                    onView={(property) =>
-                      router.push(`/dashboard/properties/${property._id}`)
-                    }
-                    onCalendar={(property) =>
-                      router.push(`/dashboard/properties/${property._id}/calendar`)
-                    }
-                    deleteLoading={deleteLoading === property._id}
-                  />
-                ))}
+              <div className="space-y-3">
+                {properties.map((property) => {
+                  const featuredImage = getFeaturedImage(property);
+                  return (
+                    <Card
+                      key={property._id}
+                      className="overflow-hidden border-border hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => router.push(`/dashboard/properties/${property._id}`)}
+                    >
+                      <CardContent className="p-0">
+                        <div className="flex items-center gap-4">
+                          {featuredImage && (
+                            <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-l-lg">
+                              <img
+                                src={featuredImage}
+                                alt={property.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1 py-3 pr-4">
+                            <h3 className="font-semibold text-foreground line-clamp-1">
+                              {property.name}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              {property.address?.street}, {property.address?.city}
+                            </p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant="outline" className="text-xs">
+                                {property.totalUnits} units
+                              </Badge>
+                              <Badge
+                                variant="secondary"
+                                className="text-xs"
+                              >
+                                {t(
+                                  `properties.status.${property.status}`,
+                                  { defaultValue: property.status }
+                                )}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 px-4">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/dashboard/properties/${property._id}/calendar`);
+                              }}
+                            >
+                              <CalendarDays className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/dashboard/properties/${property._id}/edit`);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                <Button size="sm" variant="ghost">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleDeleteClick(property)}>
+                                  <Trash2 className="h-4 w-4 mr-2 text-red-600" />
+                                  <span className="text-red-600">Delete</span>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
               {pagination.total > 0 && (
                 <GlobalPagination
