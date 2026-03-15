@@ -303,15 +303,15 @@ export default function TenantDashboard({ className }: TenantDashboardProps) {
     <div className={`space-y-6 ${className ?? ""}`}>
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+        <div className="flex items-center gap-2">
+          <h1 className="text-sm font-medium text-foreground">
             {session?.user?.firstName
-              ? `${getGreeting()}, ${session.user.firstName}!`
-              : `${getGreeting()}!`}
+              ? `${getGreeting()}, ${session.user.firstName}`
+              : getGreeting()}
           </h1>
-          <p className="text-muted-foreground">
-            {t("dashboard.tenant.welcome")}
-          </p>
+          <span className="text-xs text-muted-foreground">
+            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+          </span>
         </div>
 
         <div className="flex items-center gap-3">
