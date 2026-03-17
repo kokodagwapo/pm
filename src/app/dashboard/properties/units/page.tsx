@@ -142,7 +142,7 @@ function UnitCard({ unit, onViewDetails }: UnitCardProps) {
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
           <div className="flex space-x-2">
             <Link
-              href={unit.unitId ? `/dashboard/properties/${unit._id}/units/${unit.unitId}` : `/dashboard/properties/${unit._id}`}
+              href={unit.unitId ? `/dashboard/properties/${String(unit._id)}/units/${String(unit.unitId)}` : `/dashboard/properties/${String(unit._id)}`}
             >
               <Button
                 size="sm"
@@ -205,13 +205,13 @@ function UnitCard({ unit, onViewDetails }: UnitCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onClick={() => onViewDetails(unit._id, unit.unitId)}
+                onClick={() => onViewDetails(String(unit._id), String(unit.unitId))}
               >
                 <Eye className="h-4 w-4 mr-2" />
                 {t("properties.available.menu.viewUnitDetails")}
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/properties/${unit._id}`}>
+                <Link href={`/dashboard/properties/${String(unit._id)}`}>
                   <Building2 className="h-4 w-4 mr-2" />
                   {t("properties.available.menu.viewProperty")}
                 </Link>
@@ -758,7 +758,7 @@ export default function AllUnitsPage() {
                           <div className="min-w-0 flex-1">
                             <div className="font-medium text-gray-900 dark:text-gray-100">
                               <Link
-                                href={unit.unitId ? `/dashboard/properties/${unit._id}/units/${unit.unitId}` : `/dashboard/properties/${unit._id}`}
+                                href={unit.unitId ? `/dashboard/properties/${String(unit._id)}/units/${String(unit.unitId)}` : `/dashboard/properties/${String(unit._id)}`}
                                 className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                               >
                                 {t("properties.available.card.unit")}{" "}
@@ -780,7 +780,7 @@ export default function AllUnitsPage() {
                         <div className="flex flex-col space-y-1">
                           <div className="font-medium text-gray-900 dark:text-gray-100">
                             <Link
-                              href={`/dashboard/properties/${unit._id}`}
+                              href={`/dashboard/properties/${String(unit._id)}`}
                               className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                             >
                               {unit.name}
@@ -848,14 +848,14 @@ export default function AllUnitsPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
                               onClick={() =>
-                                handleViewUnitDetails(unit._id, unit.unitId)
+                                handleViewUnitDetails(String(unit._id), String(unit.unitId))
                               }
                             >
                               <Eye className="h-4 w-4 mr-2" />
                               {t("properties.available.menu.viewUnitDetails")}
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                              <Link href={`/dashboard/properties/${unit._id}`}>
+                              <Link href={`/dashboard/properties/${String(unit._id)}`}>
                                 <Building2 className="h-4 w-4 mr-2" />
                                 {t("properties.available.menu.viewProperty")}
                               </Link>
