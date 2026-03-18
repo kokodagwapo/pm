@@ -106,9 +106,7 @@ const nextConfig: NextConfig = {
   webpack: (config, { dev }) => {
     if (dev) {
       config.watchOptions = {
-        poll: false,
-        aggregateTimeout: 2000,
-        ignored: /[\\/](node_modules|\.next|\.git|\.local|\.cache|\.mongodb-data|\.replit)[\\/]/,
+        ignored: /.*/,
       };
     }
     return config;

@@ -23,9 +23,9 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **FlickeringGridBackground**: Removed from dashboard layout for cleaner appearance.
 
 ## Dev Server Stability (Replit-specific)
-- **Turbopack disabled**: The `--turbopack` flag was removed from the dev script because Turbopack's file watcher is incompatible with Replit's cloud filesystem, causing an infinite Fast Refresh loop (~250ms rebuild cycles).
-- **Webpack watchOptions**: Configured in `next.config.ts` with `poll: false`, `aggregateTimeout: 2000`, and an `ignored` regex for `.next`, `node_modules`, `.git`, `.local`, `.cache`, `.mongodb-data`, `.replit` directories. This prevents phantom filesystem events from triggering unnecessary rebuilds.
-- **Do NOT re-add `--turbopack`** to the dev command — it will reintroduce the refresh loop on Replit.
+- **Turbopack disabled**: The `--turbopack` flag was removed from the dev script because Turbopack's file watcher is incompatible with Replit's cloud filesystem, causing an infinite Fast Refresh loop.
+- **File watcher disabled**: Webpack's file watcher is set to `ignored: /.*/` in `next.config.ts` because Replit's filesystem sends phantom inotify events (no actual file changes) that trigger constant recompiles and break the preview iframe. After code changes, restart the workflow to pick them up.
+- **Do NOT re-add `--turbopack`** or remove the `ignored: /.*/` watchOption — it will reintroduce the refresh loop on Replit.
 
 ## Stack
 - **Framework**: Next.js 15.5.12 (App Router)
