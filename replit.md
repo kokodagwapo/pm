@@ -22,6 +22,11 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Plus Jakarta Sans**: Applied to dashboard layout via `--font-jakarta`.
 - **FlickeringGridBackground**: Removed from dashboard layout for cleaner appearance.
 
+## Dev Server Stability (Replit-specific)
+- **Turbopack disabled**: The `--turbopack` flag was removed from the dev script because Turbopack's file watcher is incompatible with Replit's cloud filesystem, causing an infinite Fast Refresh loop (~250ms rebuild cycles).
+- **Webpack watchOptions**: Configured in `next.config.ts` with `poll: false`, `aggregateTimeout: 2000`, and an `ignored` regex for `.next`, `node_modules`, `.git`, `.local`, `.cache`, `.mongodb-data`, `.replit` directories. This prevents phantom filesystem events from triggering unnecessary rebuilds.
+- **Do NOT re-add `--turbopack`** to the dev command — it will reintroduce the refresh loop on Replit.
+
 ## Stack
 - **Framework**: Next.js 15.5.12 (App Router)
 - **Language**: TypeScript
