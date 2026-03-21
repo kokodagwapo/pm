@@ -1,10 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function ServiceWorkerRegistration() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     if (
+      !mounted ||
       typeof window === "undefined" ||
       !("serviceWorker" in navigator) ||
       process.env.NODE_ENV === "development"
@@ -30,7 +37,9 @@ export function ServiceWorkerRegistration() {
         });
       })
       .catch(() => {});
-  }, []);
+  }, [mounted]);
 
   return null;
 }
+
+export default ServiceWorkerRegistration;
