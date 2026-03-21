@@ -16,6 +16,7 @@ const replitDevOrigins: string[] = [
 ];
 
 const nextConfig: NextConfig = {
+  reactStrictMode: false,
   allowedDevOrigins: replitDevOrigins,
 
   // Inline for client bundles (next-auth/react). Must match the origin you use in the browser during dev.

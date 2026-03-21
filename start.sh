@@ -16,8 +16,9 @@ fi
 echo "Running auto-seed check..."
 node src/scripts/auto-seed.mjs
 
-if [ ! -f ".next/prerender-manifest.json" ] || [ "$FORCE_BUILD" = "1" ]; then
+if [ ! -f ".next/BUILD_ID" ] || [ "$FORCE_BUILD" = "1" ]; then
   echo "Building application..."
+  rm -rf .next
   npm run build
 else
   echo "Using existing build (set FORCE_BUILD=1 to rebuild)"

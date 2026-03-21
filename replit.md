@@ -29,6 +29,9 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Watcher is Replit-only**: The `ignored: /.*/` watchOption is gated behind `process.env.REPLIT_DEV_DOMAIN`, so local development (Cursor) gets normal Turbopack HMR.
 - **`.next` cache cleanup**: `dev.sh` runs `rm -rf .next` before starting Next.js to ensure a fresh build. Do NOT put `rm -rf .next` in `scripts/post-merge.sh` — that script runs while the dev server is still serving, and deleting `.next` mid-session causes permanent 500 errors (the server can't recover because the watcher is disabled).
 - **SSR hydration safety**: All providers (`DashboardAppearanceProvider`, `LocalizationProvider`, `localization.service.ts`) use stable SSR-safe defaults ("immersive", "en-US", "USD") in initial state. Client-side localStorage values are applied only in `useEffect` after hydration.
+- **React Strict Mode disabled**: `reactStrictMode: false` in `next.config.ts` to prevent double-mounting of components in dev mode, which exacerbates hydration issues on Replit.
+- **Auto-recovering error boundaries**: `global-error.tsx` and `error.tsx` detect hydration-related errors and auto-retry via `reset()` after 200ms. This prevents blank-page crashes from Fast Refresh module updates during initial page compilation.
+- **Production build limitation**: The production build (`next build`) requires more memory than Replit's container provides (~1.5GB available). The app runs in dev mode on Replit; use `start.sh` with `BUILD_ID` check for local/Docker production builds.
 
 ## Local Development (Cursor + Docker)
 - **Docker**: `docker-compose.dev.yml` runs MongoDB 7 on port 27017

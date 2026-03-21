@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -105,29 +105,40 @@ function getErrorMessage(type: string, error: Error) {
   }
 }
 
+const MAX_AUTO_RETRIES = 3;
+
 export default function ErrorPage({ error, reset }: ErrorPageProps) {
   const router = useRouter();
+  const retryCount = useRef(0);
   const errorType = getErrorType(error);
   const errorInfo = getErrorMessage(errorType, error);
   const ErrorIcon = getErrorIcon(errorType);
 
   useEffect(() => {
-    // Log error to console in development
+    const msg = error.message?.toLowerCase() || "";
+    const isHydrationError =
+      msg.includes("hydration") ||
+      msg.includes("server rendered html") ||
+      msg.includes("text content does not match") ||
+      msg.includes("invalid hook call") ||
+      msg.includes("minified react error") ||
+      msg.includes("$refreshreg$");
+
+    if (isHydrationError && retryCount.current < MAX_AUTO_RETRIES) {
+      retryCount.current += 1;
+      console.warn(`[SmartStartPM] Auto-recovering from hydration error (attempt ${retryCount.current}/${MAX_AUTO_RETRIES})`);
+      const timer = setTimeout(() => reset(), 200);
+      return () => clearTimeout(timer);
+    }
+
     if (process.env.NODE_ENV === "development") {
       console.error("Application Error:", {
         message: error.message,
-        stack: error.stack,
         digest: error.digest,
         type: errorType,
       });
     }
-
-    // Log error to monitoring service in production
-    if (process.env.NODE_ENV === "production") {
-      // TODO: Send to error monitoring service (e.g., Sentry, LogRocket)
-      console.error("Error digest:", error.digest);
-    }
-  }, [error, errorType]);
+  }, [error, errorType, reset]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20">

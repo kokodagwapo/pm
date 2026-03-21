@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   AlertTriangle,
   RefreshCw,
@@ -12,26 +12,34 @@ interface GlobalErrorProps {
   reset: () => void;
 }
 
+const MAX_AUTO_RETRIES = 3;
+
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
+  const retryCount = useRef(0);
+
   useEffect(() => {
-    // Log critical error
+    const msg = error.message?.toLowerCase() || "";
+    const isHydrationError =
+      msg.includes("hydration") ||
+      msg.includes("server rendered html") ||
+      msg.includes("text content does not match") ||
+      msg.includes("invalid hook call") ||
+      msg.includes("minified react error") ||
+      msg.includes("$refreshreg$");
+
+    if (isHydrationError && retryCount.current < MAX_AUTO_RETRIES) {
+      retryCount.current += 1;
+      console.warn(`[SmartStartPM] Auto-recovering from hydration error (attempt ${retryCount.current}/${MAX_AUTO_RETRIES})`);
+      const timer = setTimeout(() => reset(), 200);
+      return () => clearTimeout(timer);
+    }
+
     console.error("Critical Application Error:", {
       message: error.message,
-      stack: error.stack,
       digest: error.digest,
       timestamp: new Date().toISOString(),
     });
-
-    // In production, send to error monitoring service
-    if (process.env.NODE_ENV === "production") {
-      // TODO: Send to error monitoring service (e.g., Sentry, LogRocket)
-      try {
-        // Example: Sentry.captureException(error);
-      } catch (e) {
-        console.error("Failed to log error to monitoring service:", e);
-      }
-    }
-  }, [error]);
+  }, [error, reset]);
 
   return (
     <html lang="en">
