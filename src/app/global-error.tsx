@@ -32,27 +32,32 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   const [showUI, setShowUI] = useState(false);
 
   useEffect(() => {
-    const isTransient = isTransientDevError(error);
+    try {
+      const isTransient = isTransientDevError(error);
 
-    if (isTransient) {
-      if (retryCount.current < MAX_AUTO_RETRIES) {
-        retryCount.current += 1;
-        const timer = setTimeout(() => reset(), 500 * retryCount.current);
-        return () => clearTimeout(timer);
-      }
-      if (typeof window !== "undefined") {
-        const key = "__smartstart_reload";
-        const count = parseInt(sessionStorage.getItem(key) || "0", 10);
-        if (count < 2) {
-          sessionStorage.setItem(key, String(count + 1));
-          window.location.reload();
-          return;
+      if (isTransient) {
+        if (retryCount.current < MAX_AUTO_RETRIES) {
+          retryCount.current += 1;
+          const timer = setTimeout(() => reset && reset(), 500 * retryCount.current);
+          return () => clearTimeout(timer);
         }
-        sessionStorage.removeItem(key);
+        if (typeof window !== "undefined") {
+          const key = "__smartstart_reload";
+          const count = parseInt(sessionStorage.getItem(key) || "0", 10);
+          if (count < 2) {
+            sessionStorage.setItem(key, String(count + 1));
+            window.location.reload();
+            return;
+          }
+          sessionStorage.removeItem(key);
+        }
       }
-    }
 
-    setShowUI(true);
+      setShowUI(true);
+    } catch (err) {
+      // Fallback: show error UI on any exception
+      setShowUI(true);
+    }
   }, [error, reset]);
 
   if (!showUI) {
