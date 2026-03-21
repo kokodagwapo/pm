@@ -13,5 +13,4 @@ fi
 
 node src/scripts/auto-seed.mjs
 
-# Replit workflow waits on externalPort 5000 (.replit waitForPort = 5000)
-exec npm run dev:5000
+exec npm run dev
