@@ -62,24 +62,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="SmartStartPM" />
-        {process.env.NODE_ENV === 'development' && (
-          <script dangerouslySetInnerHTML={{ __html: `
-            (function(){
-              window.addEventListener('error',function(e){
-                var s=(e&&e.message)||'';var t=(e&&e.error&&e.error.stack)||'';
-                if(t.indexOf('options.factory')!==-1||t.indexOf('webpack_require')!==-1||(s.indexOf("reading 'call'")!==-1&&t.indexOf('webpack')!==-1)){
-                  e.preventDefault();e.stopImmediatePropagation();return false;
-                }
-              },true);
-              window.addEventListener('unhandledrejection',function(e){
-                var t=(e&&e.reason&&e.reason.stack)||'';
-                if(t.indexOf('options.factory')!==-1||t.indexOf('webpack_require')!==-1){
-                  e.preventDefault();
-                }
-              });
-            })();
-          `}} />
-        )}
       </head>
       <body className={`${inter.variable} ${inter.className} ${playfair.variable} ${montserrat.variable} ${plusJakarta.variable} font-light`} suppressHydrationWarning>
         <Providers>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -110,7 +110,7 @@ const MAX_AUTO_RETRIES = 3;
 export default function ErrorPage({ error, reset }: ErrorPageProps) {
   const router = useRouter();
   const retryCount = useRef(0);
-  const loggedRef = useRef(false);
+  const [showUI, setShowUI] = useState(false);
   const errorType = getErrorType(error);
   const errorInfo = getErrorMessage(errorType, error);
   const ErrorIcon = getErrorIcon(errorType);
@@ -118,16 +118,18 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
   useEffect(() => {
     const msg = error.message?.toLowerCase() || "";
     const stack = error.stack?.toLowerCase() || "";
+    const isWebpackError =
+      (msg.includes("cannot read properties of undefined") && msg.includes("'call'")) ||
+      stack.includes("options.factory") ||
+      stack.includes("webpack_require");
     const isTransientDevError =
+      isWebpackError ||
       msg.includes("hydration") ||
       msg.includes("server rendered html") ||
       msg.includes("text content does not match") ||
       msg.includes("invalid hook call") ||
       msg.includes("minified react error") ||
-      msg.includes("$refreshreg$") ||
-      (msg.includes("cannot read properties of undefined") && msg.includes("'call'")) ||
-      stack.includes("options.factory") ||
-      stack.includes("webpack_require");
+      msg.includes("$refreshreg$");
 
     if (isTransientDevError) {
       if (retryCount.current < MAX_AUTO_RETRIES) {
@@ -135,21 +137,22 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
         const timer = setTimeout(() => reset(), 500 * retryCount.current);
         return () => clearTimeout(timer);
       }
-      if (process.env.NODE_ENV === "development" && !loggedRef.current) {
-        loggedRef.current = true;
-        console.warn("[SmartStartPM] Transient dev error persisted after retries:", msg.slice(0, 100));
+      if (isWebpackError && typeof window !== "undefined") {
+        const key = "__smartstart_reload";
+        const count = parseInt(sessionStorage.getItem(key) || "0", 10);
+        if (count < 2) {
+          sessionStorage.setItem(key, String(count + 1));
+          window.location.reload();
+          return;
+        }
+        sessionStorage.removeItem(key);
       }
-      return;
     }
 
-    if (process.env.NODE_ENV === "development") {
-      console.error("Application Error:", {
-        message: error.message,
-        digest: error.digest,
-        type: errorType,
-      });
-    }
+    setShowUI(true);
   }, [error, errorType, reset]);
+
+  if (!showUI) return null;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20">
