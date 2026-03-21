@@ -13,6 +13,6 @@
   </g>
   <!-- SmartStartPM text -->
   <text x="48" y="26" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif" font-size="18" font-weight="600" fill="#0F172A" letter-spacing="-0.3">
-    <tspan>Smart</tspan><tspan fill="url(#brandGradient)">Start</tspan><tspan fill="#64748B" font-weight="500" font-size="14">PM</tspan>
+    <tspan fill="#FFFFFF">Smart</tspan><tspan fill="url(#brandGradient)">Start</tspan><tspan fill="#94A3B8" font-weight="500" font-size="14">PM</tspan>
   </text>
 </svg>
