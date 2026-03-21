@@ -23,17 +23,17 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **FlickeringGridBackground**: Removed from dashboard layout for cleaner appearance.
 
 ## Dev Server Stability (Replit-specific)
-- **Turbopack disabled**: The `--turbopack` flag was removed from the Replit dev scripts (`dev`, `dev:5000`) because Turbopack's file watcher is incompatible with Replit's cloud filesystem, causing an infinite Fast Refresh loop. Only `dev:local` uses `--turbopack` (for local Cursor development).
-- **File watcher disabled**: Webpack's file watcher is set to `ignored: /.*/` in `next.config.ts` because Replit's filesystem sends phantom inotify events (no actual file changes) that trigger constant recompiles and break the preview iframe. After code changes, restart the workflow to pick them up.
-- **Do NOT re-add `--turbopack`** to Replit-facing scripts or remove the `ignored: /.*/` watchOption — it will reintroduce the refresh loop on Replit.
-- **Watcher is Replit-only**: The `ignored: /.*/` watchOption is gated behind `process.env.REPLIT_DEV_DOMAIN`, so local development (Cursor) gets normal Turbopack HMR.
+- **Run button uses production**: The `Project` workflow in `.replit` runs `bash start.sh` → `npm run build` (if needed) → `npm run start` on port 5000 for a stable webview (no HMR). Use `bash dev.sh` only when you need webpack dev; restart after edits on Replit.
+- **Turbopack disabled**: Replit-facing scripts (`dev`, `dev:5000`) do not use Turbopack. `dev:local` uses webpack on port 3000 for Cursor/local development.
+- **File watcher on Replit dev**: `next.config.ts` sets `watchOptions.ignored: /.*/` when `REPLIT_DEV_DOMAIN` or `REPL_ID` is set so phantom FS events do not spin the dev server. Local development without those env vars gets normal webpack HMR.
+- **Do NOT re-add `--turbopack`** to Replit-facing scripts or remove the `ignored: /.*/` watchOption on Replit without testing — it can reintroduce refresh loops.
 - **`.next` cache cleanup**: `dev.sh` runs `rm -rf .next` before starting Next.js to ensure a fresh build. Do NOT put `rm -rf .next` in `scripts/post-merge.sh` — that script runs while the dev server is still serving, and deleting `.next` mid-session causes permanent 500 errors (the server can't recover because the watcher is disabled).
 - **SSR hydration safety**: All providers (`DashboardAppearanceProvider`, `LocalizationProvider`, `localization.service.ts`) use stable SSR-safe defaults ("immersive", "en-US", "USD") in initial state. Client-side localStorage values are applied only in `useEffect` after hydration.
 - **React Strict Mode disabled**: `reactStrictMode: false` in `next.config.ts` to prevent double-mounting of components in dev mode, which exacerbates hydration issues on Replit.
 - **Auto-recovering error boundaries**: `global-error.tsx` and `error.tsx` detect transient dev errors (webpack chunk loading, hydration, invalid hook calls) and auto-retry via `reset()` with 500ms×attempt backoff (max 3 retries). After exhausting retries, a single throttled `console.warn` is emitted (dev-only). No `console.error` is logged for transient dev errors.
 - **Webpack error guard (BannerPlugin)**: `next.config.ts` uses `webpack.BannerPlugin` to inject a dev-only error event listener into `webpack|main-app|app-pages` chunks. This catches `options.factory` / `webpack_require` errors at the window level and prevents the Next.js dev overlay from appearing. The guard is gated behind `dev && !isServer` — production never runs this code.
 - **Transient webpack race condition**: On Replit's slow environment, initial route compilation triggers a brief webpack chunk loading race condition (`options.factory` is undefined). This causes 1-2 Fast Refresh full reloads before the page stabilizes. This is a known Next.js dev-mode limitation on cloud environments and does NOT affect production builds or end users.
-- **Production build limitation**: The production build (`next build`) requires more memory than Replit's container provides (~1.5GB available). The app runs in dev mode on Replit; use `start.sh` with `BUILD_ID` check for local/Docker production builds.
+- **Production build memory**: `npm run build` uses a constrained heap in `package.json` for Replit-sized containers. If `start.sh` fails during build, use a larger Repl or build in CI/Docker, then deploy artifacts.
 
 ## PWA & Mobile
 - **Manifest**: `public/manifest.json` — `start_url: /dashboard`, `theme_color: #4f46e5`, PNG icons (72–512px) with maskable entries for 192/512.
@@ -46,7 +46,7 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 ## Local Development (Cursor + Docker)
 - **Docker**: `docker-compose.dev.yml` runs MongoDB 7 on port 27017
 - **Env vars**: Copy `.env.local.example` to `.env.local` and fill in values
-- **Quick start**: `npm run setup:local` (starts Docker MongoDB + seeds data), then `npm run dev:local` (Turbopack on port 3000)
+- **Quick start**: `npm run setup:local` (starts Docker MongoDB + seeds data), then `npm run dev:local` (port 3000)
 - **Scripts**: `npm run docker:up`, `docker:down`, `docker:logs` for container management
 - **Production Docker**: `docker compose up` uses the full `docker-compose.yml` with Dockerfile to build and run app + MongoDB together
 
@@ -78,9 +78,9 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - `src/locales/` - i18n translations
 
 ## Running (Replit)
-- Workflow: `bash dev.sh` — starts local MongoDB, runs auto-seed, cleans `.next`, then `next dev` (webpack, no Turbopack) on port 5000
-- Dev: `npm run dev` (port 5000, webpack mode — for Replit workflow)
-- Dev local: `npm run dev:local` (port 3000, Turbopack — for local Cursor development)
+- **Run button (Project workflow)**: `bash start.sh` — MongoDB, auto-seed, conditional `npm run build`, then `next start` on port 5000 (stable preview).
+- **Manual dev**: `bash dev.sh` — MongoDB, auto-seed, stops stale `next dev`, clears `.next`, then `next dev` (webpack, port 5000). Prefer **Run** (`start.sh`) for daily preview; restart dev after edits when the watcher is ignored on Replit.
+- **Local (Cursor)**: `npm run dev:local` — port 3000, webpack (no Turbopack).
 - Build: `npm run build`
 - Start: `npm run start` (port 5000, bound to 0.0.0.0)
 

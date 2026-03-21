@@ -279,22 +279,22 @@ export default function PropertyDetailsPage() {
   // Show loading skeleton while fetching data
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 space-y-6">
+      <div className="container mx-auto space-y-6 px-3 py-5 sm:px-4 sm:py-6 md:py-8">
         {/* Header Skeleton */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="animate-pulse h-10 w-32 bg-gray-200 dark:bg-gray-800 rounded-md" />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:space-x-4 sm:gap-0">
+            <div className="animate-pulse h-10 w-full max-w-[11rem] rounded-md bg-gray-200 dark:bg-gray-800 sm:w-32" />
             <div className="space-y-2">
-              <div className="animate-pulse h-9 w-64 bg-gray-200 dark:bg-gray-800 rounded-md" />
-              <div className="flex items-center space-x-2">
-                <div className="animate-pulse h-6 w-20 bg-gray-200 dark:bg-gray-800 rounded-md" />
-                <div className="animate-pulse h-6 w-24 bg-gray-200 dark:bg-gray-800 rounded-md" />
+              <div className="animate-pulse h-9 w-full max-w-md rounded-md bg-gray-200 dark:bg-gray-800" />
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="animate-pulse h-6 w-20 rounded-md bg-gray-200 dark:bg-gray-800" />
+                <div className="animate-pulse h-6 w-24 rounded-md bg-gray-200 dark:bg-gray-800" />
               </div>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="animate-pulse h-10 w-32 bg-gray-200 dark:bg-gray-800 rounded-md" />
-            <div className="animate-pulse h-10 w-10 bg-gray-200 dark:bg-gray-800 rounded-md" />
+          <div className="flex flex-wrap gap-2">
+            <div className="animate-pulse h-10 flex-1 min-w-[7rem] rounded-md bg-gray-200 dark:bg-gray-800 sm:flex-none sm:w-32" />
+            <div className="animate-pulse h-10 w-10 rounded-md bg-gray-200 dark:bg-gray-800" />
           </div>
         </div>
 
@@ -320,7 +320,7 @@ export default function PropertyDetailsPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 py-5 sm:px-4 sm:py-6 md:py-8">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <h3 className={cn("mb-2 text-lg font-semibold", txTitle)}>
@@ -354,7 +354,7 @@ export default function PropertyDetailsPage() {
 
   if (!property) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 py-5 sm:px-4 sm:py-6 md:py-8">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <h3 className={cn("mb-2 text-lg font-semibold", txTitle)}>
@@ -379,73 +379,92 @@ export default function PropertyDetailsPage() {
   return (
     <div
       className={cn(
-        "container mx-auto space-y-6 px-4 py-8",
+        "container mx-auto space-y-5 px-3 py-5 sm:space-y-6 sm:px-4 sm:py-6 md:py-8",
         isLight && "text-slate-900"
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="flex min-w-0 flex-col gap-3">
           <Button
             size="sm"
             variant="outline"
             onClick={() => router.push("/dashboard/properties")}
             className={cn(
-              "flex shrink-0 items-center space-x-1",
+              "flex w-full shrink-0 items-center justify-center gap-1.5 sm:w-auto sm:justify-start",
               outlineActions
             )}
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span>{t("properties.details.actions.backToList")}</span>
+            <ArrowLeft className="h-4 w-4 shrink-0" />
+            <span className="truncate">
+              {t("properties.details.actions.backToList")}
+            </span>
           </Button>
-          <h1
-            className={cn(
-              "truncate text-lg font-semibold",
-              isLight ? "text-slate-900" : "text-foreground"
-            )}
-          >
-            {property?.name || t("properties.details.unknownProperty")}
-          </h1>
-          {property?.status && (
-            <Badge variant="outline" className="shrink-0">
-              {t(`properties.status.${property.status}`)}
-            </Badge>
-          )}
-          {property?.type && (
-            <Badge variant="secondary" className="shrink-0">
-              {t(`properties.type.${property.type}`)}
-            </Badge>
-          )}
+          <div className="min-w-0 space-y-2">
+            <h1
+              className={cn(
+                "break-words text-base font-semibold sm:text-lg",
+                isLight ? "text-slate-900" : "text-foreground"
+              )}
+            >
+              {property?.name || t("properties.details.unknownProperty")}
+            </h1>
+            <div className="flex flex-wrap items-center gap-2">
+              {property?.status && (
+                <Badge variant="outline" className="shrink-0">
+                  {t(`properties.status.${property.status}`)}
+                </Badge>
+              )}
+              {property?.type && (
+                <Badge variant="secondary" className="shrink-0">
+                  {t(`properties.type.${property.type}`)}
+                </Badge>
+              )}
+            </div>
+          </div>
         </div>
 
         {canModifyProperty() && (
-          <div className="flex items-center space-x-2 shrink-0">
+          <div className="flex flex-wrap gap-2 sm:max-w-none sm:shrink-0 sm:justify-end">
             <Button
               size="sm"
               variant="outline"
-              onClick={() => router.push(`/dashboard/properties/${propertyId}/calendar`)}
-              className={cn("flex items-center space-x-2", outlineActions)}
+              onClick={() =>
+                router.push(`/dashboard/properties/${propertyId}/calendar`)
+              }
+              title={t("nav.calendar")}
+              className={cn(
+                "flex min-h-10 flex-1 items-center justify-center gap-2 text-xs sm:flex-none sm:text-sm",
+                outlineActions
+              )}
             >
-              <Calendar className="h-4 w-4" />
-              <span>Calendar</span>
+              <Calendar className="h-4 w-4 shrink-0" />
+              <span className="text-center">{t("nav.calendar")}</span>
             </Button>
             <Button
               size="sm"
               variant="outline"
               onClick={handleEditProperty}
-              className={cn("flex items-center space-x-2", outlineActions)}
+              className={cn(
+                "flex min-h-10 flex-1 items-center justify-center gap-2 text-xs sm:flex-none sm:text-sm",
+                outlineActions
+              )}
             >
-              <Edit className="h-4 w-4" />
-              <span>{t("properties.details.actions.editProperty")}</span>
+              <Edit className="h-4 w-4 shrink-0" />
+              <span className="truncate">
+                {t("properties.details.actions.editProperty")}
+              </span>
             </Button>
             <Button
               size="sm"
               variant="outline"
               onClick={() => setShowDeleteDialog(true)}
-              className="flex items-center space-x-2 border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+              className="flex min-h-10 flex-1 items-center justify-center gap-2 border-red-200 text-xs text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700 sm:flex-none sm:text-sm"
             >
-              <Trash2 className="h-4 w-4" />
-              <span>{t("properties.details.actions.deleteProperty")}</span>
+              <Trash2 className="h-4 w-4 shrink-0" />
+              <span className="truncate">
+                {t("properties.details.actions.deleteProperty")}
+              </span>
             </Button>
           </div>
         )}
@@ -458,7 +477,7 @@ export default function PropertyDetailsPage() {
       >
         <div
           className={cn(
-            "rounded-xl border p-2 shadow-sm",
+            "rounded-xl border p-1.5 shadow-sm sm:p-2",
             isLight
               ? "border-slate-200/90 bg-white/90"
               : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
@@ -466,14 +485,14 @@ export default function PropertyDetailsPage() {
         >
           <TabsList
             className={cn(
-              "grid h-auto w-full grid-cols-5 gap-2 rounded-lg bg-transparent",
+              "grid h-auto w-full grid-cols-2 gap-1.5 rounded-lg bg-transparent sm:grid-cols-3 md:grid-cols-5 md:gap-2",
               isLight && "text-slate-800"
             )}
           >
             <TabsTrigger
               value="overview"
               className={cn(
-                "flex items-center gap-2 rounded-lg bg-transparent px-3 py-2 text-sm font-medium transition-all duration-200",
+                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
                   ? "text-slate-800 hover:bg-slate-100/90"
                   : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -485,7 +504,7 @@ export default function PropertyDetailsPage() {
             <TabsTrigger
               value="details"
               className={cn(
-                "flex items-center gap-2 rounded-lg bg-transparent px-3 py-2 text-sm font-medium transition-all duration-200",
+                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
                   ? "text-slate-800 hover:bg-slate-100/90"
                   : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -497,7 +516,7 @@ export default function PropertyDetailsPage() {
             <TabsTrigger
               value="units"
               className={cn(
-                "flex items-center gap-2 rounded-lg bg-transparent px-3 py-2 text-sm font-medium transition-all duration-200",
+                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
                   ? "text-slate-800 hover:bg-slate-100/90"
                   : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -509,7 +528,7 @@ export default function PropertyDetailsPage() {
             <TabsTrigger
               value="images"
               className={cn(
-                "flex items-center gap-2 rounded-lg bg-transparent px-3 py-2 text-sm font-medium transition-all duration-200",
+                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
                   ? "text-slate-800 hover:bg-slate-100/90"
                   : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -521,7 +540,7 @@ export default function PropertyDetailsPage() {
             <TabsTrigger
               value="amenities"
               className={cn(
-                "flex items-center gap-2 rounded-lg bg-transparent px-3 py-2 text-sm font-medium transition-all duration-200",
+                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
                   ? "text-slate-800 hover:bg-slate-100/90"
                   : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -627,14 +646,14 @@ export default function PropertyDetailsPage() {
           {/* Multi-Unit Property Statistics - Minimal Style */}
           {property?.isMultiUnit && units.length > 0 && (
             <Card className="border p-0 border-gray-100 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-900 overflow-hidden">
-              <CardHeader className="bg-blue-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 p-6">
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+              <CardHeader className="border-b border-gray-100 bg-blue-50 p-4 dark:border-gray-700 dark:bg-gray-800 sm:p-6">
+                <CardTitle className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-center space-x-3">
+                    <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900">
                       <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <div>
-                      <h3 className={cn("text-xl font-bold", txTitle)}>
+                    <div className="min-w-0">
+                      <h3 className={cn("text-lg font-bold sm:text-xl", txTitle)}>
                         {t("properties.details.overview.occupancy.title")}
                       </h3>
                       <p className={cn("text-sm", txBody)}>
@@ -642,25 +661,26 @@ export default function PropertyDetailsPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
                     <Button
                       variant="outline"
                       onClick={() => setActiveTab("units")}
                       className={cn(
+                        "w-full justify-center sm:w-auto",
                         outlineActions,
                         !isLight &&
                           "border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
                       )}
                     >
-                      <Eye className="h-4 w-4 mr-2" />
+                      <Eye className="mr-2 h-4 w-4" />
                       {t("properties.details.overview.actions.viewAllUnits")}
                     </Button>
                     {canModifyProperty() && (
                       <Button
                         onClick={() => setShowAddUnitDialog(true)}
-                        className="bg-blue-600 text-white hover:bg-blue-700"
+                        className="w-full justify-center bg-blue-600 text-white hover:bg-blue-700 sm:w-auto"
                       >
-                        <Building2 className="h-4 w-4 mr-2" />
+                        <Building2 className="mr-2 h-4 w-4" />
                         {t("properties.details.overview.actions.addUnit")}
                       </Button>
                     )}

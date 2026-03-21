@@ -5,6 +5,10 @@ const r2PublicUrl =
   process.env.NEXT_PUBLIC_R2_PUBLIC_URL || process.env.R2_PUBLIC_URL;
 const r2Hostname = r2PublicUrl ? new URL(r2PublicUrl).hostname : null;
 
+/** Replit sets REPL_ID; REPLIT_DEV_DOMAIN is not always present during dev. */
+const isReplitRuntime =
+  Boolean(process.env.REPLIT_DEV_DOMAIN) || Boolean(process.env.REPL_ID);
+
 const replitDevOrigins: string[] = [
   ...(process.env.REPLIT_DEV_DOMAIN ? [process.env.REPLIT_DEV_DOMAIN, `https://${process.env.REPLIT_DEV_DOMAIN}`] : []),
   ...(process.env.REPLIT_DOMAINS
@@ -114,7 +118,8 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
 
   webpack: (config, { dev, isServer }) => {
-    if (dev && process.env.REPLIT_DEV_DOMAIN) {
+    // Replit’s synced FS fires bogus watch events → endless recompiles / OOM / crashed dev server.
+    if (dev && isReplitRuntime) {
       config.watchOptions = {
         ignored: /.*/,
       };

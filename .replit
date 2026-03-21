@@ -25,9 +25,10 @@ author = "agent"
 [workflows.workflow.metadata]
 outputType = "webview"
 
+# Production server (next start) — avoids Replit filesystem + HMR rebuild loops that crash Next dev.
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "bash dev.sh"
+args = "bash start.sh"
 waitForPort = 5000
 
 [[ports]]
