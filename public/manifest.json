@@ -1,12 +1,12 @@
 {
   "name": "SmartStartPM",
   "short_name": "SmartStartPM",
-  "description": "Naples, FL vacation rentals and property management",
-  "start_url": "/rentals",
+  "description": "Enterprise property management — leases, maintenance, tenants, and financial analytics",
+  "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#0ea5e9",
-  "orientation": "portrait-primary",
+  "background_color": "#09090b",
+  "theme_color": "#4f46e5",
+  "orientation": "any",
   "scope": "/",
   "lang": "en-US",
   "categories": ["business", "productivity", "finance"],
@@ -15,49 +15,61 @@
       "src": "/icons/icon-72x72.png",
       "sizes": "72x72",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-96x96.png",
       "sizes": "96x96",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-128x128.png",
       "sizes": "128x128",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-144x144.png",
       "sizes": "144x144",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-152x152.png",
       "sizes": "152x152",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-384x384.png",
       "sizes": "384x384",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
@@ -65,93 +77,30 @@
       "name": "Dashboard",
       "short_name": "Dashboard",
       "description": "View property management dashboard",
-      "url": "/dashboard",
-      "icons": [
-        {
-          "src": "/icons/shortcut-dashboard.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
+      "url": "/dashboard"
     },
     {
       "name": "Properties",
       "short_name": "Properties",
       "description": "Manage properties",
-      "url": "/dashboard/properties",
-      "icons": [
-        {
-          "src": "/icons/shortcut-properties.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
+      "url": "/dashboard/properties"
     },
     {
       "name": "Tenants",
       "short_name": "Tenants",
       "description": "Manage tenants",
-      "url": "/dashboard/tenants",
-      "icons": [
-        {
-          "src": "/icons/shortcut-tenants.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
+      "url": "/dashboard/tenants"
     },
     {
       "name": "Payments",
       "short_name": "Payments",
       "description": "Track payments",
-      "url": "/dashboard/payments",
-      "icons": [
-        {
-          "src": "/icons/shortcut-payments.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/desktop-dashboard.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "PropertyPro Dashboard - Desktop View"
-    },
-    {
-      "src": "/screenshots/mobile-dashboard.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "PropertyPro Dashboard - Mobile View"
-    },
-    {
-      "src": "/screenshots/mobile-properties.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Property Management - Mobile View"
-    },
-    {
-      "src": "/screenshots/mobile-payments.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Payment Tracking - Mobile View"
+      "url": "/dashboard/payments"
     }
   ],
   "related_applications": [],
   "prefer_related_applications": false,
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
   "launch_handler": {
     "client_mode": "navigate-existing"
-  },
-  "handle_links": "preferred",
-  "capture_links": "existing-client-navigate"
+  }
 }

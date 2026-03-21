@@ -69,7 +69,7 @@ const TenantDashboard = dynamic(
     loading: () => (
       <ResponsiveLayout>
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between" data-slot="page-header">
             <div>
               <div className="h-8 w-64 bg-gray-200 rounded animate-pulse mb-2" />
               <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />

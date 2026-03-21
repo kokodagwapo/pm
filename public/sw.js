@@ -1,32 +1,21 @@
 /**
  * PropertyPro - Service Worker
  * Provides offline functionality and caching for PWA
+ * NOTE: Only caches static assets and public pages. Authenticated API
+ * responses are NEVER cached to prevent PII exposure on shared devices.
  */
 
-const CACHE_NAME = "PropertyPro-v1.0.0";
-const STATIC_CACHE_NAME = "PropertyPro-static-v1.0.0";
-const DYNAMIC_CACHE_NAME = "PropertyPro-dynamic-v1.0.0";
+const CACHE_NAME = "SmartStartPM-v1.2.0";
+const STATIC_CACHE_NAME = "SmartStartPM-static-v1.2.0";
+const DYNAMIC_CACHE_NAME = "SmartStartPM-dynamic-v1.2.0";
 
-// Static assets to cache immediately
 const STATIC_ASSETS = [
   "/",
-  "/dashboard",
   "/manifest.json",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
-  // Add other critical static assets
 ];
 
-// API endpoints to cache
-const API_CACHE_PATTERNS = [
-  /^\/api\/dashboard/,
-  /^\/api\/properties/,
-  /^\/api\/tenants/,
-  /^\/api\/payments/,
-  /^\/api\/user/,
-];
-
-// Install event - cache static assets
 self.addEventListener("install", (event) => {
   console.log("Service Worker: Installing...");
 
@@ -47,7 +36,6 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Activate event - clean up old caches
 self.addEventListener("activate", (event) => {
   console.log("Service Worker: Activating...");
 
@@ -75,101 +63,38 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Fetch event - handle requests with caching strategies
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests
   if (request.method !== "GET") {
     return;
   }
 
-  // Skip chrome-extension requests
   if (url.protocol === "chrome-extension:") {
     return;
   }
 
-  // Handle different types of requests
   if (url.pathname.startsWith("/api/")) {
-    // API requests - Network First strategy
-    event.respondWith(handleApiRequest(request));
-  } else if (url.pathname.startsWith("/_next/static/")) {
-    // Static assets - Cache First strategy
+    return;
+  }
+
+  if (url.pathname.startsWith("/_next/static/")) {
     event.respondWith(handleStaticAssets(request));
   } else {
-    // Pages - Stale While Revalidate strategy
     event.respondWith(handlePageRequest(request));
   }
 });
 
-// Network First strategy for API requests
-async function handleApiRequest(request) {
-  const url = new URL(request.url);
-
-  try {
-    // Try network first
-    const networkResponse = await fetch(request);
-
-    // Cache successful responses
-    if (networkResponse.ok) {
-      const cache = await caches.open(DYNAMIC_CACHE_NAME);
-
-      // Only cache GET requests for specific API patterns
-      const shouldCache = API_CACHE_PATTERNS.some((pattern) =>
-        pattern.test(url.pathname)
-      );
-
-      if (shouldCache) {
-        cache.put(request, networkResponse.clone());
-      }
-    }
-
-    return networkResponse;
-  } catch (error) {
-    console.log(
-      "Service Worker: Network failed, trying cache for",
-      request.url
-    );
-
-    // Try cache as fallback
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
-    // Return offline response for API requests
-    return new Response(
-      JSON.stringify({
-        error: "Offline",
-        message:
-          "You are currently offline. Some features may not be available.",
-        cached: false,
-      }),
-      {
-        status: 503,
-        statusText: "Service Unavailable",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-  }
-}
-
-// Cache First strategy for static assets
 async function handleStaticAssets(request) {
   try {
-    // Try cache first
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
       return cachedResponse;
     }
 
-    // Fallback to network
     const networkResponse = await fetch(request);
 
-    // Cache the response
     if (networkResponse.ok) {
       const cache = await caches.open(STATIC_CACHE_NAME);
       cache.put(request, networkResponse.clone());
@@ -182,13 +107,10 @@ async function handleStaticAssets(request) {
   }
 }
 
-// Stale While Revalidate strategy for pages
 async function handlePageRequest(request) {
   try {
-    // Try cache first
     const cachedResponse = await caches.match(request);
 
-    // Fetch from network in background
     const networkResponsePromise = fetch(request)
       .then((networkResponse) => {
         if (networkResponse.ok) {
@@ -199,25 +121,22 @@ async function handlePageRequest(request) {
       })
       .catch(() => null);
 
-    // Return cached version immediately if available
     if (cachedResponse) {
       return cachedResponse;
     }
 
-    // Otherwise wait for network
     const networkResponse = await networkResponsePromise;
     if (networkResponse) {
       return networkResponse;
     }
 
-    // Fallback to offline page
     return (
       caches.match("/offline.html") ||
       new Response(
         `<!DOCTYPE html>
       <html>
         <head>
-          <title>PropertyPro - Offline</title>
+          <title>SmartStartPM - Offline</title>
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <style>
             body { 
@@ -238,7 +157,7 @@ async function handlePageRequest(request) {
             h1 { color: #1f2937; margin-bottom: 1rem; }
             p { color: #6b7280; margin-bottom: 2rem; }
             button {
-              background: #2563eb;
+              background: #4f46e5;
               color: white;
               border: none;
               padding: 0.75rem 1.5rem;
@@ -246,14 +165,14 @@ async function handlePageRequest(request) {
               cursor: pointer;
               font-size: 1rem;
             }
-            button:hover { background: #1d4ed8; }
+            button:hover { background: #4338ca; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="icon">📱</div>
             <h1>You're Offline</h1>
-            <p>PropertyPro is not available right now. Please check your internet connection and try again.</p>
+            <p>SmartStartPM is not available right now. Please check your internet connection and try again.</p>
             <button onclick="window.location.reload()">Try Again</button>
           </div>
         </body>
@@ -269,36 +188,17 @@ async function handlePageRequest(request) {
   }
 }
 
-// Background sync for offline actions
 self.addEventListener("sync", (event) => {
   console.log("Service Worker: Background sync triggered", event.tag);
-
-  if (event.tag === "background-sync") {
-    event.waitUntil(handleBackgroundSync());
-  }
 });
 
-async function handleBackgroundSync() {
-  try {
-    // Get pending actions from IndexedDB or localStorage
-    // This would sync offline actions when connection is restored
-    console.log("Service Worker: Performing background sync");
-
-    // Example: Sync offline form submissions, payments, etc.
-    // Implementation would depend on your offline storage strategy
-  } catch (error) {
-    console.error("Service Worker: Background sync failed", error);
-  }
-}
-
-// Push notifications
 self.addEventListener("push", (event) => {
   console.log("Service Worker: Push notification received");
 
   const options = {
-    body: event.data ? event.data.text() : "New notification from PropertyPro",
+    body: event.data ? event.data.text() : "New notification from SmartStartPM",
     icon: "/icons/icon-192x192.png",
-    badge: "/icons/badge-72x72.png",
+    badge: "/icons/icon-72x72.png",
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -308,20 +208,17 @@ self.addEventListener("push", (event) => {
       {
         action: "explore",
         title: "View Details",
-        icon: "/icons/checkmark.png",
       },
       {
         action: "close",
         title: "Close",
-        icon: "/icons/xmark.png",
       },
     ],
   };
 
-  event.waitUntil(self.registration.showNotification("PropertyPro", options));
+  event.waitUntil(self.registration.showNotification("SmartStartPM", options));
 });
 
-// Notification click handling
 self.addEventListener("notificationclick", (event) => {
   console.log("Service Worker: Notification clicked");
 
@@ -332,7 +229,6 @@ self.addEventListener("notificationclick", (event) => {
   }
 });
 
-// Message handling for communication with main thread
 self.addEventListener("message", (event) => {
   console.log("Service Worker: Message received", event.data);
 

@@ -435,7 +435,7 @@ export default function OverduePaymentsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" data-slot="page-header">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <AlertTriangle className="h-8 w-8 text-red-600" />

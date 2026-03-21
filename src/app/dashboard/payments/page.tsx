@@ -525,7 +525,7 @@ export default function PaymentsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" data-slot="page-header">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             {t("payments.header.title")}

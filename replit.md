@@ -33,6 +33,14 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Auto-recovering error boundaries**: `global-error.tsx` and `error.tsx` detect hydration-related errors and auto-retry via `reset()` after 200ms. This prevents blank-page crashes from Fast Refresh module updates during initial page compilation.
 - **Production build limitation**: The production build (`next build`) requires more memory than Replit's container provides (~1.5GB available). The app runs in dev mode on Replit; use `start.sh` with `BUILD_ID` check for local/Docker production builds.
 
+## PWA & Mobile
+- **Manifest**: `public/manifest.json` — `start_url: /dashboard`, `theme_color: #4f46e5`, PNG icons (72–512px) with maskable entries for 192/512.
+- **Icons**: `public/icons/icon-{size}x{size}.png` (72, 96, 128, 144, 152, 180, 192, 384, 512). Apple touch icon: `icon-180x180.png`.
+- **Service Worker**: `public/sw.js` — caches static assets and Next.js bundles only. Does NOT cache authenticated `/api/*` responses (privacy/security). Disabled in development via `ServiceWorkerRegistration.tsx`.
+- **Safe-area insets**: Applied only in `@media (display-mode: standalone)` — header gets top inset padding, main content area gets left/right/bottom insets. No double-padding on body.
+- **Mobile overflow**: `overflow-x: hidden` on `html.dashboard-layout`, body, and main. Select triggers constrained to `max-width: 100%` on mobile. Page headers use `data-slot="page-header"` for mobile flex-wrap behavior.
+- **data-scroll-behavior**: `data-scroll-behavior="smooth"` on `<html>` element per Next.js 15 recommendation.
+
 ## Local Development (Cursor + Docker)
 - **Docker**: `docker-compose.dev.yml` runs MongoDB 7 on port 27017
 - **Env vars**: Copy `.env.local.example` to `.env.local` and fill in values
