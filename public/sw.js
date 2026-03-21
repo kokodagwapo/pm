@@ -5,9 +5,9 @@
  * responses are NEVER cached to prevent PII exposure on shared devices.
  */
 
-const CACHE_NAME = "SmartStartPM-v1.2.0";
-const STATIC_CACHE_NAME = "SmartStartPM-static-v1.2.0";
-const DYNAMIC_CACHE_NAME = "SmartStartPM-dynamic-v1.2.0";
+const CACHE_NAME = "SmartStartPM-v1.3.0";
+const STATIC_CACHE_NAME = "SmartStartPM-static-v1.3.0";
+const DYNAMIC_CACHE_NAME = "SmartStartPM-dynamic-v1.3.0";
 
 const STATIC_ASSETS = [
   "/",

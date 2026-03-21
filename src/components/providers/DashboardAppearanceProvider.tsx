@@ -4,7 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -24,12 +24,12 @@ const DashboardAppearanceContext =
   createContext<DashboardAppearanceContextValue | null>(null);
 
 export function DashboardAppearanceProvider({ children }: { children: ReactNode }) {
-  const [appearance, setAppearanceState] = useState<DashboardAppearance>("immersive");
+  const [appearance, setAppearanceState] = useState<DashboardAppearance>("light");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as DashboardAppearance | null;
     const next: DashboardAppearance =
-      stored === "light" || stored === "immersive" ? stored : "immersive";
+      stored === "light" || stored === "immersive" ? stored : "light";
     setAppearanceState(next);
     document.documentElement.classList.toggle("dashboard-light", next === "light");
     return () => {
@@ -67,7 +67,7 @@ export function useDashboardAppearance(): DashboardAppearanceContextValue {
   return ctx;
 }
 
-/** For PastelIcon / cards that may render outside strict layout boundaries; default to immersive. */
+/** For PastelIcon / cards that may render outside strict layout boundaries; default matches light dashboard. */
 export function useOptionalDashboardAppearance(): DashboardAppearanceContextValue | null {
   return useContext(DashboardAppearanceContext);
 }

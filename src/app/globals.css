@@ -277,6 +277,16 @@
   html.dashboard-layout body {
     background: transparent !important;
     color: var(--foreground);
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  /* PWA standalone / notched devices: reserve space under system UI (content padding is on main inner wrapper too). */
+  @media (display-mode: standalone) {
+    html.dashboard-layout header.dashboard-ui-surface {
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+    }
   }
 }
 
@@ -580,6 +590,9 @@
   }
 
   html.dashboard-layout [data-slot="card"] {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
     border-radius: 1rem;
   }
 
@@ -1576,17 +1589,14 @@ html.dashboard-layout main {
 }
 
 html.dashboard-layout main .dashboard-main-typography {
+  min-width: 0;
+  max-width: 100%;
   overflow-x: hidden;
   overflow-wrap: break-word;
   word-break: break-word;
 }
 
 @media (max-width: 639px) {
-  html.dashboard-layout main .dashboard-main-typography {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-  }
-
   html.dashboard-layout [data-slot="card"] {
     border-radius: 0.75rem;
   }
@@ -1599,11 +1609,13 @@ html.dashboard-layout main .dashboard-main-typography {
     padding: 0.75rem 0.75rem 0;
   }
 
+  /* Keep wide tables inside the card — scroll horizontally instead of bleeding past the viewport */
   html.dashboard-layout [data-slot="table-container"] {
-    margin-left: -0.75rem;
-    margin-right: -0.75rem;
-    width: calc(100% + 1.5rem);
-    border-radius: 0;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
   }
 
   html.dashboard-layout [data-slot="select-trigger"] {

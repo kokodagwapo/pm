@@ -240,7 +240,7 @@ export function AnalyticsCardGrid({
   return (
     <div
       className={cn(
-        "grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5",
+        "grid min-w-0 max-w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5",
         className
       )}
     >
@@ -257,7 +257,7 @@ export function FinancialCardGrid({
   className?: string;
 }) {
   return (
-    <div className={cn("grid grid-cols-1 gap-3 lg:gap-4", className)}>
+    <div className={cn("grid min-w-0 max-w-full grid-cols-1 gap-3 lg:gap-4", className)}>
       {children}
     </div>
   );

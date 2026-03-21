@@ -23,6 +23,7 @@ import { useLocalizationContext } from "@/components/providers/LocalizationProvi
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { InlinePreloader } from "@/components/ui/preloader";
 import { DemoGuide } from "@/components/demo/DemoGuide";
+import { PwaInstallHint } from "@/components/pwa/PwaInstallHint";
 import { HeroVideo } from "@/components/landing/HeroVideo";
 import {
   DashboardAppearanceProvider,
@@ -57,11 +58,11 @@ const MobileHeader = memo(function MobileHeader({
   return (
     <header
       className={cn(
-        "dashboard-ui-surface sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between rounded-none border-x-0 border-t-0 border-b px-3 md:px-6",
+        "dashboard-ui-surface sticky top-0 z-30 flex min-h-14 shrink-0 items-center justify-between gap-2 rounded-none border-x-0 border-t-0 border-b px-2 pt-[env(safe-area-inset-top,0px)] sm:px-3 md:px-6",
         isLight ? "text-slate-900" : "border-white/[0.14] text-white"
       )}
     >
-      <div className="flex items-center gap-2 md:gap-4">
+      <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2 md:gap-4">
         <Button
           variant="ghost"
           size="sm"
@@ -91,7 +92,7 @@ const MobileHeader = memo(function MobileHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2 md:gap-3">
         <div className="sm:hidden">
           <Button
             variant="ghost"
@@ -122,7 +123,11 @@ const MobileHeader = memo(function MobileHeader({
           {isLight ? <Moon className="h-4 w-4" aria-hidden /> : <Sun className="h-4 w-4" aria-hidden />}
         </button>
 
-        <LanguageSwitcher variant={isLight ? "light" : "dark"} align="right" />
+        <LanguageSwitcher
+          variant={isLight ? "light" : "dark"}
+          align="right"
+          compact
+        />
 
         <div className={cn(isLight ? "text-slate-900" : "text-white")}>
           <NotificationBell />
@@ -254,7 +259,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
   return (
     <div
       className={cn(
-        "relative flex h-[100dvh] overflow-hidden",
+        "relative h-[100dvh] overflow-hidden",
         isLight ? "bg-transparent" : "bg-black"
       )}
     >
@@ -268,7 +273,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
           />
         </>
       )}
-      <div className="relative z-10 flex h-full min-w-0 flex-1 overflow-hidden">
+      <div className="relative z-10 flex h-full min-h-0 min-w-0 w-full overflow-hidden">
         {isMobileMenuOpen && (
           <div
             className={cn(
@@ -301,15 +306,16 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
             router={router}
           />
 
-          <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-thin bg-transparent">
-            <div className="dashboard-main-typography mx-auto min-h-full w-full max-w-[1680px] animate-page-in p-4 md:p-6 lg:p-8">
+          <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-thin bg-transparent">
+            <div className="dashboard-main-typography mx-auto min-h-full w-full min-w-0 max-w-[1680px] animate-page-in overflow-x-hidden px-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] pt-3 sm:px-4 sm:pb-4 sm:pt-4 md:p-6 lg:p-8">
               {children}
             </div>
           </main>
         </div>
-
-        <DemoGuide />
       </div>
+
+      <PwaInstallHint variant={isLight ? "light" : "dark"} />
+      <DemoGuide />
     </div>
   );
 }

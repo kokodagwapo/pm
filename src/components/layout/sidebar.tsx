@@ -332,8 +332,10 @@ const NavItemComponent = memo(function NavItemComponent({
           isLight
             ? "focus-visible:ring-2 focus-visible:ring-sky-500/35"
             : "focus-visible:ring-2 focus-visible:ring-white/25",
-          level === 0 && "px-3 py-2 text-base font-light tracking-wide",
-          level > 0 && "ml-5 pl-3 pr-3 py-1.5 text-sm font-light tracking-wide",
+          level === 0 &&
+            "min-h-11 px-3 py-2.5 text-base font-light tracking-wide md:min-h-0 md:py-2",
+          level > 0 &&
+            "ml-5 min-h-10 py-2 pl-3 pr-3 text-sm font-light tracking-wide md:min-h-0 md:py-1.5",
           !isLight &&
             !isParentActive &&
             "border border-transparent text-white hover:border-white/[0.16] hover:bg-white/[0.06] active:scale-[0.98]",
@@ -465,9 +467,9 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex flex-col h-[100dvh] md:h-full dashboard-ui-surface",
+        "flex h-[100dvh] max-w-[min(18rem,calc(100vw-0.75rem))] flex-col md:h-full md:max-w-none dashboard-ui-surface",
         "border-y-0 border-l-0 border-r border-[var(--dashboard-glass-border)]",
-        "w-60 transition-all duration-300 ease-out",
+        "w-[min(18rem,calc(100vw-0.75rem))] transition-all duration-300 ease-out md:w-60",
         "[font-family:var(--font-jakarta),var(--font-inter),system-ui,sans-serif] font-light antialiased",
         isCollapsed && "w-16",
         className,
