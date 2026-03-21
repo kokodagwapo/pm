@@ -4,27 +4,31 @@ import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 
 interface GlobalErrorProps {
-  error: Error & { digest?: string };
-  reset: () => void;
+  error?: Error & { digest?: string };
+  reset?: () => void;
 }
 
 const MAX_AUTO_RETRIES = 3;
 
 function isTransientDevError(error: any): boolean {
-  if (!error || typeof error !== "object") return false;
-  const msg = (error?.message || "").toString().toLowerCase();
-  const stack = (error?.stack || "").toString().toLowerCase();
-  return (
-    stack.includes("options.factory") ||
-    stack.includes("webpack_require") ||
-    (msg.includes("reading 'call'") && stack.includes("webpack")) ||
-    msg.includes("hydration") ||
-    msg.includes("server rendered html") ||
-    msg.includes("text content does not match") ||
-    msg.includes("invalid hook call") ||
-    msg.includes("minified react error") ||
-    msg.includes("$refreshreg$")
-  );
+  try {
+    if (!error || typeof error !== "object") return true; // Empty/missing errors are transient
+    const msg = String(error?.message || "").toLowerCase();
+    const stack = String(error?.stack || "").toLowerCase();
+    return (
+      stack.includes("options.factory") ||
+      stack.includes("webpack_require") ||
+      (msg.includes("reading 'call'") && stack.includes("webpack")) ||
+      msg.includes("hydration") ||
+      msg.includes("server rendered html") ||
+      msg.includes("text content does not match") ||
+      msg.includes("invalid hook call") ||
+      msg.includes("minified react error") ||
+      msg.includes("$refreshreg$")
+    );
+  } catch {
+    return true; // If detection fails, treat as transient
+  }
 }
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
@@ -38,18 +42,28 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
       if (isTransient) {
         if (retryCount.current < MAX_AUTO_RETRIES) {
           retryCount.current += 1;
-          const timer = setTimeout(() => reset && reset(), 500 * retryCount.current);
+          const timer = setTimeout(() => {
+            try {
+              reset?.();
+            } catch {
+              // Ignore reset failures
+            }
+          }, 500 * retryCount.current);
           return () => clearTimeout(timer);
         }
-        if (typeof window !== "undefined") {
-          const key = "__smartstart_reload";
-          const count = parseInt(sessionStorage.getItem(key) || "0", 10);
-          if (count < 2) {
-            sessionStorage.setItem(key, String(count + 1));
-            window.location.reload();
-            return;
+        try {
+          if (typeof window !== "undefined") {
+            const key = "__smartstart_reload";
+            const count = parseInt(sessionStorage.getItem(key) || "0", 10);
+            if (count < 2) {
+              sessionStorage.setItem(key, String(count + 1));
+              window.location.reload();
+              return;
+            }
+            sessionStorage.removeItem(key);
           }
-          sessionStorage.removeItem(key);
+        } catch {
+          // Ignore storage/reload failures
         }
       }
 
