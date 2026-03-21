@@ -43,11 +43,22 @@ import PropertyImageGallery from "@/components/properties/PropertyImageGallery";
 import PropertyStatusManager from "@/components/properties/PropertyStatusManager";
 import { EnhancedUnitDisplay } from "@/components/properties/UnitDisplay";
 import { useLocalization } from "@/hooks/use-localization";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { cn } from "@/lib/utils";
 
 export default function PropertyDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { data: session } = useSession();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
+  const txTitle = isLight ? "text-slate-900" : "text-gray-900 dark:text-white";
+  const txBody = isLight ? "text-slate-600" : "text-gray-600 dark:text-gray-400";
+  const txMut = isLight ? "text-slate-700" : "text-gray-700 dark:text-gray-300";
+  const outlineActions = cn(
+    isLight &&
+      "border-slate-200 bg-white text-slate-900 hover:bg-slate-50 [&_svg]:text-slate-700"
+  );
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -312,10 +323,10 @@ export default function PropertyDetailsPage() {
       <div className="container mx-auto px-4 py-8">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className={cn("mb-2 text-lg font-semibold", txTitle)}>
               {t("properties.details.error.title")}
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 text-center mb-6">
+            <p className={cn("mb-6 text-center", txBody)}>
               {error}
             </p>
             <div className="flex space-x-3">
@@ -323,6 +334,7 @@ export default function PropertyDetailsPage() {
                 size="sm"
                 onClick={() => window.location.reload()}
                 variant="outline"
+                className={outlineActions}
               >
                 {t("properties.details.actions.retry")}
               </Button>
@@ -345,10 +357,10 @@ export default function PropertyDetailsPage() {
       <div className="container mx-auto px-4 py-8">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className={cn("mb-2 text-lg font-semibold", txTitle)}>
               {t("properties.details.notFound.title")}
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 text-center mb-6">
+            <p className={cn("mb-6 text-center", txBody)}>
               {t("properties.details.notFound.description")}
             </p>
             <Button
@@ -365,20 +377,33 @@ export default function PropertyDetailsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6">
+    <div
+      className={cn(
+        "container mx-auto space-y-6 px-4 py-8",
+        isLight && "text-slate-900"
+      )}
+    >
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex min-w-0 items-center gap-3">
           <Button
             size="sm"
             variant="outline"
             onClick={() => router.push("/dashboard/properties")}
-            className="shrink-0 flex items-center space-x-1"
+            className={cn(
+              "flex shrink-0 items-center space-x-1",
+              outlineActions
+            )}
           >
             <ArrowLeft className="h-4 w-4" />
             <span>{t("properties.details.actions.backToList")}</span>
           </Button>
-          <h1 className="text-lg font-semibold text-foreground truncate">
+          <h1
+            className={cn(
+              "truncate text-lg font-semibold",
+              isLight ? "text-slate-900" : "text-foreground"
+            )}
+          >
             {property?.name || t("properties.details.unknownProperty")}
           </h1>
           {property?.status && (
@@ -399,7 +424,7 @@ export default function PropertyDetailsPage() {
               size="sm"
               variant="outline"
               onClick={() => router.push(`/dashboard/properties/${propertyId}/calendar`)}
-              className="flex items-center space-x-2"
+              className={cn("flex items-center space-x-2", outlineActions)}
             >
               <Calendar className="h-4 w-4" />
               <span>Calendar</span>
@@ -408,7 +433,7 @@ export default function PropertyDetailsPage() {
               size="sm"
               variant="outline"
               onClick={handleEditProperty}
-              className="flex items-center space-x-2"
+              className={cn("flex items-center space-x-2", outlineActions)}
             >
               <Edit className="h-4 w-4" />
               <span>{t("properties.details.actions.editProperty")}</span>
@@ -417,7 +442,7 @@ export default function PropertyDetailsPage() {
               size="sm"
               variant="outline"
               onClick={() => setShowDeleteDialog(true)}
-              className="flex items-center space-x-2 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 hover:border-red-300"
+              className="flex items-center space-x-2 border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700"
             >
               <Trash2 className="h-4 w-4" />
               <span>{t("properties.details.actions.deleteProperty")}</span>
@@ -431,52 +456,79 @@ export default function PropertyDetailsPage() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-2">
-          <TabsList className="grid w-full grid-cols-5 bg-transparent rounded-lg h-auto gap-2">
+        <div
+          className={cn(
+            "rounded-xl border p-2 shadow-sm",
+            isLight
+              ? "border-slate-200/90 bg-white/90"
+              : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
+          )}
+        >
+          <TabsList
+            className={cn(
+              "grid h-auto w-full grid-cols-5 gap-2 rounded-lg bg-transparent",
+              isLight && "text-slate-800"
+            )}
+          >
             <TabsTrigger
               value="overview"
-              className="flex items-center gap-2 py-2 px-3 rounded-lg bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+              className={cn(
+                "flex items-center gap-2 rounded-lg bg-transparent px-3 py-2 text-sm font-medium transition-all duration-200",
+                isLight
+                  ? "text-slate-800 hover:bg-slate-100/90"
+                  : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+              )}
             >
-              <Building2 className="h-4 w-4 text-blue-600 data-[state=active]:text-white" />
-              <span className="font-medium text-sm text-gray-700 dark:text-gray-300 data-[state=active]:text-white">
-                {t("properties.details.tabs.overview")}
-              </span>
+              <Building2 className="h-4 w-4 shrink-0 text-blue-600" />
+              {t("properties.details.tabs.overview")}
             </TabsTrigger>
             <TabsTrigger
               value="details"
-              className="flex items-center gap-2 py-2 px-3 rounded-lg bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+              className={cn(
+                "flex items-center gap-2 rounded-lg bg-transparent px-3 py-2 text-sm font-medium transition-all duration-200",
+                isLight
+                  ? "text-slate-800 hover:bg-slate-100/90"
+                  : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+              )}
             >
-              <Eye className="h-4 w-4 text-blue-600 data-[state=active]:text-white" />
-              <span className="font-medium text-sm text-gray-700 dark:text-gray-300 data-[state=active]:text-white">
-                {t("properties.details.tabs.details")}
-              </span>
+              <Eye className="h-4 w-4 shrink-0 text-blue-600" />
+              {t("properties.details.tabs.details")}
             </TabsTrigger>
             <TabsTrigger
               value="units"
-              className="flex items-center gap-2 py-2 px-3 rounded-lg bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-700 data-[state=active]:to-blue-800 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+              className={cn(
+                "flex items-center gap-2 rounded-lg bg-transparent px-3 py-2 text-sm font-medium transition-all duration-200",
+                isLight
+                  ? "text-slate-800 hover:bg-slate-100/90"
+                  : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+              )}
             >
-              <Building2 className="h-4 w-4 text-blue-600 data-[state=active]:text-white" />
-              <span className="font-medium text-sm text-gray-700 dark:text-gray-300 data-[state=active]:text-white">
-                {t("properties.details.tabs.units")}
-              </span>
+              <Building2 className="h-4 w-4 shrink-0 text-blue-600" />
+              {t("properties.details.tabs.units")}
             </TabsTrigger>
             <TabsTrigger
               value="images"
-              className="flex items-center gap-2 py-2 px-3 rounded-lg bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-800 data-[state=active]:to-blue-900 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+              className={cn(
+                "flex items-center gap-2 rounded-lg bg-transparent px-3 py-2 text-sm font-medium transition-all duration-200",
+                isLight
+                  ? "text-slate-800 hover:bg-slate-100/90"
+                  : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+              )}
             >
-              <Camera className="h-4 w-4 text-blue-600 data-[state=active]:text-white" />
-              <span className="font-medium text-sm text-gray-700 dark:text-gray-300 data-[state=active]:text-white">
-                {t("properties.details.tabs.images")}
-              </span>
+              <Camera className="h-4 w-4 shrink-0 text-blue-600" />
+              {t("properties.details.tabs.images")}
             </TabsTrigger>
             <TabsTrigger
               value="amenities"
-              className="flex items-center gap-2 py-2 px-3 rounded-lg bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-900 data-[state=active]:to-indigo-900 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+              className={cn(
+                "flex items-center gap-2 rounded-lg bg-transparent px-3 py-2 text-sm font-medium transition-all duration-200",
+                isLight
+                  ? "text-slate-800 hover:bg-slate-100/90"
+                  : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+              )}
             >
-              <Star className="h-4 w-4 text-blue-600 data-[state=active]:text-white" />
-              <span className="font-medium text-sm text-gray-700 dark:text-gray-300 data-[state=active]:text-white">
-                {t("properties.details.tabs.amenities")}
-              </span>
+              <Star className="h-4 w-4 shrink-0 text-blue-600" />
+              {t("properties.details.tabs.amenities")}
             </TabsTrigger>
           </TabsList>
         </div>
@@ -492,12 +544,12 @@ export default function PropertyDetailsPage() {
                     <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white capitalize">
+                    <p className={cn("text-2xl font-bold capitalize", txTitle)}>
                       {property?.type
                         ? t(`properties.type.${property.type}`)
                         : t("properties.labels.unknown")}
                     </p>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <p className={cn("text-sm font-medium", txBody)}>
                       {t("properties.details.overview.propertyType")}
                     </p>
                   </div>
@@ -513,11 +565,11 @@ export default function PropertyDetailsPage() {
                     <Bed className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className={cn("text-2xl font-bold", txTitle)}>
                       {getTotalBedrooms(units) ||
                         t("properties.labels.unknown")}
                     </p>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <p className={cn("text-sm font-medium", txBody)}>
                       {t("properties.details.overview.bedrooms")}
                     </p>
                   </div>
@@ -533,11 +585,11 @@ export default function PropertyDetailsPage() {
                     <Bath className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className={cn("text-2xl font-bold", txTitle)}>
                       {getTotalBathrooms(units) ||
                         t("properties.labels.unknown")}
                     </p>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <p className={cn("text-sm font-medium", txBody)}>
                       {t("properties.details.overview.bathrooms")}
                     </p>
                   </div>
@@ -553,7 +605,7 @@ export default function PropertyDetailsPage() {
                     <Square className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className={cn("text-2xl font-bold", txTitle)}>
                       {(() => {
                         const totalSqFt = getTotalSquareFootage(units);
                         return totalSqFt > 0
@@ -563,7 +615,7 @@ export default function PropertyDetailsPage() {
                           : t("properties.labels.unknown");
                       })()}
                     </p>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <p className={cn("text-sm font-medium", txBody)}>
                       {t("properties.details.overview.totalSquareFootage")}
                     </p>
                   </div>
@@ -582,10 +634,10 @@ export default function PropertyDetailsPage() {
                       <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                      <h3 className={cn("text-xl font-bold", txTitle)}>
                         {t("properties.details.overview.occupancy.title")}
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">
+                      <p className={cn("text-sm", txBody)}>
                         {t("properties.details.overview.occupancy.subtitle")}
                       </p>
                     </div>
@@ -594,7 +646,11 @@ export default function PropertyDetailsPage() {
                     <Button
                       variant="outline"
                       onClick={() => setActiveTab("units")}
-                      className="border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                      className={cn(
+                        outlineActions,
+                        !isLight &&
+                          "border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                      )}
                     >
                       <Eye className="h-4 w-4 mr-2" />
                       {t("properties.details.overview.actions.viewAllUnits")}
@@ -624,7 +680,7 @@ export default function PropertyDetailsPage() {
                       {/* Occupancy Rate */}
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <h4 className="font-semibold text-gray-900 dark:text-white">
+                          <h4 className={cn("font-semibold", txTitle)}>
                             {t(
                               "properties.details.overview.occupancy.rateLabel"
                             )}
@@ -639,7 +695,7 @@ export default function PropertyDetailsPage() {
                             style={{ width: `${occupancyRate}%` }}
                           ></div>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className={cn("text-sm", txBody)}>
                           {t("properties.details.overview.occupancy.summary", {
                             values: {
                               occupied: unitStats.occupied,
@@ -655,7 +711,7 @@ export default function PropertyDetailsPage() {
                           <div className="text-3xl font-bold text-green-600 mb-2">
                             {unitStats.available}
                           </div>
-                          <div className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                          <div className={cn("text-sm font-medium uppercase tracking-wide", txBody)}>
                             {t("properties.status.available")}
                           </div>
                           <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -677,7 +733,7 @@ export default function PropertyDetailsPage() {
                           <div className="text-3xl font-bold text-blue-600 mb-2">
                             {unitStats.occupied}
                           </div>
-                          <div className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                          <div className={cn("text-sm font-medium uppercase tracking-wide", txBody)}>
                             {t("properties.status.occupied")}
                           </div>
                           <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -699,7 +755,7 @@ export default function PropertyDetailsPage() {
                           <div className="text-3xl font-bold text-yellow-600 mb-2">
                             {unitStats.maintenance}
                           </div>
-                          <div className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                          <div className={cn("text-sm font-medium uppercase tracking-wide", txBody)}>
                             {t("properties.status.maintenance")}
                           </div>
                           <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -719,10 +775,10 @@ export default function PropertyDetailsPage() {
                         </div>
 
                         <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 hover:shadow-sm transition-all duration-300">
-                          <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                          <div className={cn("mb-2 text-3xl font-bold", txTitle)}>
                             {unitStats.total}
                           </div>
-                          <div className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                          <div className={cn("text-sm font-medium uppercase tracking-wide", txBody)}>
                             {t("properties.details.specs.fields.totalUnits")}
                           </div>
                           <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -747,10 +803,10 @@ export default function PropertyDetailsPage() {
                     <MapPin className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    <h3 className={cn("text-xl font-bold", txTitle)}>
                       {t("properties.details.location.title")}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    <p className={cn("text-sm", txBody)}>
                       {t("properties.details.location.subtitle")}
                     </p>
                   </div>
@@ -759,39 +815,39 @@ export default function PropertyDetailsPage() {
               <CardContent>
                 <div className="space-y-4 mb-4  ">
                   <div>
-                    <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 block">
+                    <label className={cn("mb-1 block text-sm font-medium", txBody)}>
                       {t("properties.details.location.street")}
                     </label>
-                    <p className="text-md font-semibold text-gray-900 dark:text-white">
+                    <p className={cn("text-md font-semibold", txTitle)}>
                       {property?.address?.street ||
                         t("properties.details.common.notAvailable")}
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 block">
+                      <label className={cn("mb-1 block text-sm font-medium", txBody)}>
                         {t("properties.details.location.city")}
                       </label>
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <p className={cn("font-medium", txTitle)}>
                         {property?.address?.city ||
                           t("properties.details.common.notAvailable")}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 block">
+                      <label className={cn("mb-1 block text-sm font-medium", txBody)}>
                         {t("properties.details.location.state")}
                       </label>
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <p className={cn("font-medium", txTitle)}>
                         {property?.address?.state ||
                           t("properties.details.common.notAvailable")}
                       </p>
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 block">
+                    <label className={cn("mb-1 block text-sm font-medium", txBody)}>
                       {t("properties.details.location.postalCode")}
                     </label>
-                    <p className="font-medium text-gray-900 dark:text-white">
+                    <p className={cn("font-medium", txTitle)}>
                       {property?.address?.zipCode ||
                         t("properties.details.common.notAvailable")}
                     </p>
@@ -808,10 +864,10 @@ export default function PropertyDetailsPage() {
                     <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    <h3 className={cn("text-xl font-bold", txTitle)}>
                       {t("properties.details.financial.title")}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    <p className={cn("text-sm", txBody)}>
                       {t("properties.details.financial.subtitle")}
                     </p>
                   </div>
@@ -821,17 +877,17 @@ export default function PropertyDetailsPage() {
                 <div className="space-y-4 mb-4">
                   <div className="grid grid-cols-1 gap-4">
                     <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2 block uppercase tracking-wide">
+                      <label className={cn("mb-2 block text-sm font-medium uppercase tracking-wide", txBody)}>
                         {t("properties.details.financial.monthlyRent.label")}
                       </label>
-                      <p className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                      <p className={cn("mb-2 text-xl font-bold", txTitle)}>
                         {property?.isMultiUnit && units.length > 0
                           ? getRentRange(units) ||
                             t("properties.details.common.notAvailable")
                           : getRentRange(units) ||
                             t("properties.details.common.notAvailable")}
                       </p>
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                      <div className={cn("flex items-center text-sm", txBody)}>
                         {/* <DollarSign className="h-4 w-4 mr-1" /> */}
                         <span>
                           {t("properties.details.financial.monthlyRent.helper")}
@@ -841,16 +897,16 @@ export default function PropertyDetailsPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
-                        <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2 block uppercase tracking-wide">
+                        <label className={cn("mb-2 block text-sm font-medium uppercase tracking-wide", txBody)}>
                           {t(
                             "properties.details.financial.securityDeposit.label"
                           )}
                         </label>
-                        <p className="text-xl font-bold text-gray-900 dark:text-white">
+                        <p className={cn("text-xl font-bold", txTitle)}>
                           {getSecurityDepositRange(units) ||
                             t("properties.details.common.notAvailable")}
                         </p>
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        <div className={cn("mt-1 flex items-center text-sm", txBody)}>
                           <Square className="h-3 w-3 mr-1" />
                           <span>
                             {t(
@@ -860,7 +916,7 @@ export default function PropertyDetailsPage() {
                         </div>
                       </div>
                       <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
-                        <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2 block uppercase tracking-wide">
+                        <label className={cn("mb-2 block text-sm font-medium uppercase tracking-wide", txBody)}>
                           {t(
                             "properties.details.financial.pricePerSquareFoot.label",
                             {
@@ -870,7 +926,7 @@ export default function PropertyDetailsPage() {
                             }
                           )}
                         </label>
-                        <p className="text-xl font-bold text-gray-900 dark:text-white">
+                        <p className={cn("text-xl font-bold", txTitle)}>
                           {(() => {
                             if (units.length > 0) {
                               // Calculate average price per sq ft from units
@@ -891,7 +947,7 @@ export default function PropertyDetailsPage() {
                             return t("properties.details.common.notAvailable");
                           })()}
                         </p>
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        <div className={cn("mt-1 flex items-center text-sm", txBody)}>
                           <Square className="h-3 w-3 mr-1" />
                           <span>
                             {t(
@@ -916,10 +972,10 @@ export default function PropertyDetailsPage() {
                 <Building2 className="h-7 w-7 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h3 className={cn("text-2xl font-bold", txTitle)}>
                   {t("properties.details.specs.title")}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className={txBody}>
                   {t("properties.details.specs.subtitle")}
                 </p>
               </div>
@@ -932,11 +988,11 @@ export default function PropertyDetailsPage() {
                   <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900">
                     <Home className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <label className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  <label className={cn("text-sm font-medium uppercase tracking-wide", txBody)}>
                     {t("properties.details.specs.fields.type")}
                   </label>
                 </div>
-                <p className="text-lg font-bold text-gray-900 dark:text-white capitalize">
+                <p className={cn("text-lg font-bold capitalize", txTitle)}>
                   {property?.type
                     ? t(`properties.type.${property.type}`)
                     : t("properties.details.common.notAvailable")}
@@ -949,12 +1005,12 @@ export default function PropertyDetailsPage() {
                   <div className="p-1.5 rounded-lg bg-green-100 dark:bg-green-900">
                     <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <label className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  <label className={cn("text-sm font-medium uppercase tracking-wide", txBody)}>
                     {t("properties.details.specs.fields.status")}
                   </label>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <p className="text-lg font-bold text-gray-900 dark:text-white capitalize">
+                  <p className={cn("text-lg font-bold capitalize", txTitle)}>
                     {property?.status
                       ? t(`properties.status.${property.status}`)
                       : t("properties.details.common.notAvailable")}
@@ -991,11 +1047,11 @@ export default function PropertyDetailsPage() {
                   <div className="p-1.5 rounded-lg bg-purple-100 dark:bg-purple-900">
                     <Building2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <label className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  <label className={cn("text-sm font-medium uppercase tracking-wide", txBody)}>
                     {t("properties.details.specs.fields.totalUnits")}
                   </label>
                 </div>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                <p className={cn("text-lg font-bold", txTitle)}>
                   {units.length || 1}
                 </p>
               </div>
@@ -1006,11 +1062,11 @@ export default function PropertyDetailsPage() {
                   <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900">
                     <Calendar className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                   </div>
-                  <label className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  <label className={cn("text-sm font-medium uppercase tracking-wide", txBody)}>
                     {t("properties.details.specs.fields.yearBuilt")}
                   </label>
                 </div>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                <p className={cn("text-lg font-bold", txTitle)}>
                   {property?.yearBuilt ||
                     t("properties.details.common.notAvailable")}
                 </p>
@@ -1023,11 +1079,11 @@ export default function PropertyDetailsPage() {
                     <div className="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-900">
                       <Eye className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                     </div>
-                    <label className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                    <label className={cn("text-sm font-medium uppercase tracking-wide", txBody)}>
                       {t("properties.details.specs.fields.description")}
                     </label>
                   </div>
-                  <p className="text-base text-gray-700 dark:text-gray-300">
+                  <p className={cn("text-base", txMut)}>
                     {property.description}
                   </p>
                 </div>
@@ -1043,10 +1099,10 @@ export default function PropertyDetailsPage() {
                   <Star className="h-7 w-7 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <h3 className={cn("text-2xl font-bold", txTitle)}>
                     {t("properties.details.features.title")}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className={txBody}>
                     {t("properties.details.features.subtitle")}
                   </p>
                 </div>
@@ -1059,7 +1115,7 @@ export default function PropertyDetailsPage() {
                     className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:shadow-sm transition-all duration-200"
                   >
                     <Star className="h-4 w-4 text-amber-500 dark:text-amber-400" />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span className={cn("text-sm font-medium", txMut)}>
                       {feature}
                     </span>
                   </div>
@@ -1076,10 +1132,10 @@ export default function PropertyDetailsPage() {
                   <Building2 className="h-7 w-7 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <h3 className={cn("text-2xl font-bold", txTitle)}>
                     {t("properties.details.amenities.title")}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className={txBody}>
                     {t("properties.details.amenities.subtitle")}
                   </p>
                 </div>
@@ -1092,7 +1148,7 @@ export default function PropertyDetailsPage() {
                     className="flex items-center gap-3 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:shadow-sm transition-all duration-200"
                   >
                     <div className="flex-shrink-0 w-2.5 h-2.5 bg-blue-500 dark:bg-blue-400 rounded-full"></div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span className={cn("text-sm font-medium", txMut)}>
                       {amenity.name || amenity}
                     </span>
                   </div>

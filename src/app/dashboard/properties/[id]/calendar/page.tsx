@@ -37,6 +37,8 @@ import {
 import { DateBlockForm, DateBlockFormData } from "@/components/calendar/DateBlockForm";
 import { PricingRuleForm, PricingRuleFormData } from "@/components/calendar/PricingRuleForm";
 import { DateBlockType } from "@/types";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { cn } from "@/lib/utils";
 
 interface UnitOption {
   _id: string;
@@ -59,6 +61,16 @@ export default function PropertyCalendarPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const propertyId = params.id as string;
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
+  const filterSelectTrigger = (widthClass: string) =>
+    cn(
+      "h-10",
+      widthClass,
+      isLight
+        ? "border-slate-200 bg-white text-slate-900 [&_svg]:text-slate-500"
+        : "border-white/20 bg-white/5 text-white [&_svg]:text-white/70"
+    );
 
   const [property, setProperty] = useState<any>(null);
   const [units, setUnits] = useState<UnitOption[]>([]);
@@ -300,10 +312,10 @@ export default function PropertyCalendarPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 space-y-6">
+      <div className="space-y-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-10 bg-muted rounded w-64" />
-          <div className="h-96 bg-muted rounded" />
+          <div className="h-10 w-64 rounded bg-muted" />
+          <div className="h-96 rounded bg-muted" />
         </div>
       </div>
     );
@@ -311,12 +323,19 @@ export default function PropertyCalendarPage() {
 
   if (!property) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="space-y-6">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <h3 className="text-lg font-semibold mb-2">Property not found</h3>
+            <h3
+              className={cn(
+                "mb-2 text-lg font-semibold",
+                isLight ? "text-slate-900" : "text-foreground"
+              )}
+            >
+              Property not found
+            </h3>
             <Button onClick={() => router.push("/dashboard/properties")}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Properties
             </Button>
           </CardContent>
@@ -326,37 +345,61 @@ export default function PropertyCalendarPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <Button
             variant="outline"
             size="sm"
             onClick={() => router.push(`/dashboard/properties/${propertyId}`)}
+            className={cn(
+              "w-fit shrink-0",
+              isLight &&
+                "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+            )}
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
+            <ArrowLeft className="mr-1 h-4 w-4" />
             Back
           </Button>
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <CalendarDays className="h-6 w-6" />
+            <h1
+              className={cn(
+                "flex items-center gap-2 text-2xl font-bold tracking-tight sm:text-3xl",
+                isLight ? "text-slate-900" : "text-white"
+              )}
+            >
+              <CalendarDays
+                className={cn(
+                  "h-6 w-6 shrink-0",
+                  isLight ? "text-slate-800" : "text-white"
+                )}
+              />
               {property.name} - Availability Calendar
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p
+              className={cn(
+                "mt-1 text-sm sm:text-base",
+                isLight ? "text-slate-600" : "text-white/80"
+              )}
+            >
               Manage date blocks, pricing rules, and view availability
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => {
               if (selectedUnitId) fetchUnitCalendarData(selectedUnitId);
             }}
+            className={cn(
+              isLight &&
+                "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+            )}
           >
-            <RefreshCw className="h-4 w-4 mr-1" />
+            <RefreshCw className="mr-1 h-4 w-4" />
             Refresh
           </Button>
           {(userRole === "admin" || userRole === "manager" || userRole === "owner") && (
@@ -368,8 +411,12 @@ export default function PropertyCalendarPage() {
                   setBlockFormDates({});
                   setShowBlockForm(true);
                 }}
+                className={cn(
+                  isLight &&
+                    "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                )}
               >
-                <Lock className="h-4 w-4 mr-1" />
+                <Lock className="mr-1 h-4 w-4" />
                 Block Dates
               </Button>
               <Button
@@ -379,8 +426,12 @@ export default function PropertyCalendarPage() {
                   setPricingFormDates({});
                   setShowPricingForm(true);
                 }}
+                className={cn(
+                  isLight &&
+                    "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                )}
               >
-                <DollarSign className="h-4 w-4 mr-1" />
+                <DollarSign className="mr-1 h-4 w-4" />
                 Add Pricing Rule
               </Button>
             </>
@@ -389,10 +440,17 @@ export default function PropertyCalendarPage() {
       </div>
 
       {units.length > 1 && (
-        <div className="flex items-center gap-3">
-          <label className="text-sm font-medium">Select Unit:</label>
+        <div className="flex flex-wrap items-center gap-3">
+          <label
+            className={cn(
+              "text-sm font-medium",
+              isLight ? "text-slate-800" : "text-foreground"
+            )}
+          >
+            Select Unit:
+          </label>
           <Select value={selectedUnitId} onValueChange={setSelectedUnitId}>
-            <SelectTrigger className="w-[250px]">
+            <SelectTrigger className={filterSelectTrigger("w-[250px]")}>
               <SelectValue placeholder="Select a unit" />
             </SelectTrigger>
             <SelectContent>
@@ -412,6 +470,11 @@ export default function PropertyCalendarPage() {
                   `/dashboard/properties/${propertyId}/units/${selectedUnitId}/calendar`
                 )
               }
+              className={cn(
+                isLight
+                  ? "text-sky-700 hover:bg-sky-50 hover:text-sky-800"
+                  : undefined
+              )}
             >
               View Unit Calendar →
             </Button>
@@ -420,17 +483,22 @@ export default function PropertyCalendarPage() {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList>
+        <TabsList
+          className={cn(
+            isLight &&
+              "border border-slate-200/90 bg-slate-100/90 text-slate-900 [&_svg]:text-slate-800 shadow-sm"
+          )}
+        >
           <TabsTrigger value="calendar">
-            <CalendarDays className="h-4 w-4 mr-1" />
+            <CalendarDays className="mr-1 h-4 w-4" />
             Calendar
           </TabsTrigger>
           <TabsTrigger value="blocks">
-            <Lock className="h-4 w-4 mr-1" />
+            <Lock className="mr-1 h-4 w-4" />
             Blocks ({blocks.length})
           </TabsTrigger>
           <TabsTrigger value="pricing">
-            <DollarSign className="h-4 w-4 mr-1" />
+            <DollarSign className="mr-1 h-4 w-4" />
             Pricing Rules ({pricingRules.length})
           </TabsTrigger>
         </TabsList>
@@ -461,7 +529,12 @@ export default function PropertyCalendarPage() {
                   showLegend={true}
                 />
               ) : (
-                <p className="text-muted-foreground text-center py-12">
+                <p
+                  className={cn(
+                    "py-12 text-center",
+                    isLight ? "text-slate-600" : "text-muted-foreground"
+                  )}
+                >
                   No units available for this property.
                 </p>
               )}
@@ -478,9 +551,14 @@ export default function PropertyCalendarPage() {
                   Active Date Blocks
                 </CardTitle>
                 <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <Filter
+                    className={cn(
+                      "h-4 w-4",
+                      isLight ? "text-slate-500" : "text-muted-foreground"
+                    )}
+                  />
                   <Select value={blockFilterType} onValueChange={setBlockFilterType}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className={filterSelectTrigger("w-[180px]")}>
                       <SelectValue placeholder="Filter by type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -497,7 +575,12 @@ export default function PropertyCalendarPage() {
             </CardHeader>
             <CardContent>
               {filteredBlocks.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
+                <p
+                  className={cn(
+                    "py-8 text-center",
+                    isLight ? "text-slate-600" : "text-muted-foreground"
+                  )}
+                >
                   No active date blocks for this unit.
                 </p>
               ) : (
@@ -505,7 +588,12 @@ export default function PropertyCalendarPage() {
                   {filteredBlocks.map((block) => (
                     <div
                       key={block._id}
-                      className="flex items-center justify-between p-3 rounded-lg border"
+                      className={cn(
+                        "flex items-center justify-between rounded-lg border p-3",
+                        isLight
+                          ? "border-slate-200/90 bg-white/60"
+                          : "border-border"
+                      )}
                     >
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1">
@@ -517,12 +605,22 @@ export default function PropertyCalendarPage() {
                           </Badge>
                         </div>
                         <div>
-                          <p className="text-sm font-medium">
+                          <p
+                            className={cn(
+                              "text-sm font-medium",
+                              isLight ? "text-slate-900" : undefined
+                            )}
+                          >
                             {new Date(block.startDate).toLocaleDateString()} –{" "}
                             {new Date(block.endDate).toLocaleDateString()}
                           </p>
                           {block.reason && (
-                            <p className="text-xs text-muted-foreground">
+                            <p
+                              className={cn(
+                                "text-xs",
+                                isLight ? "text-slate-600" : "text-muted-foreground"
+                              )}
+                            >
                               {block.reason}
                             </p>
                           )}
@@ -561,8 +659,12 @@ export default function PropertyCalendarPage() {
                       setPricingFormDates({});
                       setShowPricingForm(true);
                     }}
+                    className={cn(
+                      isLight &&
+                        "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                    )}
                   >
-                    <Plus className="h-4 w-4 mr-1" />
+                    <Plus className="mr-1 h-4 w-4" />
                     Add Rule
                   </Button>
                 )}
@@ -570,7 +672,12 @@ export default function PropertyCalendarPage() {
             </CardHeader>
             <CardContent>
               {pricingRules.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
+                <p
+                  className={cn(
+                    "py-8 text-center",
+                    isLight ? "text-slate-600" : "text-muted-foreground"
+                  )}
+                >
                   No pricing rules configured for this unit.
                 </p>
               ) : (
@@ -578,15 +685,32 @@ export default function PropertyCalendarPage() {
                   {pricingRules.map((rule) => (
                     <div
                       key={rule._id}
-                      className="flex items-center justify-between p-3 rounded-lg border"
+                      className={cn(
+                        "flex items-center justify-between rounded-lg border p-3",
+                        isLight
+                          ? "border-slate-200/90 bg-white/60"
+                          : "border-border"
+                      )}
                     >
                       <div className="flex items-center gap-3">
                         <Badge variant={rule.isActive ? "default" : "secondary"}>
                           {rule.ruleType.replace(/_/g, " ")}
                         </Badge>
                         <div>
-                          <p className="text-sm font-medium">{rule.name}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p
+                            className={cn(
+                              "text-sm font-medium",
+                              isLight ? "text-slate-900" : undefined
+                            )}
+                          >
+                            {rule.name}
+                          </p>
+                          <p
+                            className={cn(
+                              "text-xs",
+                              isLight ? "text-slate-600" : "text-muted-foreground"
+                            )}
+                          >
                             {rule.pricePerNight !== undefined && rule.pricePerNight !== null
                               ? `$${rule.pricePerNight}/night`
                               : rule.priceModifier
@@ -632,7 +756,12 @@ export default function PropertyCalendarPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-3">
+            <p
+              className={cn(
+                "mb-3 text-sm",
+                isLight ? "text-slate-600" : "text-muted-foreground"
+              )}
+            >
               Apply operations to all units in this property at once.
             </p>
             <div className="flex gap-2">
@@ -643,8 +772,12 @@ export default function PropertyCalendarPage() {
                   setBlockFormDates({});
                   setShowBlockForm(true);
                 }}
+                className={cn(
+                  isLight &&
+                    "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                )}
               >
-                <Lock className="h-4 w-4 mr-1" />
+                <Lock className="mr-1 h-4 w-4" />
                 Block All Units
               </Button>
             </div>

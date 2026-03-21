@@ -5,6 +5,16 @@
 
   "dashboard.header.subtitle": "Esto es lo que está pasando con tu cartera de propiedades",
 
+  "dashboard.sections.keyMetrics.title": "Llaves, unidades y renta",
+  "dashboard.sections.keyMetrics.subtitle": "El pulso de cada puerta: ocupación, ingresos y la cola de mantenimiento",
+
+  "dashboard.sections.actionCenter.title": "Recepción — te buscan",
+  "dashboard.sections.actionCenter.subtitle": "Rentas atrasadas, órdenes urgentes y contratos tocando la puerta",
+
+  "dashboard.sections.financial.title": "Historia del flujo de caja",
+  "dashboard.sections.propertyMix.title": "Qué hay en tu cartera",
+  "dashboard.sections.rentRadar.title": "Radar de rentas",
+
   "dashboard.actions.refresh": "Actualizar",
   "dashboard.actions.analytics": "Analíticas",
   "dashboard.actions.retry": "Reintentar",

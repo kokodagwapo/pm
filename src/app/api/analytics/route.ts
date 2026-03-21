@@ -4,7 +4,8 @@
  */
 
 import { NextRequest } from "next/server";
-import { Property, Tenant, Lease, Payment, MaintenanceRequest } from "@/models";
+import mongoose from "mongoose";
+import { Property, Lease, Payment, MaintenanceRequest } from "@/models";
 import {
   UserRole,
   PaymentStatus,
@@ -22,11 +23,16 @@ import {
 // GET /api/analytics - Get comprehensive analytics data
 // ============================================================================
 
+const PAID_STATUSES = [PaymentStatus.PAID, PaymentStatus.COMPLETED];
+
 export const GET = withRoleAndDB([
   UserRole.ADMIN,
   UserRole.MANAGER,
-  UserRole.MANAGER,
-])(async (user, request: NextRequest) => {
+  UserRole.OWNER,
+])(async (
+  user: { id: string; email: string; role: UserRole; isActive: boolean },
+  request: NextRequest
+) => {
   try {
     const { searchParams } = new URL(request.url);
     const reportType = searchParams.get("type") || "overview";
@@ -38,11 +44,15 @@ export const GET = withRoleAndDB([
       : new Date();
     const propertyId = searchParams.get("propertyId");
 
-    // Build base query for user role
-    // Single company architecture - Managers can view analytics for all properties
-    let basePropertyQuery: any = {};
+    const basePropertyQuery: Record<string, unknown> = { deletedAt: null };
+    if (user.role === UserRole.OWNER) {
+      basePropertyQuery.ownerId = user.id;
+    }
     if (propertyId) {
-      basePropertyQuery._id = propertyId;
+      if (!mongoose.Types.ObjectId.isValid(propertyId)) {
+        return createErrorResponse("Invalid property id", 400);
+      }
+      basePropertyQuery._id = new mongoose.Types.ObjectId(propertyId);
     }
 
     switch (reportType) {
@@ -88,74 +98,391 @@ export const GET = withRoleAndDB([
 // ANALYTICS GENERATORS
 // ============================================================================
 
+const MONTH_LABELS_SHORT = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+function countPropertyUnits(p: {
+  isMultiUnit?: boolean;
+  units?: unknown[];
+  totalUnits?: number;
+}): number {
+  if (p?.isMultiUnit) return p.units?.length || p.totalUnits || 1;
+  return 1;
+}
+
+function portfolioAverageRent(properties: Record<string, unknown>[]): number {
+  let totalRent = 0;
+  let n = 0;
+  for (const p of properties) {
+    const units = p.units as { rentAmount?: number }[] | undefined;
+    if (p?.isMultiUnit && Array.isArray(units)) {
+      for (const u of units) {
+        if (typeof u?.rentAmount === "number" && u.rentAmount > 0) {
+          totalRent += u.rentAmount;
+          n += 1;
+        }
+      }
+    }
+  }
+  return n > 0 ? Math.round(totalRent / n) : 0;
+}
+
+async function getMonthlyTrends(
+  propertyIds: mongoose.Types.ObjectId[],
+  startDate: Date,
+  endDate: Date,
+  occupancyRate: number
+) {
+  if (!propertyIds.length) return [];
+
+  const paidMatch = {
+    propertyId: { $in: propertyIds },
+    deletedAt: null,
+    status: { $in: PAID_STATUSES },
+    $expr: {
+      $and: [
+        { $gte: [{ $ifNull: ["$paidDate", "$dueDate"] }, startDate] },
+        { $lte: [{ $ifNull: ["$paidDate", "$dueDate"] }, endDate] },
+      ],
+    },
+  };
+
+  const [revenueByMonth, maintenanceByMonth] = await Promise.all([
+    Payment.aggregate([
+      { $match: paidMatch },
+      {
+        $group: {
+          _id: {
+            year: { $year: { $ifNull: ["$paidDate", "$dueDate"] } },
+            month: { $month: { $ifNull: ["$paidDate", "$dueDate"] } },
+          },
+          total: { $sum: "$amount" },
+        },
+      },
+    ]),
+    MaintenanceRequest.aggregate([
+      {
+        $match: {
+          propertyId: { $in: propertyIds },
+          deletedAt: null,
+          createdAt: { $gte: startDate, $lte: endDate },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          cost: { $sum: { $ifNull: ["$actualCost", "$estimatedCost"] } },
+        },
+      },
+    ]),
+  ]);
+
+  const revenueMap = new Map(
+    revenueByMonth.map((b) => [`${b._id.year}-${b._id.month}`, b.total])
+  );
+  const maintMap = new Map(
+    maintenanceByMonth.map((b) => [`${b._id.year}-${b._id.month}`, b.cost])
+  );
+
+  const rows: {
+    month: string;
+    revenue: number;
+    occupancy: number;
+    maintenance: number;
+  }[] = [];
+  const cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  const endM = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+  const occ = Math.round(occupancyRate * 10) / 10;
+  while (cursor <= endM) {
+    const y = cursor.getFullYear();
+    const m = cursor.getMonth() + 1;
+    const key = `${y}-${m}`;
+    rows.push({
+      month: MONTH_LABELS_SHORT[cursor.getMonth()],
+      revenue: revenueMap.get(key) || 0,
+      occupancy: occ,
+      maintenance: maintMap.get(key) || 0,
+    });
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  return rows;
+}
+
+async function getRevenueBreakdownByType(
+  propertyIds: mongoose.Types.ObjectId[],
+  startDate: Date,
+  endDate: Date
+) {
+  if (!propertyIds.length) return [];
+  const rows = await Payment.aggregate([
+    {
+      $match: {
+        propertyId: { $in: propertyIds },
+        deletedAt: null,
+        status: { $in: PAID_STATUSES },
+        $expr: {
+          $and: [
+            { $gte: [{ $ifNull: ["$paidDate", "$dueDate"] }, startDate] },
+            { $lte: [{ $ifNull: ["$paidDate", "$dueDate"] }, endDate] },
+          ],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: { $ifNull: ["$type", "other"] },
+        amount: { $sum: "$amount" },
+      },
+    },
+  ]);
+  const total = rows.reduce((s, r) => s + r.amount, 0);
+  return rows.map((r) => {
+    const raw = String(r._id || "other");
+    const name = raw
+      .split("_")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+    return {
+      type: raw,
+      name,
+      amount: r.amount,
+      percentage: total > 0 ? Math.round((r.amount / total) * 1000) / 10 : 0,
+    };
+  });
+}
+
+async function getPropertyPerformanceRows(
+  properties: Record<string, unknown>[],
+  propertyIds: mongoose.Types.ObjectId[],
+  startDate: Date,
+  endDate: Date
+) {
+  if (!propertyIds.length) return [];
+
+  const [revenueAgg, maintAgg, leaseCounts] = await Promise.all([
+    Payment.aggregate([
+      {
+        $match: {
+          propertyId: { $in: propertyIds },
+          deletedAt: null,
+          status: { $in: PAID_STATUSES },
+          $expr: {
+            $and: [
+              { $gte: [{ $ifNull: ["$paidDate", "$dueDate"] }, startDate] },
+              { $lte: [{ $ifNull: ["$paidDate", "$dueDate"] }, endDate] },
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$propertyId",
+          revenue: { $sum: "$amount" },
+        },
+      },
+    ]),
+    MaintenanceRequest.aggregate([
+      {
+        $match: {
+          propertyId: { $in: propertyIds },
+          deletedAt: null,
+          createdAt: { $gte: startDate, $lte: endDate },
+        },
+      },
+      {
+        $group: {
+          _id: "$propertyId",
+          maintenance: { $sum: { $ifNull: ["$actualCost", "$estimatedCost"] } },
+        },
+      },
+    ]),
+    Lease.aggregate([
+      {
+        $match: {
+          propertyId: { $in: propertyIds },
+          status: LeaseStatus.ACTIVE,
+        },
+      },
+      {
+        $group: {
+          _id: "$propertyId",
+          leasedUnits: { $sum: 1 },
+        },
+      },
+    ]),
+  ]);
+
+  const revMap = new Map(
+    revenueAgg.map((r) => [r._id.toString(), r.revenue as number])
+  );
+  const maintMap = new Map(
+    maintAgg.map((r) => [r._id.toString(), r.maintenance as number])
+  );
+  const leaseMap = new Map(
+    leaseCounts.map((r) => [r._id.toString(), r.leasedUnits as number])
+  );
+
+  const rows = properties.map((p) => {
+    const id = (p._id as mongoose.Types.ObjectId).toString();
+    const unitsCount = countPropertyUnits(
+      p as { isMultiUnit?: boolean; units?: unknown[]; totalUnits?: number }
+    );
+    const leased = leaseMap.get(id) || 0;
+    const occupancy =
+      unitsCount > 0 ? Math.round((leased / unitsCount) * 1000) / 10 : 0;
+    return {
+      id,
+      name: (p.name as string) || "Unnamed property",
+      revenue: revMap.get(id) || 0,
+      occupancy,
+      maintenance: maintMap.get(id) || 0,
+    };
+  });
+
+  return rows.sort((a, b) => b.revenue - a.revenue);
+}
+
+async function getMaintenanceCategoryBreakdown(
+  propertyIds: mongoose.Types.ObjectId[],
+  startDate: Date,
+  endDate: Date
+) {
+  if (!propertyIds.length) return [];
+  const rows = await MaintenanceRequest.aggregate([
+    {
+      $match: {
+        propertyId: { $in: propertyIds },
+        deletedAt: null,
+        createdAt: { $gte: startDate, $lte: endDate },
+      },
+    },
+    {
+      $group: {
+        _id: { $ifNull: ["$category", "general"] },
+        count: { $sum: 1 },
+        cost: { $sum: { $ifNull: ["$actualCost", "$estimatedCost"] } },
+      },
+    },
+    { $sort: { count: -1 } },
+    { $limit: 16 },
+  ]);
+  return rows.map((r) => ({
+    category: String(r._id || "general")
+      .split("_")
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+      .join(" "),
+    count: r.count,
+    cost: r.cost,
+  }));
+}
+
 async function generateOverviewAnalytics(
-  propertyQuery: any,
+  propertyQuery: Record<string, unknown>,
   startDate: Date,
   endDate: Date
 ) {
   try {
-    // Get properties in scope
-    const properties = await Property.find(propertyQuery);
-    const propertyIds = properties.map((p) => p._id);
+    const properties = await Property.find(propertyQuery).lean();
+    const propertyIds = properties.map(
+      (p) => p._id as mongoose.Types.ObjectId
+    );
 
-    // Portfolio Overview
+    const totalUnits = properties.reduce(
+      (sum, p) =>
+        sum +
+        countPropertyUnits(
+          p as { isMultiUnit?: boolean; units?: unknown[]; totalUnits?: number }
+        ),
+      0
+    );
+
     const portfolioStats = {
       totalProperties: properties.length,
-      totalUnits: properties.reduce((sum, p) => sum + (p.units || 1), 0),
-      totalValue: properties.reduce((sum, p) => sum + (p.value || 0), 0),
-      averageRent:
-        properties.reduce((sum, p) => sum + (p.rentAmount || 0), 0) /
-          properties.length || 0,
+      totalUnits,
+      totalValue: properties.reduce(
+        (sum, p) => sum + ((p as { value?: number }).value || 0),
+        0
+      ),
+      averageRent: portfolioAverageRent(properties as Record<string, unknown>[]),
     };
 
-    // Occupancy Overview
-    const totalLeases = await Lease.countDocuments({
-      propertyId: { $in: propertyIds },
-      status: LeaseStatus.ACTIVE,
-    });
+    const totalLeases =
+      propertyIds.length > 0
+        ? await Lease.countDocuments({
+            propertyId: { $in: propertyIds },
+            status: LeaseStatus.ACTIVE,
+          })
+        : 0;
+
     const occupancyRate =
       portfolioStats.totalUnits > 0
         ? (totalLeases / portfolioStats.totalUnits) * 100
         : 0;
 
-    // Financial Overview
-    const financialStats = await Payment.aggregate([
-      {
-        $match: {
-          propertyId: { $in: propertyIds },
-          dueDate: { $gte: startDate, $lte: endDate },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalRevenue: {
-            $sum: {
-              $cond: [
-                { $eq: ["$status", PaymentStatus.COMPLETED] },
-                "$amount",
-                0,
-              ],
+    const financialStats =
+      propertyIds.length > 0
+        ? await Payment.aggregate([
+            {
+              $match: {
+                propertyId: { $in: propertyIds },
+                deletedAt: null,
+                $expr: {
+                  $and: [
+                    {
+                      $gte: [
+                        { $ifNull: ["$paidDate", "$dueDate"] },
+                        startDate,
+                      ],
+                    },
+                    {
+                      $lte: [{ $ifNull: ["$paidDate", "$dueDate"] }, endDate],
+                    },
+                  ],
+                },
+              },
             },
-          },
-          pendingRevenue: {
-            $sum: {
-              $cond: [
-                { $eq: ["$status", PaymentStatus.PENDING] },
-                "$amount",
-                0,
-              ],
+            {
+              $group: {
+                _id: null,
+                totalRevenue: {
+                  $sum: {
+                    $cond: [{ $in: ["$status", PAID_STATUSES] }, "$amount", 0],
+                  },
+                },
+                pendingRevenue: {
+                  $sum: {
+                    $cond: [
+                      { $eq: ["$status", PaymentStatus.PENDING] },
+                      "$amount",
+                      0,
+                    ],
+                  },
+                },
+                totalPayments: { $sum: 1 },
+                completedPayments: {
+                  $sum: {
+                    $cond: [{ $in: ["$status", PAID_STATUSES] }, 1, 0],
+                  },
+                },
+              },
             },
-          },
-          totalPayments: { $sum: 1 },
-          completedPayments: {
-            $sum: {
-              $cond: [{ $eq: ["$status", PaymentStatus.COMPLETED] }, 1, 0],
-            },
-          },
-        },
-      },
-    ]);
+          ])
+        : [];
 
     const financial = financialStats[0] || {
       totalRevenue: 0,
@@ -164,32 +491,61 @@ async function generateOverviewAnalytics(
       completedPayments: 0,
     };
 
-    // Maintenance Overview
-    const maintenanceStats = await MaintenanceRequest.aggregate([
-      {
-        $match: {
-          propertyId: { $in: propertyIds },
-          createdAt: { $gte: startDate, $lte: endDate },
-        },
-      },
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
-          totalCost: { $sum: { $ifNull: ["$actualCost", "$estimatedCost"] } },
-        },
-      },
-    ]);
+    const maintenanceStats =
+      propertyIds.length > 0
+        ? await MaintenanceRequest.aggregate([
+            {
+              $match: {
+                propertyId: { $in: propertyIds },
+                deletedAt: null,
+                createdAt: { $gte: startDate, $lte: endDate },
+              },
+            },
+            {
+              $group: {
+                _id: "$status",
+                count: { $sum: 1 },
+                totalCost: {
+                  $sum: { $ifNull: ["$actualCost", "$estimatedCost"] },
+                },
+              },
+            },
+          ])
+        : [];
 
-    // Recent Activity
-    const recentActivity = await getRecentActivity(propertyIds, 10);
+    const collectionRate =
+      financial.totalPayments > 0
+        ? (financial.completedPayments / financial.totalPayments) * 100
+        : 0;
 
-    // Monthly Trends
-    const monthlyTrends = await getMonthlyTrends(
-      propertyIds,
-      startDate,
-      endDate
+    const collected = Number(financial.totalRevenue) || 0;
+    const pending = Number(financial.pendingRevenue) || 0;
+    const flowDenom = collected + pending;
+    const collectedPercent =
+      flowDenom > 0 ? Math.round((collected / flowDenom) * 1000) / 10 : 0;
+    const pendingPercent =
+      flowDenom > 0 ? Math.round((pending / flowDenom) * 1000) / 10 : 0;
+    const otherPercent = Math.max(
+      0,
+      Math.round((100 - collectedPercent - pendingPercent) * 10) / 10
     );
+
+    const [
+      monthlyTrends,
+      propertyPerformance,
+      revenueBreakdown,
+      maintenanceByCategory,
+    ] = await Promise.all([
+      getMonthlyTrends(propertyIds, startDate, endDate, occupancyRate),
+      getPropertyPerformanceRows(
+        properties as Record<string, unknown>[],
+        propertyIds,
+        startDate,
+        endDate
+      ),
+      getRevenueBreakdownByType(propertyIds, startDate, endDate),
+      getMaintenanceCategoryBreakdown(propertyIds, startDate, endDate),
+    ]);
 
     return createSuccessResponse(
       {
@@ -198,21 +554,27 @@ async function generateOverviewAnalytics(
           rate: Math.round(occupancyRate * 100) / 100,
           occupied: totalLeases,
           total: portfolioStats.totalUnits,
-          vacant: portfolioStats.totalUnits - totalLeases,
+          vacant: Math.max(0, portfolioStats.totalUnits - totalLeases),
         },
         financial: {
           ...financial,
           collectionRate:
-            financial.totalPayments > 0
-              ? (financial.completedPayments / financial.totalPayments) * 100
-              : 0,
+            Math.round(collectionRate * 100) / 100,
+          paymentMix: {
+            collectedPercent,
+            pendingPercent,
+            otherPercent,
+          },
         },
         maintenance: maintenanceStats.reduce((acc, stat) => {
           acc[stat._id] = { count: stat.count, cost: stat.totalCost };
           return acc;
-        }, {} as any),
-        recentActivity,
+        }, {} as Record<string, { count: number; cost: number }>),
+        recentActivity: [] as unknown[],
         monthlyTrends,
+        propertyPerformance,
+        revenueBreakdown,
+        maintenanceByCategory,
         period: {
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
@@ -226,7 +588,7 @@ async function generateOverviewAnalytics(
 }
 
 async function generateFinancialAnalytics(
-  propertyQuery: any,
+  propertyQuery: Record<string, unknown>,
   startDate: Date,
   endDate: Date
 ) {
@@ -239,15 +601,25 @@ async function generateFinancialAnalytics(
       {
         $match: {
           propertyId: { $in: propertyIds },
-          dueDate: { $gte: startDate, $lte: endDate },
-          status: PaymentStatus.COMPLETED,
+          deletedAt: null,
+          status: { $in: PAID_STATUSES },
+          $expr: {
+            $and: [
+              {
+                $gte: [{ $ifNull: ["$paidDate", "$dueDate"] }, startDate],
+              },
+              {
+                $lte: [{ $ifNull: ["$paidDate", "$dueDate"] }, endDate],
+              },
+            ],
+          },
         },
       },
       {
         $group: {
           _id: {
-            year: { $year: "$paidDate" },
-            month: { $month: "$paidDate" },
+            year: { $year: { $ifNull: ["$paidDate", "$dueDate"] } },
+            month: { $month: { $ifNull: ["$paidDate", "$dueDate"] } },
             type: "$type",
           },
           amount: { $sum: "$amount" },
@@ -262,7 +634,17 @@ async function generateFinancialAnalytics(
       {
         $match: {
           propertyId: { $in: propertyIds },
-          dueDate: { $gte: startDate, $lte: endDate },
+          deletedAt: null,
+          $expr: {
+            $and: [
+              {
+                $gte: [{ $ifNull: ["$paidDate", "$dueDate"] }, startDate],
+              },
+              {
+                $lte: [{ $ifNull: ["$paidDate", "$dueDate"] }, endDate],
+              },
+            ],
+          },
         },
       },
       {
@@ -280,11 +662,7 @@ async function generateFinancialAnalytics(
           propertyName: { $first: "$property.name" },
           totalRevenue: {
             $sum: {
-              $cond: [
-                { $eq: ["$status", PaymentStatus.COMPLETED] },
-                "$amount",
-                0,
-              ],
+              $cond: [{ $in: ["$status", PAID_STATUSES] }, "$amount", 0],
             },
           },
           pendingRevenue: {
@@ -299,7 +677,7 @@ async function generateFinancialAnalytics(
           paymentCount: { $sum: 1 },
           collectionRate: {
             $avg: {
-              $cond: [{ $eq: ["$status", PaymentStatus.COMPLETED] }, 1, 0],
+              $cond: [{ $in: ["$status", PAID_STATUSES] }, 1, 0],
             },
           },
         },
@@ -728,41 +1106,6 @@ async function generatePerformanceAnalytics(
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
-
-async function getRecentActivity(propertyIds: any[], limit: number) {
-  // This would aggregate recent activities from various collections
-  // For now, return mock data structure
-  return [
-    {
-      type: "lease_signed",
-      description: "New lease signed for Unit 4B",
-      timestamp: new Date(),
-    },
-    {
-      type: "payment_received",
-      description: "Rent payment received from John Doe",
-      timestamp: new Date(),
-    },
-    {
-      type: "maintenance_completed",
-      description: "Plumbing repair completed",
-      timestamp: new Date(),
-    },
-  ];
-}
-
-async function getMonthlyTrends(
-  propertyIds: any[],
-  startDate: Date,
-  endDate: Date
-) {
-  // This would calculate monthly trends across key metrics
-  return {
-    revenue: [],
-    occupancy: [],
-    maintenance: [],
-  };
-}
 
 async function getCashFlowAnalysis(
   propertyIds: any[],

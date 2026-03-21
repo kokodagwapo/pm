@@ -175,9 +175,9 @@ export function MobileFirstCard({
   children,
   className,
   padding = "md",
-  shadow = "sm",
-  border = true,
-  rounded = "lg",
+  shadow: _shadow = "sm",
+  border: _border = true,
+  rounded: _rounded = "lg",
 }: MobileFirstCardProps) {
   const paddingClasses = {
     none: "",
@@ -186,29 +186,11 @@ export function MobileFirstCard({
     lg: "p-6 sm:p-8",
   };
 
-  const shadowClasses = {
-    none: "",
-    sm: "shadow-sm",
-    md: "shadow-md",
-    lg: "shadow-lg",
-  };
-
-  const roundedClasses = {
-    none: "",
-    sm: "rounded-sm",
-    md: "rounded-md",
-    lg: "rounded-lg",
-    xl: "rounded-xl",
-  };
-
   return (
     <div
       className={cn(
-        "bg-card text-card-foreground",
+        "dashboard-ui-surface text-card-foreground rounded-2xl",
         paddingClasses[padding],
-        shadowClasses[shadow],
-        border && "border border-border",
-        roundedClasses[rounded],
         className
       )}
     >

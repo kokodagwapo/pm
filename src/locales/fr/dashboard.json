@@ -5,6 +5,16 @@
 
   "dashboard.header.subtitle": "Voici ce qui se passe dans votre portefeuille immobilier",
 
+  "dashboard.sections.keyMetrics.title": "Clés, lots & loyer",
+  "dashboard.sections.keyMetrics.subtitle": "Le pouls de chaque porte : occupation, loyers et file d’attente des travaux",
+
+  "dashboard.sections.actionCenter.title": "Réception — ça vous appelle",
+  "dashboard.sections.actionCenter.subtitle": "Retards de loyer, urgences et baux qui frappent à la porte",
+
+  "dashboard.sections.financial.title": "Le fil de l’argent",
+  "dashboard.sections.propertyMix.title": "Ce qui occupe votre parc",
+  "dashboard.sections.rentRadar.title": "Radar des loyers",
+
   "dashboard.actions.refresh": "Actualiser",
   "dashboard.actions.analytics": "Analyses",
   "dashboard.actions.retry": "Réessayer",

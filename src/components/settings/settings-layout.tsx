@@ -22,6 +22,8 @@ import { toast } from "sonner";
 import { UserRole } from "@/types";
 import { logClientError, logClientWarn } from "@/utils/logger";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { cn } from "@/lib/utils";
 
 interface UserSettings {
   _id: string;
@@ -79,6 +81,8 @@ export function SettingsLayout({
   adminOnly = false,
 }: SettingsLayoutProps) {
   const { t } = useLocalizationContext();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
   const { data: session, status } = useSession({
     refetchOnWindowFocus: false,
     refetchWhenOffline: false,
@@ -97,31 +101,20 @@ export function SettingsLayout({
   const isManager = userRole === UserRole.MANAGER;
   const hasAdminAccess = isAdmin || isManager;
 
-  // Check admin access for admin-only sections
-  if (adminOnly && !hasAdminAccess) {
-    return (
-      <div className="container mx-auto p-6 max-w-6xl">
-        <Alert className="border-red-500 bg-red-50">
-          <AlertCircle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">
-            Access denied. This section is only available to administrators and
-            managers.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
   useEffect(() => {
     // Only fetch data when session is loaded and authenticated
     if (status === "authenticated" && session?.user?.id) {
+      if (adminOnly && !hasAdminAccess) {
+        setIsLoading(false);
+        return;
+      }
       fetchUserData();
       setAlert(null);
     } else if (status === "unauthenticated") {
       setIsLoading(false);
       showAlert("error", "Authentication required");
     }
-  }, [session, status]);
+  }, [session, status, adminOnly, hasAdminAccess]);
 
   const fetchUserData = async () => {
     try {
@@ -368,27 +361,91 @@ export function SettingsLayout({
 
   if (isLoading || status === "loading") {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div
+        className={cn(
+          "flex min-h-[40vh] items-center justify-center",
+          isLight && "text-slate-900"
+        )}
+      >
+        <div
+          className={cn(
+            "h-8 w-8 animate-spin rounded-full",
+            isLight
+              ? "border-2 border-slate-200 border-t-sky-600"
+              : "border-b-2 border-primary"
+          )}
+          aria-hidden
+        />
+      </div>
+    );
+  }
+
+  if (adminOnly && !hasAdminAccess) {
+    return (
+      <div
+        className={cn(
+          "container mx-auto max-w-6xl p-6",
+          isLight && "text-slate-900"
+        )}
+      >
+        <Alert className="border-red-500 bg-red-50">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            Access denied. This section is only available to administrators and
+            managers.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <div
+      className={cn(
+        "container mx-auto max-w-6xl p-6",
+        isLight && "text-slate-900"
+      )}
+    >
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <SettingsIcon className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">{t("settings.pageTitle")}</h1>
+        <div className="mb-2 flex items-center gap-3">
+          <SettingsIcon
+            className={cn(
+              "h-8 w-8 shrink-0",
+              isLight ? "text-sky-600" : "text-primary"
+            )}
+          />
+          <h1
+            className={cn(
+              "text-3xl font-bold",
+              isLight ? "text-slate-900" : "text-white"
+            )}
+          >
+            {t("settings.pageTitle")}
+          </h1>
         </div>
-        <p className="text-muted-foreground">{t("settings.pageDescription")}</p>
+        <p
+          className={cn(
+            isLight ? "text-slate-600" : "text-white/75"
+          )}
+        >
+          {t("settings.pageDescription")}
+        </p>
       </div>
 
-      <Card>
+      <Card
+        className={cn(
+          isLight && "border-slate-200/90 text-slate-900 shadow-sm"
+        )}
+      >
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 justify-between">
+          <CardTitle
+            className={cn(
+              "flex items-center justify-between gap-2",
+              isLight && "text-slate-900 [&_svg]:text-slate-700"
+            )}
+          >
             <div className="flex items-center gap-2">
-              <Icon className="h-5 w-5" />
+              <Icon className="h-5 w-5 shrink-0" />
               {title}
             </div>
             {showRefresh && (
@@ -397,16 +454,24 @@ export function SettingsLayout({
                 size="sm"
                 onClick={fetchUserData}
                 disabled={isLoading}
-                className="text-xs"
+                className={cn(
+                  "text-xs",
+                  isLight &&
+                    "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                )}
               >
                 <RefreshCw
-                  className={`h-3 w-3 mr-1 ${isLoading ? "animate-spin" : ""}`}
+                  className={`mr-1 h-3 w-3 ${isLoading ? "animate-spin" : ""}`}
                 />
                 {t("settings.refreshButton")}
               </Button>
             )}
           </CardTitle>
-          <CardDescription>{description}</CardDescription>
+          <CardDescription
+            className={cn(isLight ? "text-slate-600" : "text-white/70")}
+          >
+            {description}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {alert && (
@@ -442,7 +507,10 @@ export function SettingsLayout({
                   variant="ghost"
                   size="sm"
                   onClick={clearAlert}
-                  className="h-6 w-6 p-0 ml-2"
+                  className={cn(
+                    "ml-2 h-6 w-6 p-0",
+                    isLight && "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                  )}
                 >
                   ×
                 </Button>

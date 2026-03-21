@@ -24,6 +24,8 @@ import { useUserAvatar } from "@/components/providers/UserAvatarProvider";
 import { Upload, User, Mail, Phone, Calendar, MapPin } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { cn } from "@/lib/utils";
 
 const createProfileSchema = (t: (key: string) => string) =>
   z.object({
@@ -154,6 +156,14 @@ export function ProfileSettings({
   onAlert,
 }: ProfileSettingsProps) {
   const { t } = useLocalizationContext();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
+  const settingsCardClass = isLight ? "border-slate-200/90 shadow-sm" : undefined;
+  const settingsTitleClass = cn("text-lg", isLight && "text-slate-900");
+  const settingsDescClass = cn(isLight && "text-slate-600");
+  const outlineLight =
+    isLight &&
+    "border-slate-200 bg-white text-slate-900 hover:bg-slate-50";
   const { update: updateSession } = useSession();
   const { avatarUrl, setAvatarUrl } = useUserAvatar();
   const [isLoading, setIsLoading] = useState(false);
@@ -557,21 +567,33 @@ export function ProfileSettings({
 
   if (!user) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div
+        className={cn(
+          "flex h-64 items-center justify-center",
+          isLight && "text-slate-900"
+        )}
+      >
+        <div
+          className={cn(
+            "h-8 w-8 animate-spin rounded-full",
+            isLight
+              ? "border-2 border-slate-200 border-t-sky-600"
+              : "border-b-2 border-primary"
+          )}
+        />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className={cn("space-y-6", isLight && "text-slate-900")}>
       {/* Avatar Section */}
-      <Card>
+      <Card className={settingsCardClass}>
         <CardHeader>
-          <CardTitle className="text-lg">
+          <CardTitle className={settingsTitleClass}>
             {t("settings.profile.avatar.title")}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className={settingsDescClass}>
             {t("settings.profile.avatar.description")}
           </CardDescription>
         </CardHeader>
@@ -592,7 +614,7 @@ export function ProfileSettings({
                 <Button
                   variant="outline"
                   disabled={isUploading}
-                  className="cursor-pointer"
+                  className={cn("cursor-pointer", outlineLight)}
                   asChild
                 >
                   <span>
@@ -621,12 +643,12 @@ export function ProfileSettings({
       {/* Single Unified Form */}
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Information */}
-        <Card>
+        <Card className={settingsCardClass}>
           <CardHeader>
-            <CardTitle className="text-lg">
+            <CardTitle className={settingsTitleClass}>
               {t("settings.profile.basicInfo.title")}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className={settingsDescClass}>
               {t("settings.profile.basicInfo.description")}
             </CardDescription>
           </CardHeader>
@@ -832,12 +854,12 @@ export function ProfileSettings({
         </Card>
 
         {/* Emergency Contact */}
-        <Card>
+        <Card className={settingsCardClass}>
           <CardHeader>
-            <CardTitle className="text-lg">
+            <CardTitle className={settingsTitleClass}>
               {t("settings.profile.emergencyContact.title")}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className={settingsDescClass}>
               {t("settings.profile.emergencyContact.description")}
             </CardDescription>
           </CardHeader>
@@ -891,12 +913,12 @@ export function ProfileSettings({
         </Card>
 
         {/* Social Links */}
-        <Card>
+        <Card className={settingsCardClass}>
           <CardHeader>
-            <CardTitle className="text-lg">
+            <CardTitle className={settingsTitleClass}>
               {t("settings.profile.socialLinks.title")}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className={settingsDescClass}>
               {t("settings.profile.socialLinks.description")}
             </CardDescription>
           </CardHeader>
@@ -972,6 +994,7 @@ export function ProfileSettings({
             variant="outline"
             onClick={() => form.reset()}
             disabled={isLoading}
+            className={cn(outlineLight)}
           >
             {t("settings.profile.actions.reset")}
           </Button>
@@ -984,12 +1007,12 @@ export function ProfileSettings({
       </form>
 
       {/* Account Information */}
-      <Card>
+      <Card className={settingsCardClass}>
         <CardHeader>
-          <CardTitle className="text-lg">
+          <CardTitle className={settingsTitleClass}>
             {t("settings.profile.accountInfo.title")}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className={settingsDescClass}>
             {t("settings.profile.accountInfo.description")}
           </CardDescription>
         </CardHeader>

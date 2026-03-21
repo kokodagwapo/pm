@@ -11,6 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
 import { DateBlockType } from "@/types";
 
 export interface CalendarBlock {
@@ -95,11 +96,23 @@ const BLOCK_TYPE_LABELS: Record<string, string> = {
   seasonal_closure: "Seasonal Closure",
 };
 
-const STATUS_COLORS: Record<DayStatus, string> = {
-  available: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-200 dark:hover:bg-emerald-900/50",
+/** High-contrast cells on light dashboard (avoids `dark:` when html.dark + dashboard-light) */
+const STATUS_COLORS_LIGHT: Record<DayStatus, string> = {
+  available:
+    "bg-emerald-100 text-emerald-900 hover:bg-emerald-200",
+  blocked: "bg-red-100 text-red-900",
+  booked: "bg-sky-100 text-sky-900",
+  pending: "bg-amber-100 text-amber-950",
+  past: "bg-slate-100 text-slate-500",
+};
+
+const STATUS_COLORS_IMMERSIVE: Record<DayStatus, string> = {
+  available:
+    "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-200 dark:hover:bg-emerald-900/50",
   blocked: "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200",
   booked: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200",
-  pending: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200",
+  pending:
+    "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200",
   past: "bg-gray-100 dark:bg-gray-800/30 text-gray-400 dark:text-gray-600",
 };
 
@@ -155,6 +168,10 @@ export function AvailabilityCalendar({
   showLegend = true,
   className,
 }: AvailabilityCalendarProps) {
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
+  const statusColors = isLight ? STATUS_COLORS_LIGHT : STATUS_COLORS_IMMERSIVE;
+
   const today = useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -363,12 +380,22 @@ export function AvailabilityCalendar({
 
     return (
       <div className="flex-1 min-w-[280px]">
-        <h3 className="text-center font-semibold text-base mb-3">{monthName}</h3>
+        <h3
+          className={cn(
+            "mb-3 text-center text-base font-semibold",
+            isLight ? "text-slate-900" : "text-white"
+          )}
+        >
+          {monthName}
+        </h3>
         <div className="grid grid-cols-7 gap-0.5 mb-1">
           {WEEKDAY_HEADERS.map((header) => (
             <div
               key={header}
-              className="text-center text-xs font-medium text-muted-foreground py-1"
+              className={cn(
+                "py-1 text-center text-xs font-medium",
+                isLight ? "text-slate-500" : "text-muted-foreground"
+              )}
             >
               {header}
             </div>
@@ -402,7 +429,7 @@ export function AvailabilityCalendar({
               className={cn(
                 "relative h-14 w-full rounded-md text-xs transition-all duration-150 flex flex-col items-center justify-start pt-1 gap-0.5 select-none",
                 !isCurrentMonth && "opacity-40",
-                STATUS_COLORS[status],
+                statusColors[status],
                 selected && "ring-2 ring-primary ring-offset-1",
                 isToday && "ring-1 ring-primary/50",
                 status === "available" && !readOnly && "cursor-pointer",
@@ -418,7 +445,12 @@ export function AvailabilityCalendar({
                 {dayNumber}
               </span>
               {showPricing && status === "available" && dayInfo.pricePerNight !== undefined && (
-                <span className="text-[10px] leading-none text-muted-foreground truncate max-w-full px-0.5">
+                <span
+                  className={cn(
+                    "max-w-full truncate px-0.5 text-[10px] leading-none",
+                    isLight ? "text-slate-600" : "text-muted-foreground"
+                  )}
+                >
                   ${dayInfo.pricePerNight.toFixed(0)}
                 </span>
               )}
@@ -448,15 +480,29 @@ export function AvailabilityCalendar({
       case "blocked":
         return (
           <div className="space-y-1">
-            <p className="font-semibold">{dateStr}</p>
-            <p className="text-red-400">
+            <p className={cn("font-semibold", isLight ? "text-slate-900" : "")}>
+              {dateStr}
+            </p>
+            <p className={isLight ? "text-red-700" : "text-red-400"}>
               Blocked: {BLOCK_TYPE_LABELS[dayInfo.block?.blockType || ""] || dayInfo.block?.blockType}
             </p>
             {dayInfo.block?.reason && (
-              <p className="text-xs text-muted-foreground">{dayInfo.block.reason}</p>
+              <p
+                className={cn(
+                  "text-xs",
+                  isLight ? "text-slate-600" : "text-muted-foreground"
+                )}
+              >
+                {dayInfo.block.reason}
+              </p>
             )}
             {dayInfo.block?.isHardBlock && (
-              <p className="text-xs text-red-400 flex items-center gap-1">
+              <p
+                className={cn(
+                  "flex items-center gap-1 text-xs",
+                  isLight ? "text-red-700" : "text-red-400"
+                )}
+              >
                 <Lock className="h-3 w-3" /> Hard block
               </p>
             )}
@@ -465,10 +511,17 @@ export function AvailabilityCalendar({
       case "booked":
         return (
           <div className="space-y-1">
-            <p className="font-semibold">{dateStr}</p>
-            <p className="text-blue-400">Occupied</p>
+            <p className={cn("font-semibold", isLight ? "text-slate-900" : "")}>
+              {dateStr}
+            </p>
+            <p className={isLight ? "text-sky-800" : "text-blue-400"}>Occupied</p>
             {dayInfo.lease?.tenantName && (
-              <p className="text-xs text-muted-foreground">
+              <p
+                className={cn(
+                  "text-xs",
+                  isLight ? "text-slate-600" : "text-muted-foreground"
+                )}
+              >
                 Tenant: {dayInfo.lease.tenantName}
               </p>
             )}
@@ -477,27 +530,45 @@ export function AvailabilityCalendar({
       case "pending":
         return (
           <div className="space-y-1">
-            <p className="font-semibold">{dateStr}</p>
-            <p className="text-yellow-400">Pending Request</p>
+            <p className={cn("font-semibold", isLight ? "text-slate-900" : "")}>
+              {dateStr}
+            </p>
+            <p className={isLight ? "text-amber-800" : "text-yellow-400"}>
+              Pending Request
+            </p>
           </div>
         );
       case "available":
         return (
           <div className="space-y-1">
-            <p className="font-semibold">{dateStr}</p>
-            <p className="text-emerald-400">Available</p>
+            <p className={cn("font-semibold", isLight ? "text-slate-900" : "")}>
+              {dateStr}
+            </p>
+            <p className={isLight ? "text-emerald-800" : "text-emerald-400"}>
+              Available
+            </p>
             {showPricing && dayInfo.pricePerNight !== undefined && (
-              <p className="text-xs">
+              <p className={cn("text-xs", isLight ? "text-slate-700" : "")}>
                 ${dayInfo.pricePerNight.toFixed(2)}/night
               </p>
             )}
             {dayInfo.pricingRule && (
-              <p className="text-xs text-muted-foreground">
+              <p
+                className={cn(
+                  "text-xs",
+                  isLight ? "text-slate-600" : "text-muted-foreground"
+                )}
+              >
                 Rule: {dayInfo.pricingRule.name}
               </p>
             )}
             {dayInfo.minimumStay && (
-              <p className="text-xs text-muted-foreground">
+              <p
+                className={cn(
+                  "text-xs",
+                  isLight ? "text-slate-600" : "text-muted-foreground"
+                )}
+              >
                 Min stay: {dayInfo.minimumStay} nights
               </p>
             )}
@@ -614,21 +685,48 @@ export function AvailabilityCalendar({
       </div>
 
       {showLegend && (
-        <div className="flex flex-wrap items-center gap-4 pt-2 border-t text-xs text-muted-foreground">
+        <div
+          className={cn(
+            "flex flex-wrap items-center gap-4 border-t pt-2 text-xs",
+            isLight
+              ? "border-slate-200 text-slate-600"
+              : "border-white/15 text-muted-foreground"
+          )}
+        >
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-emerald-200 dark:bg-emerald-900/50" />
+            <div
+              className={cn(
+                "h-3 w-3 rounded-sm",
+                isLight ? "bg-emerald-200" : "bg-emerald-200 dark:bg-emerald-900/50"
+              )}
+            />
             <span>Available</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-red-200 dark:bg-red-900/50" />
+            <div
+              className={cn(
+                "h-3 w-3 rounded-sm",
+                isLight ? "bg-red-200" : "bg-red-200 dark:bg-red-900/50"
+              )}
+            />
             <span>Blocked</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-blue-200 dark:bg-blue-900/50" />
+            <div
+              className={cn(
+                "h-3 w-3 rounded-sm",
+                isLight ? "bg-sky-200" : "bg-blue-200 dark:bg-blue-900/50"
+              )}
+            />
             <span>Booked</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-yellow-200 dark:bg-yellow-900/50" />
+            <div
+              className={cn(
+                "h-3 w-3 rounded-sm",
+                isLight ? "bg-amber-200" : "bg-yellow-200 dark:bg-yellow-900/50"
+              )}
+            />
             <span>Pending Request</span>
           </div>
           <div className="flex items-center gap-1.5">

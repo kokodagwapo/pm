@@ -123,7 +123,7 @@ export function GlobalPagination({
       )}
     >
       {/* Left side - Showing info and page size selector */}
-      <div className="flex flex-col sm:flex-row items-center gap-4 text-sm text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-center gap-4 text-sm text-white/75">
         <span>
           {showingText ||
             `${showingLabel} ${startItem}-${endItem} ${ofLabel} ${totalItems}`}
@@ -147,7 +147,7 @@ export function GlobalPagination({
                 ))}
               </SelectContent>
             </Select>
-            <span className="text-muted-foreground">{itemsPerPageLabel}</span>
+            <span className="text-white/65">{itemsPerPageLabel}</span>
           </div>
         )}
       </div>
@@ -161,7 +161,7 @@ export function GlobalPagination({
             size="sm"
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage <= 1 || disabled}
-            className="h-8"
+            className="h-8 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             {previousLabel}
@@ -173,7 +173,7 @@ export function GlobalPagination({
               page === "ellipsis" ? (
                 <span
                   key={`ellipsis-${index}`}
-                  className="px-2 text-muted-foreground"
+                  className="px-2 text-white/55"
                 >
                   ...
                 </span>
@@ -184,7 +184,11 @@ export function GlobalPagination({
                   size="sm"
                   onClick={() => onPageChange(page)}
                   disabled={disabled}
-                  className="h-8 w-8 p-0"
+                  className={
+                    currentPage === page
+                      ? "h-8 w-8 p-0"
+                      : "h-8 w-8 border-white/20 bg-white/5 p-0 text-white hover:bg-white/10 hover:text-white"
+                  }
                 >
                   {page}
                 </Button>
@@ -193,7 +197,7 @@ export function GlobalPagination({
           </div>
 
           {/* Mobile page indicator */}
-          <span className="sm:hidden text-sm text-muted-foreground">
+          <span className="sm:hidden text-sm text-white/70">
             {pageLabel} {currentPage} {ofLabel} {totalPages}
           </span>
 
@@ -203,7 +207,7 @@ export function GlobalPagination({
             size="sm"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage >= totalPages || disabled}
-            className="h-8"
+            className="h-8 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
           >
             {nextLabel}
             <ChevronRight className="h-4 w-4 ml-1" />

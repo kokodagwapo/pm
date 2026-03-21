@@ -307,15 +307,40 @@ function getStepsForRole(role?: string): TourStep[] {
 function getRoleColor(role?: string) {
   switch (role) {
     case UserRole.ADMIN:
-      return { dot: "bg-violet-500", ring: "ring-violet-400", text: "text-violet-600", light: "bg-violet-100" };
+      return {
+        dot: "bg-violet-400",
+        ring: "ring-cyan-300/50",
+        text: "text-white",
+        light: "bg-violet-400/10",
+      };
     case UserRole.MANAGER:
-      return { dot: "bg-blue-500", ring: "ring-blue-400", text: "text-blue-600", light: "bg-blue-100" };
+      return {
+        dot: "bg-sky-400",
+        ring: "ring-cyan-300/50",
+        text: "text-white",
+        light: "bg-sky-400/10",
+      };
     case UserRole.OWNER:
-      return { dot: "bg-emerald-500", ring: "ring-emerald-400", text: "text-emerald-600", light: "bg-emerald-100" };
+      return {
+        dot: "bg-emerald-400",
+        ring: "ring-cyan-300/50",
+        text: "text-white",
+        light: "bg-emerald-400/10",
+      };
     case UserRole.TENANT:
-      return { dot: "bg-rose-500", ring: "ring-rose-400", text: "text-rose-600", light: "bg-rose-100" };
+      return {
+        dot: "bg-rose-400",
+        ring: "ring-cyan-300/50",
+        text: "text-white",
+        light: "bg-rose-400/10",
+      };
     default:
-      return { dot: "bg-violet-500", ring: "ring-violet-400", text: "text-violet-600", light: "bg-violet-100" };
+      return {
+        dot: "bg-sky-400",
+        ring: "ring-cyan-300/50",
+        text: "text-white",
+        light: "bg-sky-400/10",
+      };
   }
 }
 
@@ -436,7 +461,7 @@ export function DemoGuide() {
             "relative w-12 h-12 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center text-white",
             "hover:scale-110 active:scale-95",
             roleColors.dot,
-            isOpen && "scale-110 ring-4 ring-white shadow-xl"
+            isOpen && "scale-110 ring-4 ring-cyan-300/45 shadow-[0_0_28px_rgba(56,189,248,0.35)]"
           )}
         >
           {showPulse && !isOpen && !hasCompleted && (
@@ -459,10 +484,10 @@ export function DemoGuide() {
           <button
             onClick={handleRestart}
             aria-label="Restart tour"
-            className="absolute -top-10 right-0 w-8 h-8 rounded-full bg-white shadow border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:shadow-md transition-all"
+            className="absolute -top-10 right-0 flex h-8 w-8 items-center justify-center rounded-full border border-sky-200/35 bg-sky-950/40 text-white shadow-[0_4px_24px_rgba(56,189,248,0.15)] backdrop-blur-md transition-all hover:border-sky-200/50 hover:bg-sky-900/50"
             title="Restart tour"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="h-3.5 w-3.5" />
           </button>
         )}
       </div>
@@ -478,19 +503,32 @@ export function DemoGuide() {
             : "opacity-0 translate-y-4 scale-95 pointer-events-none"
         )}
       >
-        <div className="bg-white rounded-2xl shadow-2xl border border-slate-200/80 overflow-hidden">
+        <div
+          className={cn(
+            "overflow-hidden rounded-2xl border border-sky-200/35",
+            "bg-gradient-to-br from-sky-400/[0.14] via-cyan-500/[0.08] to-blue-600/[0.16]",
+            "shadow-[0_24px_64px_rgba(15,23,42,0.45),0_0_0_1px_rgba(255,255,255,0.06)_inset,0_1px_0_rgba(186,230,253,0.12)_inset]",
+            "backdrop-blur-xl [-webkit-backdrop-filter:blur(20px)]"
+          )}
+        >
           {/* Progress bar */}
-          <div className="h-1 bg-slate-100">
+          <div className="h-1 bg-sky-950/40">
             <div
-              className={cn("h-full transition-all duration-500 rounded-full", roleColors.dot)}
+              className="h-full rounded-full bg-gradient-to-r from-sky-300 via-cyan-200 to-sky-100 shadow-[0_0_12px_rgba(125,211,252,0.45)] transition-all duration-500"
               style={{ width: `${progressPct}%` }}
             />
           </div>
 
           {/* Header */}
-          <div className={cn("px-4 py-3 flex items-center justify-between border-b border-slate-100", roleColors.light)}>
+          <div
+            className={cn(
+              "flex items-center justify-between border-b border-white/10 px-4 py-3",
+              "bg-sky-950/25 backdrop-blur-md",
+              roleColors.light
+            )}
+          >
             <div className="flex items-center gap-2">
-              <span className={cn("text-xs font-bold uppercase tracking-wider", roleColors.text)}>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white">
                 {userRole === UserRole.ADMIN && "Super Admin Tour"}
                 {userRole === UserRole.MANAGER && "Manager Tour"}
                 {userRole === UserRole.OWNER && "Owner Tour"}
@@ -498,14 +536,14 @@ export function DemoGuide() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-xs font-medium text-white/70 tabular-nums">
                 {currentStep + 1} / {steps.length}
               </span>
               <button
                 onClick={handleClose}
-                className="w-6 h-6 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-all"
+                className="flex h-6 w-6 items-center justify-center rounded-full text-white/80 transition-all hover:bg-white/10 hover:text-white"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
@@ -517,29 +555,23 @@ export function DemoGuide() {
               isAnimating ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0"
             )}
           >
-            <div className={cn("p-4 border-b border-slate-100", step.bgColor, "border")}>
+            <div className="border-b border-white/10 bg-gradient-to-br from-white/[0.07] via-sky-400/[0.06] to-cyan-500/[0.05] p-4">
               <div className="flex items-start gap-3">
-                <span className="text-3xl flex-shrink-0 select-none leading-none mt-0.5">
+                <span className="mt-0.5 flex-shrink-0 select-none text-3xl leading-none drop-shadow-[0_2px_8px_rgba(15,23,42,0.35)]">
                   {step.emoji}
                 </span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className={cn("font-bold text-sm leading-tight", step.color)}>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-sm font-semibold leading-tight tracking-tight text-white">
                       {step.title}
                     </h3>
                     {step.badge && (
-                      <span
-                        className={cn(
-                          "text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full",
-                          step.color,
-                          "bg-white/60 border border-current/20"
-                        )}
-                      >
+                      <span className="rounded-full border border-sky-200/35 bg-sky-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-[0_0_20px_rgba(56,189,248,0.12)]">
                         {step.badge}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                  <p className="mt-1.5 text-xs leading-relaxed text-white/85">
                     {step.description}
                   </p>
                 </div>
@@ -547,7 +579,7 @@ export function DemoGuide() {
             </div>
 
             {/* Step dots */}
-            <div className="px-4 py-2 flex items-center gap-1 justify-center">
+            <div className="flex items-center justify-center gap-1 px-4 py-2">
               {steps.map((_, i) => (
                 <button
                   key={i}
@@ -555,10 +587,10 @@ export function DemoGuide() {
                   className={cn(
                     "rounded-full transition-all duration-200",
                     i === currentStep
-                      ? cn("w-4 h-2", roleColors.dot)
+                      ? cn("h-2 w-4 shadow-[0_0_10px_rgba(125,211,252,0.4)]", roleColors.dot)
                       : i < currentStep
-                      ? cn("w-2 h-2", roleColors.dot, "opacity-60")
-                      : "w-2 h-2 bg-slate-200"
+                        ? cn("h-2 w-2 opacity-70", roleColors.dot)
+                        : "h-2 w-2 bg-white/20 hover:bg-white/30"
                   )}
                   aria-label={`Go to step ${i + 1}`}
                 />
@@ -566,27 +598,24 @@ export function DemoGuide() {
             </div>
 
             {/* Navigation */}
-            <div className="px-4 pb-4 flex items-center gap-2">
+            <div className="flex items-center gap-2 px-4 pb-4">
               <button
                 onClick={handlePrev}
                 disabled={isFirst}
                 className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center transition-all",
+                  "flex h-8 w-8 items-center justify-center rounded-full border transition-all",
                   isFirst
-                    ? "text-slate-300 bg-slate-50 cursor-not-allowed"
-                    : "text-slate-600 bg-slate-100 hover:bg-slate-200 active:scale-95"
+                    ? "cursor-not-allowed border-white/5 bg-white/[0.03] text-white/25"
+                    : "border-sky-200/25 bg-white/5 text-white hover:border-sky-200/40 hover:bg-white/10 active:scale-95"
                 )}
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="h-4 w-4" />
               </button>
 
               {step.href && !isLast && (
                 <button
                   onClick={handleNavigate}
-                  className={cn(
-                    "flex-1 text-xs font-semibold py-2 px-3 rounded-lg border transition-all active:scale-95",
-                    "border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                  )}
+                  className="flex-1 rounded-lg border border-sky-200/30 bg-white/5 px-3 py-2 text-xs font-semibold text-white transition-all hover:border-sky-200/45 hover:bg-sky-400/10 active:scale-95"
                 >
                   Go there →
                 </button>
@@ -595,8 +624,7 @@ export function DemoGuide() {
               <button
                 onClick={handleNext}
                 className={cn(
-                  "flex-1 text-xs font-semibold py-2 px-4 rounded-lg text-white transition-all active:scale-95 hover:opacity-90",
-                  roleColors.dot
+                  "flex-1 rounded-lg border border-white/20 bg-gradient-to-r from-sky-700/95 via-cyan-800/90 to-blue-900/95 px-4 py-2 text-xs font-semibold text-white shadow-[0_8px_24px_rgba(56,189,248,0.25)] transition-all hover:from-sky-600 hover:via-cyan-700 hover:to-blue-800 active:scale-95"
                 )}
               >
                 {isLast ? "Finish Tour 🎉" : "Next"}
@@ -606,20 +634,25 @@ export function DemoGuide() {
                 onClick={handleNext}
                 disabled={isLast}
                 className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center transition-all",
+                  "flex h-8 w-8 items-center justify-center rounded-full border transition-all",
                   isLast
-                    ? "text-slate-300 bg-slate-50 cursor-not-allowed"
-                    : "text-slate-600 bg-slate-100 hover:bg-slate-200 active:scale-95"
+                    ? "cursor-not-allowed border-white/5 bg-white/[0.03] text-white/25"
+                    : "border-sky-200/25 bg-white/5 text-white hover:border-sky-200/40 hover:bg-white/10 active:scale-95"
                 )}
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="h-4 w-4" />
               </button>
             </div>
           </div>
         </div>
 
         {/* Tail pointing to button */}
-        <div className="absolute -bottom-2 right-5 w-4 h-4 bg-white border-r border-b border-slate-200/80 rotate-45 shadow-sm" />
+        <div
+          className={cn(
+            "absolute -bottom-2 right-5 h-4 w-4 rotate-45 border-r border-b border-sky-200/35",
+            "bg-gradient-to-br from-sky-400/25 to-cyan-600/20 shadow-[0_8px_20px_rgba(15,23,42,0.35)] backdrop-blur-md"
+          )}
+        />
       </div>
     </>
   );

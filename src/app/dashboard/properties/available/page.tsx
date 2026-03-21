@@ -64,6 +64,9 @@ import UnitDetailsModal from "@/components/properties/UnitDetailsModal";
 import { useViewPreferencesStore } from "@/stores/view-preferences.store";
 import { getFeaturedImage, hasPropertyImages } from "@/lib/utils/image-utils";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { PastelIcon } from "@/components/ui/pastel-icon";
+import { cn } from "@/lib/utils";
 
 interface UnitCardProps {
   unit: AvailableUnitResponse;
@@ -73,40 +76,82 @@ interface UnitCardProps {
 function UnitCard({ unit, onViewDetails }: UnitCardProps) {
   const { t, formatCurrency: formatCurrencyLocalized } =
     useLocalizationContext();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
 
   // Safe image handling using utility functions
   const hasImage = hasPropertyImages(unit);
   const featuredImage = getFeaturedImage(unit);
 
   return (
-    <Card className="group hover:shadow-lg py-0 gap-0 transition-all duration-200 overflow-hidden border-0 shadow-sm">
+    <Card
+      className={cn(
+        "group dashboard-ui-surface gap-0 overflow-hidden rounded-lg p-0 shadow-none transition-all duration-200",
+        isLight
+          ? "border border-slate-200/90 hover:border-slate-300/90"
+          : "border border-white/14 hover:border-white/25"
+      )}
+    >
       {/* Featured Image */}
-      <div className="relative h-48 overflow-hidden bg-gray-100 dark:bg-gray-800">
+      <div
+        className={cn(
+          "relative m-0 h-48 overflow-hidden rounded-t-lg p-0",
+          isLight
+            ? "bg-gradient-to-br from-slate-100 to-slate-50/80"
+            : "bg-gradient-to-br from-white/[0.08] to-white/[0.02]"
+        )}
+      >
         {hasImage ? (
           <img
             src={featuredImage!}
             alt={`${unit.name} - Unit ${unit.unitNumber}`}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="absolute inset-0 m-0 h-full w-full object-cover object-center p-0 transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-            <Building2 className="h-16 w-16 text-gray-400 dark:text-gray-600" />
+          <div
+            className={cn(
+              "flex h-full w-full items-center justify-center",
+              isLight
+                ? "bg-gradient-to-br from-slate-100 to-slate-50/80"
+                : "bg-gradient-to-br from-white/[0.08] to-white/[0.02]"
+            )}
+          >
+            <Building2
+              className={cn(
+                "h-16 w-16",
+                isLight ? "text-slate-300" : "text-white/35"
+              )}
+            />
           </div>
         )}
 
         {/* Status Badge */}
-        <div className="absolute top-3 left-3">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-green-100 dark:bg-green-950/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800">
-            <CheckCircle className="h-3 w-3 mr-1" />
+        <div className="absolute left-3 top-3">
+          <span
+            className={cn(
+              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
+              isLight
+                ? "border-emerald-200/90 bg-emerald-50/95 text-emerald-900"
+                : "border-emerald-300/35 bg-emerald-400/15 text-white"
+            )}
+          >
+            <CheckCircle className="mr-1 h-3 w-3" />
             {t("properties.available.card.available")}
           </span>
         </div>
 
         {/* Unit Type Badge */}
-        <div className="absolute top-3 right-3">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-            <Home className="h-3 w-3 mr-1" />
+        <div className="absolute right-3 top-3">
+          <span
+            className={cn(
+              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium backdrop-blur-sm",
+              isLight
+                ? "border-slate-200/90 bg-white/90 text-slate-800 shadow-sm"
+                : "border-white/25 bg-black/35 text-white"
+            )}
+          >
+            <Home className="mr-1 h-3 w-3" />
             <span>
               {unit.unitType.charAt(0).toUpperCase() + unit.unitType.slice(1)}
             </span>
@@ -114,15 +159,24 @@ function UnitCard({ unit, onViewDetails }: UnitCardProps) {
         </div>
 
         {/* Overlay Actions */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center justify-center opacity-0 transition-colors duration-200 group-hover:opacity-100",
+            isLight ? "bg-black/0 group-hover:bg-black/10" : "bg-black/0 group-hover:bg-black/20"
+          )}
+        >
           <div className="flex space-x-2">
             <Link
               href={unit.unitId ? `/dashboard/properties/${String(unit._id)}/units/${String(unit.unitId)}` : `/dashboard/properties/${String(unit._id)}`}
             >
               <Button
                 size="sm"
-                variant="secondary"
-                className="bg-white/90 hover:bg-white text-gray-900"
+                variant="outline"
+                className={cn(
+                  isLight
+                    ? "border-slate-200 bg-white text-slate-900 shadow-md hover:bg-slate-50 [&_svg]:shrink-0 [&_svg]:text-slate-800"
+                    : "border border-white/25 bg-white/15 text-white hover:bg-white/25 [&_svg]:text-white"
+                )}
               >
                 <Eye className="h-4 w-4" />
               </Button>
@@ -135,38 +189,78 @@ function UnitCard({ unit, onViewDetails }: UnitCardProps) {
       <CardContent className="p-4">
         {/* Property & Unit Name */}
         <div className="mb-3">
-          <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-1 line-clamp-1">
+          <h3
+            className={cn(
+              "mb-1 line-clamp-2 text-lg font-semibold",
+              isLight ? "text-slate-900" : "text-white"
+            )}
+          >
             {unit.name} - {t("properties.available.card.unit")}{" "}
             {unit.unitNumber}
           </h3>
           {unit.description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+            <p
+              className={cn(
+                "line-clamp-2 text-sm",
+                isLight ? "text-slate-600" : "text-white/85"
+              )}
+            >
               {unit.description}
             </p>
           )}
         </div>
 
         {/* Location */}
-        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
-          <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+        <div
+          className={cn(
+            "mb-3 flex items-center text-sm",
+            isLight ? "text-slate-600" : "text-white/75"
+          )}
+        >
+          <MapPin
+            className={cn(
+              "mr-1 h-4 w-4 shrink-0",
+              isLight ? "text-slate-400" : "text-white/55"
+            )}
+          />
           <span className="line-clamp-1">
             {unit.address.city}, {unit.address.state}
           </span>
         </div>
 
         {/* Unit Details */}
-        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-4">
+        <div
+          className={cn(
+            "mb-4 flex items-center justify-between text-sm",
+            isLight ? "text-slate-600" : "text-white/75"
+          )}
+        >
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
-              <Bed className="h-4 w-4 mr-1" />
+              <Bed
+                className={cn(
+                  "mr-1 h-4 w-4",
+                  isLight ? "text-slate-400" : "text-white/55"
+                )}
+              />
               <span>{unit.bedrooms}</span>
             </div>
             <div className="flex items-center">
-              <Bath className="h-4 w-4 mr-1" />
+              <Bath
+                className={cn(
+                  "mr-1 h-4 w-4",
+                  isLight ? "text-slate-400" : "text-white/55"
+                )}
+              />
               <span>{unit.bathrooms}</span>
             </div>
             <div className="flex items-center">
-              <Square className="h-4 w-4 mr-1" />
+              <Square
+                className={cn(
+                  "mr-1 h-4 w-4",
+                  isLight ? "text-slate-400" : "text-white/55"
+                )}
+              />
               <span>{(unit.squareFootage || 0).toLocaleString()} ft²</span>
             </div>
           </div>
@@ -174,8 +268,20 @@ function UnitCard({ unit, onViewDetails }: UnitCardProps) {
 
         {/* Floor Info */}
         {unit.floor !== undefined && (
-          <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
-            <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+          <div
+            className={cn(
+              "mb-3 flex items-center text-sm",
+              isLight ? "text-slate-600" : "text-white/75"
+            )}
+          >
+            <span
+              className={cn(
+                "rounded border px-2 py-1 text-xs",
+                isLight
+                  ? "border-slate-200/90 bg-slate-50 text-slate-800"
+                  : "border-white/15 bg-white/[0.06] text-white/90"
+              )}
+            >
               {t("properties.available.card.floor", {
                 values: { floor: unit.floor },
               })}
@@ -185,9 +291,19 @@ function UnitCard({ unit, onViewDetails }: UnitCardProps) {
 
         {/* Rent & Actions */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <div
+            className={cn(
+              "flex items-center text-lg font-semibold",
+              isLight ? "text-slate-900" : "text-white"
+            )}
+          >
             <span>{formatCurrencyLocalized(unit.rentAmount)}</span>
-            <span className="text-sm font-normal text-gray-600 dark:text-gray-400 ml-1">
+            <span
+              className={cn(
+                "ml-1 text-sm font-normal",
+                isLight ? "text-slate-500" : "text-white/70"
+              )}
+            >
               {t("properties.available.card.perMonth")}
             </span>
           </div>
@@ -195,7 +311,16 @@ function UnitCard({ unit, onViewDetails }: UnitCardProps) {
           {/* Actions Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "h-8 w-8 p-0",
+                  isLight
+                    ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                )}
+              >
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -225,6 +350,17 @@ export default function AvailablePropertiesPage() {
     useLocalizationContext();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dashAppearance = useOptionalDashboardAppearance();
+  const isLight = dashAppearance?.isLight ?? false;
+
+  const filterSelectTrigger = (widthClass: string) =>
+    cn(
+      "h-10",
+      widthClass,
+      isLight
+        ? "border-slate-200 bg-white text-slate-900 [&_svg]:text-slate-500"
+        : "border-white/20 bg-white/5 text-white [&_svg]:text-white/70"
+    );
 
   const [availableUnits, setAvailableUnits] = useState<AvailableUnitResponse[]>(
     []
@@ -334,31 +470,52 @@ export default function AvailablePropertiesPage() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1
+            className={cn(
+              "text-2xl font-bold tracking-tight sm:text-3xl",
+              isLight ? "text-black" : "text-white"
+            )}
+          >
             {t("properties.available.header.title")}
           </h1>
-          <p className="text-muted-foreground">
+          <p
+            className={cn(
+              "text-sm sm:text-base",
+              isLight ? "text-black/75" : "text-white"
+            )}
+          >
             {t("properties.available.header.subtitle")}
           </p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2 sm:space-x-2">
           <Button
             variant="outline"
             size="sm"
             onClick={fetchAvailableUnits}
             disabled={loading}
+            className={cn(
+              "flex-1 sm:flex-none",
+              isLight
+                ? "border-slate-200 bg-white text-black hover:bg-slate-50 hover:text-black"
+                : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+            )}
           >
             <RefreshCw
-              className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+              className={`h-4 w-4 sm:mr-2 ${loading ? "animate-spin" : ""}`}
             />
-            {t("properties.available.actions.refresh")}
+            <span className="hidden sm:inline">
+              {t("properties.available.actions.refresh")}
+            </span>
           </Button>
-          <Link href="/dashboard/properties/new">
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              {t("properties.available.actions.addProperty")}
+          <Link href="/dashboard/properties/new" className="flex-1 sm:flex-none">
+            <Button className="w-full sm:w-auto" size="sm">
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">
+                {t("properties.available.actions.addProperty")}
+              </span>
+              <span className="sm:hidden">+</span>
             </Button>
           </Link>
         </div>
@@ -368,32 +525,51 @@ export default function AvailablePropertiesPage() {
       <UnitStats units={availableUnits} variant="available" />
 
       {/* Available Units with Integrated Filters */}
-      <Card className="gap-3">
+      <Card className="gap-2">
         <CardHeader>
           {/* Main Header */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="mb-2 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-50 dark:bg-green-900/30 rounded-lg border border-green-100 dark:border-green-800">
-                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </div>
+              <PastelIcon icon={CheckCircle} tint="success" size="lg" />
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                <h2
+                  className={cn(
+                    "text-lg font-semibold",
+                    isLight ? "text-black" : "text-white"
+                  )}
+                >
                   {t("properties.available.card.title")}
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p
+                  className={cn(
+                    "text-sm",
+                    isLight ? "text-black/75" : "text-white/85"
+                  )}
+                >
                   {t("properties.available.card.subtitle")}
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
               {/* View Mode Toggle */}
-              <div className="flex items-center border rounded-lg p-1 w-full sm:w-auto">
+              <div
+                className={cn(
+                  "flex w-full items-center rounded-lg border p-1 sm:w-auto",
+                  isLight ? "border-slate-200 bg-slate-50/80" : "border-white/20"
+                )}
+              >
                 <Button
                   variant={viewMode === "grid" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("grid")}
-                  className="h-8 flex-1 sm:flex-none sm:px-3"
+                  className={cn(
+                    "h-8 flex-1 sm:flex-none sm:px-3",
+                    viewMode !== "grid" &&
+                      (isLight
+                        ? "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                        : "text-white hover:bg-white/10 hover:text-white")
+                  )}
                 >
                   <Grid3X3 className="h-4 w-4" />
                   <span className="ml-1 sm:hidden">Grid</span>
@@ -402,7 +578,13 @@ export default function AvailablePropertiesPage() {
                   variant={viewMode === "rows" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("rows")}
-                  className="h-8 flex-1 sm:flex-none sm:px-3"
+                  className={cn(
+                    "h-8 flex-1 sm:flex-none sm:px-3",
+                    viewMode !== "rows" &&
+                      (isLight
+                        ? "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                        : "text-white hover:bg-white/10 hover:text-white")
+                  )}
                 >
                   <Rows3 className="h-4 w-4" />
                   <span className="ml-1 sm:hidden">Rows</span>
@@ -411,7 +593,13 @@ export default function AvailablePropertiesPage() {
                   variant={viewMode === "list" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("list")}
-                  className="h-8 flex-1 sm:flex-none sm:px-3"
+                  className={cn(
+                    "h-8 flex-1 sm:flex-none sm:px-3",
+                    viewMode !== "list" &&
+                      (isLight
+                        ? "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                        : "text-white hover:bg-white/10 hover:text-white")
+                  )}
                 >
                   <List className="h-4 w-4" />
                   <span className="ml-1 sm:hidden">List</span>
@@ -421,7 +609,14 @@ export default function AvailablePropertiesPage() {
           </div>
 
           {/* Integrated Filters Bar */}
-          <div className="flex flex-col lg:flex-row lg:items-center gap-4 p-4 bg-gray-50/50 dark:bg-gray-800/50 rounded-lg border border-gray-200/60 dark:border-gray-700/60">
+          <div
+            className={cn(
+              "flex flex-col gap-4 rounded-lg border p-4 lg:flex-row lg:items-center",
+              isLight
+                ? "border-slate-200/90 bg-slate-50/80"
+                : "border-white/15 bg-white/[0.05]"
+            )}
+          >
             {/* Search */}
             <div className="flex-1 min-w-0">
               <GlobalSearch
@@ -449,7 +644,7 @@ export default function AvailablePropertiesPage() {
                   )
                 }
               >
-                <SelectTrigger className="w-[140px] h-10 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <SelectTrigger className={filterSelectTrigger("w-[140px]")}>
                   <SelectValue
                     placeholder={t("properties.available.filters.type.all")}
                   />
@@ -476,7 +671,7 @@ export default function AvailablePropertiesPage() {
                   )
                 }
               >
-                <SelectTrigger className="w-[120px] h-10 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <SelectTrigger className={filterSelectTrigger("w-[120px]")}>
                   <SelectValue
                     placeholder={t("properties.available.filters.bedrooms.any")}
                   />
@@ -513,7 +708,7 @@ export default function AvailablePropertiesPage() {
                   )
                 }
               >
-                <SelectTrigger className="w-[120px] h-10 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <SelectTrigger className={filterSelectTrigger("w-[120px]")}>
                   <SelectValue
                     placeholder={t(
                       "properties.available.filters.bathrooms.any"
@@ -549,7 +744,7 @@ export default function AvailablePropertiesPage() {
                   )
                 }
               >
-                <SelectTrigger className="w-[140px] h-10 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <SelectTrigger className={filterSelectTrigger("w-[140px]")}>
                   <SelectValue
                     placeholder={t("properties.available.filters.unitType.all")}
                   />
@@ -586,7 +781,12 @@ export default function AvailablePropertiesPage() {
                       search: "",
                     })
                   }
-                  className="h-10 px-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                  className={cn(
+                    "h-10 px-3",
+                    isLight
+                      ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      : "text-white/75 hover:bg-white/10 hover:text-white"
+                  )}
                 >
                   <X className="h-4 w-4 mr-1" />
                   {t("properties.available.filters.clear")}
@@ -602,7 +802,10 @@ export default function AvailablePropertiesPage() {
             viewMode === "grid" ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <Card key={i} className="overflow-hidden py-0 gap-0">
+                  <Card
+                    key={i}
+                    className="dashboard-ui-surface gap-0 overflow-hidden py-0"
+                  >
                     <Skeleton className="h-48 w-full" />
                     <CardContent className="p-4 space-y-3">
                       <div className="space-y-2">
@@ -642,7 +845,10 @@ export default function AvailablePropertiesPage() {
             ) : viewMode === "rows" ? (
               <div className="space-y-3">
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <Card key={i} className="overflow-hidden py-0 gap-0">
+                  <Card
+                    key={i}
+                    className="dashboard-ui-surface gap-0 overflow-hidden py-0"
+                  >
                     <Skeleton className="h-48 w-full" />
                     <CardContent className="p-4 space-y-3">
                       <div className="space-y-2">
@@ -680,10 +886,10 @@ export default function AvailablePropertiesPage() {
                 ))}
               </div>
             ) : (
-              <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+              <div className="overflow-hidden rounded-lg border border-white/15 bg-white/[0.03] backdrop-blur-sm [-webkit-backdrop-filter:blur(8px)]">
                 <Table>
-                  <TableHeader className="bg-gray-50/50 dark:bg-gray-800/50">
-                    <TableRow className="border-b border-gray-200 dark:border-gray-700">
+                  <TableHeader className="border-b border-white/12 bg-white/[0.06]">
+                    <TableRow className="border-b border-white/12 hover:bg-transparent">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <TableHead key={i} className="py-3 px-4">
                           <Skeleton className="h-4 w-24" />
@@ -698,7 +904,7 @@ export default function AvailablePropertiesPage() {
                     {Array.from({ length: 8 }).map((_, rowIndex) => (
                       <TableRow
                         key={rowIndex}
-                        className="border-b border-gray-100 dark:border-gray-800"
+                        className="border-b border-white/10"
                       >
                         <TableCell className="py-4 px-6">
                           <div className="flex items-center space-x-3">
@@ -746,29 +952,47 @@ export default function AvailablePropertiesPage() {
               </div>
             )
           ) : error ? (
-            <div className="flex items-center justify-center">
-              <AlertCircle className="h-8 w-8 text-red-500 dark:text-red-400" />
-              <span className="ml-2 text-red-600 dark:text-red-400">
+            <div className="flex flex-wrap items-center justify-center gap-2 py-8">
+              <AlertCircle
+                className={cn(
+                  "h-8 w-8 shrink-0",
+                  isLight ? "text-red-600" : "text-red-300"
+                )}
+              />
+              <span className={isLight ? "text-red-700" : "text-red-300"}>
                 {error}
               </span>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={fetchAvailableUnits}
-                className="ml-4"
+                className={cn(
+                  isLight
+                    ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                    : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+                )}
               >
                 {t("properties.available.error.tryAgain")}
               </Button>
             </div>
           ) : !loading && availableUnits.length === 0 ? (
-            <div className="flex items-center justify-center py-16">
-              <Building2 className="h-8 w-8 text-gray-400 dark:text-gray-600" />
-              <span className="ml-2 text-gray-600 dark:text-gray-400">
+            <div className="flex flex-wrap items-center justify-center gap-3 py-16">
+              <Building2
+                className={cn(
+                  "h-8 w-8 shrink-0",
+                  isLight ? "text-slate-400" : "text-white/45"
+                )}
+              />
+              <span
+                className={cn(
+                  isLight ? "text-slate-800" : "text-white/90"
+                )}
+              >
                 {t("properties.available.empty.title")}
               </span>
               <Link href="/dashboard/properties/new">
-                <Button className="ml-4">
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button className="shrink-0">
+                  <Plus className="mr-2 h-4 w-4" />
                   {t("properties.available.empty.addProperty")}
                 </Button>
               </Link>
@@ -797,26 +1021,75 @@ export default function AvailablePropertiesPage() {
             </div>
           ) : (
             /* List View - Table */
-            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <div
+              className={cn(
+                "overflow-hidden rounded-lg border backdrop-blur-sm [-webkit-backdrop-filter:blur(8px)]",
+                isLight
+                  ? "border-slate-200/90 bg-white/70"
+                  : "border-white/15 bg-white/[0.03]"
+              )}
+            >
               <Table>
-                <TableHeader className="bg-gray-50/50 dark:bg-gray-800/50">
-                  <TableRow className="border-b border-gray-200 dark:border-gray-700">
-                    <TableHead className="text-left font-medium text-gray-700 dark:text-gray-300 py-3 px-6">
+                <TableHeader
+                  className={cn(
+                    "border-b",
+                    isLight
+                      ? "border-slate-200 bg-slate-50/95"
+                      : "border-white/12 bg-white/[0.06]"
+                  )}
+                >
+                  <TableRow
+                    className={cn(
+                      "border-b hover:bg-transparent",
+                      isLight ? "border-slate-200" : "border-white/12"
+                    )}
+                  >
+                    <TableHead
+                      className={cn(
+                        "px-6 py-3 text-left font-medium",
+                        isLight ? "text-slate-800" : "text-white/90"
+                      )}
+                    >
                       {t("properties.available.table.unit")}
                     </TableHead>
-                    <TableHead className="text-left font-medium text-gray-700 dark:text-gray-300 py-3 px-4">
+                    <TableHead
+                      className={cn(
+                        "px-4 py-3 text-left font-medium",
+                        isLight ? "text-slate-800" : "text-white/90"
+                      )}
+                    >
                       {t("properties.available.table.property")}
                     </TableHead>
-                    <TableHead className="text-left font-medium text-gray-700 dark:text-gray-300 py-3 px-4">
+                    <TableHead
+                      className={cn(
+                        "px-4 py-3 text-left font-medium",
+                        isLight ? "text-slate-800" : "text-white/90"
+                      )}
+                    >
                       {t("properties.available.table.location")}
                     </TableHead>
-                    <TableHead className="text-left font-medium text-gray-700 dark:text-gray-300 py-3 px-4">
+                    <TableHead
+                      className={cn(
+                        "px-4 py-3 text-left font-medium",
+                        isLight ? "text-slate-800" : "text-white/90"
+                      )}
+                    >
                       {t("properties.available.table.details")}
                     </TableHead>
-                    <TableHead className="text-left font-medium text-gray-700 dark:text-gray-300 py-3 px-4">
+                    <TableHead
+                      className={cn(
+                        "px-4 py-3 text-left font-medium",
+                        isLight ? "text-slate-800" : "text-white/90"
+                      )}
+                    >
                       {t("properties.available.table.rent")}
                     </TableHead>
-                    <TableHead className="text-right font-medium text-gray-700 dark:text-gray-300 py-3 px-6">
+                    <TableHead
+                      className={cn(
+                        "px-6 py-3 text-right font-medium",
+                        isLight ? "text-slate-800" : "text-white/90"
+                      )}
+                    >
                       {t("properties.available.table.actions")}
                     </TableHead>
                   </TableRow>
@@ -825,39 +1098,80 @@ export default function AvailablePropertiesPage() {
                   {availableUnits.map((unit, index) => (
                     <TableRow
                       key={`${unit._id}-${unit.unitId}`}
-                      className={`border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors ${
-                        index % 2 === 0
-                          ? "bg-white dark:bg-gray-900/20"
-                          : "bg-gray-50/20 dark:bg-gray-800/20"
-                      }`}
+                      className={cn(
+                        "border-b transition-colors",
+                        isLight
+                          ? cn(
+                              "border-slate-100 hover:bg-slate-50/90",
+                              index % 2 === 0 ? "bg-white" : "bg-slate-50/50"
+                            )
+                          : cn(
+                              "border-white/10 hover:bg-white/[0.07]",
+                              index % 2 === 0 ? "bg-white/[0.03]" : "bg-white/[0.06]"
+                            )
+                      )}
                     >
-                      <TableCell className="py-4 px-6">
+                      <TableCell className="px-6 py-4">
                         <div className="flex items-center space-x-3">
-                          <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+                          <div
+                            className={cn(
+                              "relative h-10 w-10 shrink-0 overflow-hidden rounded-lg",
+                              isLight
+                                ? "bg-gradient-to-br from-slate-100 to-slate-50"
+                                : "bg-gradient-to-br from-white/[0.08] to-white/[0.02]"
+                            )}
+                          >
                             {hasPropertyImages(unit) ? (
                               <img
                                 src={getFeaturedImage(unit)!}
                                 alt={`${unit.name} - Unit ${unit.unitNumber}`}
-                                className="absolute inset-0 w-full h-full object-cover"
+                                className="absolute inset-0 h-full w-full object-cover"
                                 loading="lazy"
                               />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-                                <Building2 className="h-5 w-5 text-gray-400 dark:text-gray-600" />
+                              <div
+                                className={cn(
+                                  "flex h-full w-full items-center justify-center",
+                                  isLight
+                                    ? "bg-gradient-to-br from-slate-100 to-slate-50"
+                                    : "bg-gradient-to-br from-white/[0.08] to-white/[0.02]"
+                                )}
+                              >
+                                <Building2
+                                  className={cn(
+                                    "h-5 w-5",
+                                    isLight ? "text-slate-300" : "text-white/35"
+                                  )}
+                                />
                               </div>
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="font-medium text-gray-900 dark:text-gray-100">
+                            <div
+                              className={cn(
+                                "font-medium",
+                                isLight ? "text-slate-900" : "text-white"
+                              )}
+                            >
                               <Link
                                 href={unit.unitId ? `/dashboard/properties/${String(unit._id)}/units/${String(unit.unitId)}` : `/dashboard/properties/${String(unit._id)}`}
-                                className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                className={cn(
+                                  "transition-colors",
+                                  isLight
+                                    ? "hover:text-sky-600"
+                                    : "hover:text-sky-200"
+                                )}
                               >
                                 {t("properties.available.card.unit")}{" "}
                                 {unit.unitNumber}
                               </Link>
                             </div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                            <div
+                              className={cn(
+                                "truncate text-sm",
+                                isLight ? "text-slate-600" : "text-white/70"
+                              )}
+                            >
                               {unit.unitType.charAt(0).toUpperCase() +
                                 unit.unitType.slice(1)}
                               {unit.floor !== undefined &&
@@ -868,70 +1182,135 @@ export default function AvailablePropertiesPage() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="py-4 px-4">
+                      <TableCell className="px-4 py-4">
                         <div className="flex flex-col space-y-1">
-                          <div className="font-medium text-gray-900 dark:text-gray-100">
+                          <div
+                            className={cn(
+                              "font-medium",
+                              isLight ? "text-slate-900" : "text-white"
+                            )}
+                          >
                             <Link
                               href={`/dashboard/properties/${String(unit._id)}`}
-                              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                              className={cn(
+                                "transition-colors",
+                                isLight
+                                  ? "hover:text-sky-600"
+                                  : "hover:text-sky-200"
+                              )}
                             >
                               {unit.name}
                             </Link>
                           </div>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span
+                            className={cn(
+                              "text-xs",
+                              isLight ? "text-slate-500" : "text-white/65"
+                            )}
+                          >
                             {unit.type.charAt(0).toUpperCase() +
                               unit.type.slice(1)}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="py-4 px-4">
+                      <TableCell className="px-4 py-4">
                         <div className="flex flex-col space-y-1">
-                          <div className="flex items-center text-sm text-gray-900 dark:text-gray-100">
-                            <MapPin className="h-3 w-3 mr-1 text-gray-400 dark:text-gray-500" />
+                          <div
+                            className={cn(
+                              "flex items-center text-sm",
+                              isLight ? "text-slate-800" : "text-white"
+                            )}
+                          >
+                            <MapPin
+                              className={cn(
+                                "mr-1 h-3 w-3",
+                                isLight ? "text-slate-400" : "text-white/50"
+                              )}
+                            />
                             {unit.address.city}, {unit.address.state}
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div
+                            className={cn(
+                              "text-xs",
+                              isLight ? "text-slate-500" : "text-white/65"
+                            )}
+                          >
                             {unit.address.street}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="py-4 px-4">
+                      <TableCell className="px-4 py-4">
                         <div className="flex flex-col space-y-1">
-                          <div className="flex items-center space-x-3 text-sm text-gray-900 dark:text-gray-100">
+                          <div
+                            className={cn(
+                              "flex items-center space-x-3 text-sm",
+                              isLight ? "text-slate-800" : "text-white"
+                            )}
+                          >
                             <div className="flex items-center">
-                              <Bed className="h-3 w-3 mr-1 text-gray-400 dark:text-gray-500" />
+                              <Bed
+                                className={cn(
+                                  "mr-1 h-3 w-3",
+                                  isLight ? "text-slate-400" : "text-white/50"
+                                )}
+                              />
                               {unit.bedrooms}
                             </div>
                             <div className="flex items-center">
-                              <Bath className="h-3 w-3 mr-1 text-gray-400 dark:text-gray-500" />
+                              <Bath
+                                className={cn(
+                                  "mr-1 h-3 w-3",
+                                  isLight ? "text-slate-400" : "text-white/50"
+                                )}
+                              />
                               {unit.bathrooms}
                             </div>
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div
+                            className={cn(
+                              "text-xs",
+                              isLight ? "text-slate-500" : "text-white/65"
+                            )}
+                          >
                             {unit.squareFootage.toLocaleString()}{" "}
                             {t("properties.available.table.squareFeet")}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="py-4 px-4">
+                      <TableCell className="px-4 py-4">
                         <div className="flex flex-col space-y-1">
-                          <div className="font-medium text-gray-900 dark:text-gray-100">
+                          <div
+                            className={cn(
+                              "font-medium",
+                              isLight ? "text-slate-900" : "text-white"
+                            )}
+                          >
                             {formatCurrencyLocalized(unit.rentAmount)}
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div
+                            className={cn(
+                              "text-xs",
+                              isLight ? "text-slate-500" : "text-white/65"
+                            )}
+                          >
                             {t("properties.available.table.perMonth")}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right py-4 px-6">
+                      <TableCell className="px-6 py-4 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-8 w-8 p-0 hover:bg-gray-100 transition-colors"
+                              className={cn(
+                                "h-8 w-8 p-0",
+                                isLight
+                                  ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                              )}
                             >
-                              <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                              <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">

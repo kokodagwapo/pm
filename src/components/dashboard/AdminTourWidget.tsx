@@ -229,7 +229,7 @@ export function AdminTourWidget() {
           <div
             className="
               fixed z-50 flex flex-col overflow-hidden shadow-2xl
-              bg-white border border-slate-200 rounded-2xl
+              rounded-2xl border border-white/15 bg-slate-950/92 text-white backdrop-blur-xl [-webkit-backdrop-filter:blur(20px)]
               inset-x-2 bottom-[72px] top-16
               sm:inset-auto sm:bottom-24 sm:right-4 sm:top-auto sm:w-[400px] sm:max-h-[600px]
             "
@@ -260,21 +260,21 @@ export function AdminTourWidget() {
             </div>
 
             {/* Tour step card */}
-            <div className="bg-gradient-to-br from-violet-50 to-indigo-50 border-b border-slate-100 px-4 py-3 shrink-0">
+            <div className="shrink-0 border-b border-white/10 bg-gradient-to-br from-violet-950/50 to-indigo-950/40 px-4 py-3">
               <div className="flex items-start gap-3">
-                <span className="text-2xl leading-none mt-0.5 shrink-0">{currentStep.emoji}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-800 text-sm leading-snug">{t(currentStep.titleKey)}</p>
-                  <p className="text-slate-600 text-xs leading-relaxed mt-1">{t(currentStep.bodyKey)}</p>
+                <span className="mt-0.5 shrink-0 text-2xl leading-none">{currentStep.emoji}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold leading-snug text-white">{t(currentStep.titleKey)}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-white/85">{t(currentStep.bodyKey)}</p>
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-3">
+              <div className="mt-3 flex items-center justify-between">
                 <div className="flex gap-1">
                   {TOUR_STEP_KEYS.map((_, i) => (
                     <button
                       key={i}
                       onClick={() => setStep(i)}
-                      className={`h-1.5 rounded-full transition-all ${i === step ? "bg-violet-600 w-4" : "w-1.5 bg-slate-300 hover:bg-slate-400"}`}
+                      className={`h-1.5 rounded-full transition-all ${i === step ? "w-4 bg-violet-400" : "w-1.5 bg-white/25 hover:bg-white/40"}`}
                     />
                   ))}
                 </div>
@@ -282,24 +282,24 @@ export function AdminTourWidget() {
                   <button
                     onClick={() => setStep((s) => Math.max(0, s - 1))}
                     disabled={step === 0}
-                    className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-white/80 disabled:opacity-30 transition-colors"
+                    className="rounded-md p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <ChevronLeft className="h-4 w-4" />
                   </button>
-                  <span className="text-xs text-slate-400 font-medium">{step + 1}/{TOUR_STEP_KEYS.length}</span>
+                  <span className="text-xs font-medium text-white/70">{step + 1}/{TOUR_STEP_KEYS.length}</span>
                   <button
                     onClick={() => setStep((s) => Math.min(TOUR_STEP_KEYS.length - 1, s + 1))}
                     disabled={step === TOUR_STEP_KEYS.length - 1}
-                    className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-white/80 disabled:opacity-30 transition-colors"
+                    className="rounded-md p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="h-4 w-4" />
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Chat messages */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-slate-50" style={{ minHeight: 0 }}>
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-slate-950/50 p-3" style={{ minHeight: 0 }}>
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex gap-2 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
                   {msg.role === "assistant" && (
@@ -309,17 +309,17 @@ export function AdminTourWidget() {
                   )}
                   <div className={`group relative max-w-[80%] flex flex-col gap-0.5 ${msg.role === "user" ? "items-end" : "items-start"}`}>
                     <div
-                      className={`rounded-2xl px-3 py-2 text-xs leading-relaxed ${
+                      className={`rounded-2xl px-3 py-2 text-xs leading-relaxed [&_strong]:text-white [&_em]:text-white/90 ${
                         msg.role === "user"
-                          ? "bg-violet-600 text-white rounded-tr-sm"
-                          : "bg-white border border-slate-100 text-slate-700 rounded-tl-sm shadow-sm"
+                          ? "rounded-tr-sm bg-violet-600 text-white"
+                          : "rounded-tl-sm border border-white/12 bg-white/10 text-white shadow-sm"
                       }`}
                       dangerouslySetInnerHTML={{ __html: formatContent(msg.content) }}
                     />
                     {msg.role === "assistant" && (
                       <button
                         onClick={() => playTTS(msg.content, msg.id)}
-                        className={`opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded ${playingId === msg.id ? "text-violet-600" : "text-slate-400 hover:text-violet-500"}`}
+                        className={`rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100 ${playingId === msg.id ? "text-violet-300" : "text-white/50 hover:text-white"}`}
                       >
                         <Volume2 className="w-3 h-3" />
                       </button>
@@ -332,14 +332,14 @@ export function AdminTourWidget() {
                   <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0">
                     <Bot className="w-3.5 h-3.5 text-white" />
                   </div>
-                  <div className="bg-white border border-slate-100 rounded-2xl rounded-tl-sm px-3 py-2 shadow-sm">
-                    <Loader2 className="w-3.5 h-3.5 text-violet-500 animate-spin" />
+                  <div className="rounded-2xl rounded-tl-sm border border-white/12 bg-white/10 px-3 py-2 shadow-sm">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-violet-300" />
                   </div>
                 </div>
               )}
               {isListening && interimText && (
                 <div className="flex justify-end">
-                  <div className="bg-violet-100 border border-violet-200 text-violet-700 rounded-2xl rounded-tr-sm px-3 py-2 text-xs italic max-w-[80%]">
+                  <div className="max-w-[80%] rounded-2xl rounded-tr-sm border border-white/15 bg-white/10 px-3 py-2 text-xs italic text-white/90">
                     {interimText}…
                   </div>
                 </div>
@@ -349,22 +349,22 @@ export function AdminTourWidget() {
 
             {/* Listening indicator */}
             {isListening && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-violet-50 border-t border-violet-100 shrink-0">
-                <div className="flex gap-0.5 items-end h-4">
+              <div className="flex shrink-0 items-center gap-2 border-t border-white/10 bg-violet-950/40 px-4 py-2">
+                <div className="flex h-4 items-end gap-0.5">
                   {[...Array(5)].map((_, i) => (
                     <div
                       key={i}
-                      className="w-1 bg-violet-500 rounded-full animate-pulse"
+                      className="w-1 animate-pulse rounded-full bg-violet-400"
                       style={{ height: `${[60, 100, 70, 90, 50][i]}%`, animationDelay: `${i * 0.1}s` }}
                     />
                   ))}
                 </div>
-                <span className="text-xs text-violet-600 font-medium">{t("tour.chat.listening")}</span>
+                <span className="text-xs font-medium text-white">{t("tour.chat.listening")}</span>
               </div>
             )}
 
             {/* Input row */}
-            <div className="px-3 py-2.5 bg-white border-t border-slate-100 shrink-0">
+            <div className="shrink-0 border-t border-white/10 bg-slate-950/60 px-3 py-2.5">
               <div className="flex items-center gap-2">
                 <input
                   ref={inputRef}
@@ -375,51 +375,51 @@ export function AdminTourWidget() {
                     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); }
                   }}
                   placeholder={t("tour.chat.placeholder")}
-                  className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 min-h-[40px] focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 placeholder:text-slate-400 transition"
+                  className="min-h-[40px] flex-1 rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-xs text-white placeholder:text-white/40 transition focus:border-violet-400/50 focus:outline-none focus:ring-2 focus:ring-violet-500/25"
                 />
                 <button
                   onClick={startListening}
-                  className={`p-2.5 min-h-[40px] min-w-[40px] rounded-xl transition-colors shrink-0 ${
+                  className={`min-h-[40px] min-w-[40px] shrink-0 rounded-xl p-2.5 transition-colors ${
                     isListening
-                      ? "bg-red-500 text-white shadow-md shadow-red-200 animate-pulse"
-                      : "bg-slate-100 text-slate-500 hover:bg-violet-100 hover:text-violet-600"
+                      ? "animate-pulse bg-red-500 text-white shadow-md shadow-red-900/40"
+                      : "border border-white/15 bg-white/10 text-white hover:bg-white/15"
                   }`}
                   title={isListening ? "Tap to stop" : "Tap to speak"}
                 >
-                  {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                  {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </button>
                 <button
                   onClick={() => sendMessage(input)}
                   disabled={!input.trim() || isLoading}
-                  className="p-2.5 min-h-[40px] min-w-[40px] rounded-xl bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+                  className="min-h-[40px] min-w-[40px] shrink-0 rounded-xl bg-violet-600 text-white transition-colors hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <Send className="w-4 h-4" />
+                  <Send className="h-4 w-4" />
                 </button>
               </div>
             </div>
 
             {/* Bottom actions */}
-            <div className="px-3 pb-3 pt-1 bg-white flex items-center gap-2 shrink-0">
+            <div className="flex shrink-0 items-center gap-2 border-t border-white/10 bg-slate-950/70 px-3 pb-3 pt-2">
               <Link
                 href="/dashboard/ai-help/faq"
-                className="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium text-slate-500 hover:text-violet-600 bg-slate-50 hover:bg-violet-50 border border-slate-200 hover:border-violet-200 rounded-xl py-2.5 min-h-[40px] transition-colors"
+                className="flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/5 py-2.5 text-xs font-medium text-white transition-colors hover:border-violet-400/40 hover:bg-violet-500/20"
               >
-                <HelpCircle className="w-3.5 h-3.5" />
+                <HelpCircle className="h-3.5 w-3.5" />
                 <span className="truncate">{t("tour.action.faqs")}</span>
               </Link>
               <Link
                 href="/dashboard/messages"
-                className="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium text-slate-500 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl py-2.5 min-h-[40px] transition-colors"
+                className="flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/5 py-2.5 text-xs font-medium text-white transition-colors hover:border-indigo-400/40 hover:bg-indigo-500/20"
               >
-                <MessageSquare className="w-3.5 h-3.5" />
+                <MessageSquare className="h-3.5 w-3.5" />
                 <span className="truncate">{t("tour.action.messages")}</span>
               </Link>
               {step === TOUR_STEP_KEYS.length - 1 && (
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl py-2.5 min-h-[40px] transition-colors"
+                  className="flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-emerald-400/35 bg-emerald-500/20 py-2.5 text-xs font-medium text-white transition-colors hover:bg-emerald-500/30"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <CheckCircle2 className="h-3.5 w-3.5" />
                   {t("tour.action.done")}
                 </button>
               )}

@@ -5,6 +5,16 @@
 
   "dashboard.header.subtitle": "Narito ang iyong buod ng portfolio ng ari-arian",
 
+  "dashboard.sections.keyMetrics.title": "Keys, Units & Rent Roll",
+  "dashboard.sections.keyMetrics.subtitle": "The pulse of every door you own — occupancy, rent & the fix-it queue",
+
+  "dashboard.sections.actionCenter.title": "Front Desk — Needs You",
+  "dashboard.sections.actionCenter.subtitle": "Late rent, hot work orders & leases knocking before they expire",
+
+  "dashboard.sections.financial.title": "Cash Flow Story",
+  "dashboard.sections.propertyMix.title": "What's on Your Lot",
+  "dashboard.sections.rentRadar.title": "Rent Radar",
+
   "dashboard.actions.refresh": "I-refresh",
   "dashboard.actions.analytics": "Tingnan ang Analytics",
   "dashboard.actions.retry": "Subukan Muli",

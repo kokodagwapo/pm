@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
+import { getCsrfToken, signIn } from "next-auth/react";
 import { HeroVideo } from "@/components/landing/HeroVideo";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
@@ -35,22 +35,6 @@ const DEFAULT_BRANDING: Branding = {
   companyName: "SmartStartPM",
 };
 
-const glassCard = {
-  background: "rgba(255,255,255,0.07)",
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
-  border: "1px solid rgba(255,255,255,0.12)",
-  boxShadow: "0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)",
-};
-
-const glassInput = {
-  background: "rgba(255,255,255,0.05)",
-  backdropFilter: "blur(4px)",
-  WebkitBackdropFilter: "blur(4px)",
-  border: "1px solid rgba(255,255,255,0.10)",
-  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.1)",
-};
-
 export default function SignInPage() {
   const { t } = useLocalizationContext();
   const [email, setEmail] = useState("");
@@ -59,6 +43,7 @@ export default function SignInPage() {
   const [error, setError] = useState("");
   const [branding, setBranding] = useState<Branding>(DEFAULT_BRANDING);
   const [logoError, setLogoError] = useState(false);
+  const [demoAccountsReady, setDemoAccountsReady] = useState(false);
 
   useEffect(() => {
     const fetchBranding = async () => {
@@ -75,25 +60,103 @@ export default function SignInPage() {
     fetchBranding();
   }, []);
 
+  // Remove stale Auth.js error query (bookmark / failed attempt) so it does not confuse users
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("error")) return;
+    params.delete("error");
+    const next = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${next ? `?${next}` : ""}`
+    );
+  }, []);
+
+  // Ensure demo users exist in MongoDB (Docker/local) so Dev Quick Login works without running setup:local
+  useEffect(() => {
+    fetch("/api/setup/ensure-demo", { credentials: "include" })
+      .catch(() => {})
+      .finally(() => setDemoAccountsReady(true));
+  }, []);
+
+  /**
+   * Same request shape as next-auth/react `signIn("credentials")` (X-Auth-Return-Redirect + JSON body).
+   * Fallback runs when the library returns an error (e.g. MissingCSRF) so cookies are always sent with `credentials: "include"`.
+   */
+  const signInCredentialsWithFallback = async (
+    loginEmail: string,
+    loginPassword: string
+  ): Promise<string | null> => {
+    await fetch("/api/setup/ensure-demo", { credentials: "include" }).catch(
+      () => {}
+    );
+
+    const callbackUrl = `${window.location.origin}/dashboard`;
+
+    const result = await signIn("credentials", {
+      email: loginEmail,
+      password: loginPassword,
+      redirect: false,
+      callbackUrl,
+    });
+
+    if (!result?.error && result?.ok) {
+      return result.url ?? "/dashboard";
+    }
+
+    const csrfToken = await getCsrfToken();
+    if (!csrfToken) return null;
+
+    const res = await fetch("/api/auth/callback/credentials", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-Auth-Return-Redirect": "1",
+      },
+      body: new URLSearchParams({
+        email: loginEmail,
+        password: loginPassword,
+        csrfToken,
+        callbackUrl,
+      }),
+    });
+
+    let data: { url?: string } = {};
+    try {
+      data = await res.json();
+    } catch {
+      return null;
+    }
+
+    if (!data.url || !res.ok) return null;
+
+    let authError: string | null = null;
+    try {
+      authError = new URL(data.url, window.location.origin).searchParams.get(
+        "error"
+      );
+    } catch {
+      return null;
+    }
+
+    if (authError) return null;
+    return data.url;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
+      const target = await signInCredentialsWithFallback(email, password);
+      if (target) {
+        window.location.href = target;
+      } else {
         setError(t("auth.signin.invalidCredentials"));
         setIsLoading(false);
-      } else if (result?.ok) {
-        setTimeout(() => {
-          window.location.href = "/dashboard";
-        }, 100);
       }
     } catch {
       setError(t("auth.signin.error"));
@@ -105,40 +168,15 @@ export default function SignInPage() {
     setIsLoading(true);
     setError("");
     try {
-      const result = await signIn("credentials", {
-        email: demoEmail,
-        password: demoPassword,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        console.warn("signIn returned error, trying direct approach:", result.error);
-
-        const csrfRes = await fetch("/api/auth/csrf");
-        const { csrfToken } = await csrfRes.json();
-
-        const callbackRes = await fetch("/api/auth/callback/credentials", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            email: demoEmail,
-            password: demoPassword,
-            csrfToken: csrfToken,
-            json: "true",
-          }),
-          redirect: "follow",
-        });
-
-        if (callbackRes.ok || callbackRes.redirected) {
-          window.location.href = "/dashboard";
-        } else {
-          setError(t("auth.signin.loginFailed"));
-          setIsLoading(false);
-        }
-      } else if (result?.ok) {
-        window.location.href = "/dashboard";
+      const target = await signInCredentialsWithFallback(
+        demoEmail,
+        demoPassword
+      );
+      if (target) {
+        window.location.href = target;
       } else {
-        window.location.href = "/dashboard";
+        setError(t("auth.signin.loginFailed"));
+        setIsLoading(false);
       }
     } catch {
       setError(t("auth.signin.error"));
@@ -161,7 +199,7 @@ export default function SignInPage() {
         className="fixed inset-0 z-[1] pointer-events-none"
         style={{
           background:
-            "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.30) 40%, rgba(0,0,0,0.65) 100%)",
+            "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.48) 40%, rgba(0,0,0,0.82) 100%)",
         }}
         aria-hidden
       />
@@ -205,11 +243,8 @@ export default function SignInPage() {
             </p>
           </div>
 
-          {/* Glassmorphic Sign In Card */}
-          <div
-            className="rounded-3xl p-6 sm:p-8"
-            style={glassCard}
-          >
+          {/* Match LanguageSwitcher (dark) trigger: outline only at rest, hover:bg-white/10 */}
+          <div className="rounded-xl border border-white/20 bg-transparent p-6 sm:p-8 text-white/80 transition-all duration-300 hover:bg-white/10">
             <div className="mb-7">
               <h3
                 className="text-lg text-white tracking-wide"
@@ -218,7 +253,7 @@ export default function SignInPage() {
                 {t("auth.signin.welcomeBack")}
               </h3>
               <p
-                className="mt-1 text-xs text-white/35 tracking-wide"
+                className="mt-1 text-xs text-white/60 tracking-wide"
                 style={{ fontWeight: 300 }}
               >
                 {t("auth.signin.credentials")}
@@ -249,8 +284,8 @@ export default function SignInPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t("auth.signin.emailPlaceholder")}
-                    className="w-full min-h-[46px] pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-white/25 transition-all"
-                    style={{ ...glassInput, fontWeight: 300 }}
+                    className="w-full min-h-[40px] pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-white/40 bg-white/5 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white/25 focus:bg-white/10 transition-all touch-manipulation"
+                    style={{ fontWeight: 300 }}
                     required
                   />
                 </div>
@@ -272,8 +307,8 @@ export default function SignInPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={t("auth.signin.passwordPlaceholder")}
-                    className="w-full min-h-[46px] pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-white/25 transition-all"
-                    style={{ ...glassInput, fontWeight: 300 }}
+                    className="w-full min-h-[40px] pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-white/40 bg-white/5 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white/25 focus:bg-white/10 transition-all touch-manipulation"
+                    style={{ fontWeight: 300 }}
                     required
                   />
                 </div>
@@ -281,7 +316,7 @@ export default function SignInPage() {
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || !demoAccountsReady}
                 className="w-full min-h-[46px] py-3 rounded-xl text-sm tracking-wide text-white bg-white/12 hover:bg-white/20 border border-white/20 hover:border-white/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all touch-manipulation mt-2"
                 style={{ fontWeight: 300 }}
               >
@@ -297,7 +332,7 @@ export default function SignInPage() {
             </form>
 
             {/* Quick Login */}
-            <div className="mt-7 pt-6 border-t border-white/10">
+            <div className="mt-7 pt-6 border-t border-white/20">
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="h-3.5 w-3.5 text-amber-400/80" />
                 <span
@@ -306,6 +341,9 @@ export default function SignInPage() {
                 >
                   {t("auth.signin.devQuickLogin")}
                 </span>
+                {!demoAccountsReady && (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-white/35" aria-hidden />
+                )}
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {demoAccounts.map((account) => (
@@ -313,8 +351,8 @@ export default function SignInPage() {
                     key={account.email}
                     type="button"
                     onClick={() => handleQuickLogin(account.email, account.password)}
-                    disabled={isLoading}
-                    className={`flex flex-col items-center justify-center gap-1.5 min-h-[52px] py-3 rounded-xl text-white text-[11px] tracking-wide transition-all touch-manipulation ${account.color}`}
+                    disabled={isLoading || !demoAccountsReady}
+                    className={`flex flex-col items-center justify-center gap-1.5 min-h-[52px] py-3 rounded-xl text-white text-[11px] tracking-wide transition-all touch-manipulation disabled:opacity-40 disabled:cursor-not-allowed ${account.color}`}
                     style={{ fontWeight: 300 }}
                   >
                     <account.icon className="h-3.5 w-3.5" />

@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
 import NewConversationDialog from "./NewConversationDialog";
 import AIAssistantChat from "./AIAssistantChat";
 
@@ -46,6 +47,8 @@ export const SimpleMessagingInterface: React.FC<
   SimpleMessagingInterfaceProps
 > = ({ refreshTrigger }) => {
   const { data: session } = useSession();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
   const [conversations, setConversations] = useState<any[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -910,11 +913,28 @@ export const SimpleMessagingInterface: React.FC<
   };
 
   return (
-    <div className="flex h-full bg-background rounded-lg border shadow-sm overflow-hidden">
+    <div
+      className={cn(
+        "flex h-full overflow-hidden rounded-lg border shadow-sm",
+        isLight
+          ? "border-slate-200/90 bg-white/80 backdrop-blur-sm"
+          : "bg-background"
+      )}
+    >
       {/* Conversations Sidebar */}
-      <div className="w-80 border-r bg-muted/30 flex flex-col">
+      <div
+        className={cn(
+          "flex w-80 flex-col border-r",
+          isLight ? "border-slate-200/90 bg-slate-50/80" : "bg-muted/30"
+        )}
+      >
         {/* Header */}
-        <div className="p-4 border-b bg-background">
+        <div
+          className={cn(
+            "border-b p-4",
+            isLight ? "border-slate-200/90 bg-white/90" : "bg-background"
+          )}
+        >
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold text-foreground">Messages</h2>
             <Button
@@ -1048,11 +1068,21 @@ export const SimpleMessagingInterface: React.FC<
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div
+        className={cn(
+          "flex min-w-0 flex-1 flex-col",
+          isLight && "bg-white/40"
+        )}
+      >
         {selectedConversation ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b bg-background flex items-center justify-between">
+            <div
+              className={cn(
+                "flex items-center justify-between border-b p-4",
+                isLight ? "border-slate-200/90 bg-white/90" : "bg-background"
+              )}
+            >
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
                   <AvatarFallback className="bg-primary/10 text-primary">
@@ -1188,7 +1218,7 @@ export const SimpleMessagingInterface: React.FC<
                                 "text-xs",
                                 isCurrentUser
                                   ? "text-blue-100"
-                                  : "text-gray-500"
+                                  : "text-muted-foreground"
                               )}
                             >
                               {formatMessageTime(message.createdAt)}
@@ -1217,7 +1247,12 @@ export const SimpleMessagingInterface: React.FC<
             {/* Typing indicators removed - using database-only approach */}
 
             {/* Message Input */}
-            <div className="p-4 border-t bg-background">
+            <div
+              className={cn(
+                "border-t p-4",
+                isLight ? "border-slate-200/90 bg-white/90" : "bg-background"
+              )}
+            >
               <div className="flex items-end gap-2">
                 <Button variant="ghost" size="sm">
                   <Paperclip className="h-4 w-4" />
@@ -1281,7 +1316,12 @@ export const SimpleMessagingInterface: React.FC<
 
       {/* AI Assistant Modal */}
       {showAIAssistant && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div
+          className={cn(
+            "fixed inset-0 z-50 flex items-center justify-center p-4",
+            isLight ? "bg-slate-900/40 backdrop-blur-[2px]" : "bg-black/50"
+          )}
+        >
           <div className="w-full max-w-lg">
             <AIAssistantChat
               conversationId={selectedConversation?._id}

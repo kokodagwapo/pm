@@ -1,14 +1,12 @@
 import mongoose from "mongoose";
 
-function getMongoUri(): string {
+export function getMongoUri(): string {
   let uri = process.env.MONGODB_URI || "mongodb://localhost:27017/SmartStartPM";
   if (uri.includes("=") && !uri.startsWith("mongodb")) {
     uri = uri.substring(uri.indexOf("=") + 1).trim();
   }
   return uri;
 }
-
-const MONGODB_URI = getMongoUri();
 
 let cached = global.mongoose;
 
@@ -17,9 +15,10 @@ if (!cached) {
 }
 
 async function connectDB() {
-  if (!process.env.MONGODB_URI) {
+  const uri = getMongoUri();
+  if (!uri.startsWith("mongodb")) {
     throw new Error(
-      "Please define the MONGODB_URI environment variable"
+      "Invalid MONGODB_URI — expected a mongodb:// or mongodb+srv:// connection string"
     );
   }
 
@@ -28,7 +27,7 @@ async function connectDB() {
   }
 
   if (!cached.promise) {
-    const isLocal = MONGODB_URI.includes("localhost") || MONGODB_URI.includes("127.0.0.1");
+    const isLocal = uri.includes("localhost") || uri.includes("127.0.0.1");
     const opts = {
       bufferCommands: false,
       maxPoolSize: 10,
@@ -39,7 +38,7 @@ async function connectDB() {
     };
 
     cached.promise = mongoose
-      .connect(MONGODB_URI, opts)
+      .connect(uri, opts)
       .then((mongoose) => {
         return mongoose;
       })

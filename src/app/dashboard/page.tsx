@@ -24,6 +24,7 @@ import {
 } from "@/components/analytics/AnalyticsCard";
 import { ResponsiveLayout } from "@/components/layout/responsive-layout";
 import { DashboardSkeleton } from "@/components/ui/skeleton-layouts";
+import { cn } from "@/lib/utils";
 import { DashboardAlert, DashboardOverviewResponse } from "@/types/dashboard";
 import {
   Building2,
@@ -58,6 +59,41 @@ import {
   AreaChart,
 } from "recharts";
 import { UserRole } from "@/types";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+
+/** Must be module-level — calling `dynamic()` inside render breaks React (blank / remount loop). */
+const TenantDashboard = dynamic(
+  () => import("@/components/tenant/TenantDashboard"),
+  {
+    ssr: false,
+    loading: () => (
+      <ResponsiveLayout>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="h-8 w-64 bg-gray-200 rounded animate-pulse mb-2" />
+              <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+                </CardHeader>
+                <CardContent>
+                  <div className="h-8 w-16 bg-gray-200 rounded animate-pulse mb-1" />
+                  <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </ResponsiveLayout>
+    ),
+  }
+);
 
 const getActivityIcon = (type: string) => {
   switch (type) {
@@ -77,75 +113,68 @@ const getActivityIcon = (type: string) => {
 };
 
 const getActivityColor = (type: string, status?: string) => {
-  if (status === "completed") return "text-success";
-  if (status === "pending") return "text-warning";
-  if (status === "sent") return "text-info";
-  if (status === "overdue" || status === "late") return "text-error";
+  if (status === "completed") return "text-emerald-200";
+  if (status === "pending") return "text-amber-200";
+  if (status === "sent") return "text-sky-200";
+  if (status === "overdue" || status === "late") return "text-rose-200";
 
   switch (type) {
     case "payment":
-      return "text-success";
+      return "text-emerald-200";
     case "maintenance":
-      return "text-warning";
+      return "text-amber-200";
     case "lease":
-      return "text-primary";
+      return "text-cyan-200";
     case "event":
-      return "text-info";
+      return "text-violet-200";
     case "application":
-      return "text-info";
+      return "text-sky-200";
     default:
-      return "text-muted-foreground";
+      return "text-white";
   }
 };
 
 const getPriorityColor = (priority: string) => {
   switch (priority) {
     case "high":
-      return "text-error";
+      return "text-rose-200";
     case "urgent":
-      return "text-error";
+      return "text-rose-200";
     case "medium":
-      return "text-warning";
+      return "text-amber-200";
     case "low":
-      return "text-success";
+      return "text-emerald-200";
     default:
-      return "text-muted-foreground";
+      return "text-white";
   }
 };
 
-const getAlertStyles = (type: string) => {
+/** Alert row — high contrast on video (immersive) or white shell (light) */
+const getAlertStyles = (type: string, isLight: boolean) => {
   switch (type) {
     case "payment":
       return {
-        border: "border-yellow-400",
-        bg: "bg-yellow-50/30",
-        iconColor: "text-orange-500",
-        textColor: "text-yellow-600",
-        badgeBg: "bg-white/80",
+        iconColor: isLight ? "text-amber-600" : "text-amber-200",
+        titleColor: isLight ? "text-slate-900" : "text-white",
+        bodyColor: isLight ? "text-slate-600" : "text-white",
       };
     case "maintenance":
       return {
-        border: "border-red-400",
-        bg: "bg-red-50/30",
-        iconColor: "text-red-500",
-        textColor: "text-red-600",
-        badgeBg: "bg-white/80",
+        iconColor: isLight ? "text-rose-600" : "text-rose-200",
+        titleColor: isLight ? "text-slate-900" : "text-white",
+        bodyColor: isLight ? "text-slate-600" : "text-white",
       };
     case "lease":
       return {
-        border: "border-cyan-400",
-        bg: "bg-cyan-50/30",
-        iconColor: "text-cyan-500",
-        textColor: "text-cyan-600",
-        badgeBg: "bg-white/80",
+        iconColor: isLight ? "text-sky-600" : "text-cyan-200",
+        titleColor: isLight ? "text-slate-900" : "text-white",
+        bodyColor: isLight ? "text-slate-600" : "text-white",
       };
     default:
       return {
-        border: "border-gray-300",
-        bg: "bg-gray-50",
-        iconColor: "text-gray-600",
-        textColor: "text-gray-800",
-        badgeBg: "bg-white/80",
+        iconColor: isLight ? "text-sky-600" : "text-sky-200",
+        titleColor: isLight ? "text-slate-900" : "text-white",
+        bodyColor: isLight ? "text-slate-600" : "text-white",
       };
   }
 };
@@ -163,6 +192,8 @@ export default function DashboardPage() {
   const isTenant = userRole === UserRole.TENANT;
   const isDashboardAuthorized =
     userRole === UserRole.ADMIN || userRole === UserRole.MANAGER;
+  const dashAppearance = useOptionalDashboardAppearance();
+  const isLight = dashAppearance?.isLight ?? false;
 
   const loadDashboardData = useCallback(
     async ({ isRefresh = false }: { isRefresh?: boolean } = {}) => {
@@ -408,40 +439,6 @@ export default function DashboardPage() {
   );
 
   if (isTenant) {
-    // Import the TenantDashboard component dynamically to avoid SSR issues
-    const TenantDashboard = dynamic(
-      () => import("@/components/tenant/TenantDashboard"),
-      {
-        ssr: false,
-        loading: () => (
-          <ResponsiveLayout>
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="h-8 w-64 bg-gray-200 rounded animate-pulse mb-2" />
-                  <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[...Array(4)].map((_, i) => (
-                  <Card key={i}>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
-                      <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-8 w-16 bg-gray-200 rounded animate-pulse mb-1" />
-                      <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </ResponsiveLayout>
-        ),
-      }
-    );
-
     return (
       <ResponsiveLayout>
         <TenantDashboard />
@@ -476,7 +473,59 @@ export default function DashboardPage() {
     );
   }
 
-  const overview = dashboardData?.overview;
+  /* Owner & other roles: no overview API — avoid rendering admin charts with null data */
+  if (!isDashboardAuthorized) {
+    return (
+      <ResponsiveLayout className="space-y-4">
+        <Card className="rounded-xl">
+          <CardHeader>
+            <CardTitle className="text-base">
+              {t("dashboard.ownerFallback.title")}
+            </CardTitle>
+            <CardDescription>
+              {t("dashboard.ownerFallback.description")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboard/properties">
+                {t("dashboard.ownerFallback.linkProperties")}
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboard/leases">
+                {t("dashboard.ownerFallback.linkLeases")}
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboard/payments">
+                {t("dashboard.ownerFallback.linkPayments")}
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </ResponsiveLayout>
+    );
+  }
+
+  /* Aborted fetch / race: authorized but no payload yet */
+  if (!dashboardData && !isLoading && !error) {
+    return (
+      <ResponsiveLayout>
+        <DashboardSkeleton />
+      </ResponsiveLayout>
+    );
+  }
+
+  if (!dashboardData) {
+    return (
+      <ResponsiveLayout>
+        <DashboardSkeleton />
+      </ResponsiveLayout>
+    );
+  }
+
+  const overview = dashboardData.overview;
   const maintenance = overview?.maintenanceRequests;
   const payments = overview?.payments;
   const revenueTrend = dashboardData?.trends?.revenue ?? [];
@@ -567,35 +616,47 @@ export default function DashboardPage() {
     }
   };
 
+  const pageHeading = isLight ? "text-slate-900" : "text-white";
+  const pageBody = isLight ? "text-slate-600" : "text-white";
+  const pageMuted = isLight ? "text-slate-500" : "text-white";
+  const chartTickFill = isLight ? "rgba(15,23,42,0.55)" : "rgba(255,255,255,0.72)";
+  const chartGridStroke = isLight ? "rgba(15,23,42,0.09)" : "rgba(255,255,255,0.1)";
+  const headerActionClass = isLight
+    ? "h-auto shrink-0 gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50"
+    : cn(
+        "dashboard-outline-control h-auto shrink-0 gap-1.5 font-medium text-white shadow-none",
+        "hover:bg-white/10 hover:text-white",
+        "focus-visible:ring-0 focus-visible:ring-offset-0"
+      );
+
   // Manager/Admin Dashboard
   return (
     <ResponsiveLayout className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <h1 className="text-sm font-medium text-foreground">
+          <h1 className={cn("text-lg font-medium", pageHeading)}>
             {getGreeting()}, {user?.firstName}
           </h1>
-          <span className="text-xs text-muted-foreground">
+          <span className={cn("text-base", pageBody)}>
             {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </span>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex shrink-0 items-center gap-2">
           <Button
-            variant="outline"
-            size="sm"
+            variant="ghost"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="gap-2 text-xs h-8 rounded-lg border-border"
+            className={headerActionClass}
           >
             <RefreshCw
-              className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`}
+              className={`h-4 w-4 shrink-0 ${isRefreshing ? "animate-spin" : ""}`}
             />
             {t("dashboard.actions.refresh")}
           </Button>
           <Link href="/dashboard/analytics">
-            <Button size="sm" className="gap-2 text-xs h-8 rounded-lg">
-              <BarChart3 className="h-3.5 w-3.5" />
+            <Button variant="ghost" className={headerActionClass}>
+              <BarChart3 className="h-4 w-4 shrink-0" />
               {t("dashboard.actions.analytics")}
             </Button>
           </Link>
@@ -612,51 +673,15 @@ export default function DashboardPage() {
         </Alert>
       )}
 
-      {/* Action Items */}
+      {/* KPI Cards — above action alerts so portfolio pulse comes first */}
       <div className="space-y-3">
-        <div className="flex items-baseline gap-3 px-0.5">
-          <h2 className="text-sm font-medium tracking-[-0.01em] text-foreground">Action Items</h2>
-          <p className="text-xs text-muted-foreground">Needs your attention</p>
-        </div>
-        <div className="grid gap-3 md:grid-cols-3">
-          {alerts?.slice(0, 3).map((alert) => {
-            const styles = getAlertStyles(alert.type);
-            return (
-              <div
-                key={alert.id}
-                className={`group rounded-xl border ${styles.border} ${styles.bg} px-4 py-3.5 cursor-pointer hover:shadow-sm transition-all duration-200`}
-                onClick={() => handleAlertClick(alert.type)}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <AlertTriangle className={`h-3.5 w-3.5 shrink-0 ${styles.iconColor}`} />
-                      <h4 className={`font-medium text-sm ${styles.textColor}`}>
-                        {getAlertTitleText(alert)}
-                      </h4>
-                    </div>
-                    <p className={`text-xs leading-relaxed ${styles.textColor} opacity-70`}>
-                      {getAlertMessageText(alert)}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className={`text-2xl font-semibold leading-none ${styles.textColor}`}>
-                      {alert.count}
-                    </span>
-                    <ChevronRight className={`h-4 w-4 ${styles.iconColor} opacity-60`} />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="space-y-3">
-        <div className="flex items-baseline gap-3 px-0.5">
-          <h2 className="text-sm font-medium tracking-[-0.01em] text-foreground">Overview</h2>
-          <p className="text-xs text-muted-foreground">Key metrics across all properties</p>
+        <div className="flex flex-col gap-1 px-0.5 sm:flex-row sm:items-baseline sm:gap-3">
+          <h2 className={cn("shrink-0 text-base font-medium tracking-[-0.01em]", pageHeading)}>
+            {t("dashboard.sections.keyMetrics.title")}
+          </h2>
+          <p className={cn("max-w-prose text-sm", pageBody)}>
+            {t("dashboard.sections.keyMetrics.subtitle")}
+          </p>
         </div>
         <AnalyticsCardGrid>
         <AnalyticsCard
@@ -745,27 +770,81 @@ export default function DashboardPage() {
       </AnalyticsCardGrid>
       </div>
 
+      {/* Action Items — after key metrics */}
+      <div className="space-y-3">
+        <div className="flex flex-col gap-1 px-0.5 sm:flex-row sm:items-baseline sm:gap-3">
+          <h2 className={cn("shrink-0 text-base font-medium tracking-[-0.01em]", pageHeading)}>
+            {t("dashboard.sections.actionCenter.title")}
+          </h2>
+          <p className={cn("max-w-prose text-sm", pageBody)}>
+            {t("dashboard.sections.actionCenter.subtitle")}
+          </p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          {alerts?.slice(0, 3).map((alert) => {
+            const styles = getAlertStyles(alert.type, isLight);
+            return (
+              <div
+                key={alert.id}
+                className="group dashboard-ui-surface rounded-2xl px-4 py-3.5 cursor-pointer transition-all duration-300 active:scale-[0.99]"
+                onClick={() => handleAlertClick(alert.type)}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <AlertTriangle className={`h-3.5 w-3.5 shrink-0 ${styles.iconColor}`} />
+                      <h4 className={`font-medium text-base ${styles.titleColor}`}>
+                        {getAlertTitleText(alert)}
+                      </h4>
+                    </div>
+                    <p className={`text-sm leading-relaxed ${styles.bodyColor}`}>
+                      {getAlertMessageText(alert)}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span className={cn("text-3xl font-semibold leading-none", pageHeading)}>
+                      {alert.count}
+                    </span>
+                    <ChevronRight className={`h-4 w-4 ${styles.iconColor} opacity-70`} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Left Column - Charts and Analytics */}
         <div className="lg:col-span-2 space-y-6">
           {/* Revenue & Expenses Trends */}
           <div className="space-y-3">
-            <h2 className="text-sm font-medium tracking-[-0.01em] text-foreground px-0.5">Financial Performance</h2>
-            <Card className="rounded-xl border border-border shadow-sm">
+            <h2 className={cn("px-0.5 text-base font-medium tracking-[-0.01em]", pageHeading)}>
+              {t("dashboard.sections.financial.title")}
+            </h2>
+            <Card className="rounded-xl">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2 text-base font-medium tracking-tight">
-                    <LineChart className="h-4 w-4 text-primary/60" />
+                  <CardTitle className="flex items-center gap-2 text-lg font-medium tracking-tight">
+                    <LineChart
+                      className={cn("h-5 w-5", isLight ? "text-sky-600" : "text-sky-200")}
+                    />
                     {t("dashboard.charts.revenueExpenses.title")}
                   </CardTitle>
-                  <CardDescription className="text-xs mt-0.5">
+                  <CardDescription className="mt-0.5 text-sm">
                     {t("dashboard.charts.revenueExpenses.description")}
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <select className="text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background text-muted-foreground">
+                  <select
+                    className={cn(
+                      "shrink-0 rounded-xl text-base focus-visible:outline-none",
+                      headerActionClass
+                    )}
+                    aria-label={t("dashboard.charts.revenueExpenses.title")}
+                  >
                     <option>2024</option>
                     <option>2023</option>
                     <option>2022</option>
@@ -775,22 +854,22 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               {/* Legend */}
-              <div className="flex items-center gap-6 mb-6">
+              <div className="mb-6 flex items-center gap-6">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[#10b981]"></div>
-                  <span className="text-sm text-muted-foreground">
+                  <div className="h-3 w-3 rounded-full bg-emerald-300/90 shadow-[0_0_12px_rgba(110,231,183,0.35)]" />
+                  <span className={cn("text-base", pageBody)}>
                     {t("dashboard.charts.revenueExpenses.legend.revenue")}
                   </span>
-                  <span className="text-lg font-semibold">
+                  <span className={cn("text-xl font-semibold", pageHeading)}>
                     {formatCurrency(currentRevenueValue)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[#f59e0b]"></div>
-                  <span className="text-sm text-muted-foreground">
+                  <div className="h-3 w-3 rounded-full bg-amber-300/90 shadow-[0_0_12px_rgba(252,211,77,0.35)]" />
+                  <span className={cn("text-base", pageBody)}>
                     {t("dashboard.charts.revenueExpenses.legend.expenses")}
                   </span>
-                  <span className="text-lg font-semibold">
+                  <span className={cn("text-xl font-semibold", pageHeading)}>
                     {formatCurrency(currentExpenseValue)}
                   </span>
                 </div>
@@ -806,11 +885,11 @@ export default function DashboardPage() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                      <stop offset="5%" stopColor="#6ee7b7" stopOpacity={0.45} />
                       <stop
                         offset="95%"
-                        stopColor="#10b981"
-                        stopOpacity={0.05}
+                        stopColor="#6ee7b7"
+                        stopOpacity={0.06}
                       />
                     </linearGradient>
                     <linearGradient
@@ -820,46 +899,51 @@ export default function DashboardPage() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
+                      <stop offset="5%" stopColor="#fcd34d" stopOpacity={0.45} />
                       <stop
                         offset="95%"
-                        stopColor="#f59e0b"
-                        stopOpacity={0.05}
+                        stopColor="#fcd34d"
+                        stopOpacity={0.06}
                       />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartGridStroke} />
                   <XAxis
                     dataKey="month"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12, fill: "#64748b" }}
+                    tick={{ fontSize: 14, fill: chartTickFill }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12, fill: "#64748b" }}
+                    tick={{ fontSize: 14, fill: chartTickFill }}
                     tickFormatter={(value) => `${value / 1000}k`}
                   />
                   <Tooltip
                     content={({ active, payload, label }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="bg-white p-3 border rounded-lg shadow-lg">
-                            <p className="text-sm font-medium mb-2">{label}</p>
+                          <div
+                            className={cn(
+                              "rounded-xl border p-3 text-base shadow-lg",
+                              isLight
+                                ? "border-slate-200 bg-white text-slate-900"
+                                : "border-white/20 bg-white/10 text-white backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)]"
+                            )}
+                          >
+                            <p className={cn("mb-2 text-base font-medium", pageHeading)}>{label}</p>
                             {payload.map((entry, index) => (
                               <div
                                 key={index}
-                                className="flex items-center gap-2 text-sm"
+                                className="flex items-center gap-2 text-base"
                               >
                                 <div
-                                  className="w-2 h-2 rounded-full"
+                                  className="h-2 w-2 rounded-full"
                                   style={{ backgroundColor: entry.color }}
-                                ></div>
-                                <span className="text-muted-foreground">
-                                  {entry.name}:
-                                </span>
-                                <span className="font-semibold">
+                                />
+                                <span className={pageBody}>{entry.name}:</span>
+                                <span className={cn("font-semibold", pageHeading)}>
                                   {formatCurrency(entry.value as number)}
                                 </span>
                               </div>
@@ -873,7 +957,7 @@ export default function DashboardPage() {
                   <Area
                     type="monotone"
                     dataKey="totalRevenue"
-                    stroke="#10b981"
+                    stroke="#6ee7b7"
                     strokeWidth={2}
                     fill="url(#incomeGradient)"
                     name={t("dashboard.charts.revenueExpenses.legend.revenue")}
@@ -882,7 +966,7 @@ export default function DashboardPage() {
                   <Area
                     type="monotone"
                     dataKey="totalExpenses"
-                    stroke="#f59e0b"
+                    stroke="#fcd34d"
                     strokeWidth={2}
                     fill="url(#expenseGradient)"
                     name={t("dashboard.charts.revenueExpenses.legend.expenses")}
@@ -898,14 +982,18 @@ export default function DashboardPage() {
           <div className="grid gap-6 md:grid-cols-2">
             {/* Property Distribution */}
             <div className="space-y-3">
-              <h3 className="text-sm font-medium tracking-[-0.01em] text-foreground px-0.5">Property Breakdown</h3>
-              <Card className="rounded-xl border border-border shadow-sm">
+              <h3 className={cn("px-0.5 text-base font-medium tracking-[-0.01em]", pageHeading)}>
+                {t("dashboard.sections.propertyMix.title")}
+              </h3>
+              <Card className="rounded-xl">
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-base font-medium tracking-tight">
-                  <PieChart className="h-4 w-4 text-primary/60" />
+                <CardTitle className="flex items-center gap-2 text-lg font-medium tracking-tight">
+                  <PieChart
+                    className={cn("h-5 w-5", isLight ? "text-violet-600" : "text-violet-200")}
+                  />
                   {t("dashboard.charts.propertyDistribution.title")}
                 </CardTitle>
-                <CardDescription className="text-xs">
+                <CardDescription className="text-sm">
                   {t("dashboard.charts.propertyDistribution.description")}
                 </CardDescription>
               </CardHeader>
@@ -937,8 +1025,15 @@ export default function DashboardPage() {
                                 )
                               : 0;
                             return (
-                              <div className="bg-white p-2 border rounded shadow-lg">
-                                <p className="text-sm font-medium">
+                              <div
+                                className={cn(
+                                  "rounded-xl border p-2 text-base font-medium shadow-lg",
+                                  isLight
+                                    ? "border-slate-200 bg-white text-slate-900"
+                                    : "border-white/20 bg-white/10 text-white backdrop-blur-xl [-webkit-backdrop-filter:blur(14px)]"
+                                )}
+                              >
+                                <p>
                                   {data.name}: {data.value} ({percentage}%)
                                 </p>
                               </div>
@@ -953,10 +1048,10 @@ export default function DashboardPage() {
                   {/* Center Total */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="text-xs text-muted-foreground">
+                      <div className={cn("text-sm", pageMuted)}>
                         {t("dashboard.charts.propertyDistribution.total")}
                       </div>
-                      <div className="text-2xl font-bold">
+                      <div className={cn("text-3xl font-bold", pageHeading)}>
                         {overview?.totalProperties ?? 0}
                       </div>
                     </div>
@@ -971,7 +1066,7 @@ export default function DashboardPage() {
                         className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: entry.color }}
                       ></div>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      <span className={cn("whitespace-nowrap text-sm", pageBody)}>
                         {entry.name}
                       </span>
                     </div>
@@ -983,24 +1078,28 @@ export default function DashboardPage() {
 
             {/* Payment Status */}
             <div className="space-y-3">
-              <h3 className="text-sm font-medium tracking-[-0.01em] text-foreground px-0.5">Payment Status</h3>
-              <Card className="rounded-xl border border-border shadow-sm">
+              <h3 className={cn("px-0.5 text-base font-medium tracking-[-0.01em]", pageHeading)}>
+                {t("dashboard.sections.rentRadar.title")}
+              </h3>
+              <Card className="rounded-xl">
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-base font-medium tracking-tight">
-                  <CreditCard className="h-4 w-4 text-emerald-500/70" />
+                <CardTitle className="flex items-center gap-2 text-lg font-medium tracking-tight">
+                  <CreditCard
+                    className={cn("h-5 w-5", isLight ? "text-emerald-600" : "text-emerald-200")}
+                  />
                   {t("dashboard.paymentStatus.title")}
                 </CardTitle>
-                <CardDescription className="text-xs">
+                <CardDescription className="text-sm">
                   {t("dashboard.paymentStatus.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">
+                    <span className={cn("text-sm", pageBody)}>
                       {t("dashboard.paymentStatus.collected")}
                     </span>
-                    <span className="text-sm font-semibold text-emerald-600">
+                    <span className={cn("text-base font-semibold", pageHeading)}>
                       {formatCurrency(payments?.collected ?? 0)}
                     </span>
                   </div>
@@ -1015,19 +1114,33 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-2">
-                  <div className="text-center p-3 bg-amber-50/60 border border-amber-100/80 rounded-lg">
-                    <div className="text-base font-semibold text-amber-600 tracking-tight">
+                  <div
+                    className={cn(
+                      "rounded-xl border p-3 text-center",
+                      isLight
+                        ? "border-amber-200 bg-amber-50"
+                        : "border-amber-200/30 bg-amber-300/12 backdrop-blur-sm"
+                    )}
+                  >
+                    <div className={cn("text-base font-semibold tracking-tight", pageHeading)}>
                       {formatCurrency(payments?.pending ?? 0)}
                     </div>
-                    <div className="text-[10px] text-amber-500/80 mt-0.5">
+                    <div className={cn("mt-0.5 text-xs", pageMuted)}>
                       {t("dashboard.paymentStatus.pending")}
                     </div>
                   </div>
-                  <div className="text-center p-3 bg-rose-50/60 border border-rose-100/80 rounded-lg">
-                    <div className="text-base font-semibold text-rose-600 tracking-tight">
+                  <div
+                    className={cn(
+                      "rounded-xl border p-3 text-center",
+                      isLight
+                        ? "border-rose-200 bg-rose-50"
+                        : "border-rose-200/30 bg-rose-300/12 backdrop-blur-sm"
+                    )}
+                  >
+                    <div className={cn("text-base font-semibold tracking-tight", pageHeading)}>
                       {formatCurrency(payments?.overdue ?? 0)}
                     </div>
-                    <div className="text-[10px] text-rose-500/80 mt-0.5">
+                    <div className={cn("mt-0.5 text-xs", pageMuted)}>
                       {t("dashboard.paymentStatus.overdue")}
                     </div>
                   </div>
@@ -1041,15 +1154,17 @@ export default function DashboardPage() {
         {/* Right Column - Activities and Tasks */}
         <div className="space-y-6">
           {/* Recent Activities */}
-          <Card className="rounded-xl border border-border shadow-sm">
+          <Card className="rounded-xl">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-base font-medium tracking-tight">
-                  <Activity className="h-4 w-4 text-primary/60" />
+                <CardTitle className="flex items-center gap-2 text-lg font-medium tracking-tight">
+                  <Activity
+                    className={cn("h-5 w-5", isLight ? "text-cyan-600" : "text-cyan-200")}
+                  />
                   {t("dashboard.recentActivity.title")}
                 </CardTitle>
               </div>
-              <CardDescription className="text-xs">
+              <CardDescription className="text-sm">
                 {t("dashboard.recentActivity.description")}
               </CardDescription>
             </CardHeader>
@@ -1057,44 +1172,72 @@ export default function DashboardPage() {
               <ScrollArea className="h-80">
                 <div className="space-y-4">
                   {recentActivities.length === 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      {t("dashboard.recentActivity.empty")}
-                    </p>
+                    <p className={cn("text-base", pageBody)}>{t("dashboard.recentActivity.empty")}</p>
                   )}
                   {recentActivities.map((activity) => {
                     const IconComponent = getActivityIcon(activity.type);
+                    const actColor = getActivityColor(activity.type, activity.status);
+                    const actColorLt =
+                      actColor === "text-emerald-200"
+                        ? "text-emerald-600"
+                        : actColor === "text-amber-200"
+                          ? "text-amber-600"
+                          : actColor === "text-sky-200"
+                            ? "text-sky-600"
+                            : actColor === "text-rose-200"
+                              ? "text-rose-600"
+                              : actColor === "text-cyan-200"
+                                ? "text-cyan-600"
+                                : actColor === "text-violet-200"
+                                  ? "text-violet-600"
+                                  : "text-slate-700";
                     return (
                       <div
                         key={activity.id}
-                        className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                        className={cn(
+                          "flex items-start gap-3 rounded-lg p-3 transition-colors",
+                          isLight ? "hover:bg-slate-50" : "hover:bg-white/[0.06]"
+                        )}
                       >
                         <div
-                          className={`p-2 rounded-lg bg-muted ${getActivityColor(
-                            activity.type,
-                            activity.status
-                          )}`}
+                          className={cn(
+                            "rounded-lg p-2 ring-1",
+                            isLight
+                              ? "bg-slate-100 ring-slate-200/80"
+                              : "bg-white/[0.08] ring-white/10",
+                            isLight ? actColorLt : actColor
+                          )}
                         >
                           <IconComponent className="h-4 w-4" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium leading-tight">
+                        <div className="min-w-0 flex-1">
+                          <p className={cn("text-base font-medium leading-tight", pageHeading)}>
                             {activity.description}
                           </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs text-muted-foreground">
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className={cn("text-sm", pageMuted)}>
                               {formatTimeAgo(activity.timestamp)}
                             </span>
                             {activity.amount && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-sm">
                                 {formatCurrency(activity.amount)}
                               </Badge>
                             )}
                             {activity.priority && (
                               <Badge
                                 variant="outline"
-                                className={`text-xs ${getPriorityColor(
-                                  activity.priority
-                                )}`}
+                                className={cn(
+                                  "text-sm",
+                                  isLight
+                                    ? activity.priority === "high" || activity.priority === "urgent"
+                                      ? "text-rose-600"
+                                      : activity.priority === "medium"
+                                        ? "text-amber-600"
+                                        : activity.priority === "low"
+                                          ? "text-emerald-600"
+                                          : "text-slate-600"
+                                    : getPriorityColor(activity.priority)
+                                )}
                               >
                                 {getPriorityLabel(activity.priority)}
                               </Badge>
@@ -1110,24 +1253,24 @@ export default function DashboardPage() {
           </Card>
 
           {/* Upcoming Tasks */}
-          <Card className="rounded-xl border border-border shadow-sm">
+          <Card className="rounded-xl">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-base font-medium tracking-tight">
-                  <ClipboardList className="h-4 w-4 text-amber-500/70" />
+                <CardTitle className="flex items-center gap-2 text-lg font-medium tracking-tight">
+                  <ClipboardList
+                    className={cn("h-5 w-5", isLight ? "text-amber-600" : "text-amber-200")}
+                  />
                   {t("dashboard.tasks.title")}
                 </CardTitle>
               </div>
-              <CardDescription className="text-xs">
+              <CardDescription className="text-sm">
                 {t("dashboard.tasks.description")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {upcomingTasks.length === 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    {t("dashboard.tasks.empty")}
-                  </p>
+                  <p className={cn("text-base", pageBody)}>{t("dashboard.tasks.empty")}</p>
                 )}
                 {upcomingTasks.slice(0, 4).map((task) => {
                   const dueDate = new Date(task.dueDate);
@@ -1138,29 +1281,49 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={task.id}
-                      className="flex items-center gap-3 p-3 rounded-lg border border-border/50 hover:border-border hover:shadow-sm cursor-pointer transition-all"
+                      className={cn(
+                        "flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all",
+                        isLight
+                          ? "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                          : "border-white/15 hover:border-white/25 hover:bg-white/[0.04]"
+                      )}
                       onClick={() => handleTaskClick(task)}
                     >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium leading-tight">
+                      <div className="min-w-0 flex-1">
+                        <p className={cn("text-base font-medium leading-tight", pageHeading)}>
                           {task.title}
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Calendar className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            {dueDateLabel}
-                          </span>
+                        <div className="mt-1 flex items-center gap-2">
+                          <Calendar
+                            className={cn("h-4 w-4", isLight ? "text-slate-500" : "text-white")}
+                          />
+                          <span className={cn("text-sm", pageMuted)}>{dueDateLabel}</span>
                           <Badge
                             variant="outline"
-                            className={`text-xs ${getPriorityColor(
-                              task.priority
-                            )}`}
+                            className={cn(
+                              "text-sm",
+                              isLight
+                                ? String(task.priority).includes("high") ||
+                                  String(task.priority).includes("urgent")
+                                  ? "text-rose-600"
+                                  : "text-slate-600"
+                                : getPriorityColor(String(task.priority))
+                            )}
                           >
                             {task.priority}
                           </Badge>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                          "h-8 w-8 p-0",
+                          isLight
+                            ? "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                            : "text-white/70 hover:bg-white/10 hover:text-white"
+                        )}
+                      >
                         <ChevronRight className="h-4 w-4" />
                       </Button>
                     </div>

@@ -18,6 +18,14 @@ const replitDevOrigins: string[] = [
 const nextConfig: NextConfig = {
   allowedDevOrigins: replitDevOrigins,
 
+  // Inline for client bundles (next-auth/react). Must match the origin you use in the browser during dev.
+  env: {
+    NEXTAUTH_URL:
+      process.env.NEXTAUTH_URL ||
+      process.env.AUTH_URL ||
+      "http://localhost:3000",
+  },
+
   serverExternalPackages: ["mongodb"],
 
   eslint: {

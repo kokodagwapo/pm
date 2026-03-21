@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { cn } from "@/lib/utils";
 
 interface PropertyItem {
   _id: string;
@@ -31,6 +33,8 @@ interface PropertyItem {
 
 export default function PropertyCalendarIndexPage() {
   const router = useRouter();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
   const [properties, setProperties] = useState<PropertyItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -77,20 +81,40 @@ export default function PropertyCalendarIndexPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <CalendarDays className="h-6 w-6" />
+        <h1
+          className={cn(
+            "flex items-center gap-2 text-2xl font-bold tracking-tight sm:text-3xl",
+            isLight ? "text-slate-900" : "text-white"
+          )}
+        >
+          <CalendarDays
+            className={cn(
+              "h-6 w-6 shrink-0",
+              isLight ? "text-slate-800" : "text-white"
+            )}
+          />
           Availability Calendar
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p
+          className={cn(
+            "mt-1 text-sm sm:text-base",
+            isLight ? "text-slate-600" : "text-white/80"
+          )}
+        >
           Select a property to manage its availability, date blocks, and pricing
           rules
         </p>
       </div>
 
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search
+          className={cn(
+            "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2",
+            isLight ? "text-slate-500" : "text-muted-foreground"
+          )}
+        />
         <Input
           placeholder="Search properties..."
           value={search}
@@ -110,11 +134,26 @@ export default function PropertyCalendarIndexPage() {
       ) : filtered.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <Building2 className="h-12 w-12 text-muted-foreground mb-3" />
-            <h3 className="text-lg font-semibold mb-1">
+            <Building2
+              className={cn(
+                "mb-3 h-12 w-12",
+                isLight ? "text-slate-400" : "text-muted-foreground"
+              )}
+            />
+            <h3
+              className={cn(
+                "mb-1 text-lg font-semibold",
+                isLight ? "text-slate-900" : "text-foreground"
+              )}
+            >
               {search ? "No properties match your search" : "No properties found"}
             </h3>
-            <p className="text-sm text-muted-foreground">
+            <p
+              className={cn(
+                "text-sm",
+                isLight ? "text-slate-600" : "text-muted-foreground"
+              )}
+            >
               {search
                 ? "Try a different search term"
                 : "Add properties first to manage their calendars"}
@@ -126,20 +165,35 @@ export default function PropertyCalendarIndexPage() {
           {filtered.map((property) => (
             <Card
               key={property._id}
-              className="cursor-pointer hover:shadow-md transition-shadow border hover:border-primary/30"
+              className={cn(
+                "cursor-pointer transition-shadow hover:shadow-md",
+                isLight
+                  ? "border-slate-200/90 hover:border-sky-300/60"
+                  : "border hover:border-primary/30"
+              )}
               onClick={() =>
                 router.push(`/dashboard/properties/${property._id}/calendar`)
               }
             >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-base truncate">
+                  <div className="min-w-0 flex-1">
+                    <h3
+                      className={cn(
+                        "truncate text-base font-semibold",
+                        isLight ? "text-slate-900" : "text-foreground"
+                      )}
+                    >
                       {property.name}
                     </h3>
                     {property.address && (
-                      <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                        <MapPin className="h-3 w-3 flex-shrink-0" />
+                      <p
+                        className={cn(
+                          "mt-1 flex items-center gap-1 text-sm",
+                          isLight ? "text-slate-600" : "text-muted-foreground"
+                        )}
+                      >
+                        <MapPin className="h-3 w-3 shrink-0" />
                         <span className="truncate">
                           {[property.address.city, property.address.state]
                             .filter(Boolean)
@@ -148,10 +202,15 @@ export default function PropertyCalendarIndexPage() {
                       </p>
                     )}
                   </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0 ml-2" />
+                  <ChevronRight
+                    className={cn(
+                      "ml-2 h-5 w-5 shrink-0",
+                      isLight ? "text-slate-400" : "text-muted-foreground"
+                    )}
+                  />
                 </div>
 
-                <div className="flex items-center gap-2 mt-3">
+                <div className="mt-3 flex items-center gap-2">
                   {property.status && (
                     <Badge
                       variant="secondary"
@@ -161,20 +220,35 @@ export default function PropertyCalendarIndexPage() {
                     </Badge>
                   )}
                   {property.units && (
-                    <span className="text-xs text-muted-foreground">
+                    <span
+                      className={cn(
+                        "text-xs",
+                        isLight ? "text-slate-500" : "text-muted-foreground"
+                      )}
+                    >
                       {property.units.length}{" "}
                       {property.units.length === 1 ? "unit" : "units"}
                     </span>
                   )}
                 </div>
 
-                <div className="mt-3 pt-3 border-t">
+                <div
+                  className={cn(
+                    "mt-3 border-t pt-3",
+                    isLight ? "border-slate-200/90" : "border-border"
+                  )}
+                >
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-center text-primary hover:text-primary"
+                    className={cn(
+                      "w-full justify-center",
+                      isLight
+                        ? "text-sky-700 hover:bg-sky-50 hover:text-sky-800"
+                        : "text-primary hover:text-primary"
+                    )}
                   >
-                    <CalendarDays className="h-4 w-4 mr-1" />
+                    <CalendarDays className="mr-1 h-4 w-4" />
                     Open Calendar
                   </Button>
                 </div>

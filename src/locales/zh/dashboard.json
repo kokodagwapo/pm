@@ -5,6 +5,16 @@
 
   "dashboard.header.subtitle": "这是您的物业组合概览",
 
+  "dashboard.sections.keyMetrics.title": "Keys, Units & Rent Roll",
+  "dashboard.sections.keyMetrics.subtitle": "The pulse of every door you own — occupancy, rent & the fix-it queue",
+
+  "dashboard.sections.actionCenter.title": "Front Desk — Needs You",
+  "dashboard.sections.actionCenter.subtitle": "Late rent, hot work orders & leases knocking before they expire",
+
+  "dashboard.sections.financial.title": "Cash Flow Story",
+  "dashboard.sections.propertyMix.title": "What's on Your Lot",
+  "dashboard.sections.rentRadar.title": "Rent Radar",
+
   "dashboard.actions.refresh": "刷新",
   "dashboard.actions.analytics": "查看分析",
   "dashboard.actions.retry": "重试",

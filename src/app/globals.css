@@ -113,6 +113,22 @@
   --chart-4: #ef4444;
   --chart-5: #06b6d4;
 
+  /* Dashboard ambient (glass shell) */
+  --dashboard-bg-top: #eef2f9;
+  --dashboard-bg-mid: #e8ecf6;
+  --dashboard-bg-bottom: #e2e8f4;
+  /* Cyan-accent shell (matches action-center / lease cards: rounded-xl border-cyan bg-cyan-50/30) */
+  --dashboard-glass-surface: color-mix(in srgb, rgb(236 254 255) 38%, rgba(255, 255, 255, 0.92));
+  --dashboard-glass-border: rgb(34 211 238 / 0.78);
+  --dashboard-glass-highlight: rgba(165, 243, 252, 0.45);
+  /* Subtle float + hover:shadow-sm scale */
+  --dashboard-shadow-outer: 0 1px 2px rgb(15 23 42 / 0.04);
+  --dashboard-shadow-inner: 0 0 0 1px rgb(255 255 255 / 0.55) inset;
+  --dashboard-shadow-float: var(--dashboard-shadow-outer), var(--dashboard-shadow-inner);
+  --dashboard-shadow-outer-hover: 0 1px 3px rgb(15 23 42 / 0.08),
+    0 1px 2px -1px rgb(15 23 42 / 0.06);
+  --dashboard-shadow-float-hover: var(--dashboard-shadow-outer-hover), var(--dashboard-shadow-inner);
+
   /* Sidebar */
   --sidebar: #ffffff;
   --sidebar-foreground: #18181b;
@@ -171,6 +187,20 @@
   --chart-4: #ef4444;
   --chart-5: #06b6d4;
 
+  /* Dashboard ambient — dark */
+  --dashboard-bg-top: #0b0b0f;
+  --dashboard-bg-mid: #09090c;
+  --dashboard-bg-bottom: #060608;
+  --dashboard-glass-surface: color-mix(in srgb, rgb(8 51 68) 55%, rgba(24, 24, 27, 0.88));
+  --dashboard-glass-border: rgb(34 211 238 / 0.32);
+  --dashboard-glass-highlight: rgba(34, 211, 238, 0.08);
+  --dashboard-shadow-outer: 0 1px 2px rgb(0 0 0 / 0.4);
+  --dashboard-shadow-inner: 0 0 0 1px rgb(255 255 255 / 0.06) inset;
+  --dashboard-shadow-float: var(--dashboard-shadow-outer), var(--dashboard-shadow-inner);
+  --dashboard-shadow-outer-hover: 0 2px 8px rgb(0 0 0 / 0.45),
+    0 1px 3px rgb(0 0 0 / 0.35);
+  --dashboard-shadow-float-hover: var(--dashboard-shadow-outer-hover), var(--dashboard-shadow-inner);
+
   /* Sidebar - Dark */
   --sidebar: #18181b;
   --sidebar-foreground: #fafafa;
@@ -201,9 +231,52 @@
   body.dashboard-layout {
     overflow: hidden;
     font-family: var(--font-jakarta), var(--font-inter), system-ui, sans-serif;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   html.dashboard-layout {
     overflow: hidden;
+  }
+
+  /* /dashboard: landing hero parity — Browse Rentals pill (border-white/14, type scale) + readable copy on video */
+  html.dashboard-layout {
+    --background: transparent;
+    --foreground: #ffffff;
+    --card: rgb(255 255 255 / 0.04);
+    --card-foreground: #ffffff;
+    --popover: rgb(15 23 42 / 0.96);
+    --popover-foreground: #ffffff;
+    --muted: rgb(255 255 255 / 0.06);
+    --muted-foreground: #ffffff;
+    --border: rgb(255 255 255 / 0.14);
+    --input: rgb(255 255 255 / 0.14);
+    --ring: rgb(125 211 252 / 0.55);
+    --primary: rgb(56 189 248);
+    --primary-foreground: rgb(15 23 42);
+    --secondary: rgb(255 255 255 / 0.08);
+    --secondary-foreground: #ffffff;
+    --accent: rgb(255 255 255 / 0.1);
+    --accent-foreground: #ffffff;
+    --dashboard-glass-surface: rgb(255 255 255 / 0.04);
+    --dashboard-glass-border: rgb(255 255 255 / 0.14);
+    --dashboard-shadow-float: none;
+    --dashboard-shadow-float-hover: none;
+    --sidebar: rgb(255 255 255 / 0.035);
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: rgb(56 189 248);
+    --sidebar-primary-foreground: rgb(15 23 42);
+    --sidebar-accent: rgb(255 255 255 / 0.08);
+    --sidebar-accent-foreground: rgb(255 255 255 / 0.92);
+    --sidebar-border: rgb(255 255 255 / 0.14);
+    --sidebar-ring: rgb(56 189 248);
+  }
+
+  html.dashboard-layout,
+  html.dashboard-layout body {
+    background: transparent !important;
+    color: var(--foreground);
   }
 }
 
@@ -229,49 +302,55 @@
     -webkit-line-clamp: 3;
   }
 
-  /* Glass Morphism Effects */
+  /* Glass Morphism Effects (Chrome / Edge / Safari — always pair webkit) */
   .glass {
     background: var(--glass);
-    backdrop-filter: blur(var(--backdrop-blur-md));
-    -webkit-backdrop-filter: blur(var(--backdrop-blur-md));
-    border: 1px solid rgba(var(--border), 0.3);
+    backdrop-filter: blur(var(--backdrop-blur-md)) saturate(150%);
+    -webkit-backdrop-filter: blur(var(--backdrop-blur-md)) saturate(150%);
+    border: 1px solid var(--glass-border);
   }
 
   .glass-sm {
     background: var(--glass);
-    backdrop-filter: blur(var(--backdrop-blur-sm));
-    -webkit-backdrop-filter: blur(var(--backdrop-blur-sm));
-    border: 1px solid rgba(var(--border), 0.2);
+    backdrop-filter: blur(var(--backdrop-blur-sm)) saturate(150%);
+    -webkit-backdrop-filter: blur(var(--backdrop-blur-sm)) saturate(150%);
+    border: 1px solid var(--glass-border);
   }
 
   .glass-md {
     background: var(--glass);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(var(--border), 0.4);
+    backdrop-filter: blur(8px) saturate(150%);
+    -webkit-backdrop-filter: blur(8px) saturate(150%);
+    border: 1px solid var(--glass-border);
   }
 
   .glass-lg {
     background: var(--glass);
-    backdrop-filter: blur(var(--backdrop-blur-lg));
-    -webkit-backdrop-filter: blur(var(--backdrop-blur-lg));
-    border: 1px solid rgba(var(--border), 0.2);
+    backdrop-filter: blur(var(--backdrop-blur-lg)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--backdrop-blur-lg)) saturate(160%);
+    border: 1px solid var(--glass-border);
   }
 
   .glass-xl {
     background: var(--glass);
-    backdrop-filter: blur(var(--backdrop-blur-xl));
-    -webkit-backdrop-filter: blur(var(--backdrop-blur-xl));
-    border: 1px solid rgba(var(--border), 0.15);
+    backdrop-filter: blur(var(--backdrop-blur-xl)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--backdrop-blur-xl)) saturate(160%);
+    border: 1px solid var(--glass-border);
   }
 
-  /* Custom Scrollbar Styles */
+  /* Scrollbar — hairline, light sky (WebKit + Firefox) */
   .scrollbar-thin {
     scrollbar-width: thin;
+    scrollbar-color: rgba(56, 189, 248, 0.45) transparent;
+  }
+
+  .dark .scrollbar-thin {
+    scrollbar-color: rgba(125, 211, 252, 0.35) transparent;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
-    width: 4px;
+    width: 2px;
+    height: 2px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -279,27 +358,420 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: rgb(229 231 235);
-    border-radius: 2px;
+    background-color: rgba(56, 189, 248, 0.4);
+    border-radius: 9999px;
   }
 
   .dark .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: rgb(55 65 81);
+    background-color: rgba(125, 211, 252, 0.3);
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(209 213 219);
+    background-color: rgba(14, 165, 233, 0.55);
   }
 
   .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(75 85 99);
+    background-color: rgba(125, 211, 252, 0.5);
+  }
+
+  /* Dashboard light theme: hairline white thumb (WebKit + Firefox) */
+  html.dashboard-layout.dashboard-light .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.92) transparent;
+  }
+
+  html.dashboard-layout.dashboard-light .scrollbar-thin::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+  }
+
+  html.dashboard-layout.dashboard-light .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  html.dashboard-layout.dashboard-light .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.9);
+    border-radius: 9999px;
+  }
+
+  html.dashboard-layout.dashboard-light .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(255 255 255 / 1);
+  }
+
+  /* Matches LanguageSwitcher (dark): outline pill on video dashboard */
+  .dashboard-outline-control {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-height: 40px;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgb(255 255 255 / 0.2);
+    background-color: transparent;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.25;
+    color: #ffffff;
+    box-shadow: none;
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease,
+      border-color 0.2s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (hover: hover) {
+    .dashboard-outline-control:hover:not(:disabled) {
+      color: rgb(255 255 255 / 1);
+      background-color: rgb(255 255 255 / 0.1);
+    }
+  }
+
+  .dashboard-outline-control:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(255 255 255 / 0.25);
+    border-color: rgb(255 255 255 / 0.35);
+  }
+
+  .dashboard-outline-control:disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  select.dashboard-outline-control {
+    cursor: pointer;
+    appearance: none;
+    background-color: rgb(255 255 255 / 0.05);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.55)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    padding-right: 2rem;
+  }
+
+  @media (hover: hover) {
+    select.dashboard-outline-control:hover:not(:disabled) {
+      background-color: rgb(255 255 255 / 0.1);
+    }
   }
 
   .glass-2xl {
     background: var(--glass);
-    backdrop-filter: blur(var(--backdrop-blur-2xl));
-    -webkit-backdrop-filter: blur(var(--backdrop-blur-2xl));
-    border: 1px solid rgba(var(--border), 0.1);
+    backdrop-filter: blur(var(--backdrop-blur-2xl)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--backdrop-blur-2xl)) saturate(160%);
+    border: 1px solid var(--glass-border);
+  }
+
+  /* Dashboard: full-viewport ambient (contrast for floating glass panels) */
+  .dashboard-ambient {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .dashboard-ambient::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 130% 90% at 0% -15%, rgba(99, 102, 241, 0.2), transparent 58%),
+      radial-gradient(ellipse 100% 75% at 100% 5%, rgba(14, 165, 233, 0.14), transparent 52%),
+      radial-gradient(ellipse 90% 55% at 55% 105%, rgba(168, 85, 247, 0.1), transparent 48%),
+      linear-gradient(
+        165deg,
+        var(--dashboard-bg-top) 0%,
+        var(--dashboard-bg-mid) 45%,
+        var(--dashboard-bg-bottom) 100%
+      );
+  }
+
+  .dark .dashboard-ambient::before {
+    background:
+      radial-gradient(ellipse 130% 90% at 0% -15%, rgba(99, 102, 241, 0.22), transparent 58%),
+      radial-gradient(ellipse 100% 75% at 100% 5%, rgba(56, 189, 248, 0.1), transparent 52%),
+      radial-gradient(ellipse 90% 55% at 55% 105%, rgba(139, 92, 246, 0.12), transparent 48%),
+      linear-gradient(
+        165deg,
+        var(--dashboard-bg-top) 0%,
+        var(--dashboard-bg-mid) 45%,
+        var(--dashboard-bg-bottom) 100%
+      );
+  }
+
+  .dashboard-ambient::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.35;
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--foreground) 4%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--foreground) 4%, transparent) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(ellipse 95% 75% at 50% 35%, #000 20%, transparent 72%);
+    mask-image: radial-gradient(ellipse 95% 75% at 50% 35%, #000 20%, transparent 72%);
+  }
+
+  .dark .dashboard-ambient::after {
+    opacity: 0.2;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  }
+
+  /*
+   * Unified dashboard chrome — cyan-accent cards (lease / action center style):
+   * cards, top nav, sidebar shell, nested tiles.
+   */
+  .dashboard-ui-surface,
+  .dashboard-glass-panel {
+    background: var(--dashboard-glass-surface);
+    border: 1px solid var(--dashboard-glass-border);
+    backdrop-filter: blur(10px) saturate(130%);
+    -webkit-backdrop-filter: blur(10px) saturate(130%);
+    box-shadow: var(--dashboard-shadow-float);
+    transition:
+      box-shadow 0.2s ease,
+      border-color 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  @media (hover: hover) {
+    .dashboard-ui-surface:hover,
+    .dashboard-glass-panel:hover {
+      box-shadow: var(--dashboard-shadow-float-hover);
+    }
+  }
+
+  /* Landing “Browse Rentals” pill — extended to cards / chrome (border-white/14, soft fill, 300ms) */
+  html.dashboard-layout .dashboard-ui-surface,
+  html.dashboard-layout .dashboard-glass-panel {
+    background: rgb(255 255 255 / 0.04);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    box-shadow: none;
+    transition:
+      border-color 0.3s ease,
+      background-color 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  @media (hover: hover) {
+    html.dashboard-layout .dashboard-ui-surface:hover,
+    html.dashboard-layout .dashboard-glass-panel:hover {
+      border-color: rgb(255 255 255 / 0.28);
+      background: rgb(255 255 255 / 0.07);
+    }
+
+    /* Keep shell chrome steady; hover only on smaller panels feels calmer */
+    html.dashboard-layout aside.dashboard-ui-surface:hover,
+    html.dashboard-layout header.dashboard-ui-surface:hover {
+      border-color: rgb(255 255 255 / 0.14);
+      background: rgb(255 255 255 / 0.035);
+    }
+  }
+
+  html.dashboard-layout aside.dashboard-ui-surface,
+  html.dashboard-layout header.dashboard-ui-surface {
+    border-radius: 0;
+  }
+
+  html.dashboard-layout [data-slot="card"] {
+    border-radius: 1rem;
+  }
+
+  /* Header search — same border weight as landing outline CTA */
+  html.dashboard-layout .dashboard-hero-search {
+    background: rgb(255 255 255 / 0.03);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    box-shadow: none;
+    backdrop-filter: blur(12px) saturate(130%);
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 300;
+    letter-spacing: 0.025em;
+  }
+
+  html.dashboard-layout .dashboard-hero-search::placeholder {
+    color: rgb(255 255 255 / 0.62);
+  }
+
+  html.dashboard-layout .dashboard-hero-search:focus {
+    border-color: rgb(255 255 255 / 0.28);
+    color: #ffffff;
+  }
+
+  /* Main scroll region: larger type, white copy (Tailwind text-* stays relative; we nudge common steps) */
+  html.dashboard-layout main .dashboard-main-typography {
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: #ffffff;
+  }
+
+  html.dashboard-layout main .dashboard-main-typography .text-xs {
+    font-size: 0.9375rem !important;
+    line-height: 1.45 !important;
+  }
+
+  html.dashboard-layout main .dashboard-main-typography .text-sm {
+    font-size: 1.0625rem !important;
+    line-height: 1.5 !important;
+  }
+
+  html.dashboard-layout main .dashboard-main-typography .text-base {
+    font-size: 1.1875rem !important;
+  }
+
+  html.dashboard-layout main .dashboard-main-typography .text-lg {
+    font-size: 1.375rem !important;
+  }
+
+  html.dashboard-layout main .dashboard-main-typography .text-xl {
+    font-size: 1.625rem !important;
+  }
+
+  html.dashboard-layout main .dashboard-main-typography .text-2xl {
+    font-size: 2rem !important;
+  }
+
+  html.dashboard-layout main .dashboard-main-typography .text-3xl {
+    font-size: 2.25rem !important;
+  }
+
+  html.dashboard-layout main .dashboard-main-typography .text-muted-foreground {
+    color: #ffffff !important;
+  }
+
+  /* Semantic tokens + any stray grays: force copy to pure white in main column */
+  html.dashboard-layout main .dashboard-main-typography .text-foreground,
+  html.dashboard-layout main .dashboard-main-typography .text-card-foreground,
+  html.dashboard-layout main .dashboard-main-typography .text-accent-foreground,
+  html.dashboard-layout main .dashboard-main-typography .text-secondary-foreground,
+  html.dashboard-layout main .dashboard-main-typography .text-primary-foreground,
+  html.dashboard-layout main .dashboard-main-typography .text-popover-foreground {
+    color: #ffffff !important;
+  }
+
+  html.dashboard-layout main .dashboard-main-typography .text-primary {
+    color: #ffffff !important;
+  }
+
+  html.dashboard-layout [data-slot="card-title"] {
+    font-size: 1.5rem !important;
+  }
+
+  html.dashboard-layout [data-slot="card-description"] {
+    font-size: 1.0625rem !important;
+    color: #ffffff !important;
+  }
+
+  /* Sidebar: match main scale */
+  html.dashboard-layout aside.dashboard-ui-surface {
+    font-size: 1.0625rem;
+    color: #ffffff;
+  }
+
+  html.dashboard-layout aside.dashboard-ui-surface .text-sm {
+    font-size: 1.0625rem !important;
+  }
+
+  html.dashboard-layout aside.dashboard-ui-surface .text-xs {
+    font-size: 0.9375rem !important;
+  }
+
+  html.dashboard-layout aside.dashboard-ui-surface .text-base {
+    font-size: 1.125rem !important;
+  }
+
+  /* User menu + Radix menus — same glass outline as LanguageSwitcher */
+  html.dashboard-layout [data-slot="dropdown-menu-content"],
+  html.dashboard-layout [data-slot="dropdown-menu-sub-content"] {
+    background-color: rgb(255 255 255 / 0.1) !important;
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid rgb(255 255 255 / 0.2) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  html.dashboard-layout [data-slot="dropdown-menu-label"] {
+    color: #ffffff;
+  }
+
+  html.dashboard-layout [data-slot="dropdown-menu-label"] .text-muted-foreground {
+    color: #ffffff !important;
+  }
+
+  html.dashboard-layout [data-slot="dropdown-menu-separator"] {
+    background-color: rgb(255 255 255 / 0.15) !important;
+  }
+
+  html.dashboard-layout [data-slot="dropdown-menu-item"][data-highlighted]:not([data-variant="destructive"]),
+  html.dashboard-layout [data-slot="dropdown-menu-checkbox-item"][data-highlighted],
+  html.dashboard-layout [data-slot="dropdown-menu-radio-item"][data-highlighted] {
+    background-color: rgb(255 255 255 / 0.1) !important;
+    color: rgb(255 255 255 / 1) !important;
+  }
+
+  html.dashboard-layout [data-slot="dropdown-menu-item"][data-variant="destructive"][data-highlighted] {
+    background-color: rgb(239 68 68 / 0.15) !important;
+    color: rgb(252 165 165) !important;
+  }
+
+  html.dashboard-layout [data-slot="dropdown-menu-item"] [class*="text-muted"],
+  html.dashboard-layout [data-slot="dropdown-menu-item"] svg:not([class*="text-"]) {
+    color: rgb(255 255 255 / 0.55);
+  }
+
+  html.dashboard-layout [data-slot="dropdown-menu-item"][data-highlighted] svg:not([class*="text-"]) {
+    color: rgb(255 255 255 / 0.75);
+  }
+
+  @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    .dashboard-ui-surface,
+    .dashboard-glass-panel {
+      background: color-mix(in srgb, rgb(236 254 255) 30%, var(--card) 88%);
+    }
+
+    .dark .dashboard-ui-surface,
+    .dark .dashboard-glass-panel {
+      background: color-mix(in srgb, rgb(8 51 68) 35%, var(--card) 90%);
+    }
+
+    html.dashboard-layout .dashboard-ui-surface,
+    html.dashboard-layout .dashboard-glass-panel {
+      background: rgb(15 23 42 / 0.82);
+      border-color: rgb(255 255 255 / 0.18);
+    }
+  }
+
+  /* Floating glass cards — use with Card or sections */
+  .dashboard-float-surface {
+    transform: translateZ(0);
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+
+  .dashboard-float-surface:hover {
+    transform: translateY(-3px) translateZ(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dashboard-float-surface,
+    .dashboard-float-surface:hover {
+      transform: none;
+      transition: none;
+    }
+
+    [data-slot="card"]:hover {
+      transform: none;
+    }
   }
 
   /* Subtle Hover Effects */
@@ -326,29 +798,6 @@
 
   .hover-glow:hover {
     box-shadow: 0 0 8px rgba(37, 99, 235, 0.15);
-  }
-
-  /* Custom scrollbar styles */
-  .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: var(--muted-foreground) transparent;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: var(--muted-foreground);
-    border-radius: 3px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: var(--foreground);
   }
 
   /* Premium Gradients */
@@ -539,10 +988,578 @@
 /* Dashboard typography — thin/light weights */
 .dashboard-heading {
   font-weight: 300;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 .dashboard-label {
   font-weight: 300;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+}
+
+/* Scoped page titles inside dashboard */
+body.dashboard-layout h1,
+body.dashboard-layout h2 {
+  font-weight: 300;
+  letter-spacing: -0.025em;
+}
+
+/*
+ * Dashboard main column — unlayered so this beats Tailwind @layer utilities
+ * (fixes CardTitle / CardDescription / ghost buttons still resolving to gray).
+ */
+html.dashboard-layout main .dashboard-main-typography [data-slot="card-title"],
+html.dashboard-layout main .dashboard-main-typography [data-slot="card-description"],
+html.dashboard-layout main .dashboard-main-typography [data-slot="card-header"],
+html.dashboard-layout main .dashboard-main-typography [data-slot="card-footer"] {
+  color: #ffffff !important;
+}
+
+html.dashboard-layout main .dashboard-main-typography [data-slot="card-content"] {
+  color: #ffffff !important;
+}
+
+html.dashboard-layout main .dashboard-main-typography [data-slot="button"] {
+  color: #ffffff !important;
+}
+
+/*
+ * Dashboard main — form fields, labels, tables, skeletons (video / glass theme).
+ * Applies to all pages under DashboardLayout + dashboard-main-typography.
+ */
+html.dashboard-layout main .dashboard-main-typography [data-slot="label"] {
+  color: rgb(255 255 255 / 0.92) !important;
+  font-weight: 300;
+}
+
+html.dashboard-layout main .dashboard-main-typography textarea[data-slot="textarea"],
+html.dashboard-layout main .dashboard-main-typography input[data-slot="input"]:not(.dashboard-hero-search) {
+  background: rgb(255 255 255 / 0.05) !important;
+  border: 1px solid rgb(255 255 255 / 0.18) !important;
+  border-width: 1px !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(12px) saturate(130%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
+}
+
+html.dashboard-layout main .dashboard-main-typography textarea[data-slot="textarea"]::placeholder,
+html.dashboard-layout main .dashboard-main-typography input[data-slot="input"]:not(.dashboard-hero-search)::placeholder {
+  color: rgb(255 255 255 / 0.55) !important;
+}
+
+html.dashboard-layout main .dashboard-main-typography textarea[data-slot="textarea"]:focus,
+html.dashboard-layout main .dashboard-main-typography input[data-slot="input"]:not(.dashboard-hero-search):focus {
+  border-color: rgb(255 255 255 / 0.32) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.12) !important;
+}
+
+html.dashboard-layout main .dashboard-main-typography [data-slot="select-trigger"] {
+  background: rgb(255 255 255 / 0.05) !important;
+  border: 1px solid rgb(255 255 255 / 0.18) !important;
+  border-width: 1px !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(12px) saturate(130%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
+}
+
+html.dashboard-layout main .dashboard-main-typography [data-slot="select-trigger"][data-state="open"],
+html.dashboard-layout main .dashboard-main-typography [data-slot="select-trigger"]:focus-visible {
+  border-color: rgb(255 255 255 / 0.32) !important;
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.12) !important;
+}
+
+html.dashboard-layout main .dashboard-main-typography [data-slot="select-trigger"] svg {
+  color: rgb(255 255 255 / 0.65);
+}
+
+html.dashboard-layout main .dashboard-main-typography [data-slot="select-trigger"][data-placeholder] > span {
+  color: rgb(255 255 255 / 0.55) !important;
+}
+
+/* Portaled — still under html.dashboard-layout */
+html.dashboard-layout [data-slot="select-content"] {
+  background-color: rgb(255 255 255 / 0.1) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgb(255 255 255 / 0.22) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html.dashboard-layout [data-slot="select-label"] {
+  color: rgb(255 255 255 / 0.55) !important;
+}
+
+html.dashboard-layout [data-slot="select-item"] {
+  color: rgb(255 255 255 / 0.92) !important;
+}
+
+html.dashboard-layout [data-slot="select-item"][data-highlighted] {
+  background-color: rgb(255 255 255 / 0.12) !important;
+  color: #ffffff !important;
+}
+
+html.dashboard-layout [data-slot="select-item"] svg {
+  color: rgb(255 255 255 / 0.55);
+}
+
+html.dashboard-layout [data-slot="select-separator"] {
+  background-color: rgb(255 255 255 / 0.12) !important;
+}
+
+html.dashboard-layout main .dashboard-main-typography [data-slot="table"] {
+  color: #ffffff;
+}
+
+html.dashboard-layout main .dashboard-main-typography [data-slot="table-head"],
+html.dashboard-layout main .dashboard-main-typography [data-slot="table-cell"],
+html.dashboard-layout main .dashboard-main-typography [data-slot="table-caption"] {
+  color: #ffffff !important;
+}
+
+html.dashboard-layout main .dashboard-main-typography [data-slot="table-footer"] {
+  background: rgb(255 255 255 / 0.06) !important;
+  color: #ffffff !important;
+  border-color: rgb(255 255 255 / 0.12) !important;
+}
+
+html.dashboard-layout main .dashboard-main-typography [data-slot="skeleton"] {
+  border-color: rgb(255 255 255 / 0.12) !important;
+  box-shadow: none !important;
+  background: linear-gradient(
+    to right,
+    rgb(255 255 255 / 0.09),
+    rgb(255 255 255 / 0.04),
+    rgb(255 255 255 / 0.09)
+  ) !important;
+}
+
+html.dashboard-layout main .dashboard-main-typography [data-slot="checkbox"]:not(.bg-primary) {
+  border-color: rgb(255 255 255 / 0.38) !important;
+  background-color: rgb(255 255 255 / 0.06) !important;
+  --tw-ring-offset-color: transparent;
+}
+
+html.dashboard-layout main .dashboard-main-typography [data-slot="checkbox"].bg-primary {
+  border-color: rgb(255 255 255 / 0.25) !important;
+}
+
+/* Lucide defaults — slightly lighter strokes to match PastelIcon (nested SVGs keep their own strokeWidth) */
+html.dashboard-layout svg.lucide:not(:root) {
+  stroke-width: 1.75;
+}
+
+/* Modals while dashboard is active (portaled) */
+html.dashboard-layout [data-slot="dialog-content"] {
+  background: rgb(255 255 255 / 0.08) !important;
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgb(255 255 255 / 0.22) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html.dashboard-layout [data-slot="dialog-header"],
+html.dashboard-layout [data-slot="dialog-footer"] {
+  color: #ffffff !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dashboard light — frosted glass on cool ambient canvas (toggle in header)   */
+/* -------------------------------------------------------------------------- */
+
+html.dashboard-layout.dashboard-light {
+  --background: rgb(248 250 252);
+  --foreground: #0f172a;
+  --card: rgb(255 255 255 / 0.78);
+  --card-foreground: #0f172a;
+  --popover: rgb(255 255 255 / 0.92);
+  --popover-foreground: #0f172a;
+  --muted: rgb(241 245 249 / 0.85);
+  --muted-foreground: #64748b;
+  --border: rgb(255 255 255 / 0.65);
+  --input: rgb(226 232 240 / 0.9);
+  --ring: rgb(14 165 233 / 0.45);
+  --primary: #0ea5e9;
+  --primary-foreground: #ffffff;
+  --secondary: rgb(241 245 249 / 0.9);
+  --secondary-foreground: #0f172a;
+  --accent: rgb(240 249 255 / 0.9);
+  --accent-foreground: #0f172a;
+  --dashboard-glass-surface: rgb(255 255 255 / 0.72);
+  --dashboard-glass-border: rgb(255 255 255 / 0.55);
+  --dashboard-shadow-float: 0 8px 32px rgb(15 23 42 / 0.06), 0 0 0 1px rgb(255 255 255 / 0.45) inset;
+  --dashboard-shadow-float-hover: 0 12px 40px rgb(15 23 42 / 0.09), 0 0 0 1px rgb(255 255 255 / 0.55) inset;
+  --sidebar: rgb(255 255 255 / 0.52);
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #0ea5e9;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgb(241 245 249 / 0.85);
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: rgb(255 255 255 / 0.5);
+  --sidebar-ring: #0ea5e9;
+}
+
+html.dashboard-layout.dashboard-light,
+html.dashboard-layout.dashboard-light body {
+  background-color: #f1f5f9 !important;
+  background-image:
+    radial-gradient(ellipse 120% 90% at 0% -25%, rgb(224 242 254 / 0.85), transparent 55%),
+    radial-gradient(ellipse 90% 70% at 100% 0%, rgb(237 233 254 / 0.5), transparent 50%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgb(207 250 254 / 0.35), transparent 45%),
+    linear-gradient(168deg, #f8fafc 0%, #f1f5f9 42%, #eef2ff 100%) !important;
+  background-attachment: fixed !important;
+  color: var(--foreground);
+}
+
+/* Content cards & floating panels — brighter frost for readability */
+html.dashboard-layout.dashboard-light main .dashboard-ui-surface,
+html.dashboard-layout.dashboard-light main .dashboard-glass-panel {
+  background: rgb(255 255 255 / 0.78) !important;
+  border: 1px solid rgb(255 255 255 / 0.82) !important;
+  backdrop-filter: blur(18px) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.35) !important;
+  box-shadow:
+    0 10px 40px rgb(15 23 42 / 0.07),
+    0 0 0 1px rgb(255 255 255 / 0.55) inset !important;
+}
+
+/* Sidebar rail & top bar — airier glass */
+html.dashboard-layout.dashboard-light aside.dashboard-ui-surface,
+html.dashboard-layout.dashboard-light header.dashboard-ui-surface {
+  background: rgb(255 255 255 / 0.52) !important;
+  border-color: rgb(255 255 255 / 0.58) !important;
+  backdrop-filter: blur(22px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.4) !important;
+  box-shadow:
+    0 4px 28px rgb(15 23 42 / 0.05),
+    0 0 0 1px rgb(255 255 255 / 0.42) inset !important;
+}
+
+/* User mini-card inside sidebar */
+html.dashboard-layout.dashboard-light aside.dashboard-ui-surface .dashboard-ui-surface {
+  background: rgb(255 255 255 / 0.42) !important;
+  border: 1px solid rgb(255 255 255 / 0.65) !important;
+  backdrop-filter: blur(14px) saturate(1.25) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.25) !important;
+  box-shadow: 0 4px 16px rgb(15 23 42 / 0.04), 0 0 0 1px rgb(255 255 255 / 0.4) inset !important;
+}
+
+@media (hover: hover) {
+  html.dashboard-layout.dashboard-light main .dashboard-ui-surface:hover,
+  html.dashboard-layout.dashboard-light main .dashboard-glass-panel:hover {
+    border-color: rgb(255 255 255 / 0.95) !important;
+    background: rgb(255 255 255 / 0.88) !important;
+    box-shadow:
+      0 14px 48px rgb(15 23 42 / 0.09),
+      0 0 0 1px rgb(255 255 255 / 0.65) inset !important;
+  }
+
+  html.dashboard-layout.dashboard-light aside.dashboard-ui-surface:hover,
+  html.dashboard-layout.dashboard-light header.dashboard-ui-surface:hover {
+    border-color: rgb(255 255 255 / 0.72) !important;
+    background: rgb(255 255 255 / 0.58) !important;
+    box-shadow:
+      0 6px 32px rgb(15 23 42 / 0.06),
+      0 0 0 1px rgb(255 255 255 / 0.48) inset !important;
+  }
+}
+
+html.dashboard-layout.dashboard-light .dashboard-hero-search {
+  background: rgb(255 255 255 / 0.48) !important;
+  border: 1px solid rgb(255 255 255 / 0.72) !important;
+  color: #0f172a !important;
+  backdrop-filter: blur(14px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.3) !important;
+  box-shadow: 0 2px 12px rgb(15 23 42 / 0.04), 0 0 0 1px rgb(255 255 255 / 0.35) inset !important;
+}
+
+html.dashboard-layout.dashboard-light .dashboard-hero-search::placeholder {
+  color: rgb(15 23 42 / 0.45) !important;
+}
+
+html.dashboard-layout.dashboard-light .dashboard-hero-search:focus {
+  border-color: rgb(14 165 233 / 0.45) !important;
+  color: #0f172a !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography {
+  color: #0f172a !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography .text-muted-foreground {
+  color: #64748b !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography .text-foreground,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography .text-card-foreground,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography .text-accent-foreground,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography .text-secondary-foreground,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography .text-primary-foreground,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography .text-popover-foreground {
+  color: #0f172a !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography .text-primary {
+  color: #0284c7 !important;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="card-title"],
+html.dashboard-layout.dashboard-light [data-slot="card-description"] {
+  color: #0f172a !important;
+}
+
+html.dashboard-layout.dashboard-light aside.dashboard-ui-surface {
+  color: #0f172a;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="dropdown-menu-content"],
+html.dashboard-layout.dashboard-light [data-slot="dropdown-menu-sub-content"] {
+  background: rgb(255 255 255 / 0.88) !important;
+  border: 1px solid rgb(255 255 255 / 0.92) !important;
+  color: #0f172a !important;
+  backdrop-filter: blur(20px) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.35) !important;
+  box-shadow:
+    0 16px 48px rgb(15 23 42 / 0.11),
+    0 0 0 1px rgb(255 255 255 / 0.55) inset !important;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="dropdown-menu-label"] {
+  color: #0f172a;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="dropdown-menu-label"] .text-muted-foreground {
+  color: #64748b !important;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="dropdown-menu-separator"] {
+  background-color: #e4e4e7 !important;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="dropdown-menu-item"][data-highlighted]:not([data-variant="destructive"]),
+html.dashboard-layout.dashboard-light [data-slot="dropdown-menu-checkbox-item"][data-highlighted],
+html.dashboard-layout.dashboard-light [data-slot="dropdown-menu-radio-item"][data-highlighted] {
+  background-color: rgb(14 165 233 / 0.1) !important;
+  color: #0f172a !important;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="dropdown-menu-item"] [class*="text-muted"],
+html.dashboard-layout.dashboard-light [data-slot="dropdown-menu-item"] svg:not([class*="text-"]) {
+  color: #64748b;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="dropdown-menu-item"][data-highlighted] svg:not([class*="text-"]) {
+  color: #475569;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card-title"],
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card-description"],
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card-header"],
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card-footer"],
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card-content"] {
+  color: #0f172a !important;
+}
+
+/*
+ * Light dashboard: undo immersive “all buttons white” so outline/ghost/secondary
+ * pick up theme + utilities; keep solid primary/destructive labels light on gradients.
+ */
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="button"] {
+  color: inherit !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="button"].gradient-primary,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="button"].gradient-error {
+  color: #ffffff !important;
+}
+
+/*
+ * Light outline-on-white actions: `color: inherit` can resolve poorly if an ancestor
+ * omits `color`; force readable slate (beats the inherit rule via higher specificity).
+ * Include `bg-white/95` etc. (no `.bg-white` token) — e.g. property card image overlays.
+ */
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="button"].border-slate-200.bg-white,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="button"].border-slate-200[class*="bg-white"] {
+  color: #0f172a !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="button"].border-slate-200.bg-white svg,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="button"].border-slate-200[class*="bg-white"] svg {
+  color: #334155 !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="label"] {
+  color: rgb(15 23 42 / 0.88) !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography textarea[data-slot="textarea"],
+html.dashboard-layout.dashboard-light main .dashboard-main-typography input[data-slot="input"]:not(.dashboard-hero-search) {
+  background: rgb(255 255 255 / 0.82) !important;
+  border: 1px solid rgb(255 255 255 / 0.75) !important;
+  color: #0f172a !important;
+  backdrop-filter: blur(10px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(1.2) !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography textarea[data-slot="textarea"]::placeholder,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography input[data-slot="input"]:not(.dashboard-hero-search)::placeholder {
+  color: rgb(15 23 42 / 0.45) !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography textarea[data-slot="textarea"]:focus,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography input[data-slot="input"]:not(.dashboard-hero-search):focus {
+  border-color: rgb(14 165 233 / 0.5) !important;
+  box-shadow: 0 0 0 2px rgb(14 165 233 / 0.2) !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="select-trigger"] {
+  background: rgb(255 255 255 / 0.82) !important;
+  border: 1px solid rgb(255 255 255 / 0.75) !important;
+  color: #0f172a !important;
+  backdrop-filter: blur(10px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(1.2) !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="select-trigger"][data-state="open"],
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="select-trigger"]:focus-visible {
+  border-color: rgb(14 165 233 / 0.5) !important;
+  box-shadow: 0 0 0 2px rgb(14 165 233 / 0.2) !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="select-trigger"] svg {
+  color: #64748b;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="select-trigger"][data-placeholder] > span {
+  color: rgb(15 23 42 / 0.45) !important;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="select-content"] {
+  background: rgb(255 255 255 / 0.88) !important;
+  border: 1px solid rgb(255 255 255 / 0.92) !important;
+  color: #0f172a !important;
+  backdrop-filter: blur(20px) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.35) !important;
+  box-shadow:
+    0 16px 48px rgb(15 23 42 / 0.11),
+    0 0 0 1px rgb(255 255 255 / 0.55) inset !important;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="select-label"] {
+  color: #64748b !important;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="select-item"] {
+  color: #0f172a !important;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="select-item"][data-highlighted] {
+  background-color: rgb(14 165 233 / 0.1) !important;
+  color: #0f172a !important;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="select-item"] svg {
+  color: #64748b;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="select-separator"] {
+  background-color: #e4e4e7 !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="table"] {
+  color: #0f172a;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="table-head"],
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="table-cell"],
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="table-caption"] {
+  color: #0f172a !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="table-footer"] {
+  background: #f4f4f5 !important;
+  color: #0f172a !important;
+  border-color: #e4e4e7 !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="skeleton"] {
+  border-color: #e4e4e7 !important;
+  background: linear-gradient(
+    to right,
+    rgb(244 244 245),
+    rgb(228 228 231),
+    rgb(244 244 245)
+  ) !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="checkbox"]:not(.bg-primary) {
+  border-color: #cbd5e1 !important;
+  background-color: #ffffff !important;
+}
+
+html.dashboard-layout.dashboard-light .dashboard-scroll-area-thumb {
+  background-color: rgb(148 163 184 / 0.45) !important;
+}
+
+html.dashboard-layout.dashboard-light .dashboard-scroll-area-thumb:hover {
+  background-color: rgb(100 116 139 / 0.5) !important;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="dialog-content"] {
+  background: rgb(255 255 255 / 0.9) !important;
+  border: 1px solid rgb(255 255 255 / 0.88) !important;
+  color: #0f172a !important;
+  backdrop-filter: blur(26px) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(1.35) !important;
+  box-shadow:
+    0 28px 72px rgb(15 23 42 / 0.14),
+    0 0 0 1px rgb(255 255 255 / 0.6) inset !important;
+}
+
+html.dashboard-layout.dashboard-light [data-slot="dialog-header"],
+html.dashboard-layout.dashboard-light [data-slot="dialog-footer"] {
+  color: #0f172a !important;
+}
+
+html.dashboard-layout.dashboard-light .scrollbar-thin {
+  scrollbar-color: rgb(148 163 184 / 0.5) transparent;
+}
+
+html.dashboard-layout.dashboard-light .scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgb(148 163 184 / 0.45);
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  html.dashboard-layout.dashboard-light main .dashboard-ui-surface,
+  html.dashboard-layout.dashboard-light main .dashboard-glass-panel {
+    background: #fafbfc !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  html.dashboard-layout.dashboard-light aside.dashboard-ui-surface,
+  html.dashboard-layout.dashboard-light header.dashboard-ui-surface {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  html.dashboard-layout.dashboard-light aside.dashboard-ui-surface .dashboard-ui-surface {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  html.dashboard-layout.dashboard-light .dashboard-hero-search {
+    background: #f1f5f9 !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  html.dashboard-layout.dashboard-light [data-slot="dropdown-menu-content"],
+  html.dashboard-layout.dashboard-light [data-slot="dropdown-menu-sub-content"],
+  html.dashboard-layout.dashboard-light [data-slot="select-content"],
+  html.dashboard-layout.dashboard-light [data-slot="dialog-content"] {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+  }
 }

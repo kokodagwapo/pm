@@ -4,29 +4,32 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { MongoClient } from "mongodb";
-import connectDB from "./mongodb";
+import connectDB, { getMongoUri } from "./mongodb";
 import User, { UserDocument } from "@/models/User";
 import { UserRole } from "@/types";
 import type { Provider } from "next-auth/providers";
 
-// MongoDB client for NextAuth adapter
-// Use lazy connection to avoid timeout during build
-// Guard: skip adapter when MONGODB_URI is missing (e.g. build time, misconfigured env)
-// Strip key=value prefix if secret was stored as "MONGODB_URI=mongodb://..."
-const _rawUri = process.env.MONGODB_URI ?? "";
-const uri =
-  _rawUri.includes("=") && !_rawUri.startsWith("mongodb")
-    ? _rawUri.substring(_rawUri.indexOf("=") + 1).trim()
-    : _rawUri || undefined;
+const hasOAuthProviders = Boolean(
+  (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) ||
+    (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET)
+);
+
+// MongoDB adapter is only required for OAuth account persistence.
+// For local credentials + JWT sessions, eager adapter startup can break `/auth/signin`
+// when Mongo isn't ready yet, so we avoid creating it unless OAuth is enabled.
+const mongoUriForAdapter =
+  hasOAuthProviders && process.env.NEXT_PHASE !== "phase-production-build"
+    ? getMongoUri()
+    : "";
 const options = {
   serverSelectionTimeoutMS: 30000,
   connectTimeoutMS: 30000,
 };
 
-const clientPromise: Promise<MongoClient> | null = uri
+const clientPromise: Promise<MongoClient> | null = mongoUriForAdapter
   ? (() => {
       if (!global._mongoClientPromise) {
-        const client = new MongoClient(uri, options);
+        const client = new MongoClient(mongoUriForAdapter, options);
         global._mongoClientPromise = client.connect();
       }
       return global._mongoClientPromise;
@@ -148,8 +151,14 @@ providers.push(
 
 export const authOptions: NextAuthConfig = {
   // @ts-expect-error - Type mismatch between @auth/mongodb-adapter and next-auth adapter types
-  adapter: clientPromise ? MongoDBAdapter(clientPromise) : undefined,
+  adapter: hasOAuthProviders && clientPromise ? MongoDBAdapter(clientPromise) : undefined,
   providers,
+  secret:
+    process.env.AUTH_SECRET ||
+    process.env.NEXTAUTH_SECRET ||
+    (process.env.NODE_ENV !== "production"
+      ? "smartstartpm-local-dev-secret-32chars!!"
+      : undefined),
 
   // Trust host for development and production
   trustHost: true,

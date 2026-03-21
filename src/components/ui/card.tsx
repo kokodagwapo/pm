@@ -7,7 +7,10 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        "bg-white/10 dark:bg-black/20 backdrop-blur-xl text-card-foreground flex flex-col gap-6 rounded-2xl border border-white/20 dark:border-white/10 py-6 shadow-lg hover-lift transition-all duration-200 hover:shadow-xl hover:bg-white/15 dark:hover:bg-black/25 hover:border-white/30 dark:hover:border-white/20",
+        "group relative flex flex-col gap-6 rounded-xl py-6",
+        "dashboard-ui-surface text-card-foreground",
+        "transition-[box-shadow,border-color,background-color] duration-200 ease-out",
+        "[transform:translateZ(0)]",
         className
       )}
       {...props}
@@ -32,7 +35,10 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-title"
-      className={cn("leading-none font-semibold", className)}
+      className={cn(
+        "text-lg font-light leading-tight tracking-tight text-inherit",
+        className
+      )}
       {...props}
     />
   );
@@ -42,7 +48,10 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
-      className={cn("text-muted-foreground text-sm", className)}
+      className={cn(
+        "text-sm font-light tracking-wide text-inherit",
+        className
+      )}
       {...props}
     />
   );
@@ -65,7 +74,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-content"
-      className={cn("px-6", className)}
+      className={cn("px-6 font-light", className)}
       {...props}
     />
   );
@@ -75,7 +84,10 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-footer"
-      className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
+      className={cn(
+        "flex items-center px-6 font-light [.border-t]:pt-6",
+        className
+      )}
       {...props}
     />
   );

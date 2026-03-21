@@ -59,6 +59,7 @@ import {
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
 
 // Type definitions
 type AnnouncementReactionType = "like" | "love" | "helpful" | "important";
@@ -126,6 +127,8 @@ async function requestJson<T>(
 export default function MessagesPage() {
   const { data: session } = useSession();
   const { t } = useLocalizationContext();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
   const [showAnnouncementDialog, setShowAnnouncementDialog] = useState(false);
   const [showNewConversationDialog, setShowNewConversationDialog] =
     useState(false);
@@ -858,7 +861,12 @@ export default function MessagesPage() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList>
+        <TabsList
+          className={cn(
+            isLight &&
+              "border border-slate-200/90 bg-slate-100/90 text-slate-600 shadow-sm"
+          )}
+        >
           <TabsTrigger value="messages">
             {t("messages.tabs.messages")}
           </TabsTrigger>

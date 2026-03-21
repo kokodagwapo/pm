@@ -4,6 +4,54 @@
  */
 
 /**
+ * Normalize a single image entry from API/DB (string URL or { url } from uploads).
+ */
+export function normalizeImageEntry(entry: unknown): string | null {
+  if (typeof entry === "string") {
+    const s = entry.trim();
+    return s.length > 0 ? s : null;
+  }
+  if (entry && typeof entry === "object" && "url" in entry) {
+    const u = (entry as { url: unknown }).url;
+    if (typeof u === "string" && u.trim().length > 0) {
+      return u.trim();
+    }
+  }
+  return null;
+}
+
+function collectImageStrings(raw: unknown, logLabel: string): string[] {
+  if (raw === undefined || raw === null) {
+    return [];
+  }
+  if (!Array.isArray(raw)) {
+    console.warn(
+      `${logLabel}: expected array, got`,
+      typeof raw,
+      raw
+    );
+    return [];
+  }
+
+  const out: string[] = [];
+  raw.forEach((item, index) => {
+    const url = normalizeImageEntry(item);
+    if (url) {
+      out.push(url);
+      return;
+    }
+    if (item !== undefined && item !== null && item !== "") {
+      console.warn(
+        `${logLabel}: Invalid image at index ${index}`,
+        typeof item,
+        item
+      );
+    }
+  });
+  return out;
+}
+
+/**
  * Safely get images array from property object
  * Handles undefined, null, and non-array cases
  */
@@ -17,39 +65,34 @@ export function getPropertyImages(property: any): string[] {
     return [];
   }
 
-  const images = property.images;
+  const fromProperty = collectImageStrings(
+    property.images,
+    "getPropertyImages(property.images)"
+  );
 
-  // Handle undefined or null images
-  if (images === undefined || images === null) {
+  if (fromProperty.length > 0) {
+    return fromProperty;
+  }
+
+  // Property form often stores photos only on embedded units; use those for list thumbnails
+  const units = property.units;
+  if (!Array.isArray(units) || units.length === 0) {
     return [];
   }
 
-  // Handle non-array cases
-  if (!Array.isArray(images)) {
-    console.warn(
-      "getPropertyImages: property.images is not an array",
-      typeof images,
-      images
+  const fromUnits: string[] = [];
+  for (const unit of units) {
+    if (!unit || typeof unit !== "object") continue;
+    const unitImages = collectImageStrings(
+      unit.images,
+      "getPropertyImages(unit.images)"
     );
-    return [];
+    for (const url of unitImages) {
+      fromUnits.push(url);
+    }
   }
 
-  // Filter out invalid image URLs and log any issues
-  return images.filter((img, index): img is string => {
-    if (typeof img !== "string") {
-      console.warn(
-        `getPropertyImages: Invalid image at index ${index}`,
-        typeof img,
-        img
-      );
-      return false;
-    }
-    if (img.trim().length === 0) {
-      console.warn(`getPropertyImages: Empty image URL at index ${index}`);
-      return false;
-    }
-    return true;
-  });
+  return fromUnits;
 }
 
 /**
@@ -77,14 +120,20 @@ export function getUnitImages(unit: any): string[] {
   }
 
   // First try unit-specific images
-  const unitImages = unit.unitImages;
-  if (Array.isArray(unitImages) && unitImages.length > 0) {
-    return unitImages.filter(
-      (img): img is string => typeof img === "string" && img.trim().length > 0
-    );
+  const fromUnitImages = collectImageStrings(
+    unit.unitImages,
+    "getUnitImages(unitImages)"
+  );
+  if (fromUnitImages.length > 0) {
+    return fromUnitImages;
   }
 
-  // Fall back to property images
+  const fromImages = collectImageStrings(unit.images, "getUnitImages(images)");
+  if (fromImages.length > 0) {
+    return fromImages;
+  }
+
+  // Fall back to property images (when unit object is a full property-shaped doc)
   return getPropertyImages(unit);
 }
 

@@ -5,6 +5,22 @@
 
   "dashboard.header.subtitle": "Here's your empire at a glance",
 
+  "dashboard.sections.keyMetrics.title": "Keys, Units & Rent Roll",
+  "dashboard.sections.keyMetrics.subtitle": "The pulse of every door you own — occupancy, rent & the fix-it queue",
+
+  "dashboard.sections.actionCenter.title": "Front Desk — Needs You",
+  "dashboard.sections.actionCenter.subtitle": "Late rent, hot work orders & leases knocking before they expire",
+
+  "dashboard.sections.financial.title": "Cash Flow Story",
+  "dashboard.sections.propertyMix.title": "What's on Your Lot",
+  "dashboard.sections.rentRadar.title": "Rent Radar",
+
+  "dashboard.ownerFallback.title": "Your landlord HQ",
+  "dashboard.ownerFallback.description": "Open properties, leases, or payments from the sidebar — the big overview grid is tuned for managers and admins.",
+  "dashboard.ownerFallback.linkProperties": "Properties",
+  "dashboard.ownerFallback.linkLeases": "Leases",
+  "dashboard.ownerFallback.linkPayments": "Payments",
+
   "dashboard.actions.refresh": "Refresh",
   "dashboard.actions.analytics": "View Analytics",
   "dashboard.actions.retry": "Try Again",

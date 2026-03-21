@@ -1,8 +1,14 @@
+"use client";
+
 import React from "react";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 import { formatCurrency as formatCurrencyValue } from "@/lib/formatters";
 import { Card, CardContent } from "@/components/ui/card";
+import { PastelIcon } from "@/components/ui/pastel-icon";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+
+export { dashboardPastelIconStyles, lightDashboardPastelIconStyles } from "@/components/ui/pastel-icon";
 
 export interface AnalyticsCardProps {
   title: string;
@@ -35,14 +41,6 @@ export interface MetricCardProps {
   iconColor?: "primary" | "success" | "warning" | "error" | "info";
   className?: string;
 }
-
-const iconColorClasses = {
-  primary:  { icon: "text-sky-600",     bg: "bg-sky-50     border-sky-100"     },
-  success:  { icon: "text-emerald-600", bg: "bg-emerald-50 border-emerald-100" },
-  warning:  { icon: "text-amber-600",   bg: "bg-amber-50   border-amber-100"   },
-  error:    { icon: "text-rose-600",    bg: "bg-rose-50    border-rose-100"    },
-  info:     { icon: "text-violet-600",  bg: "bg-violet-50  border-violet-100"  },
-};
 
 const financialVariantClasses = {
   success: {
@@ -78,49 +76,77 @@ export function AnalyticsCard({
   children,
 }: AnalyticsCardProps) {
   const TrendIcon = trend?.icon;
-  const colors = iconColorClasses[iconColor];
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
 
   return (
     <Card
       className={cn(
-        "relative overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-all duration-200 rounded-xl p-0",
+        "relative overflow-hidden rounded-xl p-0",
         className
       )}
     >
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-2.5">
-          <p className="text-[11px] font-medium text-muted-foreground leading-none pr-2">
+      <CardContent className="p-5">
+        <div className="mb-2.5 flex items-start justify-between">
+          <p
+            className={cn(
+              "pr-2 text-sm font-light leading-none tracking-wide",
+              isLight ? "text-slate-500" : "text-white"
+            )}
+          >
             {title}
           </p>
           {Icon && (
-            <div className={cn("p-1.5 rounded-lg border shrink-0", colors.bg)}>
-              <Icon className={cn("h-3.5 w-3.5", colors.icon)} />
-            </div>
+            <PastelIcon icon={Icon} tint={iconColor} size="md" />
           )}
         </div>
 
-        <div className="text-2xl font-semibold tracking-tight text-foreground leading-none mb-1.5">
+        <div
+          className={cn(
+            "mb-1.5 text-3xl font-light leading-none tracking-tight",
+            isLight ? "text-slate-900" : "text-white"
+          )}
+        >
           {value}
         </div>
 
         {description && (
-          <p className="text-[11px] text-muted-foreground leading-snug">{description}</p>
+          <p
+            className={cn(
+              "text-sm font-light leading-snug",
+              isLight ? "text-slate-600" : "text-white"
+            )}
+          >
+            {description}
+          </p>
         )}
 
         {trend && (
-          <div className="flex items-center gap-1 mt-2">
+          <div className="mt-2 flex items-center gap-1">
             {TrendIcon && (
               <TrendIcon
                 className={cn(
                   "h-3 w-3",
-                  trend.isPositive ? "text-emerald-500" : "text-rose-500"
+                  trend.isPositive
+                    ? isLight
+                      ? "text-emerald-600"
+                      : "text-emerald-200"
+                    : isLight
+                      ? "text-rose-600"
+                      : "text-rose-200"
                 )}
               />
             )}
             <span
               className={cn(
-                "text-xs font-semibold",
-                trend.isPositive ? "text-emerald-600" : "text-rose-600"
+                "text-sm font-light tracking-wide",
+                trend.isPositive
+                  ? isLight
+                    ? "text-emerald-600"
+                    : "text-emerald-200"
+                  : isLight
+                    ? "text-rose-600"
+                    : "text-rose-200"
               )}
             >
               {trend.value}
@@ -145,15 +171,14 @@ export function FinancialCard({
   return (
     <div
       className={cn(
-        "flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 rounded-xl border",
-        "bg-card border-border",
+        "dashboard-ui-surface flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 rounded-2xl p-4",
         className
       )}
     >
-      <span className={cn("font-medium text-sm", variantClasses.text)}>
+      <span className={cn("font-light text-sm tracking-wide", variantClasses.text)}>
         {label}
       </span>
-      <span className={cn("text-xl font-semibold tracking-tight", variantClasses.text)}>
+      <span className={cn("text-xl font-light tracking-tight", variantClasses.text)}>
         {formatCurrencyValue(amount)}
       </span>
     </div>
@@ -168,24 +193,37 @@ export function MetricCard({
   iconColor = "primary",
   className,
 }: MetricCardProps) {
-  const colors = iconColorClasses[iconColor];
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
 
   return (
-    <Card className={cn("rounded-xl bg-card border border-border shadow-sm", className)}>
-      <CardContent className="p-4">
-        <div className="flex items-center gap-3 mb-2.5">
+    <Card className={cn("rounded-xl", className)}>
+      <CardContent className="p-5">
+        <div className="mb-2.5 flex items-center gap-3">
           {Icon && (
-            <div className={cn("p-1.5 rounded-lg border", colors.bg)}>
-              <Icon className={cn("h-4 w-4", colors.icon)} />
-            </div>
+            <PastelIcon icon={Icon} tint={iconColor} size="md" />
           )}
-          <p className="text-[11px] font-medium text-muted-foreground">
+          <p
+            className={cn(
+              "text-sm font-light tracking-wide",
+              isLight ? "text-slate-500" : "text-white"
+            )}
+          >
             {title}
           </p>
         </div>
-        <div className="text-2xl font-semibold tracking-tight text-foreground">{value}</div>
+        <div
+          className={cn(
+            "text-3xl font-light tracking-tight",
+            isLight ? "text-slate-900" : "text-white"
+          )}
+        >
+          {value}
+        </div>
         {subtitle && (
-          <p className="text-[11px] text-muted-foreground/70 mt-1">{subtitle}</p>
+          <p className={cn("mt-1 text-sm", isLight ? "text-slate-600" : "text-white")}>
+            {subtitle}
+          </p>
         )}
       </CardContent>
     </Card>

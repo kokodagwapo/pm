@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
 
 // Column definition type
 export interface DataTableColumn<T> {
@@ -117,6 +118,9 @@ function DataTable<T>({
   getRowClassName,
   onRowClick,
 }: DataTableProps<T>) {
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
+
   // Helper to get visibility class
   const getVisibilityClass = (visibility?: string) => {
     switch (visibility) {
@@ -195,13 +199,25 @@ function DataTable<T>({
       >
         <div className="flex flex-col items-center justify-center text-center">
           {error?.icon}
-          <span className="text-red-600 mt-2">{error?.message}</span>
+          <span
+            className={cn(
+              "mt-2",
+              isLight ? "text-red-700" : "text-red-300"
+            )}
+          >
+            {error?.message}
+          </span>
           {error?.onRetry && (
             <Button
               variant="outline"
               size="sm"
               onClick={error.onRetry}
-              className="mt-4"
+              className={cn(
+                "mt-4",
+                isLight
+                  ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                  : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+              )}
             >
               {error.retryLabel || "Try Again"}
             </Button>
@@ -220,11 +236,21 @@ function DataTable<T>({
       >
         <div className="flex flex-col items-center justify-center text-center">
           {emptyState?.icon}
-          <span className="text-gray-600 dark:text-gray-400 mt-2 font-medium">
+          <span
+            className={cn(
+              "mt-2 font-medium",
+              isLight ? "text-slate-900" : "text-white"
+            )}
+          >
             {emptyState?.title}
           </span>
           {emptyState?.description && (
-            <span className="text-gray-500 dark:text-gray-500 text-sm mt-1">
+            <span
+              className={cn(
+                "mt-1 text-sm",
+                isLight ? "text-slate-600" : "text-white/75"
+              )}
+            >
               {emptyState.description}
             </span>
           )}
@@ -249,12 +275,22 @@ function DataTable<T>({
         <TableRow
           key={rowKey}
           className={cn(
-            "border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors",
-            striped &&
-              (index % 2 === 0
-                ? "bg-white dark:bg-gray-800"
-                : "bg-gray-50/20 dark:bg-gray-800/50"),
-            isSelected && "bg-blue-50/50 dark:bg-blue-900/20",
+            "border-b transition-colors",
+            isLight
+              ? cn(
+                  "border-slate-100 hover:bg-slate-50/90",
+                  striped &&
+                    (index % 2 === 0 ? "bg-white" : "bg-slate-50/50"),
+                  isSelected && "bg-sky-50"
+                )
+              : cn(
+                  "border-white/10 hover:bg-white/[0.07]",
+                  striped &&
+                    (index % 2 === 0
+                      ? "bg-white/[0.03]"
+                      : "bg-white/[0.06]"),
+                  isSelected && "bg-white/12"
+                ),
             onRowClick && "cursor-pointer",
             getRowClassName?.(row, index)
           )}
@@ -296,12 +332,36 @@ function DataTable<T>({
 
   return (
     <div className={cn("space-y-4", containerClassName)}>
-      <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+      <div
+        className={cn(
+          "overflow-hidden rounded-lg border backdrop-blur-sm [-webkit-backdrop-filter:blur(8px)]",
+          isLight
+            ? "border-slate-200/90 bg-white/70"
+            : "border-white/15 bg-white/[0.03]"
+        )}
+      >
         <Table className={tableClassName}>
-          <TableHeader className="bg-gray-50/50 dark:bg-gray-800/50">
-            <TableRow className="border-b border-gray-200 dark:border-gray-700">
+          <TableHeader
+            className={cn(
+              "border-b",
+              isLight
+                ? "border-slate-200 bg-slate-50/95"
+                : "border-white/12 bg-white/[0.06]"
+            )}
+          >
+            <TableRow
+              className={cn(
+                "border-b hover:bg-transparent",
+                isLight ? "border-slate-200" : "border-white/12"
+              )}
+            >
               {selection?.enabled && (
-                <TableHead className="font-medium text-gray-700 dark:text-gray-300 py-3 px-4 w-12">
+                <TableHead
+                  className={cn(
+                    "w-12 px-4 py-3 font-medium",
+                    isLight ? "text-slate-800" : "text-white/90"
+                  )}
+                >
                   <Checkbox
                     checked={isAllSelected}
                     onCheckedChange={selection.onSelectAll}
@@ -313,7 +373,8 @@ function DataTable<T>({
                 <TableHead
                   key={column.id}
                   className={cn(
-                    "font-medium text-gray-700 dark:text-gray-300 py-3 px-4",
+                    "px-4 py-3 font-medium",
+                    isLight ? "text-slate-800" : "text-white/90",
                     getVisibilityClass(column.visibility),
                     getAlignClass(column.align),
                     column.width,
@@ -340,7 +401,12 @@ function DataTable<T>({
       {/* Pagination */}
       {pagination && !loading && !error && data.length > 0 && (
         <div className="flex items-center justify-between px-2">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div
+            className={cn(
+              "text-sm",
+              isLight ? "text-slate-600" : "text-white/70"
+            )}
+          >
             {pagination.showingText}
           </div>
           <div className="flex items-center space-x-2">
@@ -351,11 +417,21 @@ function DataTable<T>({
                 pagination.onPageChange(pagination.currentPage - 1)
               }
               disabled={pagination.currentPage <= 1}
+              className={cn(
+                isLight
+                  ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                  : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+              )}
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
               {pagination.previousLabel || "Previous"}
             </Button>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
+            <span
+              className={cn(
+                "text-sm",
+                isLight ? "text-slate-600" : "text-white/75"
+              )}
+            >
               {pagination.currentPage} / {pagination.totalPages}
             </span>
             <Button
@@ -365,6 +441,11 @@ function DataTable<T>({
                 pagination.onPageChange(pagination.currentPage + 1)
               }
               disabled={pagination.currentPage >= pagination.totalPages}
+              className={cn(
+                isLight
+                  ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                  : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+              )}
             >
               {pagination.nextLabel || "Next"}
               <ChevronRight className="h-4 w-4 ml-1" />

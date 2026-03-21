@@ -62,11 +62,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { PropertyType, PropertyStatus, UserRole } from "@/types";
 import PropertyStats from "@/components/properties/PropertyStats";
+import { PastelIcon } from "@/components/ui/pastel-icon";
 import { GlobalPagination } from "@/components/ui/global-pagination";
 import { PropertyRowCard } from "@/components/properties/PropertyRowCard";
 import { useViewPreferencesStore } from "@/stores/view-preferences.store";
 import { getFeaturedImage, hasPropertyImages } from "@/lib/utils/image-utils";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { cn } from "@/lib/utils";
 // import { formatCurrency } from "@/lib/api-utils";
 
 interface PropertyCardProps {
@@ -87,19 +90,35 @@ function PropertyCard({
   deleteLoading,
 }: PropertyCardProps) {
   const { t, formatCurrency, formatDate } = useLocalizationContext();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
 
   const getStatusColor = (status?: PropertyStatus) => {
+    if (isLight) {
+      switch (status) {
+        case PropertyStatus.AVAILABLE:
+          return "border-emerald-200/90 bg-emerald-50/95 text-emerald-900";
+        case PropertyStatus.OCCUPIED:
+          return "border-sky-200/90 bg-sky-50/95 text-sky-900";
+        case PropertyStatus.MAINTENANCE:
+          return "border-amber-200/90 bg-amber-50/95 text-amber-950";
+        case PropertyStatus.UNAVAILABLE:
+          return "border-rose-200/90 bg-rose-50/95 text-rose-900";
+        default:
+          return "border-slate-200/90 bg-slate-100/95 text-slate-800";
+      }
+    }
     switch (status) {
       case PropertyStatus.AVAILABLE:
-        return "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 border-green-200 dark:border-green-700";
+        return "border-emerald-300/35 bg-emerald-400/15 text-white";
       case PropertyStatus.OCCUPIED:
-        return "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700";
+        return "border-sky-300/35 bg-sky-400/15 text-sky-100";
       case PropertyStatus.MAINTENANCE:
-        return "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-700";
+        return "border-amber-300/35 bg-amber-400/15 text-amber-100";
       case PropertyStatus.UNAVAILABLE:
-        return "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 border-red-200 dark:border-red-700";
+        return "border-rose-300/35 bg-rose-400/15 text-rose-100";
       default:
-        return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600";
+        return "border-white/20 bg-white/10 text-white";
     }
   };
 
@@ -167,19 +186,45 @@ function PropertyCard({
   const rentRange = getRentRange(property?.units, formatCurrency);
 
   return (
-    <Card className="group hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-800 p-0 gap-0 rounded-lg">
+    <Card
+      className={cn(
+        "group dashboard-ui-surface gap-0 overflow-hidden rounded-lg p-0 shadow-none transition-all duration-200",
+        isLight
+          ? "border border-slate-200/90 hover:border-slate-300/90"
+          : "border border-white/14 hover:border-white/25"
+      )}
+    >
       {/* Featured Image */}
-      <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-t-lg m-0 p-0">
+      <div
+        className={cn(
+          "relative m-0 h-48 overflow-hidden rounded-t-lg p-0",
+          isLight
+            ? "bg-gradient-to-br from-slate-100 to-slate-50/80"
+            : "bg-gradient-to-br from-white/[0.08] to-white/[0.02]"
+        )}
+      >
         {hasImage ? (
           <img
             src={featuredImage!}
             alt={propertyName}
-            className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300 m-0 p-0"
+            className="absolute inset-0 m-0 h-full w-full object-cover object-center p-0 transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
-            <Building2 className="h-16 w-16 text-gray-400 dark:text-gray-500" />
+          <div
+            className={cn(
+              "flex h-full w-full items-center justify-center",
+              isLight
+                ? "bg-gradient-to-br from-slate-100 to-slate-50/80"
+                : "bg-gradient-to-br from-white/[0.08] to-white/[0.02]"
+            )}
+          >
+            <Building2
+              className={cn(
+                "h-16 w-16",
+                isLight ? "text-slate-300" : "text-white/35"
+              )}
+            />
           </div>
         )}
 
@@ -196,28 +241,48 @@ function PropertyCard({
 
         {/* Type Badge */}
         <div className="absolute top-3 right-3">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600">
+          <span
+            className={cn(
+              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium backdrop-blur-sm",
+              isLight
+                ? "border-slate-200/90 bg-white/90 text-slate-800 shadow-sm"
+                : "border-white/25 bg-black/35 text-white"
+            )}
+          >
             {getTypeIcon(propertyType)}
             <span className="ml-1">{getTypeLabel(propertyType)}</span>
           </span>
         </div>
 
         {/* Overlay Actions */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center justify-center opacity-0 transition-colors duration-200 group-hover:opacity-100",
+            isLight ? "bg-black/0 group-hover:bg-black/10" : "bg-black/0 group-hover:bg-black/20"
+          )}
+        >
           <div className="flex space-x-2">
             <Button
               size="sm"
-              variant="secondary"
+              variant="outline"
               onClick={() => onView(property)}
-              className="bg-white/90 hover:bg-white text-gray-900"
+              className={cn(
+                isLight
+                  ? "border-slate-200 bg-white text-slate-900 shadow-md hover:bg-slate-50 [&_svg]:shrink-0 [&_svg]:text-slate-800"
+                  : "border border-white/25 bg-white/15 text-white hover:bg-white/25 [&_svg]:text-white"
+              )}
             >
               <Eye className="h-4 w-4" />
             </Button>
             <Button
               size="sm"
-              variant="secondary"
+              variant="outline"
               onClick={() => onEdit(property)}
-              className="bg-white/90 hover:bg-white text-gray-900"
+              className={cn(
+                isLight
+                  ? "border-slate-200 bg-white text-slate-900 shadow-md hover:bg-slate-50 [&_svg]:shrink-0 [&_svg]:text-slate-800"
+                  : "border border-white/25 bg-white/15 text-white hover:bg-white/25 [&_svg]:text-white"
+              )}
             >
               <Edit className="h-4 w-4" />
             </Button>
@@ -231,11 +296,16 @@ function PropertyCard({
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-1">
             <h3
-              className={`font-semibold text-lg line-clamp-1 ${
+              className={cn(
+                "line-clamp-1 text-lg font-semibold",
                 property.deletedAt
-                  ? "text-gray-400 dark:text-gray-500 line-through"
-                  : "text-gray-900 dark:text-gray-100"
-              }`}
+                  ? isLight
+                    ? "text-slate-400 line-through"
+                    : "text-white/45 line-through"
+                  : isLight
+                    ? "text-slate-900"
+                    : "text-white"
+              )}
             >
               {propertyName}
             </h3>
@@ -246,7 +316,12 @@ function PropertyCard({
             )}
           </div>
           {property?.description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
+            <p
+              className={cn(
+                "line-clamp-2 text-sm",
+                isLight ? "text-slate-600" : "text-white/85"
+              )}
+            >
               {property.description}
             </p>
           )}
@@ -260,15 +335,37 @@ function PropertyCard({
         </div>
 
         {/* Location */}
-        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
-          <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+        <div
+          className={cn(
+            "mb-3 flex items-center text-sm",
+            isLight ? "text-slate-600" : "text-white/80"
+          )}
+        >
+          <MapPin
+            className={cn(
+              "mr-1 h-4 w-4 shrink-0",
+              isLight ? "text-slate-400" : "text-white/60"
+            )}
+          />
           <span className="line-clamp-1">{displayAddress}</span>
         </div>
 
         {/* Unit Information - Consistent for all properties */}
-        <div className="mb-4 p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+        <div
+          className={cn(
+            "mb-4 rounded-lg border p-2.5",
+            isLight
+              ? "border-slate-200/90 bg-slate-50/90"
+              : "border-white/15 bg-white/[0.06]"
+          )}
+        >
+          <div className="mb-1.5 flex items-center gap-1.5">
+            <span
+              className={cn(
+                "whitespace-nowrap text-xs font-medium",
+                isLight ? "text-slate-800" : "text-white/90"
+              )}
+            >
               {property?.isMultiUnit && totalUnits > 1 ? (
                 <>
                   {totalUnits} {t("properties.labels.units")}
@@ -282,30 +379,63 @@ function PropertyCard({
               {property?.isMultiUnit ? (
                 <>
                   {unitStats.available > 0 && (
-                    <span className="inline-flex items-center px-1.5 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded font-medium whitespace-nowrap">
+                    <span
+                      className={cn(
+                        "inline-flex items-center whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-medium",
+                        isLight
+                          ? "bg-emerald-100 text-emerald-900"
+                          : "bg-emerald-400/15 text-white"
+                      )}
+                    >
                       {unitStats.available} {t("properties.units.available")}
                     </span>
                   )}
                   {unitStats.occupied > 0 && (
-                    <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded font-medium whitespace-nowrap">
+                    <span
+                      className={cn(
+                        "inline-flex items-center whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-medium",
+                        isLight
+                          ? "bg-sky-100 text-sky-900"
+                          : "bg-sky-400/15 text-sky-100"
+                      )}
+                    >
                       {unitStats.occupied} {t("properties.units.occupied")}
                     </span>
                   )}
                   {unitStats.maintenance > 0 && (
-                    <span className="inline-flex items-center px-1.5 py-0.5 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 rounded font-medium whitespace-nowrap">
+                    <span
+                      className={cn(
+                        "inline-flex items-center whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-medium",
+                        isLight
+                          ? "bg-amber-100 text-amber-950"
+                          : "bg-amber-400/15 text-amber-100"
+                      )}
+                    >
                       {unitStats.maintenance} {t("properties.units.maintenance")}
                     </span>
                   )}
                 </>
               ) : (
-                <span className="inline-flex items-center px-1.5 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded font-medium whitespace-nowrap">
+                <span
+                  className={cn(
+                    "inline-flex items-center whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-medium",
+                    isLight
+                      ? "bg-emerald-100 text-emerald-900"
+                      : "bg-emerald-400/15 text-white"
+                  )}
+                >
                   {getStatusLabel(propertyStatus)}
                 </span>
               )}
             </div>
           </div>
           {property?.isMultiUnit && unitStats.types.length > 0 ? (
-            <div className="text-[10px] text-gray-600 dark:text-gray-400">
+            <div
+              className={cn(
+                "text-[10px]",
+                isLight ? "text-slate-500" : "text-white/75"
+              )}
+            >
               {t("properties.labels.types")}:{" "}
               {unitStats.types
                 .map((type) =>
@@ -314,7 +444,12 @@ function PropertyCard({
                 .join(", ")}
             </div>
           ) : (
-            <div className="text-[10px] text-gray-600 dark:text-gray-400">
+            <div
+              className={cn(
+                "text-[10px]",
+                isLight ? "text-slate-500" : "text-white/75"
+              )}
+            >
               {t("properties.labels.types")}: {getTypeLabel(propertyType)}
             </div>
           )}
@@ -323,23 +458,43 @@ function PropertyCard({
         {/* Rent & Owner */}
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
-            <div className="flex items-center text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <div
+              className={cn(
+                "flex items-center text-lg font-semibold",
+                isLight ? "text-slate-900" : "text-white"
+              )}
+            >
               <span>
                 {rentRange || t("properties.labels.unknown")}
               </span>
-              <span className="text-sm font-normal text-gray-600 dark:text-gray-400 ml-1">
+              <span
+                className={cn(
+                  "ml-1 text-sm font-normal",
+                  isLight ? "text-slate-500" : "text-white/80"
+                )}
+              >
                 {t("properties.labels.perMonth")}
               </span>
             </div>
             {property?.isMultiUnit && unitStats.available > 0 ? (
-              <span className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
+              <span
+                className={cn(
+                  "mt-1 text-xs font-medium",
+                  isLight ? "text-emerald-700" : "text-emerald-200"
+                )}
+              >
                 {t("properties.units.availableCount", {
                   values: { count: unitStats.available },
                 })}
               </span>
             ) : (
               !property?.isMultiUnit && (
-                <span className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
+                <span
+                  className={cn(
+                    "mt-1 text-xs font-medium",
+                    isLight ? "text-emerald-700" : "text-emerald-200"
+                  )}
+                >
                   {t("properties.labels.singleUnit")}
                 </span>
               )
@@ -349,7 +504,16 @@ function PropertyCard({
           {/* Actions Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "h-8 w-8 p-0",
+                  isLight
+                    ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    : "text-white hover:bg-white/10 hover:text-white"
+                )}
+              >
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -474,6 +638,16 @@ export default function PropertiesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t, formatCurrency } = useLocalizationContext();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
+  const filterSelectTrigger = (widthClass: string) =>
+    cn(
+      "h-10",
+      widthClass,
+      isLight
+        ? "border-slate-200 bg-white text-slate-900 [&_svg]:text-slate-500"
+        : "border-white/20 bg-white/5 text-white [&_svg]:text-white/70"
+    );
   const [properties, setProperties] = useState<PropertyResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
@@ -736,40 +910,88 @@ export default function PropertiesPage() {
       header: t("properties.table.property"),
       cell: (property) => (
         <div className="flex items-center space-x-3">
-          <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex-shrink-0">
+          <div
+            className={cn(
+              "relative h-10 w-10 shrink-0 overflow-hidden rounded-lg",
+              isLight
+                ? "bg-gradient-to-br from-slate-100 to-slate-50"
+                : "bg-gradient-to-br from-white/[0.08] to-white/[0.02]"
+            )}
+          >
             {hasPropertyImages(property) ? (
               <img
                 src={getFeaturedImage(property)!}
                 alt={property.name}
-                className="absolute inset-0 w-full h-full object-cover object-center m-0 p-0"
+                className="absolute inset-0 m-0 h-full w-full object-cover object-center p-0"
                 loading="lazy"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
-                <Building2 className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+              <div
+                className={cn(
+                  "flex h-full w-full items-center justify-center",
+                  isLight
+                    ? "bg-gradient-to-br from-slate-100 to-slate-50"
+                    : "bg-gradient-to-br from-white/[0.08] to-white/[0.02]"
+                )}
+              >
+                <Building2
+                  className={cn(
+                    "h-5 w-5",
+                    isLight ? "text-slate-300" : "text-white/40"
+                  )}
+                />
               </div>
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="font-medium text-gray-900 dark:text-gray-100">
+            <div
+              className={cn(
+                "font-medium",
+                isLight ? "text-slate-900" : "text-white"
+              )}
+            >
               <Link
                 href={`/dashboard/properties/${property._id}`}
-                className={`hover:text-blue-600 dark:hover:text-blue-400 transition-colors ${
-                  property.deletedAt ? "line-through text-gray-400" : ""
-                }`}
+                className={cn(
+                  "transition-colors",
+                  isLight
+                    ? property.deletedAt
+                      ? "text-slate-400 line-through hover:text-slate-500"
+                      : "hover:text-sky-600"
+                    : property.deletedAt
+                      ? "text-white/45 line-through"
+                      : "hover:text-sky-200"
+                )}
               >
                 {property.name}
               </Link>
               {property.deletedAt && (
-                <span className="ml-2 px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
+                <span
+                  className={cn(
+                    "ml-2 rounded-full px-2 py-1 text-xs",
+                    isLight
+                      ? "bg-rose-100 text-rose-800"
+                      : "bg-rose-400/20 text-rose-100"
+                  )}
+                >
                   Deleted
                 </span>
               )}
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
+            <div
+              className={cn(
+                "truncate text-sm",
+                isLight ? "text-slate-600" : "text-white/75"
+              )}
+            >
               ID: {property._id.slice(-6)}
               {property.deletedAt && (
-                <span className="ml-2 text-red-500">
+                <span
+                  className={cn(
+                    "ml-2",
+                    isLight ? "text-rose-700" : "text-rose-200"
+                  )}
+                >
                   (Deleted: {new Date(property.deletedAt).toLocaleDateString()})
                 </span>
               )}
@@ -792,7 +1014,12 @@ export default function PropertiesPage() {
               ? t(`properties.status.${property.status.toLowerCase()}`)
               : t("properties.status.unknown")}
           </Badge>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span
+            className={cn(
+              "text-xs",
+              isLight ? "text-slate-600" : "text-white/75"
+            )}
+          >
             {property?.type
               ? t(`properties.type.${property.type.toLowerCase()}`)
               : t("properties.type.unknown")}
@@ -806,13 +1033,28 @@ export default function PropertiesPage() {
       visibility: "md",
       cell: (property) => (
         <div className="flex flex-col space-y-1">
-          <div className="flex items-center text-sm text-gray-900 dark:text-gray-100">
-            <MapPin className="h-3 w-3 mr-1 text-gray-400 dark:text-gray-500" />
+          <div
+            className={cn(
+              "flex items-center text-sm",
+              isLight ? "text-slate-800" : "text-white"
+            )}
+          >
+            <MapPin
+              className={cn(
+                "mr-1 h-3 w-3",
+                isLight ? "text-slate-400" : "text-white/55"
+              )}
+            />
             {[property?.address?.city, property?.address?.state]
               .filter(Boolean)
               .join(", ") || t("properties.labels.locationUnavailable")}
           </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
+          <div
+            className={cn(
+              "text-xs",
+              isLight ? "text-slate-600" : "text-white/75"
+            )}
+          >
             {property?.address?.street ?? ""}
           </div>
         </div>
@@ -824,7 +1066,12 @@ export default function PropertiesPage() {
       visibility: "lg",
       cell: (property) => (
         <div className="flex flex-col space-y-1">
-          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+          <div
+            className={cn(
+              "text-sm font-medium",
+              isLight ? "text-slate-900" : "text-white"
+            )}
+          >
             {property.isMultiUnit && (property.totalUnits ?? 0) > 1
               ? `${property.totalUnits ?? 0} Units`
               : "Unit"}
@@ -836,12 +1083,16 @@ export default function PropertiesPage() {
                 return (
                   <>
                     {unitStats.available > 0 && (
-                      <span className="text-green-600 dark:text-green-400">
+                      <span
+                        className={
+                          isLight ? "text-emerald-700" : "text-emerald-200"
+                        }
+                      >
                         {unitStats.available} available
                       </span>
                     )}
                     {unitStats.occupied > 0 && (
-                      <span className="text-blue-600 dark:text-blue-400">
+                      <span className={isLight ? "text-sky-700" : "text-sky-200"}>
                         {unitStats.occupied} occupied
                       </span>
                     )}
@@ -849,7 +1100,7 @@ export default function PropertiesPage() {
                 );
               })()
             ) : (
-              <span className="text-green-600 dark:text-green-400">
+              <span className={isLight ? "text-emerald-700" : "text-emerald-200"}>
                 {property?.status === PropertyStatus.AVAILABLE
                   ? "available"
                   : property?.status?.toLowerCase() || "unknown"}
@@ -865,11 +1116,21 @@ export default function PropertiesPage() {
       visibility: "md",
       cell: (property) => (
         <div className="flex flex-col space-y-1">
-          <div className="font-medium text-gray-900 dark:text-gray-100">
+          <div
+            className={cn(
+              "font-medium",
+              isLight ? "text-slate-900" : "text-white"
+            )}
+          >
             {getRentRange(property?.units, formatCurrency) ||
               t("properties.labels.unknown")}
           </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
+          <div
+            className={cn(
+              "text-xs",
+              isLight ? "text-slate-600" : "text-white/75"
+            )}
+          >
             {t("properties.labels.perMonth")}
           </div>
         </div>
@@ -881,11 +1142,21 @@ export default function PropertiesPage() {
       visibility: "xl",
       cell: (property) => (
         <div className="flex flex-col space-y-1">
-          <div className="text-sm text-gray-900 dark:text-gray-100">
+          <div
+            className={cn(
+              "text-sm",
+              isLight ? "text-slate-800" : "text-white"
+            )}
+          >
             {property.ownerId?.firstName ?? ""}{" "}
             {property.ownerId?.lastName ?? ""}
           </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
+          <div
+            className={cn(
+              "text-xs",
+              isLight ? "text-slate-600" : "text-white/75"
+            )}
+          >
             {t("properties.table.propertyOwner")}
           </div>
         </div>
@@ -900,9 +1171,14 @@ export default function PropertiesPage() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className={cn(
+                "h-8 w-8 p-0 transition-colors",
+                isLight
+                  ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  : "text-white hover:bg-white/10 hover:text-white"
+              )}
             >
-              <MoreHorizontal className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -1007,10 +1283,20 @@ export default function PropertiesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          <h1
+            className={cn(
+              "text-2xl font-bold tracking-tight sm:text-3xl",
+              isLight ? "text-slate-900" : "text-white"
+            )}
+          >
             {t("properties.header.title")}
           </h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
+          <p
+            className={cn(
+              "text-sm sm:text-base",
+              isLight ? "text-slate-600" : "text-white"
+            )}
+          >
             {t("properties.header.subtitle")}
           </p>
         </div>
@@ -1020,7 +1306,12 @@ export default function PropertiesPage() {
             size="sm"
             onClick={fetchProperties}
             disabled={loading}
-            className="flex-1 sm:flex-none"
+            className={cn(
+              "flex-1 sm:flex-none",
+              isLight
+                ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50 hover:text-slate-900 [&_svg]:text-slate-700"
+                : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+            )}
           >
             <RefreshCw
               className={`h-4 w-4 ${loading ? "animate-spin" : ""} sm:mr-2`}
@@ -1055,14 +1346,22 @@ export default function PropertiesPage() {
           {/* Main Header */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-2">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800">
-                <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
+              <PastelIcon icon={Building2} tint="primary" size="lg" />
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                <h2
+                  className={cn(
+                    "text-lg font-semibold",
+                    isLight ? "text-slate-900" : "text-white"
+                  )}
+                >
                   {t("properties.header.title")}
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p
+                  className={cn(
+                    "text-sm",
+                    isLight ? "text-slate-600" : "text-white/85"
+                  )}
+                >
                   {t("properties.header.subtitle")}
                 </p>
               </div>
@@ -1071,8 +1370,20 @@ export default function PropertiesPage() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               {/* Bulk Actions */}
               {selectedProperties.length > 0 && (
-                <div className="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800">
-                  <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                <div
+                  className={cn(
+                    "flex items-center gap-2 rounded-xl border px-3 py-2 backdrop-blur-md [-webkit-backdrop-filter:blur(10px)]",
+                    isLight
+                      ? "border-slate-200/90 bg-white/90"
+                      : "border-white/20 bg-white/[0.06]"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "text-sm font-medium",
+                      isLight ? "text-slate-900" : "text-white/90"
+                    )}
+                  >
                     {t("properties.bulk.selected", {
                       values: { count: selectedProperties.length },
                     })}
@@ -1092,7 +1403,12 @@ export default function PropertiesPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => setSelectedProperties([])}
-                    className="h-8"
+                    className={cn(
+                      "h-8",
+                      isLight
+                        ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                        : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+                    )}
                   >
                     {t("properties.filters.clear")}
                   </Button>
@@ -1100,12 +1416,23 @@ export default function PropertiesPage() {
               )}
 
               {/* View Mode Toggle */}
-              <div className="flex items-center border rounded-lg p-1 w-full sm:w-auto">
+              <div
+                className={cn(
+                  "flex w-full items-center rounded-lg border p-1 sm:w-auto",
+                  isLight ? "border-slate-200 bg-slate-50/80" : "border-white/20"
+                )}
+              >
                 <Button
                   variant={viewMode === "grid" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("grid")}
-                  className="h-8 flex-1 sm:flex-none sm:px-3"
+                  className={cn(
+                    "h-8 flex-1 sm:flex-none sm:px-3",
+                    viewMode !== "grid" &&
+                      (isLight
+                        ? "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                        : "text-white hover:bg-white/10 hover:text-white")
+                  )}
                 >
                   <Grid3X3 className="h-4 w-4" />
                   <span className="ml-1 sm:hidden">
@@ -1116,7 +1443,13 @@ export default function PropertiesPage() {
                   variant={viewMode === "rows" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("rows")}
-                  className="h-8 flex-1 sm:flex-none sm:px-3"
+                  className={cn(
+                    "h-8 flex-1 sm:flex-none sm:px-3",
+                    viewMode !== "rows" &&
+                      (isLight
+                        ? "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                        : "text-white hover:bg-white/10 hover:text-white")
+                  )}
                 >
                   <Rows3 className="h-4 w-4" />
                   <span className="ml-1 sm:hidden">
@@ -1127,7 +1460,13 @@ export default function PropertiesPage() {
                   variant={viewMode === "list" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("list")}
-                  className="h-8 flex-1 sm:flex-none sm:px-3"
+                  className={cn(
+                    "h-8 flex-1 sm:flex-none sm:px-3",
+                    viewMode !== "list" &&
+                      (isLight
+                        ? "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                        : "text-white hover:bg-white/10 hover:text-white")
+                  )}
                 >
                   <List className="h-4 w-4" />
                   <span className="ml-1 sm:hidden">
@@ -1139,7 +1478,14 @@ export default function PropertiesPage() {
           </div>
 
           {/* Integrated Filters Bar */}
-          <div className="flex flex-col lg:flex-row lg:items-center gap-4 p-4 bg-gray-50/50 dark:bg-gray-800/50 rounded-lg border border-gray-200/60 dark:border-gray-700/60">
+          <div
+            className={cn(
+              "flex flex-col gap-4 rounded-lg border p-4 lg:flex-row lg:items-center",
+              isLight
+                ? "border-slate-200/90 bg-slate-50/80"
+                : "border-white/15 bg-white/[0.05]"
+            )}
+          >
             {/* Search */}
             <div className="flex-1 min-w-0">
               <GlobalSearch
@@ -1165,7 +1511,7 @@ export default function PropertiesPage() {
                   )
                 }
               >
-                <SelectTrigger className="w-[140px] h-10 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <SelectTrigger className={filterSelectTrigger("w-[140px]")}>
                   <SelectValue placeholder={t("properties.filters.type.all")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -1193,7 +1539,7 @@ export default function PropertiesPage() {
                   )
                 }
               >
-                <SelectTrigger className="w-[140px] h-10 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <SelectTrigger className={filterSelectTrigger("w-[140px]")}>
                   <SelectValue
                     placeholder={t("properties.filters.status.all")}
                   />
@@ -1229,7 +1575,7 @@ export default function PropertiesPage() {
                   }));
                 }}
               >
-                <SelectTrigger className="w-[140px] h-10 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <SelectTrigger className={filterSelectTrigger("w-[140px]")}>
                   <SelectValue
                     placeholder={t("properties.filters.sort.placeholder")}
                   />
@@ -1266,7 +1612,7 @@ export default function PropertiesPage() {
                   )
                 }
               >
-                <SelectTrigger className="w-[140px] h-10 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <SelectTrigger className={filterSelectTrigger("w-[140px]")}>
                   <SelectValue
                     placeholder={t("properties.filters.unitType.placeholder")}
                   />
@@ -1306,9 +1652,14 @@ export default function PropertiesPage() {
                       sortOrder: "desc",
                     })
                   }
-                  className="h-10 px-3 text-gray-500 hover:text-gray-700"
+                  className={cn(
+                    "h-10 px-3",
+                    isLight
+                      ? "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                      : "text-white/80 hover:bg-white/10 hover:text-white"
+                  )}
                 >
-                  <X className="h-4 w-4 mr-1" />
+                  <X className="mr-1 h-4 w-4" />
                   {t("properties.filters.clear")}
                 </Button>
               )}
@@ -1391,26 +1742,59 @@ export default function PropertiesPage() {
             )
           ) : error ? (
             <div className="flex items-center justify-center py-16">
-              <AlertCircle className="h-8 w-8 text-red-500" />
-              <span className="ml-2 text-red-600">{error}</span>
+              <AlertCircle
+                className={cn(
+                  "h-8 w-8",
+                  isLight ? "text-red-600" : "text-rose-300"
+                )}
+              />
+              <span
+                className={cn("ml-2", isLight ? "text-slate-800" : "text-white")}
+              >
+                {error}
+              </span>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={fetchProperties}
-                className="ml-4"
+                className={cn(
+                  "ml-4",
+                  isLight
+                    ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                    : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+                )}
               >
                 Try Again
               </Button>
             </div>
           ) : properties.length === 0 ? (
             <div className="flex items-center justify-center py-16">
-              <Building2 className="h-8 w-8 text-gray-400" />
-              <span className="ml-2 text-gray-600">
+              <Building2
+                className={cn(
+                  "h-8 w-8",
+                  isLight ? "text-slate-400" : "text-white/50"
+                )}
+              />
+              <span
+                className={cn(
+                  "ml-2",
+                  isLight ? "text-slate-800" : "text-white"
+                )}
+              >
                 {t("properties.empty.title")}
               </span>
               <Link href="/dashboard/properties/new">
-                <Button variant="outline" size="sm" className="ml-4">
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "ml-4",
+                    isLight
+                      ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                      : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+                  )}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
                   {t("properties.empty.addFirst")}
                 </Button>
               </Link>
@@ -1473,7 +1857,12 @@ export default function PropertiesPage() {
                   return (
                     <Card
                       key={property._id}
-                      className="overflow-hidden border-border hover:shadow-md transition-shadow cursor-pointer"
+                      className={cn(
+                        "dashboard-ui-surface cursor-pointer overflow-hidden shadow-none transition-all",
+                        isLight
+                          ? "border border-slate-200/90 hover:border-slate-300/90"
+                          : "border border-white/14 hover:border-white/25"
+                      )}
                       onClick={() => router.push(`/dashboard/properties/${property._id}`)}
                     >
                       <CardContent className="p-0">
@@ -1488,10 +1877,20 @@ export default function PropertiesPage() {
                             </div>
                           )}
                           <div className="flex-1 py-3 pr-4">
-                            <h3 className="font-semibold text-foreground line-clamp-1">
+                            <h3
+                              className={cn(
+                                "line-clamp-1 font-semibold",
+                                isLight ? "text-slate-900" : "text-white"
+                              )}
+                            >
                               {property.name}
                             </h3>
-                            <p className="text-sm text-muted-foreground">
+                            <p
+                              className={cn(
+                                "text-sm",
+                                isLight ? "text-slate-600" : "text-white/85"
+                              )}
+                            >
                               {property.address?.street}, {property.address?.city}
                             </p>
                             <div className="flex gap-2 mt-2">
@@ -1513,6 +1912,11 @@ export default function PropertiesPage() {
                             <Button
                               size="sm"
                               variant="ghost"
+                              className={cn(
+                                isLight
+                                  ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                  : "text-white hover:bg-white/10 hover:text-white"
+                              )}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 router.push(`/dashboard/properties/${property._id}/calendar`);
@@ -1523,6 +1927,11 @@ export default function PropertiesPage() {
                             <Button
                               size="sm"
                               variant="ghost"
+                              className={cn(
+                                isLight
+                                  ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                  : "text-white hover:bg-white/10 hover:text-white"
+                              )}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 router.push(`/dashboard/properties/${property._id}/edit`);
@@ -1532,7 +1941,15 @@ export default function PropertiesPage() {
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                <Button size="sm" variant="ghost">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className={cn(
+                                    isLight
+                                      ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                      : "text-white hover:bg-white/10 hover:text-white"
+                                  )}
+                                >
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>

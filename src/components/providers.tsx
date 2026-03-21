@@ -13,7 +13,11 @@ interface ProvidersProps {
 
 export const Providers = memo(function Providers({ children }: ProvidersProps) {
   return (
-    <SessionProvider refetchOnWindowFocus={false} refetchInterval={0}>
+    <SessionProvider
+      basePath="/api/auth"
+      refetchOnWindowFocus={false}
+      refetchInterval={0}
+    >
       <ThemeProvider
         attribute="class"
         defaultTheme="light"

@@ -141,22 +141,24 @@ export function GlobalSearch({
   const showSpinner = isLoading || isDebouncing;
   const showClear = showClearButton && value && !showSpinner;
 
+  /** Matches header `dashboard-hero-search` (glass on video); overrides Input light-theme defaults. */
+  const dashboardInputChrome =
+    "dashboard-hero-search rounded-full focus:outline-none transition-all duration-300";
+
   return (
     <div className={cn("relative", className)}>
       <div className="relative">
         {/* Search Icon or Loading Spinner */}
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none z-[1]">
           {showSpinner ? (
             <Loader2
               className={cn(
                 iconSizeClasses[size],
-                "animate-spin text-muted-foreground"
+                "animate-spin text-white/55"
               )}
             />
           ) : (
-            <Search
-              className={cn(iconSizeClasses[size], "text-muted-foreground")}
-            />
+            <Search className={cn(iconSizeClasses[size], "text-white/55")} />
           )}
         </div>
 
@@ -175,6 +177,7 @@ export function GlobalSearch({
             "pl-10",
             showClear && "pr-10",
             sizeClasses[size],
+            dashboardInputChrome,
             inputClassName
           )}
         />
@@ -186,7 +189,7 @@ export function GlobalSearch({
             variant="ghost"
             size="sm"
             onClick={handleClear}
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
+            className="absolute right-1 top-1/2 z-[1] h-8 w-8 -translate-y-1/2 transform p-0 text-white/70 hover:bg-white/10 hover:text-white"
             aria-label="Clear search"
           >
             <X className={iconSizeClasses[size]} />
@@ -196,7 +199,7 @@ export function GlobalSearch({
 
       {/* Error Message */}
       {error && (
-        <p className="text-sm text-red-600 mt-1" role="alert">
+        <p className="mt-1 text-sm text-red-300" role="alert">
           {error}
         </p>
       )}
