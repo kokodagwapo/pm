@@ -104,7 +104,7 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
 
   webpack: (config, { dev }) => {
-    if (dev) {
+    if (dev && process.env.REPLIT_DEV_DOMAIN) {
       config.watchOptions = {
         ignored: /.*/,
       };

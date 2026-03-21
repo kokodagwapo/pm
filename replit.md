@@ -26,6 +26,14 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Turbopack disabled**: The `--turbopack` flag was removed from the dev script because Turbopack's file watcher is incompatible with Replit's cloud filesystem, causing an infinite Fast Refresh loop.
 - **File watcher disabled**: Webpack's file watcher is set to `ignored: /.*/` in `next.config.ts` because Replit's filesystem sends phantom inotify events (no actual file changes) that trigger constant recompiles and break the preview iframe. After code changes, restart the workflow to pick them up.
 - **Do NOT re-add `--turbopack`** or remove the `ignored: /.*/` watchOption — it will reintroduce the refresh loop on Replit.
+- **Watcher is Replit-only**: The `ignored: /.*/` watchOption is gated behind `process.env.REPLIT_DEV_DOMAIN`, so local development (Cursor) gets normal Turbopack HMR.
+
+## Local Development (Cursor + Docker)
+- **Docker**: `docker-compose.dev.yml` runs MongoDB 7 on port 27017
+- **Env vars**: Copy `.env.local.example` to `.env.local` and fill in values
+- **Quick start**: `npm run setup:local` (starts Docker MongoDB + seeds data), then `npm run dev:local` (Turbopack on port 3000)
+- **Scripts**: `npm run docker:up`, `docker:down`, `docker:logs` for container management
+- **Production Docker**: `docker compose up` uses the full `docker-compose.yml` with Dockerfile to build and run app + MongoDB together
 
 ## Stack
 - **Framework**: Next.js 15.5.12 (App Router)
