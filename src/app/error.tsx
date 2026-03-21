@@ -110,25 +110,36 @@ const MAX_AUTO_RETRIES = 3;
 export default function ErrorPage({ error, reset }: ErrorPageProps) {
   const router = useRouter();
   const retryCount = useRef(0);
+  const loggedRef = useRef(false);
   const errorType = getErrorType(error);
   const errorInfo = getErrorMessage(errorType, error);
   const ErrorIcon = getErrorIcon(errorType);
 
   useEffect(() => {
     const msg = error.message?.toLowerCase() || "";
-    const isHydrationError =
+    const stack = error.stack?.toLowerCase() || "";
+    const isTransientDevError =
       msg.includes("hydration") ||
       msg.includes("server rendered html") ||
       msg.includes("text content does not match") ||
       msg.includes("invalid hook call") ||
       msg.includes("minified react error") ||
-      msg.includes("$refreshreg$");
+      msg.includes("$refreshreg$") ||
+      (msg.includes("cannot read properties of undefined") && msg.includes("'call'")) ||
+      stack.includes("options.factory") ||
+      stack.includes("webpack_require");
 
-    if (isHydrationError && retryCount.current < MAX_AUTO_RETRIES) {
-      retryCount.current += 1;
-      console.warn(`[SmartStartPM] Auto-recovering from hydration error (attempt ${retryCount.current}/${MAX_AUTO_RETRIES})`);
-      const timer = setTimeout(() => reset(), 200);
-      return () => clearTimeout(timer);
+    if (isTransientDevError) {
+      if (retryCount.current < MAX_AUTO_RETRIES) {
+        retryCount.current += 1;
+        const timer = setTimeout(() => reset(), 500 * retryCount.current);
+        return () => clearTimeout(timer);
+      }
+      if (process.env.NODE_ENV === "development" && !loggedRef.current) {
+        loggedRef.current = true;
+        console.warn("[SmartStartPM] Transient dev error persisted after retries:", msg.slice(0, 100));
+      }
+      return;
     }
 
     if (process.env.NODE_ENV === "development") {
