@@ -195,6 +195,30 @@ export default function DashboardPage() {
   const dashAppearance = useOptionalDashboardAppearance();
   const isLight = dashAppearance?.isLight ?? false;
 
+  const { t, formatCurrency, formatPercentage, formatDate } =
+    useLocalizationContext();
+
+  const [greeting, setGreeting] = useState("");
+  const [currentDateStr, setCurrentDateStr] = useState("");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    setGreeting(
+      hour < 12
+        ? t("dashboard.greeting.morning")
+        : hour < 17
+          ? t("dashboard.greeting.afternoon")
+          : t("dashboard.greeting.evening")
+    );
+    setCurrentDateStr(
+      new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      })
+    );
+  }, [t]);
+
   const loadDashboardData = useCallback(
     async ({ isRefresh = false }: { isRefresh?: boolean } = {}) => {
       if (!isDashboardAuthorized) {
@@ -279,19 +303,13 @@ export default function DashboardPage() {
     loadDashboardData();
   }, [status, isDashboardAuthorized, loadDashboardData]);
 
-  const { t, formatCurrency, formatPercentage, formatDate } =
-    useLocalizationContext();
-
-  // Get greeting based on time of day
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return t("dashboard.greeting.morning");
-    if (hour < 17) return t("dashboard.greeting.afternoon");
-    return t("dashboard.greeting.evening");
-  };
+  const [nowRef, setNowRef] = useState<Date | null>(null);
+  useEffect(() => {
+    setNowRef(new Date());
+  }, []);
 
   const formatTimeAgo = (input?: Date | string | null) => {
-    if (!input) {
+    if (!input || !nowRef) {
       return t("dashboard.time.justNow");
     }
 
@@ -300,9 +318,8 @@ export default function DashboardPage() {
       return t("dashboard.time.justNow");
     }
 
-    const now = new Date();
     const diffInMinutes = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60)
+      (nowRef.getTime() - date.getTime()) / (1000 * 60)
     );
 
     if (diffInMinutes < 60) {
@@ -635,11 +652,11 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <h1 className={cn("text-lg font-medium", pageHeading)}>
-            {getGreeting()}, {user?.firstName}
+          <h1 className={cn("text-lg font-medium", pageHeading)} suppressHydrationWarning>
+            {greeting}{greeting ? ", " : ""}{user?.firstName}
           </h1>
-          <span className={cn("text-base", pageBody)}>
-            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+          <span className={cn("text-base", pageBody)} suppressHydrationWarning>
+            {currentDateStr}
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-2">

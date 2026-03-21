@@ -77,6 +77,28 @@ export default function TenantDashboard({ className }: TenantDashboardProps) {
   const [selectedLeaseId, setSelectedLeaseId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [greeting, setGreeting] = useState("");
+  const [currentDateStr, setCurrentDateStr] = useState("");
+  const stableFallbackDate = "1970-01-01T00:00:00.000Z";
+  const stableFallbackDateObj = new Date("1970-01-01T00:00:00.000Z");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    setGreeting(
+      hour < 12
+        ? t("dashboard.greeting.morning")
+        : hour < 18
+          ? t("dashboard.greeting.afternoon")
+          : t("dashboard.greeting.evening")
+    );
+    setCurrentDateStr(
+      new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      })
+    );
+  }, [t]);
 
   useEffect(() => {
     if (session?.user) {
@@ -166,12 +188,6 @@ export default function TenantDashboard({ className }: TenantDashboardProps) {
     }
   };
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return t("dashboard.greeting.morning");
-    if (hour < 18) return t("dashboard.greeting.afternoon");
-    return t("dashboard.greeting.evening");
-  };
 
   const formatAddress = (address: any) => {
     if (!address) return null;
@@ -249,7 +265,7 @@ export default function TenantDashboard({ className }: TenantDashboardProps) {
         date:
           notification?.createdAt ??
           notification?.updatedAt ??
-          new Date().toISOString(),
+          stableFallbackDate,
         type: "notification" as const,
       })
     );
@@ -264,7 +280,7 @@ export default function TenantDashboard({ className }: TenantDashboardProps) {
             )}: ${translateMaintenanceStatus(request.status)}`
           : "",
         date:
-          request?.updatedAt ?? request?.createdAt ?? new Date().toISOString(),
+          request?.updatedAt ?? request?.createdAt ?? stableFallbackDate,
         type: "maintenance" as const,
       })
     );
@@ -304,13 +320,13 @@ export default function TenantDashboard({ className }: TenantDashboardProps) {
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <h1 className="text-sm font-medium text-foreground">
+          <h1 className="text-sm font-medium text-foreground" suppressHydrationWarning>
             {session?.user?.firstName
-              ? `${getGreeting()}, ${session.user.firstName}`
-              : getGreeting()}
+              ? `${greeting}${greeting ? ", " : ""}${session.user.firstName}`
+              : greeting}
           </h1>
-          <span className="text-xs text-muted-foreground">
-            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+          <span className="text-xs text-muted-foreground" suppressHydrationWarning>
+            {currentDateStr}
           </span>
         </div>
 
@@ -569,7 +585,7 @@ export default function TenantDashboard({ className }: TenantDashboardProps) {
                             date: formatDate(
                               payment?.paidDate ??
                                 payment?.dueDate ??
-                                new Date()
+                                stableFallbackDateObj
                             ),
                           },
                         })}
@@ -621,7 +637,7 @@ export default function TenantDashboard({ className }: TenantDashboardProps) {
                         <p className="text-sm text-muted-foreground">
                           {t("dashboard.tenant.dueOn", {
                             values: {
-                              date: formatDate(payment?.dueDate ?? new Date()),
+                              date: formatDate(payment?.dueDate ?? stableFallbackDateObj),
                             },
                           })}
                         </p>
