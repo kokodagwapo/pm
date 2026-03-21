@@ -77,19 +77,16 @@ export function LocalizationProvider({
   initialLocale,
   initialCurrency,
 }: LocalizationProviderProps) {
-  ensureIntlCurrencyPatch();
+  const ssrSafeLocale = initialLocale || "en-US";
+  const ssrSafeCurrency = initialCurrency || "USD";
 
-  const [currentLocale, setCurrentLocale] = useState(
-    initialLocale || localizationService.getCurrentLocale()
-  );
-  const [currentCurrency, setCurrentCurrency] = useState(
-    initialCurrency || localizationService.getCurrentCurrency()
-  );
+  const [currentLocale, setCurrentLocale] = useState(ssrSafeLocale);
+  const [currentCurrency, setCurrentCurrency] = useState(ssrSafeCurrency);
   const [locale, setLocale] = useState(
-    localizationService.getLocale(currentLocale)
+    localizationService.getLocale(ssrSafeLocale)
   );
   const [currency, setCurrency] = useState(
-    localizationService.getCurrency(currentCurrency)
+    localizationService.getCurrency(ssrSafeCurrency)
   );
   const [loading, setLoading] = useState(true);
   const hasLoadedDisplaySettings = useRef(false);
@@ -121,6 +118,8 @@ export function LocalizationProvider({
 
   // Initialize localization service
   useEffect(() => {
+    ensureIntlCurrencyPatch();
+
     const initializeLocalization = async () => {
       try {
         // Load user preferences from localStorage

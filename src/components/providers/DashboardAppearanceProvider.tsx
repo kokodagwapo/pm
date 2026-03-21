@@ -4,7 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
-  useLayoutEffect,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -26,7 +26,7 @@ const DashboardAppearanceContext =
 export function DashboardAppearanceProvider({ children }: { children: ReactNode }) {
   const [appearance, setAppearanceState] = useState<DashboardAppearance>("immersive");
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as DashboardAppearance | null;
     const next: DashboardAppearance =
       stored === "light" || stored === "immersive" ? stored : "immersive";

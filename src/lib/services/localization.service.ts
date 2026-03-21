@@ -877,22 +877,8 @@ export class LocalizationService {
   private translations: Record<string, Record<string, string>> = {};
 
   private constructor() {
-    // Always default to English; only switch if user has explicitly saved a locale preference
-    if (typeof window !== "undefined") {
-      this.currentLocale = "en-US";
-      const savedCurrency = (() => {
-        try {
-          return localStorage.getItem("SmartStartPM-currency") || undefined;
-        } catch {
-          return undefined;
-        }
-      })();
-      if (savedCurrency && CURRENCIES[savedCurrency]) {
-        this.currentCurrency = savedCurrency;
-      } else {
-        this.currentCurrency = LOCALES[this.currentLocale]?.currency || "USD";
-      }
-    }
+    // Start with stable SSR-safe defaults; client-side localStorage values
+    // are applied later via LocalizationProvider's useEffect.
   }
 
   public static getInstance(): LocalizationService {
