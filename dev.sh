@@ -13,4 +13,7 @@ fi
 
 node src/scripts/auto-seed.mjs
 
+pkill -f "next dev" 2>/dev/null || true
+sleep 1
+rm -rf .next
 exec npm run dev

@@ -23,10 +23,12 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **FlickeringGridBackground**: Removed from dashboard layout for cleaner appearance.
 
 ## Dev Server Stability (Replit-specific)
-- **Turbopack disabled**: The `--turbopack` flag was removed from the dev script because Turbopack's file watcher is incompatible with Replit's cloud filesystem, causing an infinite Fast Refresh loop.
+- **Turbopack disabled**: The `--turbopack` flag was removed from the Replit dev scripts (`dev`, `dev:5000`) because Turbopack's file watcher is incompatible with Replit's cloud filesystem, causing an infinite Fast Refresh loop. Only `dev:local` uses `--turbopack` (for local Cursor development).
 - **File watcher disabled**: Webpack's file watcher is set to `ignored: /.*/` in `next.config.ts` because Replit's filesystem sends phantom inotify events (no actual file changes) that trigger constant recompiles and break the preview iframe. After code changes, restart the workflow to pick them up.
-- **Do NOT re-add `--turbopack`** or remove the `ignored: /.*/` watchOption — it will reintroduce the refresh loop on Replit.
+- **Do NOT re-add `--turbopack`** to Replit-facing scripts or remove the `ignored: /.*/` watchOption — it will reintroduce the refresh loop on Replit.
 - **Watcher is Replit-only**: The `ignored: /.*/` watchOption is gated behind `process.env.REPLIT_DEV_DOMAIN`, so local development (Cursor) gets normal Turbopack HMR.
+- **`.next` cache cleanup**: `dev.sh` runs `rm -rf .next` before starting Next.js to ensure a fresh build. Do NOT put `rm -rf .next` in `scripts/post-merge.sh` — that script runs while the dev server is still serving, and deleting `.next` mid-session causes permanent 500 errors (the server can't recover because the watcher is disabled).
+- **SSR hydration safety**: All providers (`DashboardAppearanceProvider`, `LocalizationProvider`, `localization.service.ts`) use stable SSR-safe defaults ("immersive", "en-US", "USD") in initial state. Client-side localStorage values are applied only in `useEffect` after hydration.
 
 ## Local Development (Cursor + Docker)
 - **Docker**: `docker-compose.dev.yml` runs MongoDB 7 on port 27017
@@ -63,11 +65,11 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - `src/locales/` - i18n translations
 
 ## Running (Replit)
-- Workflow: `bash start.sh` — starts local MongoDB, runs auto-seed, builds, then `next start` (production mode) on port 5000
-- Dev: `npm run dev` (port 5000, Turbopack, HMR — use only for local development, NOT Replit workflow)
+- Workflow: `bash dev.sh` — starts local MongoDB, runs auto-seed, cleans `.next`, then `next dev` (webpack, no Turbopack) on port 5000
+- Dev: `npm run dev` (port 5000, webpack mode — for Replit workflow)
+- Dev local: `npm run dev:local` (port 3000, Turbopack — for local Cursor development)
 - Build: `npm run build`
 - Start: `npm run start` (port 5000, bound to 0.0.0.0)
-- **Why production mode in workflow**: Replit's filesystem sync triggers constant HMR rebuilds (~200ms interval) which corrupt Turbopack's module factory cache, causing "module factory not available" runtime errors. Production mode has no HMR so this issue doesn't occur.
 
 ## Replit-Specific Configuration
 - **MongoDB**: Running locally via Nix (mongodb 7.0), data at `/home/runner/.mongodb-data/data/` (outside project root to avoid file-watcher loops)
