@@ -10,9 +10,10 @@ interface GlobalErrorProps {
 
 const MAX_AUTO_RETRIES = 3;
 
-function isTransientDevError(error: Error): boolean {
-  const msg = (error.message || "").toLowerCase();
-  const stack = (error.stack || "").toLowerCase();
+function isTransientDevError(error: any): boolean {
+  if (!error || typeof error !== "object") return false;
+  const msg = (error?.message || "").toString().toLowerCase();
+  const stack = (error?.stack || "").toString().toLowerCase();
   return (
     stack.includes("options.factory") ||
     stack.includes("webpack_require") ||
@@ -117,11 +118,11 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 <details>
                   <summary>Technical Details</summary>
                   <div className="ec">
-                    <div><strong>Error:</strong> {error.message}</div>
-                    {error.digest && (
+                    <div><strong>Error:</strong> {error?.message || "Unknown error"}</div>
+                    {error?.digest && (
                       <div style={{ marginTop: "0.5rem" }}><strong>Digest:</strong> {error.digest}</div>
                     )}
-                    {error.stack && (
+                    {error?.stack && (
                       <div style={{ marginTop: "0.5rem" }}><strong>Stack:</strong> {error.stack}</div>
                     )}
                   </div>

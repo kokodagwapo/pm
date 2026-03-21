@@ -24,8 +24,8 @@ interface ErrorPageProps {
 }
 
 // Determine error type based on error message and properties
-function getErrorType(error: Error) {
-  const message = error.message.toLowerCase();
+function getErrorType(error: any) {
+  const message = (error?.message || "").toString().toLowerCase();
   
   if (message.includes("network") || message.includes("fetch") || message.includes("connection")) {
     return "network";
