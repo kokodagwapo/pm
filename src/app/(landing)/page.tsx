@@ -64,7 +64,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 w-full max-w-[280px] sm:max-w-none mx-auto">
               <Link
                 href="/auth/signin"
-                className="group inline-flex items-center justify-center gap-2 h-12 sm:h-11 px-8 rounded-full bg-white text-slate-900 text-sm tracking-wide transition-all duration-300 hover:shadow-[0_0_28px_rgba(255,255,255,0.22)] active:scale-[0.97]"
+                className="group inline-flex items-center justify-center gap-2 h-12 sm:h-11 px-8 rounded-full border border-white/[0.14] text-white/50 text-sm tracking-wide transition-all duration-300 hover:border-white/[0.28] hover:text-white/78 active:scale-[0.97]"
                 style={{ fontWeight: 300 }}
               >
                 {t("landing.cta.signin")}
