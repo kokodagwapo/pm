@@ -16,13 +16,10 @@ fi
 echo "Running auto-seed check..."
 node src/scripts/auto-seed.mjs
 
-if [ ! -f ".next/BUILD_ID" ] || [ "$FORCE_BUILD" = "1" ]; then
-  echo "Building application..."
-  rm -rf .next
-  npm run build
-else
-  echo "Using existing build (set FORCE_BUILD=1 to rebuild)"
-fi
+pkill -f "next dev" 2>/dev/null || true
+sleep 1
+rm -rf .next
+export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=3072"
 
-echo "Starting production server..."
-exec npm run start
+echo "Starting dev server..."
+exec npm run dev

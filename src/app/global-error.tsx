@@ -12,22 +12,46 @@ const MAX_AUTO_RETRIES = 3;
 
 function isTransientDevError(error: any): boolean {
   try {
-    if (!error || typeof error !== "object") return true; // Empty/missing errors are transient
-    const msg = String(error?.message || "").toLowerCase();
-    const stack = String(error?.stack || "").toLowerCase();
-    return (
-      stack.includes("options.factory") ||
-      stack.includes("webpack_require") ||
-      (msg.includes("reading 'call'") && stack.includes("webpack")) ||
-      msg.includes("hydration") ||
-      msg.includes("server rendered html") ||
-      msg.includes("text content does not match") ||
-      msg.includes("invalid hook call") ||
-      msg.includes("minified react error") ||
-      msg.includes("$refreshreg$")
-    );
+    // Empty or missing error = transient
+    if (!error) return true;
+    
+    // Get message and stack with absolute safety
+    let msg = "";
+    let stack = "";
+    
+    try {
+      msg = String(error?.message) || "";
+      msg = msg.toLowerCase?.() || msg.toLowerCase() || "";
+    } catch {
+      msg = "";
+    }
+    
+    try {
+      stack = String(error?.stack) || "";
+      stack = stack.toLowerCase?.() || stack.toLowerCase() || "";
+    } catch {
+      stack = "";
+    }
+    
+    // Check for known transient patterns
+    if (stack && stack.indexOf !== undefined) {
+      if (stack.indexOf("options.factory") > -1) return true;
+      if (stack.indexOf("webpack_require") > -1) return true;
+      if (stack.indexOf("webpack") > -1 && msg.indexOf("reading 'call'") > -1) return true;
+    }
+    
+    if (msg && msg.indexOf !== undefined) {
+      if (msg.indexOf("hydration") > -1) return true;
+      if (msg.indexOf("server rendered html") > -1) return true;
+      if (msg.indexOf("text content does not match") > -1) return true;
+      if (msg.indexOf("invalid hook call") > -1) return true;
+      if (msg.indexOf("minified react error") > -1) return true;
+      if (msg.indexOf("$refreshreg$") > -1) return true;
+    }
+    
+    return false;
   } catch {
-    return true; // If detection fails, treat as transient
+    return true; // If anything fails, treat as transient
   }
 }
 
@@ -149,7 +173,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               </div>
             )}
             <div className="ac">
-              <button onClick={() => reset()} className="b bp">
+              <button onClick={() => { try { reset?.(); } catch {} }} className="b bp">
                 <RefreshCw style={{ width: "1rem", height: "1rem" }} />
                 Try Again
               </button>
