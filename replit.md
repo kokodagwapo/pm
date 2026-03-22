@@ -16,7 +16,7 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Color palette**: Neutral zinc scale (background `#fafafa`, foreground `#18181b`, borders `#e4e4e7`). Primary indigo (`#4f46e5`). Dark mode uses `#09090b` / `#fafafa` / `#27272a` zinc tones.
 - **Typography**: Light/normal weight headings (font-light for hero, font-medium for section labels), no bold/extrabold. 11px uppercase tracking labels for metadata.
 - **Cards**: `rounded-xl border border-border shadow-sm` — flat, clean, no glassmorphism in dashboard. Hover: `shadow-md`.
-- **Sidebar**: White background, `w-60`, clean border. Active nav uses `text-primary bg-primary/8 font-medium`. Muted-foreground for inactive items.
+- **Sidebar**: Dashboard rail uses glass styling (`dashboard-ui-surface`); expanded width is `15rem` (`md:w-60`). Collapsed state is a narrow icon rail (~56px) via `SidebarCollapseProvider` + layout wrapper sizing — client-only state, no env or Replit script changes required.
 - **Dashboard**: Emoji-free section headers. Lighter greeting (font-light). KPI cards with compact padding. Charts in bordered cards.
 - **Landing page**: Preserved cinematic dark aesthetic with video background, ultra-thin typography (weight 100-300).
 - **Plus Jakarta Sans**: Applied to dashboard layout via `--font-jakarta`.

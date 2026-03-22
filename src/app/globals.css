@@ -759,6 +759,13 @@
     font-size: 0.875rem !important;
   }
 
+  /* Collapsed sidebar — force narrow 56px icon rail */
+  html.dashboard-layout aside.dashboard-ui-surface[data-collapsed="true"] {
+    width: 3.5rem !important;
+    min-width: 3.5rem !important;
+    max-width: 3.5rem !important;
+  }
+
   /* User menu + Radix menus — same glass outline as LanguageSwitcher */
   html.dashboard-layout [data-slot="dropdown-menu-content"],
   html.dashboard-layout [data-slot="dropdown-menu-sub-content"] {

@@ -27,6 +27,10 @@ import {
   DashboardAppearanceProvider,
   useDashboardAppearance,
 } from "@/components/providers/DashboardAppearanceProvider";
+import {
+  SidebarCollapseProvider,
+  useSidebarCollapse,
+} from "@/components/providers/SidebarCollapseProvider";
 
 const HeroVideo = dynamic(() => import("@/components/landing/HeroVideo").then((m) => ({ default: m.HeroVideo })), {
   ssr: false,
@@ -45,6 +49,43 @@ const DemoGuide = dynamic(
 /** Base dim + vignette over HeroVideo — immersive / dark (lighter overlay = more video visible). */
 const DASHBOARD_VIDEO_OVERLAY =
   "linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.46) 40%, rgba(0,0,0,0.80) 100%), rgba(0,0,0,0.26)";
+
+const COLLAPSED_WIDTH = 56; // px — narrow icon rail, icons only
+
+const SidebarColumn = memo(function SidebarColumn({
+  isMobileMenuOpen,
+  closeMobileMenu,
+}: {
+  isMobileMenuOpen: boolean;
+  closeMobileMenu: () => void;
+}) {
+  const { isCollapsed } = useSidebarCollapse() ?? { isCollapsed: false };
+  return (
+    <div
+      className={cn(
+        "fixed inset-y-0 left-0 z-50 h-full overflow-hidden transition-[transform,width,min-width,max-width,flex-basis] duration-300 ease-out md:relative md:z-auto",
+        "md:flex md:flex-none md:shrink-0 md:flex-col",
+        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+        !isCollapsed &&
+          "w-[min(18rem,calc(100vw-0.75rem))] min-w-[min(18rem,calc(100vw-0.75rem))] max-w-[min(18rem,calc(100vw-0.75rem))] md:w-60 md:min-w-60 md:max-w-60"
+      )}
+      style={
+        isCollapsed
+          ? {
+              width: COLLAPSED_WIDTH,
+              minWidth: COLLAPSED_WIDTH,
+              maxWidth: COLLAPSED_WIDTH,
+              flexBasis: COLLAPSED_WIDTH,
+            }
+          : undefined
+      }
+    >
+      <div onClick={closeMobileMenu} className="h-full w-full min-w-0 overflow-hidden">
+        <Sidebar />
+      </div>
+    </div>
+  );
+});
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -287,30 +328,24 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
           />
         </>
       )}
-      <div className="relative z-10 flex h-full min-h-0 min-w-0 w-full overflow-hidden">
-        {isMobileMenuOpen && (
-          <div
-            className={cn(
-              "fixed inset-0 z-40 backdrop-blur-sm md:hidden",
-              isLight ? "bg-slate-900/25" : "bg-black/75"
-            )}
-            onClick={closeMobileMenu}
-          />
-        )}
-
-        <div
-          className={cn(
-            "fixed inset-y-0 left-0 z-50 h-full transition-transform duration-300 ease-out md:relative md:z-auto",
-            "md:flex md:shrink-0 md:flex-col",
-            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      <SidebarCollapseProvider>
+        <div className="relative z-10 flex h-full min-h-0 min-w-0 w-full overflow-hidden">
+          {isMobileMenuOpen && (
+            <div
+              className={cn(
+                "fixed inset-0 z-40 backdrop-blur-sm md:hidden",
+                isLight ? "bg-slate-900/25" : "bg-black/75"
+              )}
+              onClick={closeMobileMenu}
+            />
           )}
-        >
-          <div onClick={closeMobileMenu} className="h-full">
-            <Sidebar />
-          </div>
-        </div>
 
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          <SidebarColumn
+            isMobileMenuOpen={isMobileMenuOpen}
+            closeMobileMenu={closeMobileMenu}
+          />
+
+          <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <MobileHeader
             user={user}
             avatarUrl={avatarUrl}
@@ -327,6 +362,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
           </main>
         </div>
       </div>
+      </SidebarCollapseProvider>
 
       <PwaInstallHint variant={isLight ? "light" : "dark"} />
       <DemoGuide />

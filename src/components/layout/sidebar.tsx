@@ -45,6 +45,7 @@ import {
 import { UserRole } from "@/types";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { useDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { useSidebarCollapse } from "@/components/providers/SidebarCollapseProvider";
 import {
   PastelIcon,
   pastelTintFromLegacyIconColor,
@@ -360,7 +361,7 @@ const NavItemComponent = memo(function NavItemComponent({
             !isActive &&
             level > 0 &&
             "border border-transparent text-slate-700 hover:border-slate-200 hover:bg-slate-50 active:scale-[0.98]",
-          isCollapsed && level === 0 && "justify-center px-2",
+          isCollapsed && level === 0 && "justify-center px-1",
         )}
       >
         {/* Active indicator bar */}
@@ -434,7 +435,9 @@ const NavItemComponent = memo(function NavItemComponent({
 });
 
 export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const collapseCtx = useSidebarCollapse();
+  const isCollapsed = collapseCtx?.isCollapsed ?? false;
+  const setIsCollapsed = collapseCtx?.setIsCollapsed ?? (() => {});
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const pathname = usePathname();
   const { avatarUrl } = useUserAvatar();
@@ -464,19 +467,38 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
 
   if (!session?.user) return null;
 
+  const collapsedWidth = 56; // narrow rail — icons only
+
   return (
     <aside
+      data-collapsed={isCollapsed}
       className={cn(
-        "flex h-[100dvh] max-w-[min(18rem,calc(100vw-0.75rem))] flex-col md:h-full md:max-w-none dashboard-ui-surface",
+        "flex h-[100dvh] flex-col md:h-full dashboard-ui-surface flex-none flex-shrink-0 overflow-hidden",
         "border-y-0 border-l-0 border-r border-[var(--dashboard-glass-border)]",
-        "w-[min(18rem,calc(100vw-0.75rem))] transition-all duration-300 ease-out md:w-60",
+        "transition-[width,min-width,max-width,flex-basis] duration-300 ease-out",
         "[font-family:var(--font-jakarta),var(--font-inter),system-ui,sans-serif] font-normal antialiased",
-        isCollapsed && "w-16",
+        !isCollapsed &&
+          "w-[min(18rem,calc(100vw-0.75rem))] min-w-[min(18rem,calc(100vw-0.75rem))] max-w-[min(18rem,calc(100vw-0.75rem))] md:w-60 md:min-w-60 md:max-w-60",
         className,
       )}
+      style={
+        isCollapsed
+          ? {
+              width: collapsedWidth,
+              minWidth: collapsedWidth,
+              maxWidth: collapsedWidth,
+              flexBasis: collapsedWidth,
+            }
+          : undefined
+      }
     >
-      {/* Header */}
-      <div className="flex items-center h-14 px-3 shrink-0 border-b border-[var(--dashboard-glass-border)] bg-transparent">
+      {/* Header — slims when sidebar collapsed */}
+      <div
+        className={cn(
+          "flex items-center shrink-0 justify-center border-b border-[var(--dashboard-glass-border)] bg-transparent transition-all duration-300 ease-out",
+          isCollapsed ? "h-9 px-1" : "h-14 px-3 justify-between",
+        )}
+      >
         {!isCollapsed && (
           <Link href="/dashboard" className="flex items-center opacity-90 hover:opacity-100 transition-opacity">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -491,13 +513,13 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={() => setIsCollapsed((prev) => !prev)}
           className={cn(
-            "ml-auto h-7 w-7 shrink-0 transition-all duration-300",
+            "shrink-0 transition-all duration-300",
+            isCollapsed ? "h-7 w-7" : "h-7 w-7 ml-auto",
             isLight
               ? "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               : "text-white/50 hover:bg-white/[0.08] hover:text-white/80",
-            isCollapsed && "mx-auto",
           )}
         >
           {isCollapsed ? (
@@ -509,7 +531,12 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 min-h-0 overflow-y-auto px-2 py-3 space-y-4 scrollbar-thin">
+      <nav
+        className={cn(
+          "flex-1 min-h-0 overflow-y-auto space-y-4 scrollbar-thin transition-all duration-300",
+          isCollapsed ? "px-1 py-2" : "px-2 py-3",
+        )}
+      >
         {filteredSections.map((section, sectionIndex) => (
           <div key={sectionIndex}>
             {section.title && !isCollapsed && (
