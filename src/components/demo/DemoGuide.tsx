@@ -615,7 +615,7 @@ export function DemoGuide() {
               {step.href && !isLast && (
                 <button
                   onClick={handleNavigate}
-                  className="flex-1 rounded-lg border border-sky-200/30 bg-white/5 px-3 py-2 text-xs font-semibold text-white transition-all hover:border-sky-200/45 hover:bg-sky-400/10 active:scale-95"
+                  className="flex-1 rounded-lg border border-sky-200/30 bg-white/5 px-3 py-2 text-xs font-semibold text-black transition-all hover:border-sky-200/45 hover:bg-sky-400/10 active:scale-95"
                 >
                   Go there →
                 </button>
