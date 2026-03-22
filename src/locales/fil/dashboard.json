@@ -146,5 +146,17 @@
   "dashboard.tenant.status.upcoming": "Paparating",
   "dashboard.tenant.status.terminated": "Natapos na",
   "dashboard.tenant.activityType.notification": "Abiso",
-  "dashboard.tenant.activityType.maintenance": "Pagpapanatili"
+  "dashboard.tenant.activityType.maintenance": "Pagpapanatili",
+
+  "dashboard.admin.demoLeads.title": "Mga demo lead",
+  "dashboard.admin.demoLeads.subtitle": "Mga submission mula sa demo sign-in form. Makikita lang ng mga admin.",
+  "dashboard.admin.demoLeads.refresh": "I-refresh",
+  "dashboard.admin.demoLeads.tableTitle": "Mga submission",
+  "dashboard.admin.demoLeads.tableHint": "{count} kabuuang record",
+  "dashboard.admin.demoLeads.empty": "Wala pang demo submission.",
+  "dashboard.admin.demoLeads.loadError": "Hindi ma-load ang mga demo lead.",
+  "dashboard.admin.demoLeads.col.name": "Pangalan",
+  "dashboard.admin.demoLeads.col.phone": "Telepono",
+  "dashboard.admin.demoLeads.col.email": "Email",
+  "dashboard.admin.demoLeads.col.submitted": "Na-submit"
 }

@@ -236,7 +236,7 @@ export function AdminTourWidget() {
           >
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 shrink-0">
-              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-lg shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-lg shrink-0">
                 🚀
               </div>
               <div className="flex-1 min-w-0">
@@ -303,7 +303,7 @@ export function AdminTourWidget() {
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex gap-2 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
                   {msg.role === "assistant" && (
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
                       <Bot className="w-3.5 h-3.5 text-white" />
                     </div>
                   )}
@@ -329,7 +329,7 @@ export function AdminTourWidget() {
               ))}
               {isLoading && (
                 <div className="flex gap-2">
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0">
+                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0">
                     <Bot className="w-3.5 h-3.5 text-white" />
                   </div>
                   <div className="rounded-2xl rounded-tl-sm border border-white/12 bg-white/10 px-3 py-2 shadow-sm">
@@ -354,7 +354,7 @@ export function AdminTourWidget() {
                   {[...Array(5)].map((_, i) => (
                     <div
                       key={i}
-                      className="w-1 animate-pulse rounded-full bg-violet-400"
+                      className="w-1 animate-pulse rounded-sm bg-violet-400"
                       style={{ height: `${[60, 100, 70, 90, 50][i]}%`, animationDelay: `${i * 0.1}s` }}
                     />
                   ))}
@@ -443,7 +443,7 @@ export function AdminTourWidget() {
           <>
             <Rocket className="w-4 h-4 text-white" />
             <span className="text-white text-sm font-semibold">{t("tour.toggle.open")}</span>
-            <span className="ml-1 px-2 py-0.5 rounded-full bg-white/25 text-white text-[10px] font-bold uppercase tracking-wide border border-white/30 hidden sm:inline">
+            <span className="ml-1 px-2 py-0.5 rounded-lg bg-white/25 text-white text-[10px] font-bold uppercase tracking-wide border border-white/30 hidden sm:inline">
               {t("tour.toggle.start")}
             </span>
           </>

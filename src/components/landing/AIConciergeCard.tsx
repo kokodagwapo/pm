@@ -89,7 +89,7 @@ export function AIConciergeCard() {
     >
       {/* Tabs - glassmorphic, stack on very small screens */}
       <div
-        className="flex flex-wrap sm:flex-nowrap gap-1.5 sm:gap-1 p-1.5 rounded-full mb-4 sm:mb-6 w-full sm:w-fit"
+        className="flex flex-wrap sm:flex-nowrap gap-1.5 sm:gap-1 p-1.5 rounded-2xl mb-4 sm:mb-6 w-full sm:w-fit"
         style={{
           background: "rgba(255,255,255,0.08)",
           backdropFilter: "blur(20px)",
@@ -101,7 +101,7 @@ export function AIConciergeCard() {
         <button
           type="button"
           onClick={() => setActiveTab("short")}
-          className={`flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all touch-manipulation ${
+          className={`flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all touch-manipulation ${
             activeTab === "short"
               ? "text-black"
               : "text-black/70 hover:text-black"
@@ -123,7 +123,7 @@ export function AIConciergeCard() {
         <button
           type="button"
           onClick={() => setActiveTab("long")}
-          className={`flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all touch-manipulation ${
+          className={`flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all touch-manipulation ${
             activeTab === "long"
               ? "text-black"
               : "text-black/70 hover:text-black"
@@ -156,7 +156,7 @@ export function AIConciergeCard() {
           <Link
             key={`${i}-${link.href}`}
             href={link.href}
-            className="min-h-[44px] inline-flex items-center px-3 py-2.5 sm:py-1.5 rounded-full text-black text-xs sm:text-sm transition-all hover:bg-white/25 touch-manipulation"
+            className="min-h-[44px] inline-flex items-center px-3 py-2.5 sm:py-1.5 rounded-xl text-black text-xs sm:text-sm transition-all hover:bg-white/25 touch-manipulation"
             style={{
               background: "rgba(255,255,255,0.15)",
               backdropFilter: "blur(8px)",

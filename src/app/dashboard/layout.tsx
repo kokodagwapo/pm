@@ -120,7 +120,7 @@ const MobileHeader = memo(function MobileHeader({
           variant="ghost"
           size="sm"
           className={cn(
-            "h-9 w-9 rounded-full p-0 transition-all duration-300 md:hidden",
+            "h-9 w-9 rounded-xl p-0 transition-all duration-300 md:hidden",
             isLight
               ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               : "text-white/75 hover:bg-white/[0.08] hover:text-white"
@@ -139,8 +139,9 @@ const MobileHeader = memo(function MobileHeader({
           />
           <input
             type="search"
-            placeholder="Search..."
-            className="dashboard-hero-search w-44 rounded-full py-2 pl-10 pr-3 text-base transition-all duration-300 focus:outline-none md:w-60 lg:w-80"
+            placeholder={t("header.search.placeholder")}
+            aria-label={t("header.search.placeholder")}
+            className="dashboard-hero-search w-44 rounded-2xl py-2 pl-10 pr-3 text-base transition-all duration-300 focus:outline-none md:w-60 lg:w-80"
           />
         </div>
       </div>
@@ -151,11 +152,12 @@ const MobileHeader = memo(function MobileHeader({
             variant="ghost"
             size="sm"
             className={cn(
-              "h-9 w-9 rounded-full p-0 transition-all duration-300",
+              "h-9 w-9 rounded-xl p-0 transition-all duration-300",
               isLight
                 ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 : "text-white/75 hover:bg-white/[0.08] hover:text-white"
             )}
+            aria-label={t("header.search.placeholder")}
           >
             <Search className="h-4 w-4" />
           </Button>
@@ -165,13 +167,21 @@ const MobileHeader = memo(function MobileHeader({
           type="button"
           onClick={() => setAppearance(isLight ? "immersive" : "light")}
           className={cn(
-            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300 touch-manipulation",
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 touch-manipulation",
             isLight
               ? "border-white/55 bg-white/35 text-slate-800 shadow-[0_2px_12px_rgb(15_23_42/0.06)] backdrop-blur-md hover:bg-white/50"
               : "border-white/20 bg-transparent text-white/85 hover:bg-white/10 hover:text-white"
           )}
-          title={isLight ? "Switch to immersive (dark) dashboard" : "Switch to light dashboard"}
-          aria-label={isLight ? "Switch to immersive dark dashboard" : "Switch to light dashboard"}
+          title={
+            isLight
+              ? t("header.appearance.toDark.title")
+              : t("header.appearance.toLight.title")
+          }
+          aria-label={
+            isLight
+              ? t("header.appearance.toDark.aria")
+              : t("header.appearance.toLight.aria")
+          }
         >
           {isLight ? <Moon className="h-4 w-4" aria-hidden /> : <Sun className="h-4 w-4" aria-hidden />}
         </button>
@@ -191,7 +201,7 @@ const MobileHeader = memo(function MobileHeader({
             <Button
               variant="ghost"
               className={cn(
-                "relative h-8 w-8 rounded-full transition-all duration-300",
+                "relative h-8 w-8 rounded-xl transition-all duration-300",
                 isLight
                   ? "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
                   : "text-white/85 hover:bg-white/[0.1] hover:text-white"

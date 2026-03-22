@@ -113,7 +113,7 @@ function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: (
               )}
             </div>
             {images.length > 1 && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 text-white text-[9px] backdrop-blur-sm font-medium">
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-black/50 text-white text-[9px] backdrop-blur-sm font-medium">
                 <Grid3X3 className="w-2.5 h-2.5" />
                 {images.length}
               </span>
@@ -201,7 +201,7 @@ function CompareModal({
     { label: "Neighborhood", render: (p: any) => p.neighborhood ?? "Naples" },
     { label: "Type", render: (p: any) => p.type ?? "—" },
     { label: "Status", render: (p: any) => (
-      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${p.status === "available" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+      <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase ${p.status === "available" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
         {p.status ?? "unknown"}
       </span>
     )},
@@ -328,7 +328,7 @@ function PropertyListCard({
           <div className="absolute top-2 right-2 flex flex-col gap-1.5">
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleFavorite(property._id); }}
-              className={`w-7 h-7 rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm transition-all duration-200 ${isFavorited ? "bg-red-500 text-white scale-110" : "bg-white/90 text-slate-400 hover:text-red-400 hover:scale-110"}`}
+              className={`w-7 h-7 rounded-xl flex items-center justify-center shadow-lg backdrop-blur-sm transition-all duration-200 ${isFavorited ? "bg-red-500 text-white scale-110" : "bg-white/90 text-slate-400 hover:text-red-400 hover:scale-110"}`}
               title={isFavorited ? "Remove from saved" : "Save property"}
             >
               <Heart className={`w-3.5 h-3.5 ${isFavorited ? "fill-current" : ""}`} />
@@ -336,7 +336,7 @@ function PropertyListCard({
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleCompare(property._id); }}
               disabled={!isInCompare && !canAddToCompare}
-              className={`w-7 h-7 rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm transition-all duration-200 disabled:opacity-40 ${isInCompare ? "bg-sky-500 text-white scale-110" : "bg-white/90 text-slate-400 hover:text-sky-500 hover:scale-105"}`}
+              className={`w-7 h-7 rounded-xl flex items-center justify-center shadow-lg backdrop-blur-sm transition-all duration-200 disabled:opacity-40 ${isInCompare ? "bg-sky-500 text-white scale-110" : "bg-white/90 text-slate-400 hover:text-sky-500 hover:scale-105"}`}
               title={isInCompare ? "Remove from compare" : "Add to compare"}
             >
               {isInCompare ? <Check className="w-3.5 h-3.5" /> : <GitCompare className="w-3.5 h-3.5" />}
@@ -345,7 +345,7 @@ function PropertyListCard({
 
           {/* Image count */}
           {imageCount > 1 && (
-            <div className="absolute bottom-2 left-2.5 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white text-[9px] font-medium">
+            <div className="absolute bottom-2 left-2.5 flex items-center gap-1 px-1.5 py-0.5 rounded-lg bg-black/50 backdrop-blur-sm text-white text-[9px] font-medium">
               <Grid3X3 className="w-2.5 h-2.5" />
               {imageCount}
             </div>
@@ -712,7 +712,7 @@ function RentalsContent() {
                   <button
                     key={n.value || "all-n"}
                     onClick={() => handleNeighborhood(n.value)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
                       isActive
                         ? "bg-slate-900 text-white"
                         : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800"
@@ -892,7 +892,7 @@ function RentalsContent() {
                   </div>
                   <button
                     onClick={() => toggleCompare(id)}
-                    className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-slate-600 hover:bg-red-500 text-white flex items-center justify-center transition-colors"
+                    className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-md bg-slate-600 hover:bg-red-500 text-white flex items-center justify-center transition-colors"
                   >
                     <X className="w-2.5 h-2.5" />
                   </button>

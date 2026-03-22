@@ -1,20 +1,26 @@
-import { FlickeringGridBackground } from "@/components/ui/flickering-grid-background";
+import type { Metadata } from "next";
+import { LandingLayoutShell } from "@/components/landing/LandingLayoutShell";
 
 /**
- * Landing layout - Coastal Glassmorphism design
- * Uses Playfair Display for headings, Montserrat for body
- * FlickeringGrid background for all landing pages
+ * Landing layout — default light theme; optional dark (toggle on home).
  */
+
+export const metadata: Metadata = {
+  title: "SmartStart PM | Modern Property Management",
+  description:
+    "Enterprise-ready property management from Naples, Florida. Economical per-property pricing, API integrations, migration from legacy PM tools and CSV, with practical AI-assisted workflows.",
+  openGraph: {
+    title: "SmartStart PM | Modern Property Management",
+    description:
+      "Light, fast, integration-friendly PM software for portfolios of any size.",
+    type: "website",
+  },
+};
 
 export default function LandingLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="relative min-h-screen font-[var(--font-montserrat)] antialiased">
-      <FlickeringGridBackground />
-      <div className="relative z-10">{children}</div>
-    </div>
-  );
+  return <LandingLayoutShell>{children}</LandingLayoutShell>;
 }

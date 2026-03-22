@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
-import connectDB from "@/lib/mongodb";
+import connectDB, { connectDBSafe } from "@/lib/mongodb";
 import { DisplaySettings, User } from "@/models";
 import {
   createSuccessResponse,
@@ -126,12 +126,32 @@ const bulkUpdateSchema = z.object({
   ),
 });
 
+function displayFallbackUnauthenticated() {
+  return {
+    settings: {
+      branding: {
+        logoLight: "/images/logo-light.svg",
+        logoDark: "/images/logo-dark.svg",
+        favicon: "/favicon.ico",
+        primaryColor: "#3B82F6",
+        secondaryColor: "#64748B",
+      },
+    },
+    metadata: { lastUpdated: new Date(), version: 1 },
+  };
+}
+
 // ============================================================================
 // GET /api/settings/display - Get display settings with enhanced features
 // ============================================================================
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
+    const db = await connectDBSafe();
+    if (!db) {
+      const response = createSuccessResponse(displayFallbackUnauthenticated());
+      return addSecurityHeaders(response);
+    }
+
     const session = await auth();
 
     let actorId: string;
@@ -143,10 +163,7 @@ export async function GET(request: NextRequest) {
         .select("_id")
         .lean();
       if (!admin) {
-        return createSuccessResponse({
-          settings: { branding: { logoLight: "/images/logo-light.svg", logoDark: "/images/logo-dark.svg", favicon: "/favicon.ico", primaryColor: "#3B82F6", secondaryColor: "#64748B" } },
-          metadata: { lastUpdated: new Date(), version: 1 },
-        });
+        return createSuccessResponse(displayFallbackUnauthenticated());
       }
       actorId = (admin as any)._id.toString();
       actorRole = UserRole.ADMIN;

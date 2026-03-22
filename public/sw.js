@@ -5,12 +5,12 @@
  * responses are NEVER cached to prevent PII exposure on shared devices.
  */
 
-const CACHE_NAME = "SmartStartPM-v1.3.0";
-const STATIC_CACHE_NAME = "SmartStartPM-static-v1.3.0";
-const DYNAMIC_CACHE_NAME = "SmartStartPM-dynamic-v1.3.0";
+const CACHE_NAME = "SmartStartPM-v1.4.0";
+const STATIC_CACHE_NAME = "SmartStartPM-static-v1.4.0";
+const DYNAMIC_CACHE_NAME = "SmartStartPM-dynamic-v1.4.0";
 
+/** Do not precache `/` — HTML must not be stuck on an old marketing shell after deploys. */
 const STATIC_ASSETS = [
-  "/",
   "/manifest.json",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
@@ -109,25 +109,43 @@ async function handleStaticAssets(request) {
 
 async function handlePageRequest(request) {
   try {
-    const cachedResponse = await caches.match(request);
+    const accept = request.headers.get("accept") || "";
+    const isHtmlDocument =
+      request.mode === "navigate" || accept.includes("text/html");
 
-    const networkResponsePromise = fetch(request)
-      .then((networkResponse) => {
+    // HTML: network-first so landing and app routes always pick up new deploys.
+    if (isHtmlDocument) {
+      try {
+        const networkResponse = await fetch(request);
         if (networkResponse.ok) {
-          const cache = caches.open(DYNAMIC_CACHE_NAME);
-          cache.then((c) => c.put(request, networkResponse.clone()));
+          const cache = await caches.open(DYNAMIC_CACHE_NAME);
+          await cache.put(request, networkResponse.clone());
         }
         return networkResponse;
-      })
-      .catch(() => null);
+      } catch {
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) return cachedResponse;
+      }
+    } else {
+      const cachedResponse = await caches.match(request);
+      const networkResponsePromise = fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse.ok) {
+            const cache = caches.open(DYNAMIC_CACHE_NAME);
+            cache.then((c) => c.put(request, networkResponse.clone()));
+          }
+          return networkResponse;
+        })
+        .catch(() => null);
 
-    if (cachedResponse) {
-      return cachedResponse;
-    }
+      if (cachedResponse) {
+        return cachedResponse;
+      }
 
-    const networkResponse = await networkResponsePromise;
-    if (networkResponse) {
-      return networkResponse;
+      const networkResponse = await networkResponsePromise;
+      if (networkResponse) {
+        return networkResponse;
+      }
     }
 
     return (

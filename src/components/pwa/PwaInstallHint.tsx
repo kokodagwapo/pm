@@ -1,9 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useBranding } from "@/components/providers/BrandingProvider";
+
+/** Default favicon in branding is .ico — use SVG mark for a crisp banner tile. */
+const DEFAULT_VECTOR_LOGO = "/favicon.svg";
+const DEFAULT_BRANDING_FAVICON = "/favicon.ico";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -24,9 +29,21 @@ export function PwaInstallHint({
   /** Match dashboard appearance (immersive vs light). */
   variant?: "dark" | "light";
 }) {
+  const { branding } = useBranding();
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [standalone, setStandalone] = useState(false);
+
+  const logoSrc = useMemo(() => {
+    const f = branding.favicon?.trim();
+    if (!f || f === DEFAULT_BRANDING_FAVICON) return DEFAULT_VECTOR_LOGO;
+    return f;
+  }, [branding.favicon]);
+  const iconFallbackDone = useRef(false);
+
+  useEffect(() => {
+    iconFallbackDone.current = false;
+  }, [logoSrc]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -84,12 +101,34 @@ export function PwaInstallHint({
     >
       <div
         className={cn(
-          "flex items-start gap-3 rounded-2xl border p-3 shadow-lg backdrop-blur-md",
+          "relative flex items-start gap-3 rounded-2xl border p-3 pr-10 shadow-lg backdrop-blur-md",
           variant === "light"
             ? "border-slate-200/90 bg-white/95 text-slate-900"
             : "dashboard-ui-surface border-white/15 bg-slate-950/90 dark:bg-slate-950/85"
         )}
       >
+        <div
+          className={cn(
+            "relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl shadow-lg",
+            variant === "light"
+              ? "bg-gradient-to-br from-slate-50 to-white ring-1 ring-slate-200/90 shadow-slate-900/[0.06]"
+              : "bg-gradient-to-br from-white/20 to-white/[0.06] ring-1 ring-white/25 shadow-black/25"
+          )}
+          aria-hidden
+        >
+          <img
+            src={logoSrc}
+            alt=""
+            width={44}
+            height={44}
+            className="h-[2.125rem] w-[2.125rem] object-contain"
+            onError={(e) => {
+              if (iconFallbackDone.current) return;
+              iconFallbackDone.current = true;
+              e.currentTarget.src = DEFAULT_VECTOR_LOGO;
+            }}
+          />
+        </div>
         <div
           className={cn(
             "min-w-0 flex-1 text-sm",
@@ -131,7 +170,7 @@ export function PwaInstallHint({
           type="button"
           onClick={dismiss}
           className={cn(
-            "shrink-0 rounded-full p-1 transition",
+            "absolute right-2 top-2 shrink-0 rounded-lg p-1.5 transition",
             variant === "light"
               ? "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
               : "text-white/60 hover:bg-white/10 hover:text-white"

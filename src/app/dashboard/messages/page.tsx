@@ -1183,7 +1183,7 @@ export default function MessagesPage() {
                               return (
                                 <span
                                   key={reaction.value}
-                                  className="flex items-center gap-1 rounded-full bg-muted px-2 py-1"
+                                  className="flex items-center gap-1 rounded-xl bg-muted px-2 py-1"
                                 >
                                   {reaction.miniIcon}
                                   {count}

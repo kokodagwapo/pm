@@ -27,6 +27,7 @@ export default function EnhancedNewPropertyPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(data),
       });
 

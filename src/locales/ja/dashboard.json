@@ -146,5 +146,17 @@
   "dashboard.tenant.status.upcoming": "開始予定",
   "dashboard.tenant.status.terminated": "終了",
   "dashboard.tenant.activityType.notification": "通知",
-  "dashboard.tenant.activityType.maintenance": "メンテナンス"
+  "dashboard.tenant.activityType.maintenance": "メンテナンス",
+
+  "dashboard.admin.demoLeads.title": "デモリード",
+  "dashboard.admin.demoLeads.subtitle": "デモサインインフォームからの送信。管理者のみ表示されます。",
+  "dashboard.admin.demoLeads.refresh": "更新",
+  "dashboard.admin.demoLeads.tableTitle": "送信一覧",
+  "dashboard.admin.demoLeads.tableHint": "合計 {count} 件",
+  "dashboard.admin.demoLeads.empty": "デモの送信はまだありません。",
+  "dashboard.admin.demoLeads.loadError": "デモリードを読み込めませんでした。",
+  "dashboard.admin.demoLeads.col.name": "氏名",
+  "dashboard.admin.demoLeads.col.phone": "電話",
+  "dashboard.admin.demoLeads.col.email": "メール",
+  "dashboard.admin.demoLeads.col.submitted": "送信日時"
 }

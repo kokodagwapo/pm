@@ -174,5 +174,17 @@
   "dashboard.tenant.status.upcoming": "Próximo",
   "dashboard.tenant.status.terminated": "Terminado",
   "dashboard.tenant.activityType.notification": "Notificación",
-  "dashboard.tenant.activityType.maintenance": "Mantenimiento"
+  "dashboard.tenant.activityType.maintenance": "Mantenimiento",
+
+  "dashboard.admin.demoLeads.title": "Leads de demo",
+  "dashboard.admin.demoLeads.subtitle": "Envíos del formulario de acceso demo. Solo visible para administradores.",
+  "dashboard.admin.demoLeads.refresh": "Actualizar",
+  "dashboard.admin.demoLeads.tableTitle": "Envíos",
+  "dashboard.admin.demoLeads.tableHint": "{count} registros en total",
+  "dashboard.admin.demoLeads.empty": "Aún no hay envíos de demo.",
+  "dashboard.admin.demoLeads.loadError": "No se pudieron cargar los leads de demo.",
+  "dashboard.admin.demoLeads.col.name": "Nombre",
+  "dashboard.admin.demoLeads.col.phone": "Teléfono",
+  "dashboard.admin.demoLeads.col.email": "Correo",
+  "dashboard.admin.demoLeads.col.submitted": "Enviado"
 }

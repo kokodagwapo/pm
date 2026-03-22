@@ -56,7 +56,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
           </div>
           {/* Instant Book */}
           <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-            <span className="px-4 py-2 rounded-full bg-white text-slate-900 font-semibold text-sm shadow-md">
+            <span className="px-4 py-2 rounded-2xl bg-white text-slate-900 font-semibold text-sm shadow-md">
               Instant Book
             </span>
           </div>

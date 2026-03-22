@@ -173,9 +173,27 @@ export function LocalizationProvider({
   );
 
   useEffect(() => {
+    if (typeof document === "undefined") return;
+    const code = currentLocale || "en-US";
+    document.documentElement.lang = code;
+    document.documentElement.dir = localizationService.isRTL(code)
+      ? "rtl"
+      : "ltr";
+  }, [currentLocale]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
 
     const handleStorage = (event: StorageEvent) => {
+      if (
+        event.key === "SmartStartPM-locale" &&
+        event.newValue &&
+        event.newValue !== currentLocale
+      ) {
+        localizationService.setLocale(event.newValue);
+        setCurrentLocale(event.newValue);
+        setLocale(localizationService.getLocale(event.newValue));
+      }
       if (event.key !== "SmartStartPM-currency" || !event.newValue) return;
       if (event.newValue === currentCurrency) return;
       applyCurrency(event.newValue, false);
@@ -201,7 +219,7 @@ export function LocalizationProvider({
         handleDisplaySettingsUpdate
       );
     };
-  }, [applyCurrency, currentCurrency]);
+  }, [applyCurrency, currentCurrency, currentLocale]);
 
   useEffect(() => {
     if (typeof window === "undefined" || hasLoadedDisplaySettings.current)
@@ -338,7 +356,7 @@ export function LocalizationProvider({
     formatNumber,
     formatPercentage,
     convertCurrency,
-    isRTL: localizationService.isRTL(),
+    isRTL: localizationService.isRTL(currentLocale),
     firstDayOfWeek: localizationService.getFirstDayOfWeek(),
     loading,
     language,

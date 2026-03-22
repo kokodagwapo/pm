@@ -146,5 +146,17 @@
   "dashboard.tenant.status.upcoming": "Предстоящий",
   "dashboard.tenant.status.terminated": "Расторгнутый",
   "dashboard.tenant.activityType.notification": "Уведомление",
-  "dashboard.tenant.activityType.maintenance": "Обслуживание"
+  "dashboard.tenant.activityType.maintenance": "Обслуживание",
+
+  "dashboard.admin.demoLeads.title": "Демо-заявки",
+  "dashboard.admin.demoLeads.subtitle": "Отправки из формы демо-входа. Видно только администраторам.",
+  "dashboard.admin.demoLeads.refresh": "Обновить",
+  "dashboard.admin.demoLeads.tableTitle": "Отправки",
+  "dashboard.admin.demoLeads.tableHint": "Всего записей: {count}",
+  "dashboard.admin.demoLeads.empty": "Пока нет демо-отправок.",
+  "dashboard.admin.demoLeads.loadError": "Не удалось загрузить демо-заявки.",
+  "dashboard.admin.demoLeads.col.name": "Имя",
+  "dashboard.admin.demoLeads.col.phone": "Телефон",
+  "dashboard.admin.demoLeads.col.email": "Email",
+  "dashboard.admin.demoLeads.col.submitted": "Отправлено"
 }

@@ -174,5 +174,17 @@
   "dashboard.tenant.status.upcoming": "À venir",
   "dashboard.tenant.status.terminated": "Résilié",
   "dashboard.tenant.activityType.notification": "Notification",
-  "dashboard.tenant.activityType.maintenance": "Maintenance"
+  "dashboard.tenant.activityType.maintenance": "Maintenance",
+
+  "dashboard.admin.demoLeads.title": "Prospects démo",
+  "dashboard.admin.demoLeads.subtitle": "Soumissions du formulaire de connexion démo. Visible uniquement par les administrateurs.",
+  "dashboard.admin.demoLeads.refresh": "Actualiser",
+  "dashboard.admin.demoLeads.tableTitle": "Soumissions",
+  "dashboard.admin.demoLeads.tableHint": "{count} enregistrements au total",
+  "dashboard.admin.demoLeads.empty": "Aucune soumission démo pour le moment.",
+  "dashboard.admin.demoLeads.loadError": "Impossible de charger les prospects démo.",
+  "dashboard.admin.demoLeads.col.name": "Nom",
+  "dashboard.admin.demoLeads.col.phone": "Téléphone",
+  "dashboard.admin.demoLeads.col.email": "E-mail",
+  "dashboard.admin.demoLeads.col.submitted": "Envoyé"
 }

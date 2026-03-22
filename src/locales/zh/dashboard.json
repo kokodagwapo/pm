@@ -146,5 +146,17 @@
   "dashboard.tenant.status.upcoming": "即将开始",
   "dashboard.tenant.status.terminated": "已终止",
   "dashboard.tenant.activityType.notification": "通知",
-  "dashboard.tenant.activityType.maintenance": "维修"
+  "dashboard.tenant.activityType.maintenance": "维修",
+
+  "dashboard.admin.demoLeads.title": "演示留资",
+  "dashboard.admin.demoLeads.subtitle": "来自演示登录表单的提交，仅管理员可见。",
+  "dashboard.admin.demoLeads.refresh": "刷新",
+  "dashboard.admin.demoLeads.tableTitle": "提交记录",
+  "dashboard.admin.demoLeads.tableHint": "共 {count} 条",
+  "dashboard.admin.demoLeads.empty": "暂无演示提交。",
+  "dashboard.admin.demoLeads.loadError": "无法加载演示留资。",
+  "dashboard.admin.demoLeads.col.name": "姓名",
+  "dashboard.admin.demoLeads.col.phone": "电话",
+  "dashboard.admin.demoLeads.col.email": "邮箱",
+  "dashboard.admin.demoLeads.col.submitted": "提交时间"
 }

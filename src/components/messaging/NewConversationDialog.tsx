@@ -447,7 +447,7 @@ export const NewConversationDialog: React.FC<NewConversationDialogProps> = ({
                 </span>
                 <button
                   onClick={() => handleSelectParticipant(participant)}
-                  className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                  className="ml-1 hover:bg-gray-200 rounded-md p-0.5"
                 >
                   <X className="h-3 w-3" />
                 </button>

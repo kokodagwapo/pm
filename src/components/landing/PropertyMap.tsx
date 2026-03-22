@@ -564,7 +564,7 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
       <div className="absolute top-3 left-3 z-[1000] w-16 h-16 select-none pointer-events-none"
         style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))" }}
       >
-        <div className="relative w-full h-full bg-black/60 backdrop-blur-md rounded-full border border-white/25 flex items-center justify-center">
+        <div className="relative w-full h-full bg-black/60 backdrop-blur-md rounded-2xl border border-white/25 flex items-center justify-center">
           {/* Cardinal labels */}
           <span className="absolute top-1 left-1/2 -translate-x-1/2 text-white text-[10px] font-black leading-none tracking-tight">N</span>
           <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-white/45 text-[9px] font-bold leading-none">S</span>
@@ -595,7 +595,7 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
                   <button
                     key={cat.id}
                     onClick={() => togglePOI(cat.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wide whitespace-nowrap transition-all border shadow-sm ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium tracking-wide whitespace-nowrap transition-all border shadow-sm ${
                       active
                         ? "text-white border-transparent shadow-md scale-105"
                         : "bg-white/90 backdrop-blur-md text-slate-600 border-slate-200/60 hover:bg-white hover:text-slate-900 hover:scale-105 shadow-sm"
@@ -627,7 +627,7 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
                     <button
                       key={n.value || "all"}
                       onClick={() => onNeighborhoodChange(n.value)}
-                      className={`px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wide whitespace-nowrap transition-all border shadow-sm ${
+                      className={`px-3 py-1.5 rounded-xl text-[11px] font-medium tracking-wide whitespace-nowrap transition-all border shadow-sm ${
                         isActive
                           ? "bg-slate-900 text-white border-transparent shadow-md"
                           : "bg-white/90 backdrop-blur-md text-slate-600 border-slate-200/60 hover:bg-white hover:text-slate-900"

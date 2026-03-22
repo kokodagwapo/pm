@@ -180,5 +180,17 @@
   "dashboard.tenant.status.upcoming": "Upcoming",
   "dashboard.tenant.status.terminated": "Terminated",
   "dashboard.tenant.activityType.notification": "Notification",
-  "dashboard.tenant.activityType.maintenance": "Maintenance"
+  "dashboard.tenant.activityType.maintenance": "Maintenance",
+
+  "dashboard.admin.demoLeads.title": "Demo leads",
+  "dashboard.admin.demoLeads.subtitle": "Submissions from the demo sign-in form. Visible to administrators only.",
+  "dashboard.admin.demoLeads.refresh": "Refresh",
+  "dashboard.admin.demoLeads.tableTitle": "Submissions",
+  "dashboard.admin.demoLeads.tableHint": "{count} total records",
+  "dashboard.admin.demoLeads.empty": "No demo submissions yet.",
+  "dashboard.admin.demoLeads.loadError": "Could not load demo leads.",
+  "dashboard.admin.demoLeads.col.name": "Name",
+  "dashboard.admin.demoLeads.col.phone": "Phone",
+  "dashboard.admin.demoLeads.col.email": "Email",
+  "dashboard.admin.demoLeads.col.submitted": "Submitted"
 }

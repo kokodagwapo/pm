@@ -237,7 +237,7 @@ function showCustomToast(
           className={`flex items-center gap-3 px-4 py-3 ${colors.headerBg} border-b ${colors.headerBorder}`}
         >
           <div
-            className={`flex items-center justify-center w-8 h-8 rounded-full ${colors.iconBg}`}
+            className={`flex items-center justify-center w-8 h-8 rounded-xl ${colors.iconBg}`}
           >
             <Icon className={`h-5 w-5 ${colors.iconColor}`} />
           </div>
@@ -338,7 +338,7 @@ function showSimpleToast(
       >
         <div className={`flex items-center gap-3 px-4 py-3 ${colors.headerBg}`}>
           <div
-            className={`flex items-center justify-center w-8 h-8 rounded-full ${colors.iconBg}`}
+            className={`flex items-center justify-center w-8 h-8 rounded-xl ${colors.iconBg}`}
           >
             <Icon className={`h-5 w-5 ${colors.iconColor}`} />
           </div>

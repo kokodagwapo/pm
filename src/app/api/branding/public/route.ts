@@ -6,8 +6,8 @@
 
 export const dynamic = "force-dynamic";
 
-import { NextRequest, NextResponse } from "next/server";
-import connectDB from "@/lib/mongodb";
+import { NextResponse } from "next/server";
+import { connectDBSafe } from "@/lib/mongodb";
 import { DisplaySettings, User } from "@/models";
 import { UserRole } from "@/types";
 
@@ -25,9 +25,15 @@ const DEFAULT_BRANDING = {
  * GET /api/branding/public - Get public branding information
  * No authentication required - used for login page
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    await connectDB();
+    const db = await connectDBSafe();
+    if (!db) {
+      return NextResponse.json({
+        success: true,
+        data: DEFAULT_BRANDING,
+      });
+    }
 
     // Find the admin user to get their display settings
     const admin = await User.findOne({

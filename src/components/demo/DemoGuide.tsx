@@ -458,7 +458,7 @@ export function DemoGuide() {
           onClick={() => setIsOpen((v) => !v)}
           aria-label="Demo guide"
           className={cn(
-            "relative w-12 h-12 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center text-white",
+            "relative w-12 h-12 rounded-2xl shadow-lg transition-all duration-300 flex items-center justify-center text-white",
             "hover:scale-110 active:scale-95",
             roleColors.dot,
             isOpen && "scale-110 ring-4 ring-cyan-300/45 shadow-[0_0_28px_rgba(56,189,248,0.35)]"
@@ -467,7 +467,7 @@ export function DemoGuide() {
           {showPulse && !isOpen && !hasCompleted && (
             <span
               className={cn(
-                "absolute inset-0 rounded-full animate-ping opacity-60",
+                "absolute inset-0 rounded-2xl animate-ping opacity-60",
                 roleColors.dot
               )}
             />
@@ -484,7 +484,7 @@ export function DemoGuide() {
           <button
             onClick={handleRestart}
             aria-label="Restart tour"
-            className="absolute -top-10 right-0 flex h-8 w-8 items-center justify-center rounded-full border border-sky-200/35 bg-sky-950/40 text-white shadow-[0_4px_24px_rgba(56,189,248,0.15)] backdrop-blur-md transition-all hover:border-sky-200/50 hover:bg-sky-900/50"
+            className="absolute -top-10 right-0 flex h-8 w-8 items-center justify-center rounded-xl border border-sky-200/35 bg-sky-950/40 text-white shadow-[0_4px_24px_rgba(56,189,248,0.15)] backdrop-blur-md transition-all hover:border-sky-200/50 hover:bg-sky-900/50"
             title="Restart tour"
           >
             <RotateCcw className="h-3.5 w-3.5" />
@@ -514,7 +514,7 @@ export function DemoGuide() {
           {/* Progress bar */}
           <div className="h-1 bg-sky-950/40">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-sky-300 via-cyan-200 to-sky-100 shadow-[0_0_12px_rgba(125,211,252,0.45)] transition-all duration-500"
+              className="h-full rounded-md bg-gradient-to-r from-sky-300 via-cyan-200 to-sky-100 shadow-[0_0_12px_rgba(125,211,252,0.45)] transition-all duration-500"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -541,7 +541,7 @@ export function DemoGuide() {
               </span>
               <button
                 onClick={handleClose}
-                className="flex h-6 w-6 items-center justify-center rounded-full text-white/80 transition-all hover:bg-white/10 hover:text-white"
+                className="flex h-6 w-6 items-center justify-center rounded-lg text-white/80 transition-all hover:bg-white/10 hover:text-white"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -566,7 +566,7 @@ export function DemoGuide() {
                       {step.title}
                     </h3>
                     {step.badge && (
-                      <span className="rounded-full border border-sky-200/35 bg-sky-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-900 shadow-[0_0_20px_rgba(56,189,248,0.12)]">
+                      <span className="rounded-lg border border-sky-200/35 bg-sky-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-900 shadow-[0_0_20px_rgba(56,189,248,0.12)]">
                         {step.badge}
                       </span>
                     )}
@@ -585,7 +585,7 @@ export function DemoGuide() {
                   key={i}
                   onClick={() => goToStep(i)}
                   className={cn(
-                    "rounded-full transition-all duration-200",
+                    "rounded-md transition-all duration-200",
                     i === currentStep
                       ? cn("h-2 w-4 shadow-[0_0_10px_rgba(125,211,252,0.4)]", roleColors.dot)
                       : i < currentStep
@@ -603,7 +603,7 @@ export function DemoGuide() {
                 onClick={handlePrev}
                 disabled={isFirst}
                 className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-full border transition-all",
+                  "flex h-8 w-8 items-center justify-center rounded-xl border transition-all",
                   isFirst
                     ? "cursor-not-allowed border-white/5 bg-white/[0.03] text-white/25"
                     : "border-sky-200/25 bg-white/5 text-white hover:border-sky-200/40 hover:bg-white/10 active:scale-95"
@@ -634,7 +634,7 @@ export function DemoGuide() {
                 onClick={handleNext}
                 disabled={isLast}
                 className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-full border transition-all",
+                  "flex h-8 w-8 items-center justify-center rounded-xl border transition-all",
                   isLast
                     ? "cursor-not-allowed border-white/5 bg-white/[0.03] text-white/25"
                     : "border-sky-200/25 bg-white/5 text-white hover:border-sky-200/40 hover:bg-white/10 active:scale-95"

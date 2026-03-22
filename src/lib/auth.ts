@@ -185,22 +185,23 @@ export const authOptions: NextAuthConfig = {
   },
 
   callbacks: {
-    async jwt({ token, user, account }) {
-      // Initial sign in
-      if (account && user) {
-        token.role = user?.role;
-        token.isActive = user?.isActive;
-        token.userId = user?.id;
+    async jwt({ token, user }) {
+      // Persist user id on the token for every sign-in path (credentials, OAuth, etc.)
+      if (user?.id) {
+        token.userId = user.id;
+        token.sub = user.id;
+        token.role = user.role;
+        token.isActive = user.isActive;
       }
 
-      // Return previous token if the access token has not expired yet
       return token;
     },
 
     async session({ session, token }) {
       // Send properties to the client
       if (token) {
-        session.user.id = (token?.userId as string) ?? "";
+        session.user.id =
+          (token?.userId as string) || (token?.sub as string) || "";
 
         session.user.role = (token?.role as UserRole) ?? UserRole.TENANT;
         session.user.isActive = (token?.isActive as boolean) ?? false;
@@ -310,65 +311,17 @@ export const {
   signOut: signOutAction,
 } = NextAuth(authOptions);
 
-// Helper function to check if user has required role
-export function hasRole(
-  userRole: UserRole,
-  requiredRoles: UserRole[]
-): boolean {
-  return requiredRoles.includes(userRole);
-}
-
-// Helper function to check if user is admin
-export function isAdmin(userRole: UserRole): boolean {
-  return userRole === UserRole.ADMIN;
-}
-
-// Helper function to check if user is a property owner
-export function isOwner(userRole: UserRole): boolean {
-  return userRole === UserRole.OWNER;
-}
-
-// Helper function to check if user can manage properties (full access)
-export function canManageProperties(userRole: UserRole): boolean {
-  return [UserRole.ADMIN, UserRole.MANAGER].includes(userRole);
-}
-
-// Helper function to check if user can manage their own properties (includes owners)
-export function canManageOwnProperties(userRole: UserRole): boolean {
-  return [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER].includes(userRole);
-}
-
-// Helper function to check if user can access tenant features
-export function canAccessTenantFeatures(userRole: UserRole): boolean {
-  return [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT].includes(userRole);
-}
-
-// Helper function to check if user has company-wide access (not tenant-specific)
-export function hasCompanyAccess(userRole: UserRole): boolean {
-  return [UserRole.ADMIN, UserRole.MANAGER].includes(userRole);
-}
-
-// Helper function to check if user can manage users
-export function canManageUsers(userRole: UserRole): boolean {
-  return userRole === UserRole.ADMIN;
-}
-
-// Helper function to check if user can view all company data
-export function canViewAllData(userRole: UserRole): boolean {
-  return [UserRole.ADMIN, UserRole.MANAGER].includes(userRole);
-}
-
-// Helper function to check if user can view property data (owners see only their properties)
-export function canViewPropertyData(userRole: UserRole): boolean {
-  return [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER].includes(userRole);
-}
-
-// Helper function to check if user can manage calendar events
-export function canManageCalendarEvents(userRole: UserRole): boolean {
-  return [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER].includes(userRole);
-}
-
-// Helper function to check if user can block dates on calendar
-export function canBlockDates(userRole: UserRole): boolean {
-  return [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER].includes(userRole);
-}
+export {
+  hasRole,
+  isAdmin,
+  isOwner,
+  canManageProperties,
+  canManageOwnProperties,
+  canAccessTenantFeatures,
+  hasCompanyAccess,
+  canManageUsers,
+  canViewAllData,
+  canViewPropertyData,
+  canManageCalendarEvents,
+  canBlockDates,
+} from "./auth-role-helpers";

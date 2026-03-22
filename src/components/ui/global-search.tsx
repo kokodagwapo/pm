@@ -143,7 +143,7 @@ export function GlobalSearch({
 
   /** Matches header `dashboard-hero-search` (glass on video); overrides Input light-theme defaults. */
   const dashboardInputChrome =
-    "dashboard-hero-search rounded-full focus:outline-none transition-all duration-300";
+    "dashboard-hero-search rounded-2xl focus:outline-none transition-all duration-300";
 
   return (
     <div className={cn("relative", className)}>

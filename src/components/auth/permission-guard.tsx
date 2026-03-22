@@ -8,10 +8,7 @@ import {
   isAdmin,
   canManageProperties,
   canAccessTenantFeatures,
-  hasCompanyAccess,
-  canManageUsers,
-  canViewAllData,
-} from "@/lib/auth";
+} from "@/lib/auth-role-helpers";
 import { useRolePermissions } from "@/hooks/useRolePermissions";
 
 interface PermissionGuardProps {

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LunaWidget } from "@/components/landing/LunaWidget";
 import { SinglePropertyMap } from "@/components/landing/SinglePropertyMap";
-import { NaplesAreaGuide } from "@/components/landing/NaplesAreaGuide";
 import {
   Bed,
   Bath,
@@ -117,6 +116,18 @@ const BASE_NAV_SECTIONS = [
   { id: "availability", label: "Availability", icon: Calendar },
 ];
 
+/** 48px landing header + ~56px sticky subnav + small buffer — keep in sync with `top-12` + subnav height */
+const SUBNAV_SCROLL_MARGIN_CLASS = "scroll-mt-28";
+
+/** Matches `LandingHeader` light strip: frosted glass on page bg */
+const FROST_BAR =
+  "bg-white/[0.06] backdrop-blur-md supports-[backdrop-filter]:bg-white/[0.05] transition-[background-color,border-color] duration-200";
+const FROST_CARD_OUTER = `rounded-2xl border border-slate-200/25 ${FROST_BAR} overflow-hidden`;
+const FROST_SECTION_HEADER = `px-6 py-4 border-b border-slate-200/25 ${FROST_BAR}`;
+const FROST_SECTION_HEADER_ROW = `px-6 py-4 border-b border-slate-200/25 flex items-center justify-between ${FROST_BAR}`;
+const FROST_MAP_FOOTER = `px-6 py-3 border-t border-slate-200/25 flex items-center justify-between ${FROST_BAR}`;
+const SCROLL_SPY_OFFSET_PX = 112;
+
 
 
 function getYouTubeEmbedUrl(url: string): string | null {
@@ -222,39 +233,28 @@ export function PropertyDetailClient({
       .finally(() => setLoading(false));
   }, [id, initialProperty]);
 
-  const geocodeAddress = useCallback((street: string, _city: string, _state: string, zip: string) => {
-    const STREET_COORDS: Record<string, [number, number]> = {
-      "arctic circle":       [26.1364, -81.7631],
-      "falling waters blvd": [26.1030, -81.7510],
-      "georgetown blvd":     [26.1282, -81.7816],
-      "tamiami trail n":     [26.1600, -81.7976],
-      "olympic dr":          [26.2230, -81.7690],
-      "harwich ct":          [26.1200, -81.7420],
-      "moon lake cir":       [26.1650, -81.7800],
-      "109th ave n":         [26.2650, -81.8080],
-      "whitten dr":          [26.1432, -81.7374],
-    };
+  const coordsFromZipFallback = useCallback((zip: string) => {
+    const zipNorm = (zip || "").replace(/\D/g, "").slice(0, 5);
     const ZIP_CENTROIDS: Record<string, [number, number]> = {
-      "34102": [26.1394, -81.8035], "34103": [26.1673, -81.8107],
-      "34104": [26.1400, -81.7404], "34105": [26.1656, -81.7626],
-      "34108": [26.2533, -81.8099], "34109": [26.2243, -81.7698],
-      "34110": [26.2742, -81.7913], "34112": [26.1022, -81.7461],
-      "34113": [26.0749, -81.7163], "34114": [26.0148, -81.6736],
-      "34116": [26.1642, -81.7049], "34119": [26.1030, -81.7510],
+      "34102": [26.1394, -81.8035],
+      "34103": [26.1673, -81.8107],
+      "34104": [26.1400, -81.7404],
+      "34105": [26.1656, -81.7626],
+      "34108": [26.2533, -81.8099],
+      "34109": [26.2243, -81.7698],
+      "34110": [26.2742, -81.7913],
+      "34112": [26.1022, -81.7461],
+      "34113": [26.0749, -81.7163],
+      "34114": [26.0148, -81.6736],
+      "34116": [26.1642, -81.7049],
+      "34119": [26.1030, -81.7510],
       "34120": [26.2319, -81.6401],
     };
-    const streetKey = street.replace(/^\d+\s+/, "").toLowerCase().trim();
-    if (STREET_COORDS[streetKey]) {
-      const b = STREET_COORDS[streetKey];
-      setMapCoords({ lat: b[0], lon: b[1] });
-      return;
+    if (zipNorm && ZIP_CENTROIDS[zipNorm]) {
+      const b = ZIP_CENTROIDS[zipNorm];
+      return { lat: b[0], lon: b[1] };
     }
-    if (zip && ZIP_CENTROIDS[zip]) {
-      const b = ZIP_CENTROIDS[zip];
-      setMapCoords({ lat: b[0], lon: b[1] });
-      return;
-    }
-    setMapCoords({ lat: 26.1700, lon: -81.7800 });
+    return { lat: 26.17, lon: -81.78 };
   }, []);
 
   const units = property?.units || [];
@@ -272,10 +272,42 @@ export function PropertyDetailClient({
   }, [property?.virtualTourUrl]);
 
   useEffect(() => {
-    if (address?.street && address?.city) {
-      geocodeAddress(address.street, address.city, address.state || "FL", address.zipCode || "");
-    }
-  }, [address?.street, address?.city, address?.state, address?.zipCode, geocodeAddress]);
+    if (!address?.street || !address?.city) return;
+
+    const query = [
+      address.street,
+      address.city,
+      address.state,
+      address.zipCode,
+      address.country || "United States",
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    setMapCoords(coordsFromZipFallback(address.zipCode || ""));
+
+    let cancelled = false;
+    void fetch(`/api/geocode?q=${encodeURIComponent(query)}`)
+      .then(async (res) => {
+        const data = await res.json().catch(() => null);
+        if (cancelled || !data?.ok || typeof data.lat !== "number" || typeof data.lon !== "number") {
+          return;
+        }
+        setMapCoords({ lat: data.lat, lon: data.lon });
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    address?.street,
+    address?.city,
+    address?.state,
+    address?.zipCode,
+    address?.country,
+    coordsFromZipFallback,
+  ]);
 
   useEffect(() => {
     try {
@@ -332,28 +364,27 @@ export function PropertyDetailClient({
 
   useEffect(() => {
     const handleScroll = () => {
-      const offset = 160;
       for (const section of [...navSections].reverse()) {
         const el = sectionRefs.current[section.id];
         if (el) {
           const rect = el.getBoundingClientRect();
-          if (rect.top <= offset) {
+          if (rect.top <= SCROLL_SPY_OFFSET_PX) {
             setActiveSection(section.id);
             break;
           }
         }
       }
     };
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [navSections]);
 
   const scrollToSection = (sectionId: string) => {
-    const el = sectionRefs.current[sectionId];
-    if (el) {
-      const y = el.getBoundingClientRect().top + window.scrollY - 140;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
+    sectionRefs.current[sectionId]?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   const calendarBlocks: CalendarBlock[] = useMemo(() => {
@@ -551,9 +582,9 @@ export function PropertyDetailClient({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-[#f6f5f2] font-[var(--font-jakarta)] antialiased">
         <LandingHeader />
-        <main className="pt-20 pb-16">
+        <main className="pb-16 pt-[calc(3rem+1.25rem)]">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="animate-pulse space-y-6">
               <div className="h-5 w-28 bg-slate-200 rounded" />
@@ -575,11 +606,11 @@ export function PropertyDetailClient({
 
   if (!property || error) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-[#f6f5f2] font-[var(--font-jakarta)] antialiased">
         <LandingHeader />
-        <main className="pt-20 pb-16 flex flex-col items-center justify-center min-h-[60vh] px-4">
+        <main className="flex min-h-[60vh] flex-col items-center justify-center px-4 pb-16 pt-[calc(3rem+1.25rem)]">
           <div className="text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-slate-100 flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-100 flex items-center justify-center">
               <Home className="w-8 h-8 text-slate-400" />
             </div>
             <h2 className="text-xl font-semibold text-slate-900 mb-2">
@@ -606,16 +637,16 @@ export function PropertyDetailClient({
   const totalGuests = unit ? (unit.bedrooms || 1) * 2 : 2;
 
   return (
-    <div className="min-h-screen bg-[#f8f7f4]">
+    <div className="min-h-screen bg-[#f6f5f2] font-[var(--font-jakarta)] antialiased text-slate-900">
       <LandingHeader />
 
-      <main className="pt-[104px] pb-16">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <main className="pb-16 pt-[calc(3rem+1.25rem)] sm:pt-[calc(3rem+1.5rem)]">
+        <div className="mx-auto max-w-7xl px-4 md:px-8">
           <Link
             href="/rentals"
-            className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 mb-6 text-sm font-medium transition-colors animate-pulse"
+            className="mb-8 inline-flex items-center gap-2 rounded-full py-1.5 pl-1 pr-2 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-200/60 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/15"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
             Back to all properties
           </Link>
 
@@ -680,48 +711,69 @@ export function PropertyDetailClient({
             )}
           </div>
 
-          <div className="sticky top-[72px] z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/70 -mx-4 md:-mx-8 px-4 md:px-8 mb-8 shadow-sm">
-            <div className="flex items-center justify-between">
-              <nav className="flex gap-0.5 overflow-x-auto no-scrollbar py-1 flex-1">
+          <div
+            className="-mx-4 mb-10 border-b border-slate-200/25 bg-white/[0.06] backdrop-blur-md supports-[backdrop-filter]:bg-white/[0.05] md:-mx-8 sticky top-12 z-30 transition-[background-color,border-color] duration-200"
+          >
+            <div className="mx-auto flex max-w-7xl items-stretch gap-2 px-4 py-2.5 sm:gap-3 sm:px-6 sm:py-3">
+              <nav
+                className="flex min-w-0 flex-1 snap-x snap-mandatory gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                aria-label="On this page"
+              >
                 {navSections.map((section) => {
                   const Icon = section.icon;
-                  const iconColors: Record<string, string> = {
-                    description: "text-slate-400", overview: "text-slate-400", pricing: "text-amber-400", amenities: "text-rose-300",
-                    availability: "text-emerald-400", tour: "text-violet-400", reviews: "text-cyan-400", map: "text-orange-400",
-                  };
+                  const active = activeSection === section.id;
                   return (
                     <button
                       key={section.id}
+                      type="button"
                       onClick={() => scrollToSection(section.id)}
-                      className={`flex items-center gap-1.5 px-3 py-3 text-sm font-medium whitespace-nowrap transition-colors relative ${
-                        activeSection === section.id
-                          ? "text-slate-900"
-                          : "text-slate-400 hover:text-slate-700"
+                      className={`inline-flex snap-start shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 ${
+                        active
+                          ? "bg-slate-900 text-white shadow-sm"
+                          : "bg-slate-100/80 text-slate-600 hover:bg-slate-200/90 hover:text-slate-900"
                       }`}
+                      aria-current={active ? "true" : undefined}
                     >
-                      {Icon && <Icon className={`w-3.5 h-3.5 ${iconColors[section.id] || "text-slate-400"}`} />}
-                      {section.label}
-                      {activeSection === section.id && (
-                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 rounded-full" />
+                      {Icon && (
+                        <Icon
+                          className={`h-3.5 w-3.5 shrink-0 ${active ? "text-white/90" : "text-slate-400"}`}
+                          aria-hidden
+                        />
                       )}
+                      {section.label}
                     </button>
                   );
                 })}
               </nav>
-              <div className="flex items-center gap-1 shrink-0 pl-2">
+              <div className="flex shrink-0 items-center gap-0.5 border-l border-slate-200/25 pl-2 sm:pl-3">
                 <button
+                  type="button"
                   onClick={toggleFavorite}
-                  className={`p-2 rounded-lg transition-all ${isFavorited ? "bg-red-50 text-red-500" : "text-slate-400 hover:text-red-400 hover:bg-red-50"}`}
+                  className={`rounded-xl p-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/15 ${
+                    isFavorited
+                      ? "text-rose-500 hover:bg-rose-50"
+                      : "text-slate-400 hover:bg-slate-100 hover:text-rose-500"
+                  }`}
                   title={isFavorited ? "Saved" : "Save property"}
+                  aria-pressed={isFavorited}
+                  aria-label={isFavorited ? "Remove from saved" : "Save property"}
                 >
-                  <Heart className={`w-4 h-4 ${isFavorited ? "fill-current" : ""}`} />
+                  <Heart className={`h-4 w-4 ${isFavorited ? "fill-current" : ""}`} />
                 </button>
                 <button
-                  onClick={() => { if (navigator.share) { navigator.share({ title: property?.name, url: window.location.href }); } else { navigator.clipboard?.writeText(window.location.href); }}}
-                  className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
+                  type="button"
+                  onClick={() => {
+                    if (navigator.share) {
+                      void navigator.share({ title: property?.name, url: window.location.href });
+                    } else {
+                      void navigator.clipboard?.writeText(window.location.href);
+                    }
+                  }}
+                  className="rounded-xl p-2.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/15"
                   title="Share"
+                  aria-label="Share this property"
                 >
-                  <Share2 className="w-4 h-4" />
+                  <Share2 className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -729,21 +781,21 @@ export function PropertyDetailClient({
 
           <div className="flex flex-col lg:flex-row gap-10">
             <div className="flex-1 min-w-0">
-              <div ref={(el) => { sectionRefs.current.description = el; }}>
-                <div className="flex flex-wrap items-center gap-2 mb-3">
+              <div ref={(el) => { sectionRefs.current.description = el; }} className={SUBNAV_SCROLL_MARGIN_CLASS}>
+                <div className="mb-3 flex flex-wrap items-center gap-2">
                   {propertyType && (
-                    <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold uppercase tracking-wide border border-slate-200">
+                    <span className="rounded-full border border-slate-200/90 bg-white px-3 py-1 text-xs font-medium uppercase tracking-wider text-slate-600">
                       {propertyType}
                     </span>
                   )}
                   {status && (
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${
                         status === "AVAILABLE"
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                          ? "bg-emerald-50/90 text-emerald-800 ring-1 ring-emerald-200/80"
                           : status === "OCCUPIED"
-                          ? "bg-amber-50 text-amber-700 border border-amber-100"
-                          : "bg-slate-50 text-slate-600 border border-slate-200"
+                            ? "bg-amber-50/90 text-amber-900 ring-1 ring-amber-200/80"
+                            : "bg-slate-100 text-slate-700 ring-1 ring-slate-200/80"
                       }`}
                     >
                       {String(status).charAt(0) + String(status).slice(1).toLowerCase()}
@@ -751,49 +803,42 @@ export function PropertyDetailClient({
                   )}
                 </div>
 
-                <h1 className="text-[2rem] md:text-4xl lg:text-5xl font-light text-slate-900 mb-2 leading-[1.15] tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                <h1
+                  className="mb-2 text-balance text-[1.875rem] font-normal leading-[1.12] tracking-tight text-slate-900 sm:text-4xl md:text-[2.75rem]"
+                  style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+                >
                   {property.name}
                 </h1>
 
                 {address && (
-                  <p className="flex items-center gap-1.5 text-slate-500 mb-5 text-sm font-medium tracking-wide">
-                    <MapPin className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+                  <p className="mb-6 flex items-start gap-2 text-sm leading-relaxed text-slate-600">
+                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />
                     {fullAddress}
                   </p>
                 )}
 
-                <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-3 pb-8 mb-8 border-b border-slate-100">
-                  {unit && (
-                    <>
-                      <div className="flex items-center gap-2 text-slate-700">
-                        <div className="w-9 h-9 rounded-lg bg-sky-50 flex items-center justify-center">
-                          <Users className="w-4 h-4 text-sky-600" />
-                        </div>
-                        <span className="text-sm font-medium">{totalGuests} Guests</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-700">
-                        <div className="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center">
-                          <Bed className="w-4 h-4 text-violet-600" />
-                        </div>
-                        <span className="text-sm font-medium">{unit.bedrooms} Bedrooms</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-700">
-                        <div className="w-9 h-9 rounded-lg bg-rose-50 flex items-center justify-center">
-                          <Bath className="w-4 h-4 text-rose-500" />
-                        </div>
-                        <span className="text-sm font-medium">{unit.bathrooms} Bathrooms</span>
-                      </div>
-                      {unit.squareFootage && (
-                        <div className="flex items-center gap-2 text-slate-700">
-                          <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
-                            <Home className="w-4 h-4 text-amber-600" />
-                          </div>
-                          <span className="text-sm font-medium">{unit.squareFootage} sq ft</span>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
+                {unit && (
+                  <div className="mb-8 flex flex-wrap gap-x-6 gap-y-3 border-b border-slate-200/80 pb-8 text-sm text-slate-600">
+                    <span className="inline-flex items-center gap-2">
+                      <Users className="h-4 w-4 text-slate-400" aria-hidden />
+                      <span className="font-medium text-slate-800">{totalGuests}</span> guests
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                      <Bed className="h-4 w-4 text-slate-400" aria-hidden />
+                      <span className="font-medium text-slate-800">{unit.bedrooms}</span> bedrooms
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                      <Bath className="h-4 w-4 text-slate-400" aria-hidden />
+                      <span className="font-medium text-slate-800">{unit.bathrooms}</span> bathrooms
+                    </span>
+                    {unit.squareFootage ? (
+                      <span className="inline-flex items-center gap-2">
+                        <Home className="h-4 w-4 text-slate-400" aria-hidden />
+                        <span className="font-medium text-slate-800">{unit.squareFootage}</span> sq ft
+                      </span>
+                    ) : null}
+                  </div>
+                )}
 
                 {property.description && (
                   <div className="mb-10">
@@ -839,12 +884,15 @@ export function PropertyDetailClient({
                 )}
               </div>
 
-              <div ref={(el) => { sectionRefs.current.pricing = el; }}>
+              <div ref={(el) => { sectionRefs.current.pricing = el; }} className={SUBNAV_SCROLL_MARGIN_CLASS}>
                 {(baseRentPerNight > 0 || seasonalPricingSummary.length > 0) && (
-                  <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
-                    <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                      <h2 className="text-xl md:text-2xl font-light text-slate-900 flex items-center gap-2 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
-                        <DollarSign className="w-4 h-4 text-amber-500" />
+                  <div className={`mb-10 ${FROST_CARD_OUTER}`}>
+                    <div className={FROST_SECTION_HEADER}>
+                      <h2
+                        className="flex items-center gap-2 text-xl font-normal tracking-tight text-slate-900 md:text-2xl"
+                        style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+                      >
+                        <DollarSign className="h-4 w-4 text-slate-400" aria-hidden />
                         Pricing
                       </h2>
                     </div>
@@ -902,10 +950,10 @@ export function PropertyDetailClient({
                 )}
               </div>
 
-              <div ref={(el) => { sectionRefs.current.details = el; }}>
+              <div ref={(el) => { sectionRefs.current.details = el; }} className={SUBNAV_SCROLL_MARGIN_CLASS}>
                 {address && (
-                  <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
-                    <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
+                  <div className={`mb-10 ${FROST_CARD_OUTER}`}>
+                    <div className={FROST_SECTION_HEADER}>
                       <h2 className="text-lg font-semibold text-slate-900">Property Address</h2>
                     </div>
                     <div className="p-6">
@@ -952,8 +1000,8 @@ export function PropertyDetailClient({
                 )}
 
                 {unit && (
-                  <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
-                    <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
+                  <div className={`mb-10 ${FROST_CARD_OUTER}`}>
+                    <div className={FROST_SECTION_HEADER}>
                       <h2 className="text-lg font-semibold text-slate-900">Property Details</h2>
                     </div>
                     <div className="p-6">
@@ -982,10 +1030,10 @@ export function PropertyDetailClient({
                 )}
               </div>
 
-              <div ref={(el) => { sectionRefs.current.amenities = el; }}>
+              <div ref={(el) => { sectionRefs.current.amenities = el; }} className={SUBNAV_SCROLL_MARGIN_CLASS}>
                 {property.amenities?.length > 0 && (
-                  <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
-                    <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
+                  <div className={`mb-10 ${FROST_CARD_OUTER}`}>
+                    <div className={FROST_SECTION_HEADER}>
                       <h2 className="text-xl md:text-2xl font-light text-slate-900 flex items-center gap-2 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
                         <Sparkles className="w-4 h-4 text-rose-400" />
                         Amenities
@@ -1012,14 +1060,14 @@ export function PropertyDetailClient({
               </div>
 
               {/* Virtual Tour section */}
-              <div ref={(el) => { sectionRefs.current.tour = el; }}>
+              <div ref={(el) => { sectionRefs.current.tour = el; }} className={SUBNAV_SCROLL_MARGIN_CLASS}>
                 {property?.virtualTourUrl && (() => {
                   const ytUrl = getYouTubeEmbedUrl(property.virtualTourUrl);
                   const isMatterport = property.virtualTourUrl.includes("matterport.com");
                   const embedUrl = ytUrl ?? (isMatterport ? property.virtualTourUrl.replace("/show/", "/show/?play=1&") : null);
                   return (
-                    <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
-                      <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                    <div className={`mb-10 ${FROST_CARD_OUTER}`}>
+                      <div className={FROST_SECTION_HEADER_ROW}>
                         <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                           <Video className="w-5 h-5 text-violet-200" />
                           Tour
@@ -1053,9 +1101,9 @@ export function PropertyDetailClient({
                 })()}
               </div>
 
-              <div ref={(el) => { sectionRefs.current.availability = el; }}>
-                <div className="mb-6 rounded-2xl border border-slate-200 overflow-hidden">
-                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
+              <div ref={(el) => { sectionRefs.current.availability = el; }} className={SUBNAV_SCROLL_MARGIN_CLASS}>
+                <div className={`mb-6 ${FROST_CARD_OUTER}`}>
+                  <div className={FROST_SECTION_HEADER}>
                     <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <Calendar className="w-5 h-5 text-emerald-200" />
                       Availability
@@ -1071,7 +1119,7 @@ export function PropertyDetailClient({
                           <button
                             key={u._id || i}
                             onClick={() => handleUnitChange(i)}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
+                            className={`px-4 py-2 rounded-2xl text-sm font-medium transition-all border ${
                               i === selectedUnitIndex
                                 ? "bg-slate-900 text-white border-slate-900 shadow-sm"
                                 : "bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-800"
@@ -1096,7 +1144,7 @@ export function PropertyDetailClient({
                 </div>
 
                 {selectedDates && (
-                  <div className="mb-6 rounded-2xl border border-slate-200 overflow-hidden shadow-md">
+                  <div className={`mb-6 ${FROST_CARD_OUTER}`}>
                     {/* Header */}
                     <div className="px-5 py-3.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
                       <h3 className="font-semibold text-white flex items-center gap-2 text-sm">
@@ -1137,11 +1185,11 @@ export function PropertyDetailClient({
                           <div className="flex items-center gap-1">
                             <div className="w-6 h-px bg-slate-300" />
                             {pricingResult ? (
-                              <span className="px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 text-[10px] font-bold whitespace-nowrap">
+                              <span className="px-2 py-0.5 rounded-lg bg-sky-100 text-sky-700 text-[10px] font-bold whitespace-nowrap">
                                 {pricingResult.totalNights}n
                               </span>
                             ) : (
-                              <span className="w-4 h-4 rounded-full bg-slate-100" />
+                              <span className="w-4 h-4 rounded-md bg-slate-100" />
                             )}
                             <div className="w-6 h-px bg-slate-300" />
                           </div>
@@ -1195,7 +1243,7 @@ export function PropertyDetailClient({
                                   <Tag className="w-3.5 h-3.5 shrink-0" />
                                   <span className="truncate">{d.label}</span>
                                   {d.percentage ? (
-                                    <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+                                    <span className="shrink-0 px-1.5 py-0.5 rounded-lg bg-emerald-100 text-emerald-700 text-[10px] font-bold">
                                       {d.percentage}% off
                                     </span>
                                   ) : null}
@@ -1356,8 +1404,8 @@ export function PropertyDetailClient({
 
                 <div ref={inquirySectionRef}>
                   {showInquiryForm && selectedDates && !inquiryResult?.success && (
-                    <div className="mb-6 rounded-2xl border border-slate-200 overflow-hidden">
-                      <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
+                    <div className={`mb-6 ${FROST_CARD_OUTER}`}>
+                      <div className={FROST_SECTION_HEADER}>
                         <h3 className="font-semibold text-slate-900 flex items-center gap-2">
                           <Send className="w-4 h-4 text-sky-500" />
                           Your Details
@@ -1437,11 +1485,14 @@ export function PropertyDetailClient({
                 </div>
               </div>
 
-              <div ref={(el) => { sectionRefs.current.map = el; }}>
-                <div className="mb-10 rounded-2xl border border-slate-200 overflow-hidden">
-                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                    <h2 className="text-xl md:text-2xl font-light text-slate-900 flex items-center gap-2 tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
-                      <MapPin className="w-4 h-4 text-orange-400" />
+              <div ref={(el) => { sectionRefs.current.map = el; }} className={SUBNAV_SCROLL_MARGIN_CLASS}>
+                <div className={`mb-10 ${FROST_CARD_OUTER}`}>
+                  <div className={FROST_SECTION_HEADER}>
+                    <h2
+                      className="flex items-center gap-2 text-xl font-normal tracking-tight text-slate-900 md:text-2xl"
+                      style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+                    >
+                      <MapPin className="h-4 w-4 text-slate-400" aria-hidden />
                       Location
                     </h2>
                   </div>
@@ -1453,9 +1504,9 @@ export function PropertyDetailClient({
                       propertyName={property.name}
                     />
                   </div>
-                  <div className="px-6 py-3 bg-white border-t border-slate-200 flex items-center justify-between">
-                    <span className="text-sm text-slate-600 flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+                  <div className={FROST_MAP_FOOTER}>
+                    <span className="flex items-center gap-2 text-sm text-slate-600">
+                      <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden />
                       {fullAddress || "Naples, FL"}
                     </span>
                     <a
@@ -1470,14 +1521,13 @@ export function PropertyDetailClient({
                   </div>
                 </div>
               </div>
-              <NaplesAreaGuide />
             </div>
 
-            <aside className="lg:w-[380px] shrink-0">
-              <div className="sticky top-36 space-y-4">
+            <aside className="shrink-0 lg:w-[380px]">
+              <div className="sticky top-28 space-y-4">
 
                 {/* Pricing + CTA card */}
-                <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xl overflow-hidden">
+                <div className={FROST_CARD_OUTER}>
                   {/* Header */}
                   <div className="px-6 pt-6 pb-4">
                     <div className="flex items-end gap-2 mb-1">
@@ -1584,7 +1634,7 @@ export function PropertyDetailClient({
                     )}
                     <Link
                       href="/contact"
-                      className="block w-full py-3 rounded-xl bg-white text-slate-700 font-semibold text-center border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-colors text-sm"
+                      className={`block w-full py-3 rounded-xl text-slate-700 font-semibold text-center border border-slate-200/25 hover:border-slate-200/40 text-sm ${FROST_BAR} hover:bg-white/[0.1]`}
                     >
                       Contact Us
                     </Link>
@@ -1592,14 +1642,14 @@ export function PropertyDetailClient({
 
                   {/* Footer nudge */}
                   {!selectedDates && (
-                    <div className="px-5 py-3 bg-slate-50/80 border-t border-slate-100 text-center">
+                    <div className={`px-5 py-3 border-t border-slate-200/25 text-center ${FROST_BAR}`}>
                       <p className="text-[11px] text-slate-400">
                         Select dates above to see instant pricing
                       </p>
                     </div>
                   )}
                   {selectedDates && pricingResult && (
-                    <div className="px-5 py-3 bg-slate-50/80 border-t border-slate-100 text-center">
+                    <div className={`px-5 py-3 border-t border-slate-200/25 text-center ${FROST_BAR}`}>
                       <p className="text-[11px] text-slate-400">
                         No payment required · Free inquiry
                       </p>
@@ -1609,8 +1659,8 @@ export function PropertyDetailClient({
 
                 {/* Quick Facts card */}
                 {unit && (
-                  <div className="rounded-2xl bg-white border border-slate-200/80 shadow-sm overflow-hidden">
-                    <div className="px-5 py-4 border-b border-slate-100">
+                  <div className={FROST_CARD_OUTER}>
+                    <div className={`px-5 py-4 border-b border-slate-200/25 ${FROST_BAR}`}>
                       <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Quick Facts</h3>
                     </div>
                     <div className="divide-y divide-slate-50">
@@ -1700,7 +1750,7 @@ export function PropertyDetailClient({
             <div className="flex-1 flex items-center justify-center px-4 min-h-0 relative">
               <button
                 onClick={() => setGalleryIndex((galleryIndex - 1 + images.length) % images.length)}
-                className="absolute left-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                className="absolute left-4 z-10 p-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
                 aria-label="Previous photo"
               >
                 <ChevronLeft className="w-6 h-6" />
@@ -1714,7 +1764,7 @@ export function PropertyDetailClient({
 
               <button
                 onClick={() => setGalleryIndex((galleryIndex + 1) % images.length)}
-                className="absolute right-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                className="absolute right-4 z-10 p-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
                 aria-label="Next photo"
               >
                 <ChevronRight className="w-6 h-6" />
@@ -1769,7 +1819,7 @@ export function PropertyDetailClient({
               <div className="px-6 py-3 border-b border-slate-100 flex items-center gap-2 shrink-0">
                 {[{n:1,label:"Personal",icon:User},{n:2,label:"Employment",icon:Briefcase},{n:3,label:"Rental History",icon:Building2},{n:4,label:"Review & Submit",icon:FileText}].map(({n,label,icon:Icon}) => (
                   <div key={n} className="flex items-center gap-1.5 flex-1">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 ${appStep >= n ? "bg-sky-500 text-white" : "bg-slate-100 text-slate-400"}`}>
+                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold shrink-0 ${appStep >= n ? "bg-sky-500 text-white" : "bg-slate-100 text-slate-400"}`}>
                       {appStep > n ? <CheckCircle2 className="w-3.5 h-3.5" /> : n}
                     </div>
                     <span className={`text-[11px] font-medium hidden sm:block ${appStep >= n ? "text-sky-600" : "text-slate-400"}`}>{label}</span>
@@ -1783,7 +1833,7 @@ export function PropertyDetailClient({
               {appResult ? (
                 appResult.success ? (
                   <div className="text-center py-8">
-                    <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-4">
                       <CheckCircle2 className="w-8 h-8 text-emerald-500" />
                     </div>
                     <h3 className="text-xl font-bold text-slate-900 mb-2">Application Submitted!</h3>

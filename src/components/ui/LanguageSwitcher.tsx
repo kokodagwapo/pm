@@ -21,6 +21,10 @@ interface LanguageSwitcherProps {
   className?: string;
   align?: "left" | "right";
   compact?: boolean;
+  /** Minimal chrome for transparent headers */
+  ghost?: boolean;
+  /** Hero / dark band: light ink on ghost control */
+  onDarkBackdrop?: boolean;
 }
 
 export function LanguageSwitcher({
@@ -28,6 +32,8 @@ export function LanguageSwitcher({
   className = "",
   align = "right",
   compact = false,
+  ghost = false,
+  onDarkBackdrop = false,
 }: LanguageSwitcherProps) {
   const { currentLocale, setLocale } = useLocalizationContext();
   const [open, setOpen] = useState(false);
@@ -38,13 +44,14 @@ export function LanguageSwitcher({
     SUPPORTED_LANGUAGES[0];
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handlePointerOutside = (e: PointerEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("pointerdown", handlePointerOutside);
+    return () =>
+      document.removeEventListener("pointerdown", handlePointerOutside);
   }, []);
 
   const isDark = variant === "dark";
@@ -63,10 +70,14 @@ export function LanguageSwitcher({
                   ? "text-white/70 hover:text-white hover:bg-white/15"
                   : "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
               }`
-            : `flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all touch-manipulation min-h-[40px] ${
+            : `flex items-center gap-1.5 px-2 py-1.5 text-sm font-medium transition-opacity touch-manipulation min-h-[40px] rounded-md ${
                 isDark
                   ? "text-white/80 hover:text-white hover:bg-white/10 border border-white/20"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200"
+                  : ghost
+                    ? onDarkBackdrop
+                      ? "border-0 bg-transparent text-white/90 hover:opacity-80"
+                      : "border-0 bg-transparent text-slate-900 hover:opacity-75"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200"
               }`
         }
       >

@@ -53,3 +53,4 @@ export { default as AuditLog } from "./AuditLog";
 export { default as DocumentTemplate } from "./DocumentTemplate";
 export { default as InvitationToken } from "./InvitationToken";
 export { default as Notification } from "./Notification";
+export { default as DemoLeadSubmission } from "./DemoLeadSubmission";

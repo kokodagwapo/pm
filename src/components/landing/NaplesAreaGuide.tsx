@@ -277,7 +277,7 @@ function FAQ() {
             <span className="text-[15px] font-medium text-slate-800 group-hover:text-slate-900 leading-snug pr-2 flex-1">
               {item.q}
             </span>
-            <span className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all ${open === i ? "bg-violet-600 text-white rotate-180" : "bg-slate-100 text-slate-400"}`}>
+            <span className={`shrink-0 w-7 h-7 rounded-xl flex items-center justify-center transition-all ${open === i ? "bg-violet-600 text-white rotate-180" : "bg-slate-100 text-slate-400"}`}>
               <ChevronDown className="w-4 h-4" />
             </span>
           </button>
@@ -349,13 +349,13 @@ export function NaplesAreaGuide() {
 
           {/* Badges */}
           <div className="flex flex-wrap gap-2 mb-5">
-            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium">
+            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 font-medium">
               <Sun className="w-3.5 h-3.5" /> Best season: Nov – Apr
             </span>
-            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 font-medium">
+            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl bg-sky-50 text-sky-700 border border-sky-200 font-medium">
               Gulf water avg 77 °F year-round
             </span>
-            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-medium">
+            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 font-medium">
               <Umbrella className="w-3.5 h-3.5" /> Hurricane season: Jun – Nov
             </span>
           </div>
@@ -367,7 +367,7 @@ export function NaplesAreaGuide() {
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xl leading-none">{w.icon}</span>
                   <span className="font-bold text-slate-800 text-sm">{w.m}</span>
-                  <span className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${rainBadge[w.rain]}`}>{w.rain}</span>
+                  <span className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-md ${rainBadge[w.rain]}`}>{w.rain}</span>
                 </div>
                 <p className="text-slate-700 text-sm font-semibold">{w.hi}° <span className="text-slate-400 font-normal">/ {w.lo}°</span></p>
                 <p className="text-[11px] text-slate-400 mt-0.5 leading-snug">{w.tip}</p>
@@ -397,7 +397,7 @@ export function NaplesAreaGuide() {
                     <td className="px-3 py-3.5 text-center font-semibold text-slate-700">{w.hi}°</td>
                     <td className="px-3 py-3.5 text-center text-slate-400">{w.lo}°</td>
                     <td className="px-3 py-3.5 text-center">
-                      <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${rainBadge[w.rain]}`}>{w.rain}</span>
+                      <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg ${rainBadge[w.rain]}`}>{w.rain}</span>
                     </td>
                     <td className="px-5 py-3.5 text-slate-500 text-[13px]">{w.tip}</td>
                   </tr>
@@ -416,7 +416,7 @@ export function NaplesAreaGuide() {
               <div key={p.name}
                 className="rounded-2xl bg-white border border-slate-200 p-5 hover:border-emerald-200 hover:shadow-lg transition-all group"
               >
-                <span className={`inline-block text-[10px] font-bold uppercase tracking-widest border px-2.5 py-1 rounded-full mb-3 ${p.tagColor}`}>
+                <span className={`inline-block text-[10px] font-bold uppercase tracking-widest border px-2.5 py-1 rounded-xl mb-3 ${p.tagColor}`}>
                   {p.tag}
                 </span>
                 <h3 className="font-semibold text-slate-800 text-[15px] leading-snug mb-2 group-hover:text-emerald-700 transition-colors">

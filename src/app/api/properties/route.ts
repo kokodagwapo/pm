@@ -236,6 +236,10 @@ export const GET = withRoleAndDB([UserRole.ADMIN, UserRole.MANAGER, UserRole.OWN
 export const POST = withRoleAndDB([UserRole.ADMIN, UserRole.MANAGER])(
   async (user, request: NextRequest) => {
     try {
+      if (!user.id || !mongoose.Types.ObjectId.isValid(user.id)) {
+        return createErrorResponse("Invalid session — please sign in again", 401);
+      }
+
       const { success, data: body, error } = await parseRequestBody(request);
       if (!success) {
         return createErrorResponse(error!, 400);

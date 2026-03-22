@@ -146,11 +146,13 @@ export const addressSchema = z.object({
     .string()
     .min(1, "ZIP/Postal code is required")
     .max(20, "ZIP/Postal code is too long"),
-  country: z
-    .string()
-    .min(1, "Country is required")
-    .max(100, "Country name too long")
-    .default("United States"),
+  country: z.preprocess(
+    (v) => {
+      const s = typeof v === "string" ? v.trim() : "";
+      return s.length > 0 ? s : "United States";
+    },
+    z.string().min(1, "Country is required").max(100, "Country name too long")
+  ),
 });
 
 export const amenitySchema = z.object({
@@ -191,15 +193,18 @@ const unitAmenitiesSchema = z.object({
 
 // Enhanced unit schema for comprehensive unit management
 export const unitSchema = z.object({
-  // Basic Information
+  // Basic Information (coerce numbers so JSON/string payloads from clients still validate)
   unitNumber: z.string().min(1).max(20),
   unitType: z.enum(["apartment", "studio", "penthouse", "loft", "room"]),
-  floor: z.number().min(0).max(200).optional(),
-  bedrooms: z.number().min(0).max(20),
-  bathrooms: z.number().min(0).max(20),
-  squareFootage: z.number().min(50).max(50000),
-  rentAmount: z.number().min(0).max(100000),
-  securityDeposit: z.number().min(0).max(50000),
+  floor: z.preprocess(
+    (v) => (v === "" || v === undefined || v === null ? undefined : v),
+    z.coerce.number().min(0).max(200).optional()
+  ),
+  bedrooms: z.coerce.number().min(0).max(20),
+  bathrooms: z.coerce.number().min(0).max(20),
+  squareFootage: z.coerce.number().min(50).max(50000),
+  rentAmount: z.coerce.number().min(0).max(100000),
+  securityDeposit: z.coerce.number().min(0).max(50000),
   status: z.nativeEnum(PropertyStatus).default(PropertyStatus.AVAILABLE),
 
   // Outdoor Features
@@ -306,26 +311,28 @@ export const propertyCreateSchema = z.object({
   totalUnits: z.number().min(1).max(1000).default(1),
 
   // Embedded Units array (unified approach)
-  units: z
-    .array(unitSchema)
-    .default([])
-    .refine((units) => units.length <= 1000, {
-      message: "Cannot have more than 1000 units",
-    }),
+  units: z.array(unitSchema).max(1000, "Too many units").default([]),
 
   // Note: bedrooms, bathrooms, squareFootage, rentAmount, securityDeposit
   // are now stored only at the unit level in the units array
   // These fields have been removed from property-level validation
 
   // Year Built
-  yearBuilt: z
-    .number()
-    .min(1800, "Year built cannot be before 1800")
-    .max(
-      new Date().getFullYear() + 5,
-      "Year built cannot be more than 5 years in the future"
-    )
-    .optional(),
+  yearBuilt: z.preprocess(
+    (v) => {
+      if (v === "" || v === undefined || v === null) return undefined;
+      const n = typeof v === "number" ? v : Number(v);
+      return Number.isFinite(n) ? n : undefined;
+    },
+    z
+      .number()
+      .min(1800, "Year built cannot be before 1800")
+      .max(
+        new Date().getFullYear() + 5,
+        "Year built cannot be more than 5 years in the future"
+      )
+      .optional()
+  ),
 
   // Property Features
   features: z.array(z.string()).default([]),
@@ -344,8 +351,12 @@ export const propertyCreateSchema = z.object({
   ownerId: z.string().min(1, "Owner ID is required").optional(),
   managerId: z.string().min(1, "Manager ID is required").optional(),
 
-  // Unified Units Array (embedded units)
-  units: z.array(unitSchema).max(1000, "Too many units").default([]),
+  // Matches Property model — form sends these but they were previously stripped by Zod
+  virtualTourUrl: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : v),
+    z.string().url("Invalid virtual tour URL").max(2000).optional()
+  ),
+  neighborhood: z.string().max(100).optional(),
 });
 
 export const propertyUpdateSchema = propertyCreateSchema

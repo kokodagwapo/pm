@@ -174,5 +174,17 @@
   "dashboard.tenant.status.upcoming": "Bevorstehend",
   "dashboard.tenant.status.terminated": "Gekündigt",
   "dashboard.tenant.activityType.notification": "Benachrichtigung",
-  "dashboard.tenant.activityType.maintenance": "Wartung"
+  "dashboard.tenant.activityType.maintenance": "Wartung",
+
+  "dashboard.admin.demoLeads.title": "Demo-Leads",
+  "dashboard.admin.demoLeads.subtitle": "Einträge aus dem Demo-Anmeldeformular. Nur für Administratoren sichtbar.",
+  "dashboard.admin.demoLeads.refresh": "Aktualisieren",
+  "dashboard.admin.demoLeads.tableTitle": "Einträge",
+  "dashboard.admin.demoLeads.tableHint": "{count} Einträge gesamt",
+  "dashboard.admin.demoLeads.empty": "Noch keine Demo-Einträge.",
+  "dashboard.admin.demoLeads.loadError": "Demo-Leads konnten nicht geladen werden.",
+  "dashboard.admin.demoLeads.col.name": "Name",
+  "dashboard.admin.demoLeads.col.phone": "Telefon",
+  "dashboard.admin.demoLeads.col.email": "E-Mail",
+  "dashboard.admin.demoLeads.col.submitted": "Eingereicht"
 }

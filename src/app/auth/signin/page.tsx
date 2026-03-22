@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getCsrfToken, signIn } from "next-auth/react";
 import { HeroVideo } from "@/components/landing/HeroVideo";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { DemoLeadForm } from "@/components/auth/DemoLeadForm";
+import { getDemoLead, type DemoLead } from "@/lib/demo-lead-storage";
 import {
   Loader2,
   Building2,
@@ -16,6 +19,7 @@ import {
   Shield,
   Users,
   Home,
+  ArrowLeft,
 } from "lucide-react";
 
 interface Branding {
@@ -44,16 +48,141 @@ function safeCallbackUrl(input: string | null): string {
   return path.startsWith("/dashboard") ? path : "/dashboard";
 }
 
+/** Set `true` to show email/password sign-in again (e.g. production). Hidden during demo-first UX. */
+const SHOW_CREDENTIALS_SIGN_IN = false;
+
+function CredentialsSignInSection({
+  t,
+  demoAccountsReady,
+  isLoading,
+  setIsLoading,
+  setError,
+  signInWithCredentials,
+}: {
+  t: (key: string) => string;
+  demoAccountsReady: boolean;
+  isLoading: boolean;
+  setIsLoading: (v: boolean) => void;
+  setError: (v: string) => void;
+  signInWithCredentials: (email: string, password: string) => Promise<string | null>;
+}) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    try {
+      const target = await signInWithCredentials(email, password);
+      if (target) {
+        window.location.href = target;
+      } else {
+        setError(t("auth.signin.invalidCredentials"));
+        setIsLoading(false);
+      }
+    } catch {
+      setError(t("auth.signin.error"));
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="mb-7">
+        <h3 className="text-lg text-white tracking-wide" style={{ fontWeight: 300 }}>
+          {t("auth.signin.welcomeBack")}
+        </h3>
+        <p className="mt-1 text-xs text-white/60 tracking-wide" style={{ fontWeight: 300 }}>
+          {t("auth.signin.credentials")}
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <label
+            htmlFor="email"
+            className="block text-xs tracking-wide text-white/45"
+            style={{ fontWeight: 300 }}
+          >
+            {t("auth.signin.emailLabel")}
+          </label>
+          <div className="relative">
+            <Mail className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" />
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={t("auth.signin.emailPlaceholder")}
+              className="w-full min-h-[40px] pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-white/40 bg-white/5 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white/25 focus:bg-white/10 transition-all touch-manipulation"
+              style={{ fontWeight: 300 }}
+              required
+            />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label
+            htmlFor="password"
+            className="block text-xs tracking-wide text-white/45"
+            style={{ fontWeight: 300 }}
+          >
+            {t("auth.signin.passwordLabel")}
+          </label>
+          <div className="relative">
+            <Lock className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" />
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t("auth.signin.passwordPlaceholder")}
+              className="w-full min-h-[40px] pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-white/40 bg-white/5 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white/25 focus:bg-white/10 transition-all touch-manipulation"
+              style={{ fontWeight: 300 }}
+              required
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading || !demoAccountsReady}
+          className="w-full min-h-[46px] py-3 rounded-xl text-sm tracking-wide text-white bg-white/12 hover:bg-white/20 border border-white/20 hover:border-white/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all touch-manipulation mt-2"
+          style={{ fontWeight: 300 }}
+        >
+          {isLoading ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              {t("auth.signin.signingIn")}
+            </span>
+          ) : (
+            t("auth.signin.signIn")
+          )}
+        </button>
+      </form>
+    </>
+  );
+}
+
 function SignInContent() {
   const searchParams = useSearchParams();
   const { t } = useLocalizationContext();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [branding, setBranding] = useState<Branding>(DEFAULT_BRANDING);
   const [logoError, setLogoError] = useState(false);
   const [demoAccountsReady, setDemoAccountsReady] = useState(false);
+  const [savedDemoLead, setSavedDemoLead] = useState<DemoLead | null>(null);
+  const [demoLeadGatePassed, setDemoLeadGatePassed] = useState(false);
+
+  useEffect(() => {
+    const existing = getDemoLead();
+    if (existing) {
+      setSavedDemoLead(existing);
+      setDemoLeadGatePassed(true);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchBranding = async () => {
@@ -175,25 +304,6 @@ function SignInContent() {
     return normalizedUrl;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const target = await signInCredentialsWithFallback(email, password);
-      if (target) {
-        window.location.href = target;
-      } else {
-        setError(t("auth.signin.invalidCredentials"));
-        setIsLoading(false);
-      }
-    } catch {
-      setError(t("auth.signin.error"));
-      setIsLoading(false);
-    }
-  };
-
   const handleQuickLogin = async (demoEmail: string, demoPassword: string) => {
     setIsLoading(true);
     setError("");
@@ -239,6 +349,17 @@ function SignInContent() {
         <LanguageSwitcher variant="dark" align="right" />
       </div>
 
+      <div className="fixed left-4 top-4 z-20 sm:left-6">
+        <Link
+          href="/"
+          className="inline-flex h-9 min-h-[36px] touch-manipulation items-center gap-2 rounded-2xl border border-white/15 px-3.5 text-xs tracking-wide text-white/65 transition-colors hover:border-white/30 hover:text-white/95"
+          style={{ fontWeight: 400 }}
+        >
+          <ArrowLeft className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          {t("auth.signin.backToHome")}
+        </Link>
+      </div>
+
       {/* Content */}
       <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-12">
         <div className="w-full max-w-[440px] space-y-6 sm:space-y-8">
@@ -275,95 +396,31 @@ function SignInContent() {
 
           {/* Match LanguageSwitcher (dark) trigger: outline only at rest, hover:bg-white/10 */}
           <div className="rounded-xl border border-white/20 bg-transparent p-6 sm:p-8 text-white/80 transition-all duration-300 hover:bg-white/10">
-            <div className="mb-7">
-              <h3
-                className="text-lg text-white tracking-wide"
-                style={{ fontWeight: 300 }}
-              >
-                {t("auth.signin.welcomeBack")}
-              </h3>
-              <p
-                className="mt-1 text-xs text-white/60 tracking-wide"
-                style={{ fontWeight: 300 }}
-              >
-                {t("auth.signin.credentials")}
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/20 border border-red-400/30 text-red-200 text-xs">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  {error}
-                </div>
-              )}
-
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="email"
-                  className="block text-xs tracking-wide text-white/45"
-                  style={{ fontWeight: 300 }}
-                >
-                  {t("auth.signin.emailLabel")}
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" />
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t("auth.signin.emailPlaceholder")}
-                    className="w-full min-h-[40px] pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-white/40 bg-white/5 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white/25 focus:bg-white/10 transition-all touch-manipulation"
-                    style={{ fontWeight: 300 }}
-                    required
-                  />
-                </div>
+            {error && (
+              <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-400/30 bg-red-500/20 p-3 text-xs text-red-200">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                {error}
               </div>
+            )}
 
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="password"
-                  className="block text-xs tracking-wide text-white/45"
-                  style={{ fontWeight: 300 }}
-                >
-                  {t("auth.signin.passwordLabel")}
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" />
-                  <input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t("auth.signin.passwordPlaceholder")}
-                    className="w-full min-h-[40px] pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-white/40 bg-white/5 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white/25 focus:bg-white/10 transition-all touch-manipulation"
-                    style={{ fontWeight: 300 }}
-                    required
-                  />
-                </div>
-              </div>
+            {SHOW_CREDENTIALS_SIGN_IN && (
+              <CredentialsSignInSection
+                t={t}
+                demoAccountsReady={demoAccountsReady}
+                isLoading={isLoading}
+                setIsLoading={setIsLoading}
+                setError={setError}
+                signInWithCredentials={signInCredentialsWithFallback}
+              />
+            )}
 
-              <button
-                type="submit"
-                disabled={isLoading || !demoAccountsReady}
-                className="w-full min-h-[46px] py-3 rounded-xl text-sm tracking-wide text-white bg-white/12 hover:bg-white/20 border border-white/20 hover:border-white/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all touch-manipulation mt-2"
-                style={{ fontWeight: 300 }}
-              >
-                {isLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    {t("auth.signin.signingIn")}
-                  </span>
-                ) : (
-                  t("auth.signin.signIn")
-                )}
-              </button>
-            </form>
-
-            {/* Quick Login */}
-            <div className="mt-7 pt-6 border-t border-white/20">
-              <div className="flex items-center gap-2 mb-3">
+            {/* Quick Login — gated behind name / phone / email (stored in localStorage) */}
+            <div
+              className={
+                SHOW_CREDENTIALS_SIGN_IN ? "mt-7 border-t border-white/20 pt-6" : ""
+              }
+            >
+              <div className="flex items-center gap-2 mb-4">
                 <Zap className="h-3.5 w-3.5 text-amber-400/80" />
                 <span
                   className="text-xs tracking-wide text-white/40"
@@ -375,13 +432,25 @@ function SignInContent() {
                   <Loader2 className="h-3.5 w-3.5 animate-spin text-white/35" aria-hidden />
                 )}
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <DemoLeadForm
+                t={t}
+                savedLead={savedDemoLead}
+                onSaved={(lead) => {
+                  setSavedDemoLead(lead);
+                  setDemoLeadGatePassed(true);
+                }}
+                onCleared={() => {
+                  setSavedDemoLead(null);
+                  setDemoLeadGatePassed(false);
+                }}
+              />
+              <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2 ${!demoLeadGatePassed ? "opacity-35" : ""}`}>
                 {demoAccounts.map((account) => (
                   <button
                     key={account.email}
                     type="button"
                     onClick={() => handleQuickLogin(account.email, account.password)}
-                    disabled={isLoading || !demoAccountsReady}
+                    disabled={isLoading || !demoAccountsReady || !demoLeadGatePassed}
                     className={`flex flex-col items-center justify-center gap-1.5 min-h-[52px] py-3 rounded-xl text-white text-[11px] tracking-wide transition-all touch-manipulation disabled:opacity-40 disabled:cursor-not-allowed ${account.color}`}
                     style={{ fontWeight: 300 }}
                   >
@@ -394,7 +463,9 @@ function SignInContent() {
                 className="text-[10px] text-white/25 mt-2.5 text-center tracking-wide"
                 style={{ fontWeight: 300 }}
               >
-                {t("auth.signin.devClickToLogin")}
+                {demoLeadGatePassed
+                  ? t("auth.signin.devClickToLogin")
+                  : t("auth.signin.demoLead.unlockHint")}
               </p>
             </div>
           </div>
@@ -403,7 +474,7 @@ function SignInContent() {
           <div className="text-center">
             <a
               href="/rentals"
-              className="inline-flex items-center gap-2 h-[42px] px-7 rounded-full border border-white/15 text-white/50 text-xs tracking-wide hover:border-white/30 hover:text-white/80 transition-all duration-300"
+              className="inline-flex items-center gap-2 h-[42px] px-7 rounded-2xl border border-white/15 text-white/50 text-xs tracking-wide hover:border-white/30 hover:text-white/80 transition-all duration-300"
               style={{ fontWeight: 300 }}
             >
               <Home className="h-3.5 w-3.5" />

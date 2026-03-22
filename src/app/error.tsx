@@ -88,7 +88,10 @@ function getErrorMessage(type: string, error: Error) {
       return {
         title: "Database Error",
         description: "We're having trouble accessing the database. This is usually temporary.",
-        suggestion: "Please try again in a few moments. If the problem persists, contact support.",
+        suggestion:
+          process.env.NODE_ENV === "development"
+            ? "Confirm MongoDB is running (for example npm run docker:mongo) and MONGODB_URI in .env.local matches it, then refresh. If it still fails, contact support."
+            : "Please try again in a few moments. If the problem persists, contact support.",
       };
     case "validation":
       return {
@@ -106,22 +109,53 @@ function getErrorMessage(type: string, error: Error) {
 }
 
 const MAX_AUTO_RETRIES = 3;
+const MAX_SESSION_AUTO_RECOVERIES = 12;
+const SESSION_SEGMENT_ERR_KEY = "__smartstart_segment_err_session_total";
+
+/** Survives remounts after `reset()` (useRef does not) — avoids dev retry storms on Replit. */
+let segmentTransientRetries = 0;
+let lastSegmentErrorKey = "";
+
+function segmentErrorKey(error: Error & { digest?: string }): string {
+  return String(error.digest || error.message || "unknown").slice(0, 200);
+}
+
+function bumpSegmentSessionTotal(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const n = parseInt(sessionStorage.getItem(SESSION_SEGMENT_ERR_KEY) || "0", 10) + 1;
+    sessionStorage.setItem(SESSION_SEGMENT_ERR_KEY, String(n));
+  } catch {
+    /* ignore */
+  }
+}
 
 export default function ErrorPage({ error, reset }: ErrorPageProps) {
   const router = useRouter();
-  const retryCount = useRef(0);
   const [showUI, setShowUI] = useState(false);
   const errorType = getErrorType(error);
   const errorInfo = getErrorMessage(errorType, error);
   const ErrorIcon = getErrorIcon(errorType);
+  const resetRef = useRef(reset);
+  resetRef.current = reset;
 
   useEffect(() => {
-    const msg = error.message?.toLowerCase() || "";
-    const stack = error.stack?.toLowerCase() || "";
+    const key = segmentErrorKey(error);
+    if (key !== lastSegmentErrorKey) {
+      lastSegmentErrorKey = key;
+      segmentTransientRetries = 0;
+    }
+
+    const msg = (error.message || "").toLowerCase();
+    const stack = (error.stack || "").toLowerCase();
     const isWebpackError =
       (msg.includes("cannot read properties of undefined") && msg.includes("'call'")) ||
       stack.includes("options.factory") ||
-      stack.includes("webpack_require");
+      stack.includes("webpack_require") ||
+      stack.includes("chunkloaderror") ||
+      stack.includes("loading chunk") ||
+      msg.includes("dynamically imported module") ||
+      msg.includes("failed to fetch dynamically imported module");
     const isTransientDevError =
       isWebpackError ||
       msg.includes("hydration") ||
@@ -131,26 +165,45 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
       msg.includes("minified react error") ||
       msg.includes("$refreshreg$");
 
-    if (isTransientDevError) {
-      if (retryCount.current < MAX_AUTO_RETRIES) {
-        retryCount.current += 1;
-        const timer = setTimeout(() => reset(), 500 * retryCount.current);
+    if (process.env.NODE_ENV === "development" && isTransientDevError) {
+      const sessionTotal = parseInt(
+        typeof window !== "undefined"
+          ? sessionStorage.getItem(SESSION_SEGMENT_ERR_KEY) || "0"
+          : "0",
+        10
+      );
+      if (sessionTotal >= MAX_SESSION_AUTO_RECOVERIES) {
+        setShowUI(true);
+        return;
+      }
+
+      if (segmentTransientRetries < MAX_AUTO_RETRIES) {
+        segmentTransientRetries += 1;
+        bumpSegmentSessionTotal();
+        const timer = setTimeout(() => {
+          try {
+            resetRef.current();
+          } catch {
+            setShowUI(true);
+          }
+        }, 500 * segmentTransientRetries);
         return () => clearTimeout(timer);
       }
       if (isWebpackError && typeof window !== "undefined") {
-        const key = "__smartstart_reload";
-        const count = parseInt(sessionStorage.getItem(key) || "0", 10);
+        const keyReload = "__smartstart_reload_segment";
+        const count = parseInt(sessionStorage.getItem(keyReload) || "0", 10);
         if (count < 2) {
-          sessionStorage.setItem(key, String(count + 1));
+          bumpSegmentSessionTotal();
+          sessionStorage.setItem(keyReload, String(count + 1));
           window.location.reload();
           return;
         }
-        sessionStorage.removeItem(key);
+        sessionStorage.removeItem(keyReload);
       }
     }
 
     setShowUI(true);
-  }, [error, errorType, reset]);
+  }, [error]);
 
   if (!showUI) return null;
 

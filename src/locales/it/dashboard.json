@@ -146,5 +146,17 @@
   "dashboard.tenant.status.upcoming": "Imminente",
   "dashboard.tenant.status.terminated": "Terminato",
   "dashboard.tenant.activityType.notification": "Notifica",
-  "dashboard.tenant.activityType.maintenance": "Manutenzione"
+  "dashboard.tenant.activityType.maintenance": "Manutenzione",
+
+  "dashboard.admin.demoLeads.title": "Lead demo",
+  "dashboard.admin.demoLeads.subtitle": "Invii dal modulo di accesso demo. Visibile solo agli amministratori.",
+  "dashboard.admin.demoLeads.refresh": "Aggiorna",
+  "dashboard.admin.demoLeads.tableTitle": "Invii",
+  "dashboard.admin.demoLeads.tableHint": "{count} record totali",
+  "dashboard.admin.demoLeads.empty": "Nessun invio demo al momento.",
+  "dashboard.admin.demoLeads.loadError": "Impossibile caricare i lead demo.",
+  "dashboard.admin.demoLeads.col.name": "Nome",
+  "dashboard.admin.demoLeads.col.phone": "Telefono",
+  "dashboard.admin.demoLeads.col.email": "Email",
+  "dashboard.admin.demoLeads.col.submitted": "Inviato"
 }

@@ -235,11 +235,11 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
               border-x-0 border border-slate-200
               rounded-t-2xl rounded-b-none
               inset-x-0 bottom-0 top-[48px]
-              sm:inset-auto sm:border-x sm:rounded-2xl sm:top-auto sm:right-4 sm:bottom-24 sm:w-[360px] sm:max-h-[560px]"
+              sm:inset-auto sm:border-x sm:rounded-2xl sm:top-auto sm:right-4 sm:bottom-[4.5rem] sm:w-[360px] sm:max-h-[560px]"
           >
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-sky-500 to-violet-500 shrink-0">
-              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold text-sm shrink-0">
                 L
               </div>
               <div className="flex-1 min-w-0">
@@ -271,7 +271,7 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
                   className={`flex gap-2 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
                 >
                   {msg.role === "assistant" && (
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-sky-400 to-violet-500 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-sky-400 to-violet-500 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">
                       L
                     </div>
                   )}
@@ -287,7 +287,7 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
                     {msg.role === "assistant" && (
                       <button
                         onClick={() => playTTS(msg.content, msg.id)}
-                        className={`opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full ${
+                        className={`opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg ${
                           playingId === msg.id ? "text-sky-500 bg-sky-50" : "text-slate-400 hover:text-sky-500 hover:bg-sky-50"
                         }`}
                         title="Listen"
@@ -300,7 +300,7 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
               ))}
               {isLoading && (
                 <div className="flex gap-2">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-sky-400 to-violet-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-sky-400 to-violet-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
                     L
                   </div>
                   <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-3 py-2 shadow-sm">
@@ -322,7 +322,7 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
                   <button
                     key={q}
                     onClick={() => sendMessage(q)}
-                    className="text-xs px-2.5 py-1.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
+                    className="text-xs px-2.5 py-1.5 rounded-xl bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
                   >
                     {q}
                   </button>
@@ -355,38 +355,40 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
       )}
 
       {/* ── Trigger / close button — hidden on mobile when open (header has close) ── */}
-      <div className={`fixed bottom-5 right-4 z-50 ${isOpen ? "hidden sm:flex" : "flex"}`}>
-        {/* Open-state pulse rings */}
+      <div className={`fixed bottom-4 right-3 z-50 sm:bottom-5 sm:right-4 ${isOpen ? "hidden sm:flex" : "flex"}`}>
         {!isOpen && (
-          <>
-            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-sky-400 to-violet-500 opacity-40 animate-ping" />
-            <span
-              className="absolute inset-[-6px] rounded-full bg-gradient-to-br from-sky-400 to-violet-500 opacity-20 animate-ping"
-              style={{ animationDelay: "0.4s" }}
-            />
-          </>
+          <span
+            className="pointer-events-none absolute inset-0 rounded-xl bg-sky-400/25 animate-ping"
+            style={{ animationDuration: "2.8s" }}
+            aria-hidden
+          />
         )}
 
         {isOpen ? (
-          /* ── Minimalist close button — small pill with subtle pulse ── */
           <button
             onClick={() => setIsOpen(false)}
             aria-label="Close Luna"
-            className="relative flex items-center justify-center w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200/80 shadow-md text-slate-400 hover:text-slate-700 hover:border-slate-300 transition-all duration-200 hover:scale-105 active:scale-95 animate-pulse"
+            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/90 bg-white/85 text-slate-500 shadow-md backdrop-blur-md transition-all duration-200 hover:scale-105 hover:text-slate-800 active:scale-95"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="h-3.5 w-3.5" />
           </button>
         ) : (
-          /* ── Open button — gradient bubble ── */
           <button
             onClick={() => setIsOpen(true)}
             aria-label="Chat with Luna"
-            className="relative w-16 h-16 rounded-full shadow-xl flex items-center justify-center bg-gradient-to-br from-sky-500 to-violet-500 hover:scale-110 shadow-sky-400/40 transition-all duration-300"
+            className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500/30 to-violet-500/30 shadow-lg shadow-slate-900/10 backdrop-blur-md transition-all duration-300 hover:from-sky-500/45 hover:to-violet-500/45 hover:scale-105 active:scale-95"
           >
-            <div className="relative">
-              <MessageCircle className="w-7 h-7 text-white" />
-              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-white animate-pulse" />
+            <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-white/20 shadow-inner">
+              <MessageCircle
+                className="h-[1.125rem] w-[1.125rem] text-white"
+                strokeWidth={2.25}
+                aria-hidden
+              />
             </div>
+            <span
+              className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_1px_rgba(255,255,255,0.85)]"
+              aria-hidden
+            />
           </button>
         )}
       </div>

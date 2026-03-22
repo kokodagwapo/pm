@@ -1742,3 +1742,79 @@ html.dashboard-layout main .dashboard-main-typography {
     }
   }
 }
+
+/* ── Marketing landing: scroll reveal + pricing bars (restrained motion) ── */
+/* Below-fold landing: same pairing as hero — Plus Jakarta body, Playfair display */
+.landing-post-hero {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 400;
+  font-feature-settings: "kern" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.landing-post-hero :where(h2, h3) {
+  font-family: var(--font-playfair), Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+.landing-post-hero :where(h2) {
+  line-height: 1.12;
+}
+
+.landing-post-hero :where(h3) {
+  line-height: 1.15;
+}
+
+.landing-reveal {
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition:
+    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landing-reveal[data-revealed="true"] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+.landing-price-bar {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landing-reveal[data-revealed="true"] .landing-price-bar {
+  transform: scaleX(1);
+}
+
+.landing-reveal[data-revealed="true"] .landing-price-bar.landing-price-bar--delayed {
+  transition-delay: 0.18s;
+}
+
+@keyframes landing-connect-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-connect-hub {
+    animation: landing-connect-float 7s ease-in-out infinite;
+  }
+}

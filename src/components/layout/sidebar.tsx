@@ -41,6 +41,7 @@ import {
   ClipboardList,
   Send,
   ListChecks,
+  Inbox,
 } from "lucide-react";
 import { UserRole } from "@/types";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
@@ -266,6 +267,7 @@ const navigationSections: NavSection[] = [
           { title: "nav.admin.users.new", href: "/dashboard/admin/users/new", icon: UserPlus, iconColor: "text-rose-200", roles: [UserRole.ADMIN] },
           { title: "nav.admin.users.roles", href: "/dashboard/admin/users/roles", icon: Shield, iconColor: "text-rose-200", roles: [UserRole.ADMIN] },
           { title: "nav.admin.apiKeys", href: "/dashboard/admin/api-keys", icon: Key, iconColor: "text-rose-200", roles: [UserRole.ADMIN] },
+          { title: "nav.admin.demoLeads", href: "/dashboard/admin/demo-leads", icon: Inbox, iconColor: "text-rose-200", roles: [UserRole.ADMIN] },
         ],
       },
       {
@@ -328,7 +330,7 @@ const NavItemComponent = memo(function NavItemComponent({
         }}
         className={cn(
           "relative flex items-center gap-2.5 transition-all duration-300",
-          level === 0 ? (isCollapsed ? "rounded-lg" : "rounded-full") : "rounded-xl",
+          level === 0 ? (isCollapsed ? "rounded-lg" : "rounded-2xl") : "rounded-xl",
           "select-none outline-none",
           isLight
             ? "focus-visible:ring-2 focus-visible:ring-sky-500/35"
@@ -387,7 +389,7 @@ const NavItemComponent = memo(function NavItemComponent({
             {item.badge && (
               <span
                 className={cn(
-                  "ml-auto flex h-4.5 min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-medium",
+                  "ml-auto flex h-4.5 min-w-[18px] items-center justify-center rounded-lg px-1 text-[10px] font-medium",
                   isLight ? "bg-slate-900 text-white" : "bg-white text-slate-900"
                 )}
               >
