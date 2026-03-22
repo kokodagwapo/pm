@@ -333,7 +333,7 @@ const NavItemComponent = memo(function NavItemComponent({
             ? "focus-visible:ring-2 focus-visible:ring-sky-500/35"
             : "focus-visible:ring-2 focus-visible:ring-white/25",
           level === 0 &&
-            "min-h-11 px-3 py-2.5 text-base font-light tracking-wide md:min-h-0 md:py-2",
+            "min-h-11 px-3 py-2.5 text-base font-normal tracking-wide md:min-h-0 md:py-2",
           level > 0 &&
             "ml-5 min-h-10 py-2 pl-3 pr-3 text-sm font-light tracking-wide md:min-h-0 md:py-1.5",
           !isLight &&
@@ -470,7 +470,7 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
         "flex h-[100dvh] max-w-[min(18rem,calc(100vw-0.75rem))] flex-col md:h-full md:max-w-none dashboard-ui-surface",
         "border-y-0 border-l-0 border-r border-[var(--dashboard-glass-border)]",
         "w-[min(18rem,calc(100vw-0.75rem))] transition-all duration-300 ease-out md:w-60",
-        "[font-family:var(--font-jakarta),var(--font-inter),system-ui,sans-serif] font-light antialiased",
+        "[font-family:var(--font-jakarta),var(--font-inter),system-ui,sans-serif] font-normal antialiased",
         isCollapsed && "w-16",
         className,
       )}
@@ -515,7 +515,7 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
             {section.title && !isCollapsed && (
               <p
                 className={cn(
-                  "px-3 pb-1 text-xs font-light uppercase tracking-[0.14em]",
+                  "px-3 pb-1 text-xs font-medium uppercase tracking-[0.12em]",
                   isLight ? "text-slate-500" : "text-white"
                 )}
               >

@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
 import { useEffect, useState, useCallback, memo } from "react";
@@ -22,13 +23,24 @@ import { NotificationBell } from "@/components/notifications/notification-bell";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { InlinePreloader } from "@/components/ui/preloader";
-import { DemoGuide } from "@/components/demo/DemoGuide";
-import { PwaInstallHint } from "@/components/pwa/PwaInstallHint";
-import { HeroVideo } from "@/components/landing/HeroVideo";
 import {
   DashboardAppearanceProvider,
   useDashboardAppearance,
 } from "@/components/providers/DashboardAppearanceProvider";
+
+const HeroVideo = dynamic(() => import("@/components/landing/HeroVideo").then((m) => ({ default: m.HeroVideo })), {
+  ssr: false,
+});
+
+const PwaInstallHint = dynamic(
+  () => import("@/components/pwa/PwaInstallHint").then((m) => ({ default: m.PwaInstallHint })),
+  { ssr: false }
+);
+
+const DemoGuide = dynamic(
+  () => import("@/components/demo/DemoGuide").then((m) => ({ default: m.DemoGuide })),
+  { ssr: false }
+);
 
 /** Base dim + vignette over HeroVideo — immersive / dark (lighter overlay = more video visible). */
 const DASHBOARD_VIDEO_OVERLAY =
@@ -156,11 +168,11 @@ const MobileHeader = memo(function MobileHeader({
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-light tracking-tight">
+                <p className="text-sm font-medium tracking-tight">
                   {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-xs font-light text-muted-foreground">{user?.email}</p>
-                <p className="text-xs font-light capitalize text-muted-foreground">
+                <p className="text-xs font-normal text-muted-foreground">{user?.email}</p>
+                <p className="text-xs font-normal capitalize text-muted-foreground">
                   {user?.role?.replace("_", " ")}
                 </p>
               </div>

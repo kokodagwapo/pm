@@ -9,6 +9,16 @@ export function ServiceWorkerRegistration() {
     setMounted(true);
   }, []);
 
+  // A service worker registered from a prior production/preview run on the same origin
+  // can intercept Next dev requests and serve stale or empty CSS — unregister in dev.
+  useEffect(() => {
+    if (typeof window === "undefined" || process.env.NODE_ENV !== "development") return;
+    if (!("serviceWorker" in navigator)) return;
+    void navigator.serviceWorker.getRegistrations().then((regs) =>
+      Promise.all(regs.map((r) => r.unregister()))
+    );
+  }, []);
+
   useEffect(() => {
     if (
       !mounted ||

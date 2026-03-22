@@ -90,8 +90,8 @@ export function AnalyticsCard({
         <div className="mb-2.5 flex items-start justify-between">
           <p
             className={cn(
-              "pr-2 text-sm font-light leading-none tracking-wide",
-              isLight ? "text-slate-500" : "text-white"
+              "pr-2 text-sm font-medium leading-none tracking-wide",
+              isLight ? "text-slate-500" : "text-white/90"
             )}
           >
             {title}
@@ -103,7 +103,7 @@ export function AnalyticsCard({
 
         <div
           className={cn(
-            "mb-1.5 text-3xl font-light leading-none tracking-tight",
+            "mb-1.5 text-3xl font-semibold leading-none tracking-tight",
             isLight ? "text-slate-900" : "text-white"
           )}
         >
@@ -113,8 +113,8 @@ export function AnalyticsCard({
         {description && (
           <p
             className={cn(
-              "text-sm font-light leading-snug",
-              isLight ? "text-slate-600" : "text-white"
+              "text-sm font-normal leading-snug",
+              isLight ? "text-slate-600" : "text-white/85"
             )}
           >
             {description}
@@ -139,7 +139,7 @@ export function AnalyticsCard({
             )}
             <span
               className={cn(
-                "text-sm font-light tracking-wide",
+                "text-sm font-medium tracking-wide",
                 trend.isPositive
                   ? isLight
                     ? "text-emerald-600"
@@ -175,10 +175,10 @@ export function FinancialCard({
         className
       )}
     >
-      <span className={cn("font-light text-sm tracking-wide", variantClasses.text)}>
+      <span className={cn("font-medium text-sm tracking-wide", variantClasses.text)}>
         {label}
       </span>
-      <span className={cn("text-xl font-light tracking-tight", variantClasses.text)}>
+      <span className={cn("text-xl font-semibold tracking-tight", variantClasses.text)}>
         {formatCurrencyValue(amount)}
       </span>
     </div>
@@ -205,8 +205,8 @@ export function MetricCard({
           )}
           <p
             className={cn(
-              "text-sm font-light tracking-wide",
-              isLight ? "text-slate-500" : "text-white"
+              "text-sm font-medium tracking-wide",
+              isLight ? "text-slate-500" : "text-white/90"
             )}
           >
             {title}
@@ -214,7 +214,7 @@ export function MetricCard({
         </div>
         <div
           className={cn(
-            "text-3xl font-light tracking-tight",
+            "text-3xl font-semibold tracking-tight",
             isLight ? "text-slate-900" : "text-white"
           )}
         >

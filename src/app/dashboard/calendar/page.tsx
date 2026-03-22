@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import FullCalendar from "@fullcalendar/react";
 import { useSearchParams } from "next/navigation";
@@ -30,8 +31,12 @@ import { toast } from "sonner";
 import { IEvent, UserRole } from "@/types";
 import { EventForm } from "@/components/calendar/EventForm";
 import { EventList } from "@/components/calendar/EventList";
-import CalendarView from "@/components/calendar/CalendarView";
 import { CalendarStats } from "@/components/calendar/CalendarStats";
+
+const CalendarView = dynamic(
+  () => import("@/components/calendar/CalendarView"),
+  { ssr: false, loading: () => <div className="min-h-[400px] animate-pulse rounded-xl bg-white/5" /> }
+);
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { CalendarSettings } from "@/components/calendar/CalendarSettings";
 import { CalendarAnalytics } from "@/components/calendar/CalendarAnalytics";

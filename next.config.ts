@@ -69,8 +69,13 @@ const nextConfig: NextConfig = {
 
   transpilePackages: ["@radix-ui/react-label", "@radix-ui/react-primitive"],
 
-  // Headers for caching static assets
+  // Long-lived caching for static assets (production only). Applying `immutable` to
+  // `/_next/static` in development breaks dev CSS routes (e.g. app/layout.css) and
+  // encourages browsers to cache stale or missing chunks after hot reloads.
   async headers() {
+    if (process.env.NODE_ENV !== "production") {
+      return [];
+    }
     return [
       {
         source: "/images/:path*",
