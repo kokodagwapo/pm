@@ -118,7 +118,8 @@ The sign-in page (`/auth/signin`) always shows "Dev Quick Login" buttons for all
 ## Required Environment Variables (Replit Secrets)
 - `MONGODB_URI` - MongoDB connection string (e.g. `mongodb://localhost:27017/SmartStartPM`)
 - `AUTH_SECRET` - NextAuth secret (required for session signing)
-- `NEXTAUTH_URL` - NextAuth base URL (e.g. `https://<replit-domain>`)
+- `APP_URL` - **Preferred for custom domains** (e.g. `https://pm.smarts.fi`). Sets NEXTAUTH_URL/AUTH_URL so auth redirects use your domain instead of smartpm.replit.app.
+- `NEXTAUTH_URL` - NextAuth base URL fallback (e.g. `https://<replit-domain>`). Ignored when APP_URL is set.
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - Stripe (optional at build time)
 - `OPENAI_API_KEY`, `OPENAI_MODEL` - OpenAI
 - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` - Twilio SMS (optional — gracefully skipped if missing)
@@ -173,7 +174,8 @@ The sign-in page (`/auth/signin`) always shows "Dev Quick Login" buttons for all
 ## Deployment / Build Notes
 - **Deployment type**: Reserved VM (`deploymentTarget = "vm"` in `.replit`). Build: `npm run build`. Run: `bash start-prod.sh`.
 - **MongoDB in deployment**: Reserved VM runs local mongod (same as dev). `start-prod.sh` starts mongod, seeds, then starts Next.js.
-- **NEXTAUTH_URL**: Set as development-only env var (dev domain). In production, Auth.js v5 auto-detects from request headers (`trustHost: true`). The `NEXTAUTH_URL` secret serves as fallback.
+- **Custom domain (pm.smarts.fi)**: Set `APP_URL=https://pm.smarts.fi` in Replit Secrets. This overrides NEXTAUTH_URL so auth and demo-login redirect to your domain. Without it, redirects may go to smartpm.replit.app.
+- **NEXTAUTH_URL**: Set by start-prod.sh from APP_URL or REPLIT_DOMAINS. Auth.js v5 also uses `trustHost: true` to accept request headers.
 - **Stripe lazy init**: All `new Stripe(...)` calls are lazy — only run inside route handlers, never at module load time.
 - **environment.ts**: Stripe and Publishable key fields are `.optional()` in the Zod schema.
 - **NEXTAUTH_SECRET vs AUTH_SECRET**: NextAuth v5 uses `AUTH_SECRET`. The env schema validates `NEXTAUTH_SECRET` but this is not required.

@@ -1,4 +1,18 @@
 #!/bin/bash
+export PORT=${PORT:-5000}
+
+# Auth URL: prefer APP_URL (custom domain), then REPLIT_DOMAINS, for correct redirects
+if [ -n "$APP_URL" ]; then
+  BASE="${APP_URL#https://}"
+  BASE="${BASE#http://}"
+  export NEXTAUTH_URL="https://${BASE}"
+  export AUTH_URL="https://${BASE}"
+elif [ -n "$REPLIT_DOMAINS" ]; then
+  FIRST_DOMAIN=$(echo "$REPLIT_DOMAINS" | cut -d',' -f1 | tr -d ' ')
+  export NEXTAUTH_URL="https://${FIRST_DOMAIN}"
+  export AUTH_URL="https://${FIRST_DOMAIN}"
+fi
+
 MONGO_DATA="/home/runner/.mongodb-data/data"
 MONGO_LOG="/home/runner/.mongodb-data/mongod.log"
 mkdir -p "$MONGO_DATA"

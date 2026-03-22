@@ -34,9 +34,13 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     let csrfToken = "";
 
-    // Fetch a CSRF token from the NextAuth endpoint
-    // Use NEXTAUTH_URL from env (ensures localhost, not 0.0.0.0)
-    const baseUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || request.nextUrl.origin;
+    // Prefer the request origin (domain user is actually on) so custom domains (e.g. pm.smarts.fi)
+    // work even when NEXTAUTH_URL points to Replit default (smartpm.replit.app).
+    const requestOrigin = request.nextUrl.origin;
+    const baseUrl =
+      requestOrigin && (requestOrigin.startsWith("https://") || requestOrigin.startsWith("http://localhost"))
+        ? requestOrigin
+        : process.env.NEXTAUTH_URL || process.env.AUTH_URL || process.env.APP_URL || requestOrigin;
     let setCookieHeader = "";
 
     try {
