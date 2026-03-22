@@ -528,7 +528,7 @@ export function DemoGuide() {
             )}
           >
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-900">
                 {userRole === UserRole.ADMIN && "Super Admin Tour"}
                 {userRole === UserRole.MANAGER && "Manager Tour"}
                 {userRole === UserRole.OWNER && "Owner Tour"}
@@ -536,7 +536,7 @@ export function DemoGuide() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-white/70 tabular-nums">
+              <span className="text-xs font-medium text-slate-700 tabular-nums">
                 {currentStep + 1} / {steps.length}
               </span>
               <button
@@ -562,16 +562,16 @@ export function DemoGuide() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-sm font-semibold leading-tight tracking-tight text-white">
+                    <h3 className="text-sm font-semibold leading-tight tracking-tight text-slate-900">
                       {step.title}
                     </h3>
                     {step.badge && (
-                      <span className="rounded-full border border-sky-200/35 bg-sky-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-[0_0_20px_rgba(56,189,248,0.12)]">
+                      <span className="rounded-full border border-sky-200/35 bg-sky-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-900 shadow-[0_0_20px_rgba(56,189,248,0.12)]">
                         {step.badge}
                       </span>
                     )}
                   </div>
-                  <p className="mt-1.5 text-xs leading-relaxed text-white/85">
+                  <p className="mt-1.5 text-xs leading-relaxed text-slate-700">
                     {step.description}
                   </p>
                 </div>
