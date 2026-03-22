@@ -240,8 +240,8 @@ export function AdminTourWidget() {
                 🚀
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm leading-none">{t("tour.header.title")}</p>
-                <p className="text-white/70 text-xs mt-0.5">{t("tour.header.subtitle")}</p>
+                <p className="text-slate-900 font-semibold text-sm leading-none">{t("tour.header.title")}</p>
+                <p className="text-slate-700 text-xs mt-0.5">{t("tour.header.subtitle")}</p>
               </div>
               <LanguageSwitcher variant="dark" align="right" compact className="shrink-0" />
               <button
@@ -264,8 +264,8 @@ export function AdminTourWidget() {
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 shrink-0 text-2xl leading-none">{currentStep.emoji}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold leading-snug text-white">{t(currentStep.titleKey)}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-white/85">{t(currentStep.bodyKey)}</p>
+                  <p className="text-sm font-semibold leading-snug text-slate-900">{t(currentStep.titleKey)}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-700">{t(currentStep.bodyKey)}</p>
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between">
@@ -286,7 +286,7 @@ export function AdminTourWidget() {
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
-                  <span className="text-xs font-medium text-white/70">{step + 1}/{TOUR_STEP_KEYS.length}</span>
+                  <span className="text-xs font-medium text-slate-700">{step + 1}/{TOUR_STEP_KEYS.length}</span>
                   <button
                     onClick={() => setStep((s) => Math.min(TOUR_STEP_KEYS.length - 1, s + 1))}
                     disabled={step === TOUR_STEP_KEYS.length - 1}
@@ -359,7 +359,7 @@ export function AdminTourWidget() {
                     />
                   ))}
                 </div>
-                <span className="text-xs font-medium text-white">{t("tour.chat.listening")}</span>
+                <span className="text-xs font-medium text-slate-900">{t("tour.chat.listening")}</span>
               </div>
             )}
 
