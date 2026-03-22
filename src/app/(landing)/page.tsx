@@ -41,6 +41,14 @@ export default function HomePage() {
         <section className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-5 sm:px-8 pt-20 sm:pt-28 pb-12 sm:pb-20">
           <div className="w-full max-w-3xl mx-auto">
 
+            {/* AI Powered badge */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/[0.16] mb-5 sm:mb-7">
+              <span className="w-1.5 h-1.5 rounded-full bg-white/70 animate-pulse" />
+              <span className="text-[10px] sm:text-[11px] tracking-[0.22em] uppercase text-white" style={{ fontWeight: 300 }}>
+                AI Powered
+              </span>
+            </div>
+
             {/* Eyebrow */}
             <p className="text-[9px] sm:text-[10px] tracking-[0.32em] uppercase font-light text-white/30 mb-6 sm:mb-9">
               {t("landing.eyebrow")}
