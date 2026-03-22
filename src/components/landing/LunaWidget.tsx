@@ -244,7 +244,7 @@ export function LunaWidget({ propertyContext, onRequestBooking }: LunaWidgetProp
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white font-semibold text-sm leading-none">Luna</p>
-                <p className="text-white/70 text-xs mt-0.5">AI Assistant · Multilingual · Online</p>
+                <p className="text-white/70 text-xs mt-0.5">Powered by AI · Multilingual · Online</p>
               </div>
               <button
                 onClick={() => setAutoVoice(!autoVoice)}

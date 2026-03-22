@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroVideo } from "@/components/landing/HeroVideo";
+import { LunaWidget } from "@/components/landing/LunaWidget";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
-import { ArrowRight, Building2, BarChart3, Users, Shield } from "lucide-react";
+import { Building2, BarChart3, Users, Shield } from "lucide-react";
 
 const FEATURE_KEYS = [
   { icon: Building2, titleKey: "landing.feature.portfolio.title", descKey: "landing.feature.portfolio.desc" },
@@ -72,11 +73,10 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 w-full max-w-[280px] sm:max-w-none mx-auto">
               <Link
                 href="/auth/signin"
-                className="group inline-flex items-center justify-center gap-2 h-12 sm:h-11 px-8 rounded-full border border-white/[0.14] text-white/50 text-sm tracking-wide transition-all duration-300 hover:border-white/[0.28] hover:text-white/78 active:scale-[0.97]"
+                className="inline-flex items-center justify-center h-12 sm:h-11 px-8 rounded-full border border-white/[0.14] text-white/50 text-sm tracking-wide transition-all duration-300 hover:border-white/[0.28] hover:text-white/78 active:scale-[0.97]"
                 style={{ fontWeight: 300 }}
               >
                 {t("landing.cta.signin")}
-                <ArrowRight className="w-3.5 h-3.5 shrink-0 group-hover:translate-x-0.5 transition-transform duration-200" />
               </Link>
               <Link
                 href="/rentals"
@@ -152,6 +152,7 @@ export default function HomePage() {
           </div>
         </footer>
       </main>
+      <LunaWidget />
     </>
   );
 }
