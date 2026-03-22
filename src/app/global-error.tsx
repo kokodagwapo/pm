@@ -173,11 +173,11 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               </div>
             )}
             <div className="ac">
-              <button onClick={() => { try { reset?.(); } catch {} }} className="b bp">
+              <button onClick={() => { try { reset?.(); } catch {} }} className="b bs">
                 <RefreshCw style={{ width: "1rem", height: "1rem" }} />
                 Try Again
               </button>
-              <a href="/" className="b bs">
+              <a href="/" className="b bp">
                 <Home style={{ width: "1rem", height: "1rem" }} />
                 Go to Homepage
               </a>
