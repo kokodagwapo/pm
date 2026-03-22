@@ -25,11 +25,12 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: replitDevOrigins,
 
   // Inline for client bundles (next-auth/react). Must match the origin you use in the browser during dev.
+  // When running `next dev -p 3001`, PORT is set so auth URL matches the actual server port.
   env: {
     NEXTAUTH_URL:
       process.env.NEXTAUTH_URL ||
       process.env.AUTH_URL ||
-      "http://localhost:3000",
+      (process.env.PORT ? `http://localhost:${process.env.PORT}` : "http://localhost:3000"),
   },
 
   serverExternalPackages: ["mongodb"],

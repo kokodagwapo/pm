@@ -77,12 +77,12 @@ function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: (
   const imageUrl = images[0] || null;
 
   return (
-    <div className="bg-white border border-slate-200/60 rounded-2xl shadow-xl overflow-hidden animate-in slide-in-from-top-2 duration-200">
+    <div className="bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden animate-in slide-in-from-top-2 duration-200">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800/80">
         <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest">Selected Property</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
+          <span className="text-[10px] font-semibold text-white/90 uppercase tracking-wider">Selected Property</span>
         </div>
         <button
           onClick={onClose}
@@ -104,9 +104,9 @@ function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: (
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
           <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
             <div>
-              <p className="text-white font-bold text-xl leading-tight drop-shadow-lg" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+              <p className="text-white font-semibold text-xl leading-tight drop-shadow-lg tracking-tight">
                 {formatPrice(price)}
-                <span className="text-white/60 text-sm font-normal ml-1">/mo</span>
+                <span className="text-white/70 text-sm font-normal ml-1">/mo</span>
               </p>
               {basePerNight > 0 && (
                 <p className="text-white/70 text-xs mt-0.5">~{formatPrice(basePerNight)}/night</p>
@@ -120,7 +120,7 @@ function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: (
             )}
           </div>
           <div className="absolute top-2.5 left-2.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-white/10 backdrop-blur-sm border border-white/20 text-white uppercase tracking-widest">
+            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-white/15 backdrop-blur-sm border border-white/20 text-white uppercase tracking-wide">
               For Rent
             </span>
           </div>
@@ -134,14 +134,14 @@ function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: (
       {/* Details */}
       <div className="px-4 py-3.5">
         {property.neighborhood && (
-          <p className="text-[9px] font-bold uppercase tracking-widest text-amber-600/80 mb-1">{property.neighborhood}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">{property.neighborhood}</p>
         )}
-        <h3 className="text-slate-900 text-base leading-tight line-clamp-2 mb-1.5" style={{ fontFamily: "var(--font-montserrat), var(--font-jakarta), system-ui, sans-serif", fontWeight: 300 }}>
+        <h3 className="text-slate-900 text-base leading-tight line-clamp-2 mb-1.5 font-medium tracking-tight">
           {property.name}
         </h3>
         {(property.address?.street || property.address?.city) && (
-          <p className="flex items-center gap-1 text-slate-900 text-xs mb-3 truncate" style={{ fontFamily: "var(--font-montserrat), var(--font-jakarta), system-ui, sans-serif", fontWeight: 300 }}>
-            <MapPin className="w-2.5 h-2.5 shrink-0 text-amber-400" />
+          <p className="flex items-center gap-1 text-slate-500 text-xs mb-3 truncate">
+            <MapPin className="w-2.5 h-2.5 shrink-0 text-slate-400" />
             {property.address.street ? `${property.address.street}, ` : ""}
             {property.address.city}
             {property.address.state ? `, ${property.address.state}` : ""}
@@ -149,11 +149,11 @@ function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: (
         )}
 
         <div className="flex items-center gap-3 mb-3.5 pb-3 border-b border-slate-100">
-          <span className="flex items-center gap-1.5 text-slate-600 text-xs font-medium">
+          <span className="flex items-center gap-1.5 text-slate-500 text-xs">
             <Bed className="w-3 h-3 text-slate-300" />
             {bedrooms} {bedrooms === 1 ? "Bed" : "Beds"}
           </span>
-          <span className="flex items-center gap-1.5 text-slate-600 text-xs font-medium">
+          <span className="flex items-center gap-1.5 text-slate-500 text-xs">
             <Bath className="w-3 h-3 text-slate-300" />
             {bathrooms} {bathrooms === 1 ? "Bath" : "Baths"}
           </span>
@@ -164,7 +164,7 @@ function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: (
 
         <Link
           href={`/properties/${property._id}`}
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 active:bg-slate-950 transition-colors shadow-sm"
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 active:bg-slate-950 transition-colors"
         >
           View Property Details
           <ExternalLink className="w-3.5 h-3.5" />
@@ -174,7 +174,7 @@ function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: (
       {/* Dismiss */}
       <button
         onClick={onClose}
-        className="w-full flex items-center justify-center gap-1.5 py-2 border-t border-slate-100 text-[11px] text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
+        className="w-full flex items-center justify-center gap-1.5 py-2.5 border-t border-slate-100 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors"
       >
         <ChevronDown className="w-3 h-3" />
         Show all results
@@ -193,7 +193,7 @@ function CompareModal({
   const rows = [
     { label: "Price/month", render: (p: any) => {
       const u = p.units?.[0]; const r = u?.rentAmount ?? 0; const price = r > 500 ? r : r * 30;
-      return <span className="font-bold text-sky-600">{formatPrice(price)}</span>;
+      return <span className="font-semibold text-slate-900">{formatPrice(price)}</span>;
     }},
     { label: "Bedrooms", render: (p: any) => p.units?.[0]?.bedrooms ?? "—" },
     { label: "Bathrooms", render: (p: any) => p.units?.[0]?.bathrooms ?? "—" },
@@ -208,11 +208,11 @@ function CompareModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
-          <h2 className="font-bold text-slate-900 text-lg flex items-center gap-2">
-            <GitCompare className="w-5 h-5 text-sky-500" />
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+          <h2 className="font-semibold text-slate-900 text-lg flex items-center gap-2 tracking-tight">
+            <GitCompare className="w-5 h-5 text-slate-600" />
             Compare Properties
           </h2>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
@@ -249,7 +249,7 @@ function CompareModal({
                 <td className="py-4 px-4" />
                 {properties.map((p) => (
                   <td key={p._id} className="py-4 px-4">
-                    <Link href={`/properties/${p._id}`} className="block w-full py-2.5 rounded-xl bg-sky-500 text-white text-xs font-semibold text-center hover:bg-sky-600 transition-colors">
+                    <Link href={`/properties/${p._id}`} className="block w-full py-2.5 rounded-lg bg-slate-900 text-white text-xs font-medium text-center hover:bg-slate-800 transition-colors">
                       View Details
                     </Link>
                   </td>
@@ -298,12 +298,12 @@ function PropertyListCard({
   return (
     <Link href={`/properties/${property._id}`} className="block w-full overflow-hidden">
       <div
-        className={`group flex flex-col sm:flex-row bg-white rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer ${
+        className={`group flex flex-col sm:flex-row bg-white rounded-xl overflow-hidden transition-all duration-300 cursor-pointer ${
           isSelected
-            ? "ring-2 ring-amber-400 ring-offset-1 shadow-lg opacity-70"
+            ? "ring-2 ring-slate-900/20 ring-offset-2 shadow-lg"
             : isHovered
-            ? "shadow-xl ring-2 ring-slate-900/10 ring-offset-1"
-            : "shadow-sm hover:shadow-xl border border-slate-100"
+            ? "shadow-lg border-slate-200"
+            : "shadow-sm border border-slate-200/60 hover:shadow-md hover:border-slate-200"
         }`}
         onMouseEnter={() => onHover(property._id)}
         onMouseLeave={() => onHover(null)}
@@ -319,7 +319,7 @@ function PropertyListCard({
 
           {/* FOR RENT badge */}
           <div className="absolute top-2.5 left-2.5">
-            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-900/80 backdrop-blur-sm text-white uppercase tracking-widest">
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-900/90 backdrop-blur-sm text-white uppercase tracking-wide">
               For Rent
             </span>
           </div>
@@ -357,18 +357,18 @@ function PropertyListCard({
           <div className="min-w-0">
             {/* Neighborhood tag */}
             {property.neighborhood && (
-              <p className="text-[9px] font-bold uppercase tracking-widest text-amber-600/80 mb-1">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">
                 {property.neighborhood}
               </p>
             )}
 
             {/* Name + Price row */}
             <div className="flex items-start justify-between gap-3 mb-1.5">
-              <h3 className="font-light text-slate-900 text-[13px] leading-snug line-clamp-2 flex-1 min-w-0" style={{ fontFamily: "var(--font-montserrat), var(--font-jakarta), system-ui, sans-serif", fontWeight: 300 }}>
+              <h3 className="text-slate-900 text-sm leading-snug line-clamp-2 flex-1 min-w-0 font-medium tracking-tight">
                 {property.name}
               </h3>
               <div className="text-right shrink-0">
-                <p className="text-[17px] font-semibold text-slate-900 leading-none tracking-tight" style={{ fontFamily: "var(--font-montserrat), var(--font-jakarta), system-ui, sans-serif" }}>
+                <p className="text-base font-semibold text-slate-900 leading-none tracking-tight">
                   {formatPrice(price)}
                 </p>
                 <p className="text-[10px] text-slate-400 mt-0.5 font-normal">/month</p>
@@ -377,8 +377,8 @@ function PropertyListCard({
 
             {/* Address */}
             {(property.address?.street || property.address?.city) && (
-              <p className="flex items-center gap-1 text-slate-900 text-[11px] truncate" style={{ fontFamily: "var(--font-montserrat), var(--font-jakarta), system-ui, sans-serif", fontWeight: 300 }}>
-                <MapPin className="w-2.5 h-2.5 shrink-0 text-amber-400" />
+              <p className="flex items-center gap-1 text-slate-500 text-xs truncate">
+                <MapPin className="w-2.5 h-2.5 shrink-0 text-slate-400" />
                 <span className="truncate">
                   {property.address.street ? `${property.address.street}, ` : ""}
                   {property.address.city}
@@ -389,19 +389,19 @@ function PropertyListCard({
           </div>
 
           {/* Stats */}
-          <div className="flex items-center gap-3 mt-3 pt-2.5 border-t border-slate-100/80" style={{ fontFamily: "var(--font-montserrat), var(--font-jakarta), system-ui, sans-serif" }}>
-            <span className="flex items-center gap-1 text-slate-500 text-[11px]" style={{ fontWeight: 300 }}>
+          <div className="flex items-center gap-3 mt-3 pt-2.5 border-t border-slate-100">
+            <span className="flex items-center gap-1 text-slate-500 text-xs">
               <Bed className="w-3 h-3 text-slate-300" />
               {bedrooms} {bedrooms === 1 ? "Bed" : "Beds"}
             </span>
-            <span className="flex items-center gap-1 text-slate-500 text-[11px]" style={{ fontWeight: 300 }}>
+            <span className="flex items-center gap-1 text-slate-500 text-xs">
               <Bath className="w-3 h-3 text-slate-300" />
               {bathrooms} {bathrooms === 1 ? "Bath" : "Baths"}
             </span>
             {sqft > 0 && (
-              <span className="text-slate-400 text-[11px]" style={{ fontWeight: 300 }}>{sqft.toLocaleString()} ft²</span>
+              <span className="text-slate-400 text-xs">{sqft.toLocaleString()} ft²</span>
             )}
-            <span className="ml-auto flex items-center gap-0.5 text-slate-900 text-[11px] opacity-0 group-hover:opacity-100 transition-all duration-200 shrink-0" style={{ fontWeight: 500 }}>
+            <span className="ml-auto flex items-center gap-0.5 text-slate-600 text-xs font-medium opacity-0 group-hover:opacity-100 transition-all duration-200 shrink-0">
               View <ArrowRight className="w-3 h-3" />
             </span>
           </div>
@@ -552,234 +552,176 @@ function RentalsContent() {
       <LandingHeader />
 
       <div className="pt-[48px] flex flex-col flex-1">
-        {/* ── Sticky filter bar ── */}
-        <div className="bg-white border-b border-slate-100/80 sticky top-[48px] z-30">
-
-          {/* Row 1 — Search + inline filters + List/Map */}
-          <div className="px-3 sm:px-5 pt-3 pb-2 flex items-center gap-2">
-
-            {/* Search input */}
-            <div className="relative flex-1 min-w-0">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-              <input
-                type="text"
-                value={searchText}
-                onChange={(e) => handleSearchInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-                    pushFilters({ search: searchText || undefined });
-                  }
-                }}
-                placeholder={t("rentals.search.placeholder")}
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[13px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 transition-all"
-              />
-            </div>
-
-            {/* Type pills — desktop only inline */}
-            <div className="hidden lg:flex items-center gap-px bg-slate-100 rounded-xl overflow-hidden shrink-0">
-              {PROPERTY_TYPES.map((opt) => (
+        {/* Sticky filter bar — modern, organized layout */}
+        <div className="bg-white/95 backdrop-blur-sm border-b border-slate-200/60 sticky top-[48px] z-30 shadow-sm">
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 space-y-4">
+            {/* Row 1: Search (hero) + View toggle + Actions */}
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1 min-w-0">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchText}
+                  onChange={(e) => handleSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+                      pushFilters({ search: searchText || undefined });
+                    }
+                  }}
+                  placeholder={t("rentals.search.placeholder")}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50/80 border border-slate-200/80 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/8 focus:border-slate-300 transition-all font-medium"
+                />
+              </div>
+              {hasActiveFilters && (
                 <button
-                  key={opt.value || "all-types"}
-                  onClick={() => pushFilters({ type: opt.value || undefined })}
-                  className={`px-3 py-1.5 text-xs font-medium transition-all whitespace-nowrap ${
-                    activeType === opt.value
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/60"
+                  onClick={clearFilters}
+                  className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-xs font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700 hover:bg-slate-50 transition-all"
+                  title="Clear all filters"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{t("rentals.filters.reset")}</span>
+                </button>
+              )}
+              <div className="flex items-center gap-px bg-slate-100 rounded-lg overflow-hidden shrink-0">
+                <button
+                  onClick={() => setMobileView("list")}
+                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-all ${
+                    mobileView === "list" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/70"
                   }`}
                 >
-                  {opt.label}
+                  <LayoutList className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t("rentals.view.list")}</span>
                 </button>
-              ))}
-            </div>
-
-            {/* Beds pills — desktop only inline */}
-            <div className="hidden lg:flex items-center gap-px bg-slate-100 rounded-xl overflow-hidden shrink-0">
-              {BEDROOMS_OPTIONS.map((opt) => (
                 <button
-                  key={opt.value || "any-beds"}
-                  onClick={() => pushFilters({ bedrooms: opt.value || undefined })}
-                  className={`px-3 py-1.5 text-xs font-medium transition-all whitespace-nowrap ${
-                    activeBedrooms === opt.value
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/60"
+                  onClick={() => setMobileView("map")}
+                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-all ${
+                    mobileView === "map" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/70"
                   }`}
                 >
-                  {opt.label}
+                  <Map className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t("rentals.view.map")}</span>
                 </button>
-              ))}
+              </div>
             </div>
 
-            {/* Price range — desktop only */}
-            <div className="hidden lg:flex items-center gap-1.5 shrink-0">
-              <input
-                type="number"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                onBlur={() => pushFilters({ minRent: minPrice || undefined })}
-                onKeyDown={(e) => e.key === "Enter" && pushFilters({ minRent: minPrice || undefined })}
-                placeholder="$ Min"
-                className="w-20 px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-100 text-[12px] text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all"
-              />
-              <span className="text-slate-300 text-sm select-none">—</span>
-              <input
-                type="number"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                onBlur={() => pushFilters({ maxRent: maxPrice || undefined })}
-                onKeyDown={(e) => e.key === "Enter" && pushFilters({ maxRent: maxPrice || undefined })}
-                placeholder="$ Max"
-                className="w-20 px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-100 text-[12px] text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all"
-              />
-            </div>
+            {/* Row 2: Filters — grouped, labeled, organized */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6 gap-3">
+              {/* Filter groups */}
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold hidden sm:inline">Type</span>
+                  <div className="flex items-center rounded-lg border border-slate-200/80 overflow-hidden bg-slate-50/50">
+                    {PROPERTY_TYPES.map((opt) => (
+                      <button
+                        key={opt.value || "all-types"}
+                        onClick={() => pushFilters({ type: opt.value || undefined })}
+                        className={`px-2.5 py-1.5 text-xs font-medium transition-all whitespace-nowrap ${
+                          activeType === opt.value
+                            ? "bg-slate-900 text-white"
+                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="h-4 w-px bg-slate-200 hidden sm:block" aria-hidden />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold hidden sm:inline">Beds</span>
+                  <div className="flex items-center rounded-lg border border-slate-200/80 overflow-hidden bg-slate-50/50">
+                    {BEDROOMS_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value || "any-beds"}
+                        onClick={() => pushFilters({ bedrooms: opt.value || undefined })}
+                        className={`px-2.5 py-1.5 text-xs font-medium transition-all whitespace-nowrap ${
+                          activeBedrooms === opt.value
+                            ? "bg-slate-900 text-white"
+                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="h-4 w-px bg-slate-200 hidden sm:block" aria-hidden />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold hidden sm:inline">Price</span>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="number"
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value)}
+                      onBlur={() => pushFilters({ minRent: minPrice || undefined })}
+                      onKeyDown={(e) => e.key === "Enter" && pushFilters({ minRent: minPrice || undefined })}
+                    placeholder="Min"
+                    className="w-16 sm:w-20 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200/80 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/8 transition-all"
+                    />
+                    <span className="text-slate-300 text-sm select-none font-light">–</span>
+                    <input
+                      type="number"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                      onBlur={() => pushFilters({ maxRent: maxPrice || undefined })}
+                      onKeyDown={(e) => e.key === "Enter" && pushFilters({ maxRent: maxPrice || undefined })}
+                      placeholder="Max"
+                      className="w-16 sm:w-20 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200/80 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/8 transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
 
-            {/* Reset — visible whenever any filter is active */}
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 text-[12px] font-medium text-slate-500 hover:border-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-all"
-                title="Clear all filters"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span className="hidden sm:inline">{t("rentals.filters.reset")}</span>
-              </button>
-            )}
-
-            {/* List / Map toggle */}
-            <div className="flex items-center gap-px bg-slate-100 rounded-xl overflow-hidden shrink-0">
-              <button
-                onClick={() => setMobileView("list")}
-                className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium transition-all ${
-                  mobileView === "list" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/60"
-                }`}
-              >
-                <LayoutList className="w-3.5 h-3.5" />
-                <span>{t("rentals.view.list")}</span>
-              </button>
-              <button
-                onClick={() => setMobileView("map")}
-                className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium transition-all ${
-                  mobileView === "map" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/60"
-                }`}
-              >
-                <Map className="w-3.5 h-3.5" />
-                <span>{t("rentals.view.map")}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Row 2 — mobile/tablet only: type + beds + price pills */}
-          <div className="lg:hidden px-3 sm:px-5 pb-2 flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
-            {/* Type */}
-            <div className="flex items-center gap-px bg-slate-100 rounded-xl overflow-hidden shrink-0">
-              {PROPERTY_TYPES.map((opt) => (
+              {/* Saved + count */}
+              <div className="flex items-center gap-3 sm:ml-auto">
                 <button
-                  key={opt.value || "all-t"}
-                  onClick={() => pushFilters({ type: opt.value || undefined })}
-                  className={`px-2.5 py-1.5 text-[11px] font-medium transition-all whitespace-nowrap ${
-                    activeType === opt.value
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-500 hover:text-slate-900"
+                  onClick={() => setShowFavoritesOnly((v) => !v)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                    showFavoritesOnly
+                      ? "bg-rose-500 text-white border-rose-500"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
-                  {opt.label}
+                  <Heart className={`w-3.5 h-3.5 ${showFavoritesOnly ? "fill-current" : ""}`} />
+                  {t("rentals.filters.saved")}
+                  {favoriteIds.length > 0 && (
+                    <span className={`ml-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none ${showFavoritesOnly ? "bg-white/25 text-white" : "bg-rose-100 text-rose-600"}`}>
+                      {favoriteIds.length}
+                    </span>
+                  )}
                 </button>
-              ))}
+                {loading ? (
+                  <span className="flex items-center gap-2 text-xs text-slate-400">
+                    <span className="w-3 h-3 rounded-full border-2 border-slate-300 border-t-transparent animate-spin" />
+                  </span>
+                ) : (
+                  <span className="text-xs text-slate-500 whitespace-nowrap">
+                    <span className="font-semibold text-slate-700">{pagination.total}</span> {pagination.total === 1 ? t("rentals.results.property") : t("rentals.results.properties")}
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div className="w-px h-4 bg-slate-200 shrink-0" />
-
-            {/* Beds */}
-            <div className="flex items-center gap-px bg-slate-100 rounded-xl overflow-hidden shrink-0">
-              {BEDROOMS_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value || "any-b"}
-                  onClick={() => pushFilters({ bedrooms: opt.value || undefined })}
-                  className={`px-2.5 py-1.5 text-[11px] font-medium transition-all whitespace-nowrap ${
-                    activeBedrooms === opt.value
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-500 hover:text-slate-900"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="w-px h-4 bg-slate-200 shrink-0" />
-
-            {/* Price */}
-            <div className="flex items-center gap-1 shrink-0">
-              <input
-                type="number"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                onBlur={() => pushFilters({ minRent: minPrice || undefined })}
-                onKeyDown={(e) => e.key === "Enter" && pushFilters({ minRent: minPrice || undefined })}
-                placeholder="$Min"
-                className="w-16 px-2 py-1.5 rounded-xl bg-slate-50 border border-slate-100 text-[11px] text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-              />
-              <span className="text-slate-300 text-xs">—</span>
-              <input
-                type="number"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                onBlur={() => pushFilters({ maxRent: maxPrice || undefined })}
-                onKeyDown={(e) => e.key === "Enter" && pushFilters({ maxRent: maxPrice || undefined })}
-                placeholder="$Max"
-                className="w-16 px-2 py-1.5 rounded-xl bg-slate-50 border border-slate-100 text-[11px] text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-              />
-            </div>
-          </div>
-
-          {/* Row 3 — Neighborhood chips + count */}
-          <div className="px-3 sm:px-5 pb-2.5 flex items-center gap-1.5">
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide flex-1 min-w-0">
+            {/* Row 3: Areas (neighborhoods) — horizontal scroll */}
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-0.5 -mx-1 px-1">
+              <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold shrink-0 hidden sm:inline">Area</span>
               {NEIGHBORHOODS.map((n) => {
                 const isActive = n.value === "" ? !activeNeighborhood : activeNeighborhood === n.value;
                 return (
                   <button
                     key={n.value || "all-n"}
                     onClick={() => handleNeighborhood(n.value)}
-                    className={`px-3 py-1 rounded-full text-[11px] font-medium tracking-wide transition-all whitespace-nowrap flex-shrink-0 border ${
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
                       isActive
-                        ? "bg-slate-900 text-white border-slate-900"
-                        : "bg-white text-slate-500 border-slate-200 hover:border-slate-400 hover:text-slate-800"
+                        ? "bg-slate-900 text-white"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800"
                     }`}
                   >
                     {n.label}
                   </button>
                 );
               })}
-              <button
-                onClick={() => setShowFavoritesOnly((v) => !v)}
-                className={`px-3 py-1 rounded-full text-[11px] font-medium tracking-wide transition-all whitespace-nowrap flex-shrink-0 border flex items-center gap-1 ${
-                  showFavoritesOnly
-                    ? "bg-rose-500 text-white border-rose-500"
-                    : "bg-white text-slate-500 border-slate-200 hover:border-rose-300 hover:text-rose-500"
-                }`}
-              >
-                <Heart className={`w-3 h-3 ${showFavoritesOnly ? "fill-current" : ""}`} />
-                {t("rentals.filters.saved")}
-                {favoriteIds.length > 0 && (
-                  <span className={`ml-0.5 px-1 rounded-full text-[9px] font-bold leading-4 ${showFavoritesOnly ? "bg-white/30 text-white" : "bg-rose-100 text-rose-500"}`}>
-                    {favoriteIds.length}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            {/* Result count — fixed right */}
-            <div className="shrink-0 pl-2">
-              {loading ? (
-                <span className="flex items-center gap-1 text-[11px] text-slate-400">
-                  <span className="w-2.5 h-2.5 rounded-full border-2 border-slate-300 border-t-transparent animate-spin inline-block" />
-                </span>
-              ) : (
-                <span className="text-[11px] text-slate-400 whitespace-nowrap">
-                  <strong className="text-slate-700 font-medium">{pagination.total}</strong> {pagination.total === 1 ? t("rentals.results.property") : t("rentals.results.properties")}
-                </span>
-              )}
             </div>
           </div>
         </div>
@@ -824,7 +766,7 @@ function RentalsContent() {
 
           {/* Listings — phone/tablet list view + lg+ right column */}
           <div className={`${mobileView === "list" ? "flex" : "hidden"} lg:flex flex-col w-full lg:w-[45%] overflow-y-auto overflow-x-hidden bg-[#f8f7f4] border-l border-slate-200/60`} style={{ isolation: "isolate" }}>
-            <div className="p-3 space-y-2.5 w-full overflow-x-hidden">
+            <div className="p-4 sm:p-5 space-y-3 w-full overflow-x-hidden max-w-2xl mx-auto lg:mx-0 lg:max-w-none">
 
               {/* Featured selected property card */}
               {selectedProperty && (
@@ -836,9 +778,9 @@ function RentalsContent() {
 
               {/* Divider when a property is selected */}
               {selectedProperty && !loading && (
-                <div className="flex items-center gap-2 py-1">
+                <div className="flex items-center gap-3 py-2">
                   <div className="flex-1 h-px bg-slate-200" />
-                  <span className="text-xs text-slate-400 font-medium whitespace-nowrap">
+                  <span className="text-xs text-slate-500 font-medium whitespace-nowrap">
                     {t("rentals.results.all").replace("{count}", String(pagination.total))}
                   </span>
                   <div className="flex-1 h-px bg-slate-200" />
@@ -848,19 +790,19 @@ function RentalsContent() {
               {loading ? (
                 <>
                   {[...Array(5)].map((_, i) => (
-                    <div key={i} className="h-[140px] rounded-xl bg-white border border-slate-200 animate-pulse" />
+                    <div key={i} className="h-[155px] sm:h-[140px] rounded-xl bg-white/80 border border-slate-200/80 animate-pulse" />
                   ))}
                 </>
               ) : properties.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-                  <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-                    <Home className="w-6 h-6 text-slate-400" />
+                  <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-5">
+                    <Home className="w-8 h-8 text-slate-400" />
                   </div>
-                  <p className="text-slate-700 font-medium mb-1">{t("rentals.noResults.title")}</p>
-                  <p className="text-slate-400 text-sm mb-4">{t("rentals.noResults.subtitle")}</p>
+                  <p className="text-slate-800 font-semibold text-lg mb-1.5">{t("rentals.noResults.title")}</p>
+                  <p className="text-slate-500 text-sm mb-5 max-w-sm">{t("rentals.noResults.subtitle")}</p>
                   <button
                     onClick={clearFilters}
-                    className="px-4 py-2 rounded-lg bg-sky-500 text-white text-sm font-medium hover:bg-sky-600 transition-colors"
+                    className="px-5 py-2.5 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors"
                   >
                     {t("rentals.noResults.clearFilters")}
                   </button>
@@ -871,10 +813,10 @@ function RentalsContent() {
                   if (displayed.length === 0 && showFavoritesOnly) {
                     return (
                       <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-                        <Heart className="w-10 h-10 text-slate-200 mb-3" />
-                        <p className="text-slate-600 font-medium mb-1">{t("rentals.noSaved.title")}</p>
-                        <p className="text-slate-400 text-sm mb-4">{t("rentals.noSaved.subtitle")}</p>
-                        <button onClick={() => setShowFavoritesOnly(false)} className="px-4 py-2 rounded-lg bg-sky-500 text-white text-sm font-medium hover:bg-sky-600 transition-colors">
+                        <Heart className="w-12 h-12 text-slate-200 mb-4" />
+                        <p className="text-slate-800 font-semibold mb-1.5">{t("rentals.noSaved.title")}</p>
+                        <p className="text-slate-500 text-sm mb-5">{t("rentals.noSaved.subtitle")}</p>
+                        <button onClick={() => setShowFavoritesOnly(false)} className="px-5 py-2.5 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
                           {t("rentals.noSaved.browseAll")}
                         </button>
                       </div>
@@ -900,11 +842,11 @@ function RentalsContent() {
 
               {/* Pagination */}
               {pagination.pages > 1 && (
-                <div className="flex items-center justify-center gap-1 py-4">
+                <div className="flex items-center justify-center gap-2 py-6">
                   <button
                     onClick={() => handlePageChange(pagination.page - 1)}
                     disabled={pagination.page <= 1}
-                    className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    className="p-2.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronLeft className="w-4 h-4 text-slate-600" />
                   </button>
@@ -912,10 +854,10 @@ function RentalsContent() {
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+                      className={`min-w-[2.25rem] h-9 px-2 rounded-lg text-sm font-medium transition-all ${
                         page === pagination.page
-                          ? "bg-sky-500 text-white shadow-sm shadow-sky-500/20"
-                          : "bg-white border border-slate-200 text-slate-600 hover:border-sky-300 hover:text-sky-600"
+                          ? "bg-slate-900 text-white"
+                          : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                       }`}
                     >
                       {page}
@@ -924,7 +866,7 @@ function RentalsContent() {
                   <button
                     onClick={() => handlePageChange(pagination.page + 1)}
                     disabled={pagination.page >= pagination.pages}
-                    className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    className="p-2.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronRight className="w-4 h-4 text-slate-600" />
                   </button>
@@ -939,7 +881,7 @@ function RentalsContent() {
 
       {/* Floating comparison bar */}
       {compareIds.length >= 1 && (
-        <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 sm:gap-3 bg-slate-900 text-white rounded-2xl shadow-2xl px-3 sm:px-4 py-2.5 sm:py-3 border border-slate-700 backdrop-blur-md max-w-[calc(100vw-2rem)]">
+        <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 sm:gap-3 bg-slate-900 text-white rounded-xl shadow-xl px-3 sm:px-4 py-2.5 sm:py-3 border border-slate-800/60 backdrop-blur-md max-w-[calc(100vw-2rem)]">
           <div className="flex items-center gap-2">
             {compareIds.map((id) => {
               const p = properties.find((x) => x._id === id);
@@ -971,7 +913,7 @@ function RentalsContent() {
           <button
             onClick={() => setShowCompareModal(true)}
             disabled={compareIds.length < 2}
-            className="ml-1 px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
+            className="ml-1 px-4 py-2 rounded-lg bg-white/15 hover:bg-white/25 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
           >
             {t("rentals.compare.bar.compare")}
           </button>

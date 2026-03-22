@@ -384,6 +384,14 @@
     background-color: transparent;
   }
 
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Dashboard light theme */
   html.dashboard-layout.dashboard-light .scrollbar-thin {
     scrollbar-width: thin;

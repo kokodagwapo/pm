@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { getCsrfToken, signIn } from "next-auth/react";
 import { HeroVideo } from "@/components/landing/HeroVideo";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
@@ -35,7 +36,16 @@ const DEFAULT_BRANDING: Branding = {
   companyName: "SmartStartPM",
 };
 
-export default function SignInPage() {
+/** Ensure callbackUrl is a safe relative path (prevent open redirects). */
+function safeCallbackUrl(input: string | null): string {
+  if (!input || typeof input !== "string") return "/dashboard";
+  const path = input.startsWith("/") ? input : `/${input}`;
+  if (path.startsWith("//") || path.includes(":")) return "/dashboard";
+  return path.startsWith("/dashboard") ? path : "/dashboard";
+}
+
+function SignInContent() {
+  const searchParams = useSearchParams();
   const { t } = useLocalizationContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -92,7 +102,8 @@ export default function SignInPage() {
       () => {}
     );
 
-    const callbackUrl = `${window.location.origin}/dashboard`;
+    const callbackPath = safeCallbackUrl(searchParams.get("callbackUrl"));
+    const callbackUrl = `${window.location.origin}${callbackPath}`;
 
     const result = await signIn("credentials", {
       email: loginEmail,
@@ -102,7 +113,7 @@ export default function SignInPage() {
     });
 
     if (!result?.error && result?.ok) {
-      return result.url ?? "/dashboard";
+      return result.url ?? callbackPath;
     }
 
     const csrfToken = await getCsrfToken();
@@ -384,5 +395,13 @@ export default function SignInPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-black"><div className="h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-white" /></div>}>
+      <SignInContent />
+    </Suspense>
   );
 }

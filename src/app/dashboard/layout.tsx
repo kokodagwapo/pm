@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Search, Settings, LogOut, User, Menu, X, Sun, Moon } from "lucide-react";
 import { useUserAvatar } from "@/components/providers/UserAvatarProvider";
@@ -206,6 +206,7 @@ const MobileHeader = memo(function MobileHeader({
 });
 
 function DashboardLayoutContent({ children }: DashboardLayoutProps) {
+  const pathname = usePathname();
   const { data: session, status } = useSession();
   const { avatarUrl } = useUserAvatar();
   const router = useRouter();
@@ -263,7 +264,8 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
   }
 
   if (status === "unauthenticated") {
-    redirect("/auth/signin");
+    const callbackUrl = pathname?.startsWith("/") ? pathname : "/dashboard";
+    redirect(`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`);
   }
 
   const user = session?.user;
