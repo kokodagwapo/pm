@@ -113,7 +113,20 @@ function SignInContent() {
     });
 
     if (!result?.error && result?.ok) {
-      return result.url ?? callbackPath;
+      // Normalize the returned URL to the current origin so custom domains
+      // (e.g. pm.smarts.fi) are preserved instead of being swapped to the
+      // Replit deployment URL.
+      const rawUrl = result.url ?? callbackPath;
+      try {
+        const u = new URL(rawUrl, window.location.origin);
+        if (u.origin !== window.location.origin) {
+          u.protocol = window.location.protocol;
+          u.host = window.location.host;
+        }
+        return u.toString();
+      } catch {
+        return rawUrl;
+      }
     }
 
     const csrfToken = await getCsrfToken();
@@ -144,16 +157,22 @@ function SignInContent() {
     if (!data.url || !res.ok) return null;
 
     let authError: string | null = null;
+    let normalizedUrl = data.url;
     try {
-      authError = new URL(data.url, window.location.origin).searchParams.get(
-        "error"
-      );
+      const u = new URL(data.url, window.location.origin);
+      authError = u.searchParams.get("error");
+      // Keep the user on the current domain (custom domain support)
+      if (u.origin !== window.location.origin) {
+        u.protocol = window.location.protocol;
+        u.host = window.location.host;
+      }
+      normalizedUrl = u.toString();
     } catch {
       return null;
     }
 
     if (authError) return null;
-    return data.url;
+    return normalizedUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

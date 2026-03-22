@@ -271,12 +271,25 @@ export const authOptions: NextAuthConfig = {
     },
 
     async redirect({ url, baseUrl }) {
+      // Build the set of trusted hosts: baseUrl + NEXTAUTH_URL + AUTH_URL + CUSTOM_DOMAIN
+      const trustedHosts = new Set<string>();
+      try { trustedHosts.add(new URL(baseUrl).host); } catch {}
+      for (const envKey of ["NEXTAUTH_URL", "AUTH_URL", "CUSTOM_DOMAIN"]) {
+        const val = process.env[envKey];
+        if (val) {
+          try { trustedHosts.add(new URL(val.startsWith("http") ? val : `https://${val}`).host); } catch {}
+        }
+      }
+
+      // Relative paths → prepend the origin the request came from
       if (url.startsWith("/")) return `${baseUrl}${url}`;
+
       try {
         const u = new URL(url);
-        const b = new URL(baseUrl);
-        if (u.host === b.host) return url;
+        // Allow redirect if destination host is trusted
+        if (trustedHosts.has(u.host)) return url;
       } catch {}
+
       return baseUrl;
     },
   },
