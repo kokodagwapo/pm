@@ -1056,6 +1056,7 @@ export enum EventType {
   GENERAL = "general",
   BLOCKED = "blocked", // Owner blocked dates - property unavailable
   OWNER_HOLD = "owner_hold", // Owner personal use
+  COMPLIANCE_DEADLINE = "compliance_deadline", // Legal/regulatory compliance deadline
 }
 
 export enum EventStatus {

@@ -217,6 +217,11 @@ function ObligationRow({
   );
 }
 
+interface PropertyOption {
+  _id: string;
+  name: string;
+}
+
 export default function CompliancePage() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -226,13 +231,25 @@ export default function CompliancePage() {
   const [loading, setLoading] = useState(true);
   const [seeding, setSeeding] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [filterSeverity, setFilterSeverity] = useState("all");
+  const [filterProperty, setFilterProperty] = useState("all");
+  const [properties, setProperties] = useState<PropertyOption[]>([]);
   const [activeModal, setActiveModal] = useState<"rent" | "eviction" | "fairHousing" | "addObligation" | null>(null);
+
+  useEffect(() => {
+    fetch("/api/properties?limit=100")
+      .then((r) => r.json())
+      .then((d) => setProperties(d.properties || []))
+      .catch(() => {});
+  }, []);
 
   const fetchObligations = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
       if (filterStatus !== "all") params.set("status", filterStatus);
+      if (filterSeverity !== "all") params.set("severity", filterSeverity);
+      if (filterProperty !== "all") params.set("propertyId", filterProperty);
       const res = await fetch(`/api/compliance/obligations?${params}`);
       if (!res.ok) return;
       const data = await res.json();
@@ -243,7 +260,7 @@ export default function CompliancePage() {
     } finally {
       setLoading(false);
     }
-  }, [filterStatus]);
+  }, [filterStatus, filterSeverity, filterProperty]);
 
   const seedJurisdictions = async () => {
     setSeeding(true);
@@ -285,8 +302,11 @@ export default function CompliancePage() {
   const userRole = (session?.user as { id?: string; role?: string } | undefined)?.role ?? "";
   const isManager = ["admin", "super_admin", "manager"].includes(userRole);
 
-  const filteredObligations =
-    filterStatus === "all" ? obligations : obligations.filter((o) => o.status === filterStatus);
+  const filteredObligations = obligations.filter((o) => {
+    if (filterStatus !== "all" && o.status !== filterStatus) return false;
+    if (filterSeverity !== "all" && o.severity !== filterSeverity) return false;
+    return true;
+  });
 
   return (
     <div className="space-y-6">
@@ -403,19 +423,42 @@ export default function CompliancePage() {
 
       {/* Obligations List */}
       <div>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className={cn("text-sm font-semibold uppercase tracking-wider", isLight ? "text-slate-500" : "text-white/50")}>
-            Compliance Obligations
-          </h2>
-          <div className="flex items-center gap-1.5">
-            <Filter className={cn("h-3.5 w-3.5", isLight ? "text-slate-400" : "text-white/40")} />
-            {["all", "pending", "in_progress", "overdue", "completed"].map((s) => (
+        <div className="mb-3 space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className={cn("text-sm font-semibold uppercase tracking-wider", isLight ? "text-slate-500" : "text-white/50")}>
+              Compliance Obligations
+            </h2>
+            <div className="flex items-center gap-1.5">
+              <Filter className={cn("h-3.5 w-3.5", isLight ? "text-slate-400" : "text-white/40")} />
+              {["all", "pending", "in_progress", "overdue", "completed"].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setFilterStatus(s)}
+                  className={cn(
+                    "rounded-lg px-2.5 py-1 text-xs font-medium transition-all",
+                    filterStatus === s
+                      ? isLight
+                        ? "bg-slate-800 text-white"
+                        : "bg-white/15 text-white"
+                      : isLight
+                      ? "text-slate-500 hover:bg-slate-100"
+                      : "text-white/50 hover:bg-white/10"
+                  )}
+                >
+                  {s === "all" ? "All" : s === "in_progress" ? "In Progress" : s.charAt(0).toUpperCase() + s.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={cn("text-xs font-medium", isLight ? "text-slate-400" : "text-white/40")}>Urgency:</span>
+            {["all", "critical", "high", "medium", "low"].map((sv) => (
               <button
-                key={s}
-                onClick={() => setFilterStatus(s)}
+                key={sv}
+                onClick={() => setFilterSeverity(sv)}
                 className={cn(
                   "rounded-lg px-2.5 py-1 text-xs font-medium transition-all",
-                  filterStatus === s
+                  filterSeverity === sv
                     ? isLight
                       ? "bg-slate-800 text-white"
                       : "bg-white/15 text-white"
@@ -424,9 +467,29 @@ export default function CompliancePage() {
                     : "text-white/50 hover:bg-white/10"
                 )}
               >
-                {s === "all" ? "All" : s === "in_progress" ? "In Progress" : s.charAt(0).toUpperCase() + s.slice(1)}
+                {sv === "all" ? "All Urgency" : sv.charAt(0).toUpperCase() + sv.slice(1)}
               </button>
             ))}
+            {properties.length > 0 && (
+              <>
+                <span className={cn("ml-2 text-xs font-medium", isLight ? "text-slate-400" : "text-white/40")}>Property:</span>
+                <select
+                  value={filterProperty}
+                  onChange={(e) => setFilterProperty(e.target.value)}
+                  className={cn(
+                    "rounded-lg border px-2 py-1 text-xs font-medium transition-all",
+                    isLight
+                      ? "border-slate-200 bg-white text-slate-700"
+                      : "border-white/10 bg-white/5 text-white/70"
+                  )}
+                >
+                  <option value="all">All Properties</option>
+                  {properties.map((p) => (
+                    <option key={p._id} value={p._id}>{p.name}</option>
+                  ))}
+                </select>
+              </>
+            )}
           </div>
         </div>
 

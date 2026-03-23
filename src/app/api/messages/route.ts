@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest } from "next/server";
 import { Message, User, Property, Conversation, MessageStatus } from "@/models";
 import { UserRole } from "@/types";
+import { checkFairHousing } from "@/lib/fair-housing-check";
 import {
   createSuccessResponse,
   createErrorResponse,
@@ -153,6 +154,18 @@ export const POST = withRoleAndDB([
       return createErrorResponse(
         "Conversation ID and content are required",
         400
+      );
+    }
+
+    // Fair housing intercept — block critical violations in message content
+    const fairHousingResult = checkFairHousing(content);
+    if (fairHousingResult.hasCritical) {
+      return createErrorResponse(
+        `Message blocked: fair housing violation detected — ${fairHousingResult.issues
+          .filter((i) => i.severity === "critical")
+          .map((i) => i.warning)
+          .join("; ")}`,
+        422
       );
     }
 

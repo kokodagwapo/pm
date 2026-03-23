@@ -4,6 +4,8 @@ import connectDB from "@/lib/mongodb";
 import ComplianceObligation from "@/models/ComplianceObligation";
 import Property from "@/models/Property";
 import mongoose from "mongoose";
+import { calendarService } from "@/lib/services/calendar.service";
+import { EventType, EventPriority, LocationType } from "@/types";
 
 interface SessionUser {
   id: string;
@@ -125,6 +127,33 @@ export async function POST(request: NextRequest) {
       ...data,
       createdBy: user.id,
     });
+
+    // Auto-create a calendar event for obligations that have a due date
+    if (data.dueDate) {
+      try {
+        const dueDate = new Date(data.dueDate);
+        const endDate = new Date(dueDate);
+        endDate.setHours(endDate.getHours() + 1);
+
+        await calendarService.createEvent(
+          {
+            title: `[Compliance] ${data.title || "Compliance Deadline"}`,
+            description: data.description || `Compliance obligation due: ${data.category}`,
+            type: EventType.COMPLIANCE_DEADLINE,
+            priority: data.severity === "critical" ? EventPriority.URGENT : data.severity === "high" ? EventPriority.HIGH : EventPriority.NORMAL,
+            startDate: dueDate,
+            endDate,
+            allDay: true,
+            propertyId: data.propertyId,
+            organizer: user.id,
+            location: { type: LocationType.OTHER },
+          },
+          user.id
+        );
+      } catch (calendarErr) {
+        console.warn("Failed to create calendar event for compliance obligation:", calendarErr);
+      }
+    }
 
     const populated = await ComplianceObligation.findById(obligation._id)
       .populate("propertyId", "name address")

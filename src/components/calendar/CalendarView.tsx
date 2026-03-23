@@ -119,6 +119,7 @@ const eventTypeColors = {
   [EventType.MOVE_IN]: "#06b6d4", // Cyan
   [EventType.MOVE_OUT]: "#ef4444", // Red
   [EventType.GENERAL]: "#6b7280", // Gray
+  [EventType.COMPLIANCE_DEADLINE]: "#dc2626", // Red - compliance deadlines
 };
 
 function getPlatformLabel(t: (key: string) => string, platform?: string) {
@@ -193,6 +194,7 @@ export default function CalendarView({
       [EventType.MOVE_IN]: t("calendar.settings.events.typeMoveIn"),
       [EventType.MOVE_OUT]: t("calendar.settings.events.typeMoveOut"),
       [EventType.GENERAL]: t("calendar.settings.events.typeGeneral"),
+      [EventType.COMPLIANCE_DEADLINE]: "Compliance Deadline",
     }),
     [t]
   );

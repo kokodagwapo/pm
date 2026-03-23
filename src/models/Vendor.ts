@@ -15,6 +15,14 @@ export interface IVendor {
   notes?: string;
   activeWorkOrders: number;
   completedJobs: number;
+  licenseNumber?: string;
+  licenseExpiryDate?: Date;
+  insuranceProvider?: string;
+  insuranceExpiryDate?: Date;
+  insurancePolicyNumber?: string;
+  complianceHold: boolean;
+  complianceHoldReason?: string;
+  lastComplianceCheck?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -54,6 +62,14 @@ const VendorSchema = new Schema<IVendor>(
     notes: { type: String, trim: true, maxlength: 1000 },
     activeWorkOrders: { type: Number, default: 0, min: 0 },
     completedJobs: { type: Number, default: 0, min: 0 },
+    licenseNumber: { type: String, trim: true, maxlength: 100 },
+    licenseExpiryDate: { type: Date },
+    insuranceProvider: { type: String, trim: true, maxlength: 200 },
+    insuranceExpiryDate: { type: Date },
+    insurancePolicyNumber: { type: String, trim: true, maxlength: 100 },
+    complianceHold: { type: Boolean, default: false },
+    complianceHoldReason: { type: String, trim: true, maxlength: 500 },
+    lastComplianceCheck: { type: Date },
   },
   {
     timestamps: true,

@@ -24,6 +24,9 @@ import {
   Home,
   CheckCircle,
   Calendar,
+  Shield,
+  AlertTriangle,
+  Clock,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -42,6 +45,7 @@ import PropertyAmenities from "@/components/properties/PropertyAmenities";
 import PropertyImageGallery from "@/components/properties/PropertyImageGallery";
 import PropertyStatusManager from "@/components/properties/PropertyStatusManager";
 import { EnhancedUnitDisplay } from "@/components/properties/UnitDisplay";
+import PropertyComplianceProfile from "@/components/properties/PropertyComplianceProfile";
 import { useLocalization } from "@/hooks/use-localization";
 import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
 import { cn } from "@/lib/utils";
@@ -485,7 +489,7 @@ export default function PropertyDetailsPage() {
         >
           <TabsList
             className={cn(
-              "grid h-auto w-full grid-cols-2 gap-1.5 rounded-lg bg-transparent sm:grid-cols-3 md:grid-cols-5 md:gap-2",
+              "grid h-auto w-full grid-cols-2 gap-1.5 rounded-lg bg-transparent sm:grid-cols-3 md:grid-cols-6 md:gap-2",
               isLight && "text-slate-800"
             )}
           >
@@ -548,6 +552,18 @@ export default function PropertyDetailsPage() {
             >
               <Star className="h-4 w-4 shrink-0 text-blue-600" />
               {t("properties.details.tabs.amenities")}
+            </TabsTrigger>
+            <TabsTrigger
+              value="compliance"
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
+                isLight
+                  ? "text-slate-800 hover:bg-slate-100/90"
+                  : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+              )}
+            >
+              <Shield className="h-4 w-4 shrink-0 text-violet-600" />
+              Compliance
             </TabsTrigger>
           </TabsList>
         </div>
@@ -1221,6 +1237,11 @@ export default function PropertyDetailsPage() {
             isLoading={unitsLoading}
             isSingleUnit={!property?.isMultiUnit}
           />
+        </TabsContent>
+
+        {/* Compliance Profile Tab */}
+        <TabsContent value="compliance" className="space-y-6">
+          <PropertyComplianceProfile propertyId={propertyId} isLight={isLight} />
         </TabsContent>
       </Tabs>
 

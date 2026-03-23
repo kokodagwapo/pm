@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 import { Announcement } from "@/models";
 import { NextRequest } from "next/server";
 import { messagingService } from "@/lib/services/messaging.service";
+import { checkFairHousing } from "@/lib/fair-housing-check";
 
 // ============================================================================
 // VALIDATION SCHEMAS
@@ -203,6 +204,19 @@ export const POST = withRoleAndDB([UserRole.ADMIN, UserRole.MANAGER])(
       }
 
       const announcementData = validation.data;
+
+      // Fair housing intercept — block critical violations
+      const textToCheck = `${announcementData.title} ${announcementData.content}`;
+      const fairHousingResult = checkFairHousing(textToCheck);
+      if (fairHousingResult.hasCritical) {
+        return createErrorResponse(
+          `Fair housing violation detected: ${fairHousingResult.issues
+            .filter((i) => i.severity === "critical")
+            .map((i) => i.warning)
+            .join("; ")}`,
+          422
+        );
+      }
 
       // Validate target audience
       if (!announcementData.targetAudience.includeAll) {
