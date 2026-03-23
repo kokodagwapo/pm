@@ -48,23 +48,24 @@ interface EvictionStep {
   description: string;
   daysFromStart: number;
   requiredDocuments: string[];
-  legalReference?: string;
-  warnings?: string[];
+  legalRequirements: string[];
+  warnings: string[];
+}
+
+interface EvictionWorkflowShape {
+  stateCode: string;
+  reason: string;
+  steps: EvictionStep[];
+  totalTimelineDays: number;
+  jurisdictionNotes: string[];
+  fairHousingWarnings: string[];
+  recommendedAttorney: boolean;
 }
 
 interface EvictionResult {
-  stateCode: string;
-  stateName: string;
-  reason: string;
-  noticePeriodDays: number;
-  totalEstimatedDays: number;
-  workflow: {
-    steps: EvictionStep[];
-    requiredDocuments: string[];
-    importantNotes: string[];
-    estimatedCost: string;
-  };
-  fairHousingReminder: string;
+  workflow: EvictionWorkflowShape;
+  tenantName: string;
+  propertyAddress: string;
 }
 
 export default function EvictionWorkflowModal({ isLight, onClose }: Props) {

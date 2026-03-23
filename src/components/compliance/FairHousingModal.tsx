@@ -17,18 +17,19 @@ const SEVERITY_COLORS = {
 };
 
 interface FairHousingIssue {
-  pattern: string;
-  match: string;
+  matched: string;
+  warning: string;
   severity: "critical" | "high" | "medium";
-  explanation: string;
-  suggestion: string;
+  recommendation?: string;
 }
 
 interface FairHousingResult {
-  compliant: boolean;
-  score: number;
+  text: string;
+  isCompliant: boolean;
+  riskLevel: "critical" | "high" | "medium" | "none";
   issues: FairHousingIssue[];
-  recommendations: string[];
+  generalRecommendations: string[];
+  analyzedAt: string;
 }
 
 export default function FairHousingModal({ isLight, onClose }: Props) {

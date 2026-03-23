@@ -63,10 +63,16 @@ export async function GET(request: NextRequest) {
       const targetEnd = new Date(targetStart);
       targetEnd.setDate(targetEnd.getDate() + 1);
 
+      const twentyThreeHoursAgo = new Date(now.getTime() - 23 * 60 * 60 * 1000);
+
       const obligations = await ComplianceObligation.find({
         isActive: true,
         status: { $nin: ["completed", "waived", "not_applicable", "overdue"] },
         dueDate: { $gte: targetStart, $lt: targetEnd },
+        $or: [
+          { reminderSentAt: { $exists: false } },
+          { reminderSentAt: { $lt: twentyThreeHoursAgo } },
+        ],
       }).populate<{ propertyId: PropertyDoc }>("propertyId", "name ownerId managerId");
 
       for (const obligation of obligations) {
