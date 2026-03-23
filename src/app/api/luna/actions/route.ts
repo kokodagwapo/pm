@@ -354,11 +354,10 @@ async function executeApprovedAction(action: {
           if (vendor) {
             await Promise.all([
               MaintenanceRequest.findByIdAndUpdate(requestId, {
-                assignedTo: vendor._id,
                 status: "in_progress",
-                vendorId: vendor._id,
-                vendorName: vendor.name,
-                dispatchedAt: new Date(),
+                lunaVendorId: vendor._id,
+                lunaVendorName: vendor.name,
+                lunaDispatchedAt: new Date(),
               }),
               Vendor.findByIdAndUpdate(vendor._id, { $inc: { activeWorkOrders: 1 } }),
             ]);

@@ -312,14 +312,14 @@ async function runTriggerCycle() {
   }
 
   // 6. System digest (check settings frequency + send if due)
-  const currentSettings = lunaAutonomousService.getSettings();
-  if (currentSettings.digestEmailEnabled) {
+  const digestSettings = lunaAutonomousService.getSettings();
+  if (digestSettings.digestEmailEnabled) {
     try {
       const User = (await import("@/models/User")).default;
       const Property = (await import("@/models/Property")).default;
       const LunaAutonomousAction = (await import("@/models/LunaAutonomousAction")).default;
 
-      const digestFrequency = currentSettings.digestEmailFrequency;
+      const digestFrequency = digestSettings.digestEmailFrequency;
       const digestIntervalMs =
         digestFrequency === "weekly" ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
 
