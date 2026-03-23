@@ -25,6 +25,7 @@ export interface TenantScoreResult {
   sentimentSignal: "positive" | "neutral" | "negative";
   signals: ITenantIntelligenceSignals;
   explanation: string[];
+  paymentSparkline: number[];
 }
 
 function clamp(v: number, min = 0, max = 100) {
@@ -36,6 +37,47 @@ function monthsBetween(a: Date, b: Date): number {
     0,
     (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth())
   );
+}
+
+const NEGATIVE_KEYWORDS = [
+  "broken", "mold", "mould", "leak", "pest", "cockroach", "rat", "mice", "mouse",
+  "noisy", "noise", "awful", "terrible", "horrible", "unsafe", "dangerous",
+  "unhappy", "disappointed", "frustrated", "angry", "sick", "disgusting",
+  "unacceptable", "unresponsive", "ignored", "neglect", "moving out", "leaving",
+  "notice", "vacate", "legal", "lawsuit", "evict", "complaint",
+];
+
+const POSITIVE_KEYWORDS = [
+  "great", "excellent", "wonderful", "love", "amazing", "fantastic", "perfect",
+  "happy", "satisfied", "comfortable", "grateful", "appreciate", "thankful",
+  "renew", "renewal", "staying", "recommend", "best", "good", "pleasant",
+];
+
+function analyzeMessageSentiment(messages: string[]): {
+  score: number;
+  responseRatePct: number;
+  totalMessages: number;
+} {
+  if (messages.length === 0) {
+    return { score: 0, responseRatePct: 100, totalMessages: 0 };
+  }
+  let negCount = 0;
+  let posCount = 0;
+  const combined = messages.join(" ").toLowerCase();
+
+  for (const kw of NEGATIVE_KEYWORDS) {
+    if (combined.includes(kw)) negCount++;
+  }
+  for (const kw of POSITIVE_KEYWORDS) {
+    if (combined.includes(kw)) posCount++;
+  }
+
+  const score = posCount - negCount;
+  return {
+    score,
+    responseRatePct: Math.min(100, Math.round((messages.length / Math.max(messages.length, 1)) * 100)),
+    totalMessages: messages.length,
+  };
 }
 
 export async function computeTenantScores(
@@ -55,12 +97,15 @@ export async function computeTenantScores(
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
   const sixMonthsAgo = new Date(now);
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const threeMonthsAgo = new Date(now);
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
   const [
     payments,
     maintenanceRequests,
     activeLease,
     historicalLeases,
+    recentMessages,
   ] = await Promise.all([
     Payment.find({
       tenantId: tenantObjId,
@@ -90,6 +135,32 @@ export async function computeTenantScores(
     })
       .select("parentLeaseId")
       .lean(),
+    (async () => {
+      try {
+        const Message = (await import("@/models/Message")).default;
+        const Conversation = (await import("@/models/Conversation")).default;
+        const convs = await Conversation.find({
+          "participants.userId": tenantObjId,
+          isArchived: false,
+          deletedAt: null,
+        })
+          .select("_id")
+          .lean();
+        if (convs.length === 0) return [];
+        const convIds = convs.map((c) => (c as unknown as { _id: mongoose.Types.ObjectId })._id);
+        const msgs = await Message.find({
+          conversationId: { $in: convIds },
+          senderId: tenantObjId,
+          createdAt: { $gte: threeMonthsAgo },
+          deletedAt: null,
+        })
+          .select("content")
+          .lean();
+        return msgs.map((m) => (m as unknown as { content?: string }).content || "");
+      } catch {
+        return [];
+      }
+    })(),
   ]);
 
   const paymentsLast12 = payments.length;
@@ -121,6 +192,34 @@ export async function computeTenantScores(
   const avgDaysLate = latePaymentsLast12 > 0 ? totalDaysLate / latePaymentsLast12 : 0;
   const maintenanceRequestsLast6Months = maintenanceRequests.length;
 
+  const paymentSparkline: number[] = Array.from({ length: 12 }, (_, i) => {
+    const monthStart = new Date(now);
+    monthStart.setMonth(monthStart.getMonth() - 11 + i, 1);
+    monthStart.setHours(0, 0, 0, 0);
+    const monthEnd = new Date(monthStart);
+    monthEnd.setMonth(monthEnd.getMonth() + 1, 0);
+    monthEnd.setHours(23, 59, 59, 999);
+
+    const monthPayments = payments.filter((p) => {
+      const due = new Date(p.dueDate);
+      return due >= monthStart && due <= monthEnd;
+    });
+
+    if (monthPayments.length === 0) return 0;
+    const allOnTime = monthPayments.every((p) => {
+      const due = new Date(p.dueDate);
+      const paid = p.paidDate ? new Date(p.paidDate) : null;
+      return (
+        p.status === PaymentStatus.PAID ||
+        p.status === PaymentStatus.COMPLETED ||
+        (paid && paid <= due)
+      );
+    });
+    return allOnTime ? 1 : -1;
+  });
+
+  const sentimentAnalysis = analyzeMessageSentiment(recentMessages as string[]);
+
   const monthlyRent =
     input.monthlyRent ??
     (activeLease as unknown as { terms?: { rentAmount?: number } })?.terms?.rentAmount ??
@@ -144,20 +243,18 @@ export async function computeTenantScores(
     : null;
   const tenancyMonths = tenancyStart ? monthsBetween(tenancyStart, now) : 0;
 
-  const sentimentScore = 0;
-
   const signals: ITenantIntelligenceSignals = {
     paymentsLast12,
     latePaymentsLast12,
     avgDaysLate: Math.round(avgDaysLate),
     maintenanceRequestsLast6Months,
     avgMaintenanceResponseDays: 0,
-    conversationResponseRatePercent: 100,
+    conversationResponseRatePercent: sentimentAnalysis.responseRatePct,
     daysUntilLeaseExpiry,
     leaseRenewals,
     tenancyMonths,
     monthlyRent,
-    sentimentScore,
+    sentimentScore: sentimentAnalysis.score,
   };
 
   const explanation: string[] = [];
@@ -207,6 +304,15 @@ export async function computeTenantScores(
     churnRisk -= 10;
     explanation.push(`Long-term tenant — ${tenancyMonths} months of tenancy reduces churn risk.`);
   }
+
+  if (sentimentAnalysis.score < -2) {
+    churnRisk += 10;
+    explanation.push("Recent messages contain negative language indicating potential dissatisfaction.");
+  } else if (sentimentAnalysis.score > 2) {
+    churnRisk -= 5;
+    explanation.push("Recent messages show positive sentiment — tenant appears satisfied.");
+  }
+
   churnRisk = clamp(churnRisk);
 
   const churnRiskLevel: "low" | "medium" | "high" =
@@ -218,6 +324,7 @@ export async function computeTenantScores(
   renewalLikelihood += leaseRenewals * 10;
   renewalLikelihood += tenancyMonths >= 24 ? 10 : 0;
   renewalLikelihood += daysUntilLeaseExpiry === null || daysUntilLeaseExpiry > 90 ? 5 : 0;
+  renewalLikelihood += sentimentAnalysis.score > 0 ? 5 : sentimentAnalysis.score < -2 ? -10 : 0;
   renewalLikelihood = clamp(renewalLikelihood);
 
   const expectedRemainingMonths = Math.max(
@@ -233,16 +340,16 @@ export async function computeTenantScores(
     (expectedRemainingMonths + avgRenewals * 12 + (renewalProbability >= 0.6 ? 12 : 0));
 
   const sentimentSignal: "positive" | "neutral" | "negative" =
-    latePaymentsLast12 >= 3 || maintenanceRequestsLast6Months >= 5
+    sentimentAnalysis.score <= -2 || (latePaymentsLast12 >= 3 && maintenanceRequestsLast6Months >= 5)
       ? "negative"
-      : leaseRenewals >= 1 || tenancyMonths >= 24
+      : sentimentAnalysis.score >= 2 || leaseRenewals >= 1 || tenancyMonths >= 24
       ? "positive"
       : "neutral";
 
   if (sentimentSignal === "positive") {
-    explanation.push("Sentiment signal is positive based on long tenancy and renewal history.");
+    explanation.push("Sentiment signal is positive based on message analysis, long tenancy, or renewal history.");
   } else if (sentimentSignal === "negative") {
-    explanation.push("Sentiment signal is negative — high late payments or maintenance volume detected.");
+    explanation.push("Sentiment signal is negative — message content or behavioral signals indicate dissatisfaction.");
   }
 
   if (explanation.length === 0) {
@@ -259,6 +366,7 @@ export async function computeTenantScores(
     sentimentSignal,
     signals,
     explanation,
+    paymentSparkline,
   };
 }
 
@@ -281,6 +389,7 @@ export async function computeAndPersistScores(
         sentimentSignal: result.sentimentSignal,
         signals: result.signals,
         explanation: result.explanation,
+        paymentSparkline: result.paymentSparkline,
         lastCalculatedAt: new Date(),
       },
     },

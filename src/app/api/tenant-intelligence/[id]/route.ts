@@ -6,13 +6,49 @@ import { computeAndPersistScores } from "@/lib/services/tenant-intelligence.serv
 import TenantIntelligence from "@/models/TenantIntelligence";
 import mongoose from "mongoose";
 
-async function requireAuth(req: NextRequest) {
+async function authorizeForTenant(tenantId: string): Promise<
+  | { user: { id: string; role: string }; ok: true }
+  | { ok: false; status: number; error: string }
+> {
   const session = await auth();
-  if (!session?.user) return null;
-  const role = (session.user as { role?: string }).role || "";
-  const allowed = [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT];
-  if (!allowed.includes(role as UserRole)) return null;
-  return session.user as { id: string; role: string };
+  if (!session?.user) return { ok: false, status: 401, error: "Unauthorized" };
+
+  const user = session.user as { id: string; role: string };
+  const role = user.role as UserRole;
+
+  if (![UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT].includes(role)) {
+    return { ok: false, status: 401, error: "Unauthorized" };
+  }
+
+  if (role === UserRole.TENANT) {
+    if (user.id !== tenantId) {
+      return { ok: false, status: 403, error: "Forbidden" };
+    }
+    return { ok: true, user };
+  }
+
+  if (role === UserRole.OWNER) {
+    await connectDB();
+    const Lease = (await import("@/models/Lease")).default;
+    const Property = (await import("@/models/Property")).default;
+    const ownedPropertyIds = await Property.find({ ownerId: user.id, deletedAt: null })
+      .select("_id")
+      .lean()
+      .then((props) => props.map((p) => (p as unknown as { _id: mongoose.Types.ObjectId })._id));
+    const leaseExists = await Lease.findOne({
+      tenantId: new mongoose.Types.ObjectId(tenantId),
+      propertyId: { $in: ownedPropertyIds },
+      deletedAt: null,
+    })
+      .select("_id")
+      .lean();
+    if (!leaseExists) {
+      return { ok: false, status: 403, error: "Forbidden" };
+    }
+    return { ok: true, user };
+  }
+
+  return { ok: true, user };
 }
 
 export async function GET(
@@ -20,12 +56,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(req);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
     const { id: tenantId } = await params;
     if (!mongoose.Types.ObjectId.isValid(tenantId)) {
       return NextResponse.json({ error: "Invalid tenant id" }, { status: 400 });
+    }
+
+    const authResult = await authorizeForTenant(tenantId);
+    if (!authResult.ok) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
     await connectDB();

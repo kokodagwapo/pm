@@ -29,6 +29,7 @@ export interface ITenantIntelligence {
   interventionSentAt: Date | null;
   creditBuilderOptIn: boolean;
   creditBuilderEnrolledAt: Date | null;
+  paymentSparkline: number[];
 }
 
 const SignalsSchema = new Schema<ITenantIntelligenceSignals>(
@@ -78,6 +79,7 @@ const TenantIntelligenceSchema = new Schema<ITenantIntelligence>(
     interventionSentAt: { type: Date, default: null },
     creditBuilderOptIn: { type: Boolean, default: false },
     creditBuilderEnrolledAt: { type: Date, default: null },
+    paymentSparkline: { type: [Number], default: [] },
   },
   {
     timestamps: true,

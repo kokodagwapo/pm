@@ -48,6 +48,30 @@ interface TenantIntelligenceData {
   interventionSent: boolean;
   interventionSentAt: string | null;
   lastCalculatedAt: string;
+  paymentSparkline?: number[];
+}
+
+function PaymentSparkline({ data }: { data: number[] }) {
+  const w = 80;
+  const h = 20;
+  const barW = w / data.length - 1;
+
+  return (
+    <svg width={w} height={h} className="overflow-visible">
+      {data.map((v, i) => (
+        <rect
+          key={i}
+          x={i * (w / data.length)}
+          y={v === 1 ? 5 : v === -1 ? 0 : 8}
+          width={Math.max(2, barW)}
+          height={v === 1 ? 15 : v === -1 ? 20 : 10}
+          rx={1}
+          fill={v === 1 ? "#10b981" : v === -1 ? "#ef4444" : "#e5e7eb"}
+          className="dark:fill-opacity-80"
+        />
+      ))}
+    </svg>
+  );
 }
 
 interface OfferTemplate {
@@ -295,6 +319,28 @@ export function TenantIntelligenceCard({
 
         {expanded && (
           <div className="space-y-3 border-t border-border/40 pt-3">
+            {data.paymentSparkline && data.paymentSparkline.length > 0 && (
+              <div>
+                <p className="text-xs text-muted-foreground mb-1.5">Payment History (12 months)</p>
+                <div className="flex items-end gap-1">
+                  <PaymentSparkline data={data.paymentSparkline} />
+                  <div className="flex flex-col gap-0.5 text-[10px] text-muted-foreground ml-2">
+                    <div className="flex items-center gap-1">
+                      <div className="h-2 w-2 rounded-sm bg-emerald-500" />
+                      On time
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="h-2 w-2 rounded-sm bg-red-500" />
+                      Late
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="h-2 w-2 rounded-sm bg-gray-200" />
+                      None
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="rounded-md bg-muted/20 px-2 py-1.5">
                 <p className="text-muted-foreground">Payments (12 mo)</p>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, CheckCircle2, Info, Loader2 } from "lucide-react";
+import { Star, CheckCircle2, Info, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 interface CreditBuilderData {
@@ -99,9 +99,15 @@ export function CreditBuilderWidget() {
         </ul>
 
         {data.optedIn && data.enrolledAt && (
-          <div className="flex items-center gap-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
-            <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
-            Enrolled since {new Date(data.enrolledAt).toLocaleDateString()}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
+              <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+              Enrolled since {new Date(data.enrolledAt).toLocaleDateString()}
+            </div>
+            <div className="flex items-center gap-2 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20 px-3 py-2 text-xs text-blue-700 dark:text-blue-400">
+              <ShieldCheck className="h-4 w-4 flex-shrink-0" />
+              Your on-time rent payments are being reported to credit bureaus.
+            </div>
           </div>
         )}
 
