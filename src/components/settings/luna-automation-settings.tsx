@@ -47,7 +47,7 @@ interface LunaEscalationContact {
 }
 
 interface LunaRoleAutonomyConfig {
-  role: "admin" | "manager" | "owner";
+  role: "admin" | "manager";
   enabledCategories: LunaActionCategory[];
   canApproveActions: boolean;
   canOverrideActions: boolean;
@@ -119,13 +119,6 @@ const DEFAULT_SETTINGS: LunaSettings = {
       role: "manager",
       enabledCategories: ["payment_reminder", "maintenance_triage", "lease_renewal_notice", "lease_expiry_alert", "tenant_communication"],
       canApproveActions: true,
-      canOverrideActions: false,
-      receivesDigest: true,
-    },
-    {
-      role: "owner",
-      enabledCategories: ["system_digest"],
-      canApproveActions: false,
       canOverrideActions: false,
       receivesDigest: true,
     },

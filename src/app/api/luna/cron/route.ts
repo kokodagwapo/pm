@@ -383,8 +383,19 @@ async function runTriggerCycle() {
         const overduePaymentTotal =
           (overduePaymentAgg as Array<{ total: number }>)[0]?.total || 0;
 
+        const digestSettings = lunaAutonomousService.getSettings();
+        const digestRoles = (digestSettings.roleAutonomyConfig || [])
+          .filter((r: { receivesDigest?: boolean }) => r.receivesDigest !== false)
+          .map((r: { role: string }) => r.role);
+        const digestRoleFilter = digestRoles.length > 0
+          ? digestRoles.map((r: string) => {
+              if (r === "admin") return UserRole.ADMIN;
+              if (r === "manager") return UserRole.MANAGER;
+              return null;
+            }).filter(Boolean)
+          : [UserRole.ADMIN, UserRole.MANAGER];
         const managers = await User.find({
-          role: { $in: [UserRole.ADMIN, UserRole.MANAGER] },
+          role: { $in: digestRoleFilter },
           deletedAt: null,
         })
           .select("email firstName lastName")
