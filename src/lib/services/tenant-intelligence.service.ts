@@ -154,8 +154,10 @@ export async function computeTenantScores(
       tenantId: tenantObjId,
       dueDate: { $gte: twelveMonthsAgo },
       deletedAt: null,
+      // Filter to rent-type payments for precision in delinquency/churn scoring
+      type: "rent",
     })
-      .select("status dueDate paidDate amount")
+      .select("status dueDate paidDate amount type")
       .lean(),
     MaintenanceRequest.find({
       tenantId: tenantObjId,
