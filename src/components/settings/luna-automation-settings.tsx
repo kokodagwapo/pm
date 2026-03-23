@@ -78,9 +78,9 @@ export function LunaAutomationSettings({ onAlert }: LunaAutomationSettingsProps)
     setIsSaving(true);
     try {
       const res = await fetch("/api/luna/settings", {
-        method: "POST",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
+        body: JSON.stringify({ settings }),
       });
       if (res.ok) {
         onAlert("success", "Luna automation settings saved successfully.");
