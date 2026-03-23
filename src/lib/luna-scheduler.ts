@@ -116,10 +116,13 @@ async function runLunaTriggerCycle(): Promise<void> {
       const daysUntilExpiry = Math.floor(
         (new Date(lease.endDate).getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
       );
+      // Milestone-based idempotent key: prevents re-triggering daily within same milestone window
+      const leaseMilestone = daysUntilExpiry <= 15 ? "15d" : daysUntilExpiry <= 30 ? "30d" : "60d";
+      const leaseEntityId = `${String(lease._id)}_${leaseMilestone}`;
 
       await lunaAutonomousService.evaluateLeaseExpiry({
         entityType: "lease",
-        entityId: String(lease._id),
+        entityId: leaseEntityId,
         affectedUserId: String(tenant._id),
         affectedPropertyId: property ? String(property._id) : undefined,
         data: {

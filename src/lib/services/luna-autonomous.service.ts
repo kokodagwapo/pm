@@ -255,6 +255,44 @@ export class LunaAutonomousService {
     return { ...this.settings };
   }
 
+  /**
+   * Generate a localized notification body for an approved action.
+   * Used by the human-review approval path to maintain 9-language consistency.
+   */
+  getLocalizedApprovalNotificationBody(
+    category: string,
+    meta: Record<string, unknown>,
+    vendorName?: string,
+    vendorEtaHours?: number
+  ): string {
+    const locale = (meta.tenantLocale as string) || "en";
+    const tenantName = (meta.tenantName as string) || "Tenant";
+    const propertyName = (meta.propertyName as string) || "Property";
+    const amount = meta.amount ? String(meta.amount) : "0";
+    const daysOverdue = Number(meta.daysOverdue ?? 0);
+    const daysUntilExpiry = Number(meta.daysUntilExpiry ?? 30);
+    const category_ = (meta.category as string) || "General";
+
+    switch (category) {
+      case "payment_reminder":
+      case "payment_escalation":
+        return getPaymentMessage(locale, tenantName, `$${amount}`, propertyName, daysOverdue);
+      case "maintenance_triage":
+      case "maintenance_escalation":
+        if (vendorName && vendorEtaHours) {
+          return getMaintenanceETAMessage(locale, tenantName, category_, vendorName, vendorEtaHours);
+        }
+        return getMaintenanceETAMessage(locale, tenantName, category_, "your maintenance team", 24);
+      case "lease_renewal_notice":
+      case "lease_expiry_alert":
+        return getLeaseRenewalMessage(locale, tenantName, propertyName, daysUntilExpiry);
+      case "tenant_communication":
+        return getAckMessage(locale, tenantName);
+      default:
+        return `Dear ${tenantName}, an update is available for your property at ${propertyName}.${getAIFooter(locale)}`;
+    }
+  }
+
   private resetHourWindowIfNeeded(): void {
     const now = new Date();
     if (now.getTime() - this.hourWindowStart.getTime() > 3_600_000) {

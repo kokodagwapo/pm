@@ -65,6 +65,15 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Per-role category gating: categories not enabled for this role are skipped
+    const triggerUserRole = (session.user.role as "admin" | "manager") || "manager";
+    function isCategoryAllowedForRole(category: string): boolean {
+      return lunaAutonomousService.isCategoryEnabledForRole(
+        category as Parameters<typeof lunaAutonomousService.isCategoryEnabledForRole>[0],
+        triggerUserRole
+      );
+    }
+
     const results = {
       overduePayments: 0,
       expiringLeases: 0,
@@ -95,6 +104,7 @@ export async function POST(req: NextRequest) {
         (now.getTime() - new Date(payment.dueDate).getTime()) / (24 * 60 * 60 * 1000)
       );
       if (daysOverdue <= 0) continue;
+      if (!isCategoryAllowedForRole("payment_reminder") && !isCategoryAllowedForRole("payment_escalation")) continue;
 
       await lunaAutonomousService.evaluateOverduePayment({
         entityType: "payment",
@@ -134,10 +144,13 @@ export async function POST(req: NextRequest) {
       const daysUntilExpiry = Math.floor(
         (new Date(lease.endDate).getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
       );
+      const leaseMilestone = daysUntilExpiry <= 15 ? "15d" : daysUntilExpiry <= 30 ? "30d" : "60d";
+      const leaseEntityId = `${String(lease._id)}_${leaseMilestone}`;
+      if (!isCategoryAllowedForRole("lease_renewal_notice") && !isCategoryAllowedForRole("lease_expiry_alert")) continue;
 
       await lunaAutonomousService.evaluateLeaseExpiry({
         entityType: "lease",
-        entityId: String(lease._id),
+        entityId: leaseEntityId,
         affectedUserId: String(tenant._id),
         affectedPropertyId: property ? String(property._id) : undefined,
         data: {
@@ -174,6 +187,7 @@ export async function POST(req: NextRequest) {
       const tenant = mReq.tenantId as Record<string, string> | null;
       const property = mReq.propertyId as Record<string, string> | null;
       if (!tenant?.email) continue;
+      if (!isCategoryAllowedForRole("maintenance_triage") && !isCategoryAllowedForRole("maintenance_escalation")) continue;
 
       const hoursUnassigned = Math.floor(
         (now.getTime() - new Date(mReq.createdAt).getTime()) / (60 * 60 * 1000)
@@ -219,6 +233,7 @@ export async function POST(req: NextRequest) {
       const tenant = eReq.tenantId as Record<string, string> | null;
       const property = eReq.propertyId as Record<string, string> | null;
       if (!tenant?.email) continue;
+      if (!isCategoryAllowedForRole("maintenance_escalation")) continue;
 
       const hoursUnassigned = Math.floor(
         (now.getTime() - new Date(eReq.createdAt).getTime()) / (60 * 60 * 1000)

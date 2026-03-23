@@ -296,6 +296,11 @@ async function executeApprovedAction(action: {
       const userId = action.affectedUserId;
       if (!tenantEmail || !userId) break;
 
+      const localizedBody = lunaAutonomousService.getLocalizedApprovalNotificationBody(
+        action.category,
+        meta
+      );
+
       await notificationService.sendNotification({
         type:
           action.category === "payment_escalation"
@@ -310,7 +315,7 @@ async function executeApprovedAction(action: {
           action.category === "payment_escalation"
             ? "Overdue Payment — Immediate Action Required"
             : "Payment Reminder",
-        message: `A payment is ${action.category === "payment_escalation" ? "significantly overdue" : "due soon"} for ${meta.propertyName || "your property"}.\n\n—\nSent by SmartStart AI. To speak with a person, reply to this message or contact your property manager directly.`,
+        message: localizedBody,
         data: {
           userEmail: tenantEmail,
           userName: meta.tenantName || "Tenant",
@@ -331,7 +336,8 @@ async function executeApprovedAction(action: {
       if (!tenantEmail || !userId) break;
 
       // Attempt vendor selection and work-order dispatch
-      let vendorNote = "";
+      let dispatchedVendorName: string | undefined;
+      let dispatchedVendorEtaHours: number | undefined;
       if (requestId && requestId !== "demo_maint_001") {
         try {
           const category = (meta.category as string) || "General";
@@ -356,7 +362,8 @@ async function executeApprovedAction(action: {
               }),
               Vendor.findByIdAndUpdate(vendor._id, { $inc: { activeWorkOrders: 1 } }),
             ]);
-            vendorNote = ` Vendor ${vendor.name} has been dispatched (ETA ~${vendor.responseTimeHours}h).`;
+            dispatchedVendorName = vendor.name;
+            dispatchedVendorEtaHours = vendor.responseTimeHours ?? 24;
           } else {
             await MaintenanceRequest.findByIdAndUpdate(requestId, {
               status: "in_progress",
@@ -366,6 +373,13 @@ async function executeApprovedAction(action: {
           console.error("[Luna executeApprovedAction] Vendor dispatch error:", dispatchErr);
         }
       }
+
+      const localizedMaintenanceBody = lunaAutonomousService.getLocalizedApprovalNotificationBody(
+        action.category,
+        meta,
+        dispatchedVendorName,
+        dispatchedVendorEtaHours
+      );
 
       await notificationService.sendNotification({
         type: NotificationType.MAINTENANCE_UPDATE,
@@ -378,7 +392,7 @@ async function executeApprovedAction(action: {
           action.category === "maintenance_escalation"
             ? `EMERGENCY: ${meta.category || "Maintenance"} at ${meta.propertyName}`
             : `Maintenance Update — ${meta.propertyName}`,
-        message: `Your maintenance request has been reviewed and is now in progress.${vendorNote}\n\n—\nSent by SmartStart AI. To speak with a person, contact your property manager directly.`,
+        message: localizedMaintenanceBody,
         data: {
           userEmail: tenantEmail,
           userName: meta.tenantName || "Tenant",
@@ -402,6 +416,11 @@ async function executeApprovedAction(action: {
       const userId = action.affectedUserId;
       if (!tenantEmail || !userId) break;
 
+      const localizedLeaseBody = lunaAutonomousService.getLocalizedApprovalNotificationBody(
+        action.category,
+        meta
+      );
+
       await notificationService.sendNotification({
         type: NotificationType.LEASE_EXPIRY,
         priority:
@@ -410,7 +429,7 @@ async function executeApprovedAction(action: {
             : NotificationPriority.NORMAL,
         userId,
         title: `Lease ${action.category === "lease_expiry_alert" ? "Expiry Alert" : "Renewal Notice"}`,
-        message: `Your lease for ${meta.propertyName} expires in ${meta.daysUntilExpiry || "N/A"} days.\n\n—\nSent by SmartStart AI. To speak with a person, reply to this message or contact your property manager directly.`,
+        message: localizedLeaseBody,
         data: {
           userEmail: tenantEmail,
           userName: meta.tenantName || "Tenant",
@@ -429,12 +448,17 @@ async function executeApprovedAction(action: {
       const userId = action.affectedUserId;
       if (!tenantEmail || !userId) break;
 
+      const localizedAckBody = lunaAutonomousService.getLocalizedApprovalNotificationBody(
+        action.category,
+        meta
+      );
+
       await notificationService.sendNotification({
         type: NotificationType.NEW_MESSAGE,
         priority: NotificationPriority.NORMAL,
         userId,
         title: "Your message has been received",
-        message: `Thank you for your message. Your property manager has been notified and will respond shortly.\n\n—\nSent by SmartStart AI. To speak with a person, reply to this message or contact your property manager directly.`,
+        message: localizedAckBody,
         data: {
           userEmail: tenantEmail,
           userName: meta.tenantName || "Tenant",
