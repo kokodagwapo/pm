@@ -92,6 +92,8 @@ export async function POST(req: NextRequest) {
       message,
     });
 
+    // Do NOT upsert — only update if a scored record already exists to avoid
+    // creating a shell record with default zero-scores masquerading as fresh.
     await TenantIntelligence.findOneAndUpdate(
       { tenantId: new mongoose.Types.ObjectId(tenantId) },
       {
@@ -100,7 +102,7 @@ export async function POST(req: NextRequest) {
           interventionSentAt: new Date(),
         },
       },
-      { upsert: true }
+      { upsert: false }
     );
 
     return NextResponse.json({

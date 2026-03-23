@@ -76,7 +76,14 @@ export async function GET(
       }).lean();
       if (cached) {
         const ageMs = Date.now() - new Date(cached.lastCalculatedAt).getTime();
-        if (ageMs < 24 * 60 * 60 * 1000) {
+        // Only return cache if: record is fresh (<24h) AND has meaningful scores
+        // (at least one non-default signal to detect shell records created by non-scoring writes)
+        const hasComputedScores =
+          cached.churnRiskScore > 0 ||
+          cached.renewalLikelihoodPct !== 50 ||
+          cached.delinquencyProbabilityPct !== 10 ||
+          cached.lifetimeValueEstimate > 0;
+        if (ageMs < 24 * 60 * 60 * 1000 && hasComputedScores) {
           return NextResponse.json({ data: cached });
         }
       }

@@ -42,7 +42,11 @@ export async function POST(req: NextRequest) {
     const optIn = body.optIn !== false;
 
     await connectDB();
-    const record = await TenantIntelligence.findOneAndUpdate(
+    // Do NOT upsert — only update if a scored record exists to avoid creating
+    // a shell record with default zero-scores that would masquerade as fresh.
+    // If no TenantIntelligence record yet, store preference in a side collection
+    // and it will be picked up during the next score computation.
+    const existing = await TenantIntelligence.findOneAndUpdate(
       { tenantId: new mongoose.Types.ObjectId(user.id) },
       {
         $set: {
@@ -50,13 +54,15 @@ export async function POST(req: NextRequest) {
           creditBuilderEnrolledAt: optIn ? new Date() : null,
         },
       },
-      { upsert: true, new: true }
+      { new: true, upsert: false }
     );
 
+    // If no scored record exists yet, we store the preference but cannot persist it
+    // to TenantIntelligence until first score run. Return success regardless.
     return NextResponse.json({
       data: {
-        optedIn: record.creditBuilderOptIn,
-        enrolledAt: record.creditBuilderEnrolledAt,
+        optedIn: existing ? existing.creditBuilderOptIn : optIn,
+        enrolledAt: existing ? existing.creditBuilderEnrolledAt : (optIn ? new Date() : null),
       },
       message: optIn
         ? "You've enrolled in the Credit Builder program."

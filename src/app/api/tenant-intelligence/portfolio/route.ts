@@ -87,21 +87,31 @@ export async function GET(req: NextRequest) {
     const activeTenantIds = tenants.map((t) => (t as unknown as { _id: mongoose.Types.ObjectId })._id);
 
     // Ensure ALL tenants have a score record — compute in parallel with concurrency cap
-    // to avoid missing any tenant from results
+    // to avoid missing any tenant from results. Single query for both freshness and score check.
     const existing = await TenantIntelligence.find({ tenantId: { $in: activeTenantIds } })
-      .select("tenantId lastCalculatedAt")
+      .select("tenantId lastCalculatedAt churnRiskScore renewalLikelihoodPct delinquencyProbabilityPct lifetimeValueEstimate")
       .lean();
 
     const existingMap = new Map(
-      existing.map((e) => [e.tenantId.toString(), e.lastCalculatedAt])
+      existing.map((e) => [e.tenantId.toString(), {
+        lastCalc: e.lastCalculatedAt,
+        // A record has real computed scores if any key metric differs from schema defaults
+        hasScores: e.churnRiskScore > 0 ||
+          e.renewalLikelihoodPct !== 50 ||
+          e.delinquencyProbabilityPct !== 10 ||
+          e.lifetimeValueEstimate > 0,
+      }])
     );
 
     const maxAgeMs = 24 * 60 * 60 * 1000;
+
     const tenantsNeedingScore = tenants.filter((t) => {
       const tt = t as unknown as { _id: mongoose.Types.ObjectId };
-      const lastCalc = existingMap.get(tt._id.toString());
-      if (!lastCalc) return true;
-      return refresh || (Date.now() - new Date(lastCalc).getTime() > maxAgeMs);
+      const entry = existingMap.get(tt._id.toString());
+      if (!entry) return true;
+      // Shell record (no meaningful scores) → must recompute regardless of age
+      if (!entry.hasScores) return true;
+      return refresh || (Date.now() - new Date(entry.lastCalc).getTime() > maxAgeMs);
     });
 
     // Process ALL tenants needing scores in batches of 10 to avoid timeouts
