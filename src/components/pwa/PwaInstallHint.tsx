@@ -101,10 +101,10 @@ export function PwaInstallHint({
     >
       <div
         className={cn(
-          "relative flex items-start gap-3 rounded-2xl border p-3 pr-10 shadow-lg backdrop-blur-md",
+          "relative flex items-start gap-3 rounded-2xl border p-4 pr-10 shadow-2xl backdrop-blur-xl [-webkit-backdrop-filter:blur(20px)]",
           variant === "light"
-            ? "border-slate-200/90 bg-white/95 text-slate-900"
-            : "dashboard-ui-surface border-white/15 bg-slate-950/90 dark:bg-slate-950/85"
+            ? "border-white/40 bg-white/30 text-slate-900 shadow-slate-200/25"
+            : "border-white/20 bg-gradient-to-br from-slate-900/40 via-slate-800/30 to-slate-900/40 text-white shadow-black/40"
         )}
       >
         <div
@@ -126,16 +126,16 @@ export function PwaInstallHint({
         <div
           className={cn(
             "min-w-0 flex-1 text-sm",
-            variant === "light" ? "text-slate-800" : "text-white/90"
+            variant === "light" ? "text-slate-900" : "text-white/95"
           )}
         >
-          <p className={cn("font-medium", variant === "light" ? "text-slate-900" : "text-white")}>
+          <p className={cn("font-semibold leading-tight", variant === "light" ? "text-slate-950" : "text-white")}>
             Install SmartStartPM
           </p>
           <p
             className={cn(
-              "mt-0.5 text-xs font-light",
-              variant === "light" ? "text-slate-600" : "text-white/70"
+              "mt-1 text-xs font-light leading-relaxed",
+              variant === "light" ? "text-slate-700" : "text-white/85"
             )}
           >
             Add to your home screen for quick access and a full-screen experience.
@@ -149,10 +149,10 @@ export function PwaInstallHint({
               size="sm"
               variant="ghost"
               className={cn(
-                "h-9 touch-manipulation",
+                "h-9 touch-manipulation font-medium",
                 variant === "light"
-                  ? "text-slate-700 hover:bg-slate-100"
-                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                  ? "text-slate-700 hover:bg-white/50 hover:text-slate-900"
+                  : "text-white/80 hover:bg-white/15 hover:text-white"
               )}
               onClick={dismiss}
             >
@@ -164,10 +164,10 @@ export function PwaInstallHint({
           type="button"
           onClick={dismiss}
           className={cn(
-            "absolute right-2 top-2 shrink-0 rounded-lg p-1.5 transition",
+            "absolute right-2 top-2 shrink-0 rounded-lg p-1.5 transition backdrop-blur-md",
             variant === "light"
-              ? "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-              : "text-white/60 hover:bg-white/10 hover:text-white"
+              ? "text-slate-600 hover:bg-white/40 hover:text-slate-800"
+              : "text-white/70 hover:bg-white/15 hover:text-white"
           )}
           aria-label="Dismiss install prompt"
         >
