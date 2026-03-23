@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Shield,
   AlertTriangle,
@@ -225,6 +225,7 @@ interface PropertyOption {
 export default function CompliancePage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isLight } = useDashboardAppearance();
   const [obligations, setObligations] = useState<ComplianceObligation[]>([]);
   const [stats, setStats] = useState<ComplianceStats>({ total: 0, pending: 0, in_progress: 0, completed: 0, overdue: 0, critical: 0, high: 0 });
@@ -286,16 +287,35 @@ export default function CompliancePage() {
     fetchObligations();
   }, [fetchObligations]);
 
-  // Handle hash navigation for modal opening
+  // Handle modal opening from URL hash
   useEffect(() => {
-    const hash = window.location.hash.substring(1);
-    if (hash === "rent" || hash === "eviction" || hash === "fairHousing") {
-      setActiveModal(hash as "rent" | "eviction" | "fairHousing");
-      // Smooth scroll to tools section if modal opens
-      setTimeout(() => {
-        document.querySelector('[data-tools-section]')?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    }
+    const checkAndOpenModal = () => {
+      const hash = window.location.hash.substring(1);
+      if (hash === "rent" || hash === "eviction" || hash === "fairHousing") {
+        setActiveModal(hash as "rent" | "eviction" | "fairHousing");
+        // Smooth scroll to tools section if modal opens
+        setTimeout(() => {
+          document.querySelector('[data-tools-section]')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+        // Clear modal if no hash
+        setActiveModal(null);
+      }
+    };
+
+    // Check on initial render
+    checkAndOpenModal();
+
+    // Use popstate event which fires for hash changes in Next.js
+    window.addEventListener("popstate", checkAndOpenModal);
+    
+    // Also check periodically for hash changes (fallback)
+    const interval = setInterval(checkAndOpenModal, 100);
+    
+    return () => {
+      window.removeEventListener("popstate", checkAndOpenModal);
+      clearInterval(interval);
+    };
   }, []);
 
   const handleStatusChange = async (id: string, newStatus: string) => {

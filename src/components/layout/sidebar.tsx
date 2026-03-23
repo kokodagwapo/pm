@@ -77,6 +77,7 @@ interface NavItem {
   roles: UserRole[];
   iconColor?: string;
   children?: NavItem[];
+  onClick?: () => void;
 }
 
 interface NavSection {
@@ -452,6 +453,12 @@ const NavItemComponent = memo(function NavItemComponent({
           href={item.href}
           prefetch={true}
           className={sharedClassName}
+          onClick={(e) => {
+            if (item.onClick) {
+              e.preventDefault();
+              item.onClick();
+            }
+          }}
         >
           {/* Active indicator bar */}
           {isParentActive && level === 0 && (
