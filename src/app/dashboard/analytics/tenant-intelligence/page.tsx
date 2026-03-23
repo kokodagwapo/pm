@@ -81,7 +81,9 @@ const FILTERS = [
   { value: "high_churn", label: "High Churn Risk" },
   { value: "medium_churn", label: "Medium Churn Risk" },
   { value: "payment_risk", label: "Payment Risk ≥50%" },
-  { value: "renewal_soon", label: "Lease Expiring Soon" },
+  { value: "renewal_30d", label: "Renewal ≤30 Days" },
+  { value: "renewal_60d", label: "Renewal ≤60 Days" },
+  { value: "renewal_90d", label: "Renewal ≤90 Days" },
   { value: "high_ltv", label: "High Lifetime Value" },
 ];
 
@@ -111,6 +113,7 @@ export default function TenantIntelligenceDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [total, setTotal] = useState(0);
   const [sendingOffer, setSendingOffer] = useState<string | null>(null);
+  const [batchSending, setBatchSending] = useState(false);
 
   const isManager = ["admin", "manager"].includes(userRole.toLowerCase());
 
@@ -166,6 +169,35 @@ export default function TenantIntelligenceDashboard() {
     fetchData(true);
   };
 
+  const handleBatchIntervene = async () => {
+    const highRiskNoIntervention = scores.filter(
+      (s) => s.churnRiskLevel === "high" && !s.interventionSent
+    );
+    if (highRiskNoIntervention.length === 0) {
+      toast.info("No high-risk tenants without prior intervention.");
+      return;
+    }
+    setBatchSending(true);
+    let sent = 0;
+    let failed = 0;
+    for (const score of highRiskNoIntervention) {
+      try {
+        const res = await fetch("/api/tenant-intelligence/intervention", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tenantId: score.tenantId, offerId: "checkin" }),
+        });
+        if (res.ok) { sent++; } else { failed++; }
+      } catch {
+        failed++;
+      }
+    }
+    setBatchSending(false);
+    if (sent > 0) toast.success(`Sent ${sent} retention offer${sent > 1 ? "s" : ""}.`);
+    if (failed > 0) toast.error(`${failed} offer${failed > 1 ? "s" : ""} failed to send.`);
+    await fetchData();
+  };
+
   const handleQuickOffer = async (tenantId: string, tenantName: string) => {
     setSendingOffer(tenantId);
     try {
@@ -211,16 +243,30 @@ export default function TenantIntelligenceDashboard() {
             </p>
           </div>
         </div>
-        <Button
-          size="sm"
-          variant="outline"
-          className="gap-1.5"
-          onClick={handleRefresh}
-          disabled={refreshing}
-        >
-          <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-          {refreshing ? "Refreshing…" : "Refresh"}
-        </Button>
+        <div className="flex items-center gap-2">
+          {isManager && stats && stats.needsIntervention > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400"
+              onClick={handleBatchIntervene}
+              disabled={batchSending}
+            >
+              <Zap className={`h-4 w-4 ${batchSending ? "animate-pulse" : ""}`} />
+              {batchSending ? "Sending…" : `Intervene All (${stats.needsIntervention})`}
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5"
+            onClick={handleRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+            {refreshing ? "Refreshing…" : "Refresh"}
+          </Button>
+        </div>
       </div>
 
       {stats && (

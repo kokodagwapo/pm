@@ -55,11 +55,10 @@ const POSITIVE_KEYWORDS = [
 
 function analyzeMessageSentiment(messages: string[]): {
   score: number;
-  responseRatePct: number;
   totalMessages: number;
 } {
   if (messages.length === 0) {
-    return { score: 0, responseRatePct: 100, totalMessages: 0 };
+    return { score: 0, totalMessages: 0 };
   }
   let negCount = 0;
   let posCount = 0;
@@ -75,7 +74,6 @@ function analyzeMessageSentiment(messages: string[]): {
   const score = posCount - negCount;
   return {
     score,
-    responseRatePct: Math.min(100, Math.round((messages.length / Math.max(messages.length, 1)) * 100)),
     totalMessages: messages.length,
   };
 }
@@ -143,22 +141,38 @@ export async function computeTenantScores(
           "participants.userId": tenantObjId,
           isArchived: false,
           deletedAt: null,
+          createdAt: { $gte: threeMonthsAgo },
         })
           .select("_id")
           .lean();
-        if (convs.length === 0) return [];
+        if (convs.length === 0) return { content: [], totalConversations: 0, repliedConversations: 0 };
         const convIds = convs.map((c) => (c as unknown as { _id: mongoose.Types.ObjectId })._id);
         const msgs = await Message.find({
           conversationId: { $in: convIds },
-          senderId: tenantObjId,
-          createdAt: { $gte: threeMonthsAgo },
           deletedAt: null,
+          createdAt: { $gte: threeMonthsAgo },
         })
-          .select("content")
+          .select("content senderId conversationId")
           .lean();
-        return msgs.map((m) => (m as unknown as { content?: string }).content || "");
+
+        const repliedConvSet = new Set<string>();
+        const tenantContent: string[] = [];
+
+        for (const m of msgs) {
+          const mm = m as unknown as { senderId: mongoose.Types.ObjectId; content?: string; conversationId: mongoose.Types.ObjectId };
+          if (mm.senderId.toString() === tenantObjId.toString()) {
+            repliedConvSet.add(mm.conversationId.toString());
+            tenantContent.push(mm.content || "");
+          }
+        }
+
+        return {
+          content: tenantContent,
+          totalConversations: convs.length,
+          repliedConversations: repliedConvSet.size,
+        };
       } catch {
-        return [];
+        return { content: [], totalConversations: 0, repliedConversations: 0 };
       }
     })(),
   ]);
@@ -218,7 +232,12 @@ export async function computeTenantScores(
     return allOnTime ? 1 : -1;
   });
 
-  const sentimentAnalysis = analyzeMessageSentiment(recentMessages as string[]);
+  const msgData = recentMessages as { content: string[]; totalConversations: number; repliedConversations: number };
+  const sentimentAnalysis = analyzeMessageSentiment(msgData.content);
+  const conversationResponseRatePct =
+    msgData.totalConversations > 0
+      ? Math.min(100, Math.round((msgData.repliedConversations / msgData.totalConversations) * 100))
+      : 100;
 
   const monthlyRent =
     input.monthlyRent ??
@@ -249,7 +268,7 @@ export async function computeTenantScores(
     avgDaysLate: Math.round(avgDaysLate),
     maintenanceRequestsLast6Months,
     avgMaintenanceResponseDays: 0,
-    conversationResponseRatePercent: sentimentAnalysis.responseRatePct,
+    conversationResponseRatePercent: conversationResponseRatePct,
     daysUntilLeaseExpiry,
     leaseRenewals,
     tenancyMonths,
@@ -311,6 +330,13 @@ export async function computeTenantScores(
   } else if (sentimentAnalysis.score > 2) {
     churnRisk -= 5;
     explanation.push("Recent messages show positive sentiment — tenant appears satisfied.");
+  }
+
+  if (conversationResponseRatePct < 50) {
+    churnRisk += 10;
+    explanation.push(
+      `Low communication response rate (${conversationResponseRatePct}%) — tenant may be disengaged.`
+    );
   }
 
   churnRisk = clamp(churnRisk);

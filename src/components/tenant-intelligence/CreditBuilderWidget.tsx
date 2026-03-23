@@ -106,7 +106,12 @@ export function CreditBuilderWidget() {
             </div>
             <div className="flex items-center gap-2 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20 px-3 py-2 text-xs text-blue-700 dark:text-blue-400">
               <ShieldCheck className="h-4 w-4 flex-shrink-0" />
-              Your on-time rent payments are being reported to credit bureaus.
+              <span>
+                Your on-time rent payments are queued for reporting.{" "}
+                <span className="font-medium">
+                  Bureau integration coming soon — your enrollment is saved and will activate automatically.
+                </span>
+              </span>
             </div>
           </div>
         )}

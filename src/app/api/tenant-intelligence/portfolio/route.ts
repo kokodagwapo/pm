@@ -140,7 +140,14 @@ export async function GET(req: NextRequest) {
         query = { ...query, delinquencyProbabilityPct: { $gte: 50 } };
         break;
       case "renewal_soon":
+      case "renewal_90d":
         query = { ...query, "signals.daysUntilLeaseExpiry": { $lte: 90, $gt: 0 } };
+        break;
+      case "renewal_60d":
+        query = { ...query, "signals.daysUntilLeaseExpiry": { $lte: 60, $gt: 0 } };
+        break;
+      case "renewal_30d":
+        query = { ...query, "signals.daysUntilLeaseExpiry": { $lte: 30, $gt: 0 } };
         break;
       case "high_ltv":
         query = { ...query, lifetimeValueEstimate: { $gte: 20000 } };
