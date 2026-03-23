@@ -417,12 +417,17 @@ export class LunaAutonomousService {
    * The lock collection has a TTL index and does NOT write to the actions log.
    * Returns true if the slot was claimed, false if already locked (duplicate).
    */
-  private async claimActionSlot(entityId: string, category: LunaActionCategory): Promise<boolean> {
+  private async claimActionSlot(
+    entityId: string,
+    category: LunaActionCategory,
+    permanent = false
+  ): Promise<boolean> {
     if (!entityId) return true;
     await connectDB();
     const LunaActionLock = (await import("@/models/LunaActionLock")).default;
-    const windowBucket = Math.floor(Date.now() / COOLDOWN_MS);
-    const lockKey = `${entityId}::${category}::${windowBucket}`;
+    const lockKey = permanent
+      ? `${entityId}::${category}::permanent`
+      : `${entityId}::${category}::${Math.floor(Date.now() / COOLDOWN_MS)}`;
     try {
       await LunaActionLock.create({ lockKey });
       return true;
@@ -844,7 +849,7 @@ export class LunaAutonomousService {
     };
 
     if (decision.shouldAct && this.settings.mode !== "off" && this.canExecuteMoreActions()) {
-      if (context.entityId && !await this.claimActionSlot(context.entityId, actionCategory)) {
+      if (context.entityId && !await this.claimActionSlot(context.entityId, actionCategory, true)) {
         return null;
       }
       if (this.settings.mode === "full" || !humanReviewRequired) {
