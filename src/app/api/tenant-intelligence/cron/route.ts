@@ -332,13 +332,24 @@ export async function POST(req: NextRequest) {
               );
               results.churnInterventions++;
             } else if (lunaMode === "full") {
-              // Full autonomy: send retention offer to tenant directly
+              // Full autonomy: select retention template based on risk signal profile
+              // High delinquency → payment plan; lease expiring → personal check-in; else → general check-in
+              const delinquencyHigh = score.delinquencyProbabilityPct >= thresholds.delinquencyRiskThreshold;
+              const leaseExpiringSoon =
+                score.signals.daysUntilLeaseExpiry !== null &&
+                score.signals.daysUntilLeaseExpiry > 0 &&
+                score.signals.daysUntilLeaseExpiry <= thresholds.leaseExpiryAlertDays;
+              const interventionMsg = delinquencyHigh
+                ? "We understand circumstances can change. We'd like to discuss a flexible payment arrangement to help you stay on track. Please reach out at your earliest convenience."
+                : leaseExpiringSoon
+                ? "Your lease is coming up for renewal soon. Your property manager would love to schedule a quick call to discuss your options. Please reply to let us know a convenient time."
+                : "Your property manager would like to schedule a brief check-in call to make sure everything is going well. Please reply to let us know a convenient time.";
               await notificationService.sendNotification({
                 type: NotificationType.SYSTEM_ANNOUNCEMENT,
                 priority: NotificationPriority.HIGH,
                 userId: tt._id.toString(),
                 title: "We Value Your Tenancy",
-                message: `Hi ${tt.firstName || "there"}, we noticed you may have some concerns. We'd love to connect and make sure your experience is great. Please reply to schedule a quick call with your property manager.`,
+                message: `Hi ${tt.firstName || "there"}, ${interventionMsg}`,
               });
 
               await TenantIntelligence.findOneAndUpdate(

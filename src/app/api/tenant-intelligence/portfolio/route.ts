@@ -116,16 +116,21 @@ export async function GET(req: NextRequest) {
 
     // Process ALL tenants needing scores in batches of 10 to avoid timeouts
     const BATCH_SIZE = 10;
+    const scoringFailures: string[] = [];
     for (let i = 0; i < tenantsNeedingScore.length; i += BATCH_SIZE) {
       const batch = tenantsNeedingScore.slice(i, i + BATCH_SIZE);
       await Promise.all(
-        batch.map((t) => {
+        batch.map(async (t) => {
           const tt = t as unknown as { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; moveInDate?: Date };
-          return computeAndPersistScores({
-            tenantId: tt._id.toString(),
-            tenantName: `${tt.firstName || ""} ${tt.lastName || ""}`.trim(),
-            moveInDate: tt.moveInDate,
-          }).catch(() => null);
+          try {
+            await computeAndPersistScores({
+              tenantId: tt._id.toString(),
+              tenantName: `${tt.firstName || ""} ${tt.lastName || ""}`.trim(),
+              moveInDate: tt.moveInDate,
+            });
+          } catch {
+            scoringFailures.push(tt._id.toString());
+          }
         })
       );
     }
@@ -218,7 +223,14 @@ export async function GET(req: NextRequest) {
       needsIntervention: aggResult.needsIntervention ?? 0,
     };
 
-    return NextResponse.json({ data: enriched, total, page, limit, portfolioStats });
+    return NextResponse.json({
+      data: enriched,
+      total,
+      page,
+      limit,
+      portfolioStats,
+      ...(scoringFailures.length > 0 && { scoringFailures, scoringFailureCount: scoringFailures.length }),
+    });
   } catch (err) {
     console.error("[TenantIntelligence Portfolio GET]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
