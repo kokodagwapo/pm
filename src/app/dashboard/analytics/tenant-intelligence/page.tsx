@@ -129,12 +129,13 @@ export default function TenantIntelligenceDashboard() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   const isManager = ["admin", "manager"].includes(userRole.toLowerCase());
+  const canViewPortfolio = ["admin", "manager", "owner"].includes(userRole.toLowerCase());
 
   useEffect(() => {
-    if (!isManager && userRole) {
+    if (!canViewPortfolio && userRole) {
       router.replace("/dashboard/analytics");
     }
-  }, [isManager, userRole, router]);
+  }, [canViewPortfolio, userRole, router]);
 
   const fetchData = useCallback(async (forceRefresh = false) => {
     try {
@@ -263,7 +264,7 @@ export default function TenantIntelligenceDashboard() {
     });
   }, [scores, sortKey, sortDir]);
 
-  if (!isManager && userRole) return null;
+  if (!canViewPortfolio && userRole) return null;
 
   return (
     <div className="space-y-6">

@@ -214,10 +214,10 @@ export default function PaymentHistoryPage() {
   // Fetch credit builder status (for tenants only)
   useEffect(() => {
     if (session?.user?.role === UserRole.TENANT && session?.user?.id) {
-      fetch(`/api/tenant-intelligence/credit-builder?tenantId=${session.user.id}`)
+      fetch(`/api/tenant-intelligence/credit-builder`)
         .then((r) => r.json())
         .then((j) => {
-          if (j.data?.creditBuilderOptIn) setCreditBuilderOptIn(true);
+          if (j.data?.optedIn) setCreditBuilderOptIn(true);
         })
         .catch(() => {});
     }
@@ -926,7 +926,7 @@ export default function PaymentHistoryPage() {
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {getStatusBadge(payment.status)}
                           {creditBuilderOptIn &&
-                            payment.status === PaymentStatus.COMPLETED &&
+                            (payment.status === PaymentStatus.COMPLETED || payment.status === PaymentStatus.PAID) &&
                             payment.type === PaymentType.RENT && (
                               <Badge className="text-[10px] px-1.5 py-0 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800">
                                 Reported
