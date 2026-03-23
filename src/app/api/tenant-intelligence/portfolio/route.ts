@@ -157,13 +157,35 @@ export async function GET(req: NextRequest) {
         break;
     }
 
-    const [scores, total] = await Promise.all([
+    const [scores, total, portfolioAgg] = await Promise.all([
       TenantIntelligence.find(query)
         .sort({ churnRiskScore: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
       TenantIntelligence.countDocuments(query),
+      // Portfolio-wide stats computed from ALL matching records (not just this page)
+      TenantIntelligence.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: null,
+            highRisk: { $sum: { $cond: [{ $eq: ["$churnRiskLevel", "high"] }, 1, 0] } },
+            mediumRisk: { $sum: { $cond: [{ $eq: ["$churnRiskLevel", "medium"] }, 1, 0] } },
+            lowRisk: { $sum: { $cond: [{ $eq: ["$churnRiskLevel", "low"] }, 1, 0] } },
+            avgRenewalLikelihood: { $avg: "$renewalLikelihoodPct" },
+            avgLifetimeValue: { $avg: "$lifetimeValueEstimate" },
+            needsIntervention: {
+              $sum: {
+                $cond: [
+                  { $and: [{ $eq: ["$churnRiskLevel", "high"] }, { $ne: ["$interventionSent", true] }] },
+                  1, 0
+                ]
+              }
+            },
+          },
+        },
+      ]),
     ]);
 
     const tenantMap = new Map(
@@ -185,7 +207,18 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    return NextResponse.json({ data: enriched, total, page, limit });
+    const aggResult = portfolioAgg[0] ?? {};
+    const portfolioStats = {
+      total,
+      highRisk: aggResult.highRisk ?? 0,
+      mediumRisk: aggResult.mediumRisk ?? 0,
+      lowRisk: aggResult.lowRisk ?? 0,
+      avgRenewalLikelihood: Math.round(aggResult.avgRenewalLikelihood ?? 0),
+      avgLifetimeValue: Math.round(aggResult.avgLifetimeValue ?? 0),
+      needsIntervention: aggResult.needsIntervention ?? 0,
+    };
+
+    return NextResponse.json({ data: enriched, total, page, limit, portfolioStats });
   } catch (err) {
     console.error("[TenantIntelligence Portfolio GET]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

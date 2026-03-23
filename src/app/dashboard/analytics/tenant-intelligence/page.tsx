@@ -151,24 +151,30 @@ export default function TenantIntelligenceDashboard() {
       setScores(list);
       setTotal(json.total ?? list.length);
 
-      const computed: PortfolioStats = {
-        total: list.length,
-        highRisk: list.filter((s) => s.churnRiskLevel === "high").length,
-        mediumRisk: list.filter((s) => s.churnRiskLevel === "medium").length,
-        lowRisk: list.filter((s) => s.churnRiskLevel === "low").length,
-        avgRenewalLikelihood:
-          list.length > 0
-            ? Math.round(list.reduce((a, s) => a + s.renewalLikelihoodPct, 0) / list.length)
-            : 0,
-        avgLifetimeValue:
-          list.length > 0
-            ? Math.round(list.reduce((a, s) => a + s.lifetimeValueEstimate, 0) / list.length)
-            : 0,
-        needsIntervention: list.filter(
-          (s) => s.churnRiskLevel === "high" && !s.interventionSent
-        ).length,
-      };
-      setStats(computed);
+      // Use portfolio-wide stats from API (not page-scoped)
+      if (json.portfolioStats) {
+        setStats(json.portfolioStats as PortfolioStats);
+      } else {
+        // Fallback: compute from page data if API doesn't return portfolioStats
+        const computed: PortfolioStats = {
+          total: json.total ?? list.length,
+          highRisk: list.filter((s) => s.churnRiskLevel === "high").length,
+          mediumRisk: list.filter((s) => s.churnRiskLevel === "medium").length,
+          lowRisk: list.filter((s) => s.churnRiskLevel === "low").length,
+          avgRenewalLikelihood:
+            list.length > 0
+              ? Math.round(list.reduce((a, s) => a + s.renewalLikelihoodPct, 0) / list.length)
+              : 0,
+          avgLifetimeValue:
+            list.length > 0
+              ? Math.round(list.reduce((a, s) => a + s.lifetimeValueEstimate, 0) / list.length)
+              : 0,
+          needsIntervention: list.filter(
+            (s) => s.churnRiskLevel === "high" && !s.interventionSent
+          ).length,
+        };
+        setStats(computed);
+      }
     } catch {
       toast.error("Failed to load tenant intelligence data.");
     } finally {
