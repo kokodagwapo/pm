@@ -21,6 +21,7 @@ import { auth } from "@/lib/auth";
 import { UserRole, PaymentStatus } from "@/types";
 import connectDB from "@/lib/mongodb";
 import { computeAndPersistScores } from "@/lib/services/tenant-intelligence.service";
+import { getTemplateById, selectTemplateForSignals } from "@/lib/services/intervention-templates.service";
 import TenantIntelligence from "@/models/TenantIntelligence";
 import mongoose from "mongoose";
 
@@ -332,18 +333,17 @@ export async function POST(req: NextRequest) {
               );
               results.churnInterventions++;
             } else if (lunaMode === "full") {
-              // Full autonomy: select retention template based on risk signal profile
-              // High delinquency → payment plan; lease expiring → personal check-in; else → general check-in
-              const delinquencyHigh = score.delinquencyProbabilityPct >= thresholds.delinquencyRiskThreshold;
-              const leaseExpiringSoon =
-                score.signals.daysUntilLeaseExpiry !== null &&
-                score.signals.daysUntilLeaseExpiry > 0 &&
-                score.signals.daysUntilLeaseExpiry <= thresholds.leaseExpiryAlertDays;
-              const interventionMsg = delinquencyHigh
-                ? "We understand circumstances can change. We'd like to discuss a flexible payment arrangement to help you stay on track. Please reach out at your earliest convenience."
-                : leaseExpiringSoon
-                ? "Your lease is coming up for renewal soon. Your property manager would love to schedule a quick call to discuss your options. Please reply to let us know a convenient time."
-                : "Your property manager would like to schedule a brief check-in call to make sure everything is going well. Please reply to let us know a convenient time.";
+              // Full autonomy: select retention template via unified service (built-ins + manager-created)
+              // High delinquency → payment_plan; lease expiring → checkin; else → checkin
+              const templateId = selectTemplateForSignals({
+                delinquencyHigh: score.delinquencyProbabilityPct >= thresholds.delinquencyRiskThreshold,
+                leaseExpiringSoon:
+                  score.signals.daysUntilLeaseExpiry !== null &&
+                  score.signals.daysUntilLeaseExpiry > 0 &&
+                  score.signals.daysUntilLeaseExpiry <= thresholds.leaseExpiryAlertDays,
+              });
+              const template = await getTemplateById(templateId);
+              const interventionMsg = template?.message ?? "Your property manager would like to connect with you. Please reply at your convenience.";
               await notificationService.sendNotification({
                 type: NotificationType.SYSTEM_ANNOUNCEMENT,
                 priority: NotificationPriority.HIGH,

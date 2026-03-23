@@ -5,39 +5,7 @@ import { NotificationType, NotificationPriority } from "@/lib/notification-servi
 import connectDB from "@/lib/mongodb";
 import TenantIntelligence from "@/models/TenantIntelligence";
 import mongoose from "mongoose";
-
-const OFFER_TEMPLATES = {
-  rent_freeze: {
-    id: "rent_freeze",
-    label: "1-Month Rent Freeze",
-    message:
-      "We value your tenancy and would like to offer you a 1-month rent freeze as a gesture of appreciation. Your rent will remain unchanged for the next month — no action needed.",
-  },
-  parking_upgrade: {
-    id: "parking_upgrade",
-    label: "Parking Upgrade",
-    message:
-      "As a valued long-term resident, we'd like to offer you a complimentary parking space upgrade. Please contact us to arrange the details.",
-  },
-  appliance_credit: {
-    id: "appliance_credit",
-    label: "$200 Appliance Upgrade Credit",
-    message:
-      "We're offering you a $200 appliance upgrade credit redeemable within the next 30 days. Contact your property manager to apply it to an eligible appliance upgrade.",
-  },
-  checkin: {
-    id: "checkin",
-    label: "Personal Check-In",
-    message:
-      "Your property manager would like to schedule a brief check-in call to make sure everything is going well. Please reply to let us know a convenient time.",
-  },
-  payment_plan: {
-    id: "payment_plan",
-    label: "Flexible Payment Plan",
-    message:
-      "We understand circumstances can change. We'd like to discuss a flexible payment arrangement to help you stay on track. Please reach out at your earliest convenience.",
-  },
-};
+import { getAllTemplates, getTemplateById } from "@/lib/services/intervention-templates.service";
 
 async function requireManagerAuth() {
   const session = await auth();
@@ -59,7 +27,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid tenant id" }, { status: 400 });
     }
 
-    const offer = OFFER_TEMPLATES[offerId as keyof typeof OFFER_TEMPLATES];
+    // Look up template from unified source (built-ins + manager-created DB templates)
+    const offer = offerId ? await getTemplateById(offerId) : null;
     if (!offer && !customMessage) {
       return NextResponse.json({ error: "Invalid offer or missing message" }, { status: 400 });
     }
@@ -89,7 +58,7 @@ export async function POST(req: NextRequest) {
       priority: NotificationPriority.NORMAL,
       userId: tenantId,
       title: `Retention Offer: ${label}`,
-      message,
+      message: `Hi ${tt.firstName || "there"}, ${message}`,
     });
 
     // Do NOT upsert — only update if a scored record already exists to avoid
@@ -124,5 +93,7 @@ export async function GET() {
   if (!role || !["admin", "manager"].includes(role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  return NextResponse.json({ data: Object.values(OFFER_TEMPLATES) });
+  // Return unified templates (built-in + manager-created) from service
+  const templates = await getAllTemplates();
+  return NextResponse.json({ data: templates });
 }
