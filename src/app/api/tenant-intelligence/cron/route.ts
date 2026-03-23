@@ -117,6 +117,10 @@ export async function POST(req: NextRequest) {
     const Payment = (await import("@/models/Payment")).default;
     const { notificationService, NotificationType, NotificationPriority } = await import("@/lib/notification-service");
 
+    // Explicit preferences for TI cron notifications: disable SMS (always returns false → breaks boolean AND).
+    // In-app + email are the correct channels; dedup/state decisions are gated on this send result.
+    const TI_PREFS = { email: true, sms: false, push: true, inApp: true };
+
     // Load autonomy mode and configurable thresholds
     const lunaMode = await getLunaAutonomyMode();
     const thresholds = await loadThresholds();
@@ -213,6 +217,7 @@ export async function POST(req: NextRequest) {
                     userId: tt._id.toString(),
                     title: "Upcoming Payment Reminder",
                     message: `Hi ${tt.firstName || "there"}, your rent payment is due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Please ensure your payment is submitted on time to avoid any late fees.`,
+                    preferences: TI_PREFS,
                     data: {
                       userEmail: tt.email,
                       userName: `${tt.firstName || ""} ${tt.lastName || ""}`.trim(),
@@ -231,6 +236,7 @@ export async function POST(req: NextRequest) {
                       userId: mgId,
                       title: `Delinquency Risk: ${tenantFullName}`,
                       message: `Tenant ${tenantFullName} has ${score.delinquencyProbabilityPct}% delinquency risk with a payment due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Manual follow-up recommended.`,
+                      preferences: TI_PREFS,
                       data: { tenantName: tenantFullName, tenantEmail: tt.email, daysUntilDue },
                     });
                     if (mgSent) anySent = true;
@@ -279,6 +285,7 @@ export async function POST(req: NextRequest) {
                   userId: tt._id.toString(),
                   title: "Your Lease Expires Soon",
                   message: `Hi ${tt.firstName || "there"}, your lease expires in ${daysUntilExpiry} days. Please contact your property manager to discuss renewal options.`,
+                  preferences: TI_PREFS,
                   data: {
                     userEmail: tt.email,
                     userName: leaseFullName,
@@ -296,6 +303,7 @@ export async function POST(req: NextRequest) {
                     userId: mgId,
                     title: `Lease Expiring: ${leaseFullName}`,
                     message: `Tenant ${leaseFullName}'s lease expires in ${daysUntilExpiry} days. Review renewal status and follow up.`,
+                    preferences: TI_PREFS,
                     data: { tenantName: leaseFullName, tenantEmail: tt.email, daysUntilExpiry },
                   });
                   if (mgLeaseSent) anyLeaseSent = true;
@@ -331,17 +339,20 @@ export async function POST(req: NextRequest) {
             } else if (lunaMode === "supervised") {
               // Supervised: alert managers only, do NOT message tenant
               const churnFullName = `${tt.firstName || ""} ${tt.lastName || ""}`.trim();
+              let anyChurnMgrSent = false;
               for (const mgId of managerIds) {
-                await notificationService.sendNotification({
+                const mgChurnSent = await notificationService.sendNotification({
                   type: NotificationType.SYSTEM_ANNOUNCEMENT,
                   priority: NotificationPriority.HIGH,
                   userId: mgId,
                   title: `High Churn Risk: ${churnFullName}`,
                   message: `Tenant ${churnFullName} has escalated to HIGH churn risk (score: ${score.churnRiskScore}/100). Consider sending a retention offer or scheduling a call.`,
+                  preferences: TI_PREFS,
                   data: { tenantName: churnFullName, tenantEmail: tt.email, churnScore: score.churnRiskScore },
                 });
+                if (mgChurnSent) anyChurnMgrSent = true;
               }
-              results.supervisedManagerAlerts++;
+              if (anyChurnMgrSent) results.supervisedManagerAlerts++;
 
               await TenantIntelligence.findOneAndUpdate(
                 { tenantId: tt._id },
@@ -367,6 +378,7 @@ export async function POST(req: NextRequest) {
                 userId: tt._id.toString(),
                 title: "We Value Your Tenancy",
                 message: `Hi ${tt.firstName || "there"}, ${interventionMsg}`,
+                preferences: TI_PREFS,
                 data: {
                   userEmail: tt.email,
                   userName: interventionFullName,
