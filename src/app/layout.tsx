@@ -30,8 +30,9 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "SmartStart Property Management",
-  description: "Property Management Software",
+  title: "SmartStartPM - AI Agentic Property Management Software",
+  description: "Enterprise-grade property management software powered by autonomous AI and machine learning. Unified platform for owners, managers, tenants, and maintenance teams. Features: intelligent messaging, automated forms, real-time collaboration, full AI autonomy, continuous learning. Perfect for residential, dorm, student housing, and educational institutions with flexible discounts.",
+  keywords: "property management software, AI property management, agentic AI, property manager, tenant management, maintenance management, messaging platform, residential management, dorm management, student housing, real estate management, automated forms, machine learning, smart property, autonomous management, property software",
   applicationName: "SmartStartPM",
   manifest: "/manifest.json",
   icons: {
