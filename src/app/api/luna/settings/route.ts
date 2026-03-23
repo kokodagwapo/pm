@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
       humanReviewThreshold: settings.humanReviewThreshold,
       spendingLimit: settings.spendingLimit ?? DEFAULT_LUNA_SETTINGS.spendingLimit,
       escalationContacts: (settings.escalationContacts ?? []) as never[],
+      roleAutonomyConfig: (settings.roleAutonomyConfig ?? DEFAULT_LUNA_SETTINGS.roleAutonomyConfig) as never[],
     });
 
     return NextResponse.json({ settings });
@@ -69,6 +70,7 @@ export async function PUT(req: NextRequest) {
       "humanReviewThreshold",
       "spendingLimit",
       "escalationContacts",
+      "roleAutonomyConfig",
     ]);
 
     const sanitized: Record<string, unknown> = {};

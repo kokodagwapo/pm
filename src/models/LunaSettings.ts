@@ -8,6 +8,14 @@ export interface ILunaEscalationContact {
   role: string;
 }
 
+export interface ILunaRoleAutonomyConfig {
+  role: "admin" | "manager";
+  enabledCategories: LunaActionCategory[];
+  canApproveActions: boolean;
+  canOverrideActions: boolean;
+  receivesDigest: boolean;
+}
+
 export interface ILunaSettings {
   _id?: string;
   mode: LunaAutonomyMode;
@@ -19,6 +27,7 @@ export interface ILunaSettings {
   humanReviewThreshold: number;
   spendingLimit: number;
   escalationContacts: ILunaEscalationContact[];
+  roleAutonomyConfig: ILunaRoleAutonomyConfig[];
   updatedAt?: Date;
   updatedBy?: string;
 }
@@ -29,6 +38,17 @@ const EscalationContactSchema = new Schema<ILunaEscalationContact>(
     email: { type: String, required: true, trim: true },
     phone: { type: String, trim: true },
     role: { type: String, required: true, trim: true },
+  },
+  { _id: false }
+);
+
+const RoleAutonomyConfigSchema = new Schema<ILunaRoleAutonomyConfig>(
+  {
+    role: { type: String, enum: ["admin", "manager"], required: true },
+    enabledCategories: { type: [String], default: [] },
+    canApproveActions: { type: Boolean, default: true },
+    canOverrideActions: { type: Boolean, default: false },
+    receivesDigest: { type: Boolean, default: true },
   },
   { _id: false }
 );
@@ -86,6 +106,41 @@ const LunaSettingsSchema = new Schema<ILunaSettings>(
     escalationContacts: {
       type: [EscalationContactSchema],
       default: [],
+    },
+    roleAutonomyConfig: {
+      type: [RoleAutonomyConfigSchema],
+      default: [
+        {
+          role: "admin",
+          enabledCategories: [
+            "payment_reminder",
+            "payment_escalation",
+            "maintenance_triage",
+            "maintenance_escalation",
+            "lease_renewal_notice",
+            "lease_expiry_alert",
+            "tenant_communication",
+            "system_digest",
+          ],
+          canApproveActions: true,
+          canOverrideActions: true,
+          receivesDigest: true,
+        },
+        {
+          role: "manager",
+          enabledCategories: [
+            "payment_reminder",
+            "maintenance_triage",
+            "lease_renewal_notice",
+            "lease_expiry_alert",
+            "tenant_communication",
+            "system_digest",
+          ],
+          canApproveActions: true,
+          canOverrideActions: false,
+          receivesDigest: true,
+        },
+      ],
     },
     updatedBy: {
       type: String,

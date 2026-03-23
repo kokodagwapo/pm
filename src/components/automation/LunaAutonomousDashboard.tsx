@@ -86,6 +86,14 @@ interface LunaEscalationContact {
   role: string;
 }
 
+interface LunaRoleAutonomyConfig {
+  role: "admin" | "manager";
+  enabledCategories: LunaActionCategory[];
+  canApproveActions: boolean;
+  canOverrideActions: boolean;
+  receivesDigest: boolean;
+}
+
 interface LunaAutonomySettings {
   mode: "full" | "supervised" | "off";
   confidenceThreshold: number;
@@ -96,6 +104,7 @@ interface LunaAutonomySettings {
   humanReviewThreshold: number;
   spendingLimit: number;
   escalationContacts: LunaEscalationContact[];
+  roleAutonomyConfig: LunaRoleAutonomyConfig[];
 }
 
 interface LunaAction {
@@ -220,6 +229,29 @@ const DEFAULT_SETTINGS: LunaAutonomySettings = {
   humanReviewThreshold: 0.6,
   spendingLimit: 500,
   escalationContacts: [],
+  roleAutonomyConfig: [
+    {
+      role: "admin" as const,
+      enabledCategories: [
+        "payment_reminder", "payment_escalation", "maintenance_triage",
+        "maintenance_escalation", "lease_renewal_notice", "lease_expiry_alert",
+        "tenant_communication", "system_digest",
+      ] as LunaActionCategory[],
+      canApproveActions: true,
+      canOverrideActions: true,
+      receivesDigest: true,
+    },
+    {
+      role: "manager" as const,
+      enabledCategories: [
+        "payment_reminder", "maintenance_triage", "lease_renewal_notice",
+        "lease_expiry_alert", "tenant_communication", "system_digest",
+      ] as LunaActionCategory[],
+      canApproveActions: true,
+      canOverrideActions: false,
+      receivesDigest: true,
+    },
+  ],
 };
 
 export default function LunaAutonomousDashboard() {
@@ -287,6 +319,7 @@ export default function LunaAutonomousDashboard() {
             ...DEFAULT_SETTINGS,
             ...data.settings,
             escalationContacts: data.settings.escalationContacts || [],
+            roleAutonomyConfig: data.settings.roleAutonomyConfig || DEFAULT_SETTINGS.roleAutonomyConfig,
           });
         }
       }
@@ -1116,6 +1149,102 @@ export default function LunaAutonomousDashboard() {
                     </Select>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Per-Role Autonomy Configuration */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-base">Per-Role Autonomy Configuration</CardTitle>
+                <CardDescription>
+                  Control which categories each role can trigger, approve, or override
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {settings.roleAutonomyConfig.map((roleConfig, roleIdx) => (
+                  <div key={roleConfig.role} className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${roleConfig.role === "admin" ? "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"}`}>
+                        {roleConfig.role}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 ml-2">
+                      {ALL_CATEGORIES.map((cat) => {
+                        const conf = CATEGORY_CONFIG[cat];
+                        const enabled = roleConfig.enabledCategories.includes(cat);
+                        return (
+                          <div key={cat} className={`flex items-center justify-between p-2 rounded-md border text-xs ${enabled ? "bg-muted/20" : "opacity-50"}`}>
+                            <div className="flex items-center gap-1.5">
+                              <span className={conf.color}>{conf.icon}</span>
+                              <span>{conf.label}</span>
+                            </div>
+                            <Switch
+                              checked={enabled}
+                              onCheckedChange={() => {
+                                setSettings((prev) => {
+                                  const updated = [...prev.roleAutonomyConfig];
+                                  const current = { ...updated[roleIdx] };
+                                  current.enabledCategories = enabled
+                                    ? current.enabledCategories.filter((c) => c !== cat)
+                                    : [...current.enabledCategories, cat];
+                                  updated[roleIdx] = current;
+                                  return { ...prev, roleAutonomyConfig: updated };
+                                });
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex gap-4 ml-2">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          id={`${roleConfig.role}-approve`}
+                          checked={roleConfig.canApproveActions}
+                          onCheckedChange={(v) => {
+                            setSettings((prev) => {
+                              const updated = [...prev.roleAutonomyConfig];
+                              updated[roleIdx] = { ...updated[roleIdx], canApproveActions: v };
+                              return { ...prev, roleAutonomyConfig: updated };
+                            });
+                          }}
+                        />
+                        <Label htmlFor={`${roleConfig.role}-approve`} className="text-xs">Can Approve Actions</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          id={`${roleConfig.role}-override`}
+                          checked={roleConfig.canOverrideActions}
+                          onCheckedChange={(v) => {
+                            setSettings((prev) => {
+                              const updated = [...prev.roleAutonomyConfig];
+                              updated[roleIdx] = { ...updated[roleIdx], canOverrideActions: v };
+                              return { ...prev, roleAutonomyConfig: updated };
+                            });
+                          }}
+                        />
+                        <Label htmlFor={`${roleConfig.role}-override`} className="text-xs">Can Override Actions</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          id={`${roleConfig.role}-digest`}
+                          checked={roleConfig.receivesDigest}
+                          onCheckedChange={(v) => {
+                            setSettings((prev) => {
+                              const updated = [...prev.roleAutonomyConfig];
+                              updated[roleIdx] = { ...updated[roleIdx], receivesDigest: v };
+                              return { ...prev, roleAutonomyConfig: updated };
+                            });
+                          }}
+                        />
+                        <Label htmlFor={`${roleConfig.role}-digest`} className="text-xs">Receives Digest</Label>
+                      </div>
+                    </div>
+                    {roleIdx < settings.roleAutonomyConfig.length - 1 && (
+                      <hr className="border-border" />
+                    )}
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </div>
