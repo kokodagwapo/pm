@@ -42,6 +42,13 @@
   "nav.automation.luna": "Luna Agent",
   "nav.automation.actions": "Actions Log",
 
+  "nav.section.compliance": "Legal & Compliance",
+  "nav.compliance": "Compliance Hub",
+  "nav.compliance.hub": "Overview",
+  "nav.compliance.rentCalculator": "Rent Calculator",
+  "nav.compliance.eviction": "Eviction Workflow",
+  "nav.compliance.fairHousing": "Fair Housing",
+
   "nav.properties": "Properties",
   "nav.properties.all": "All Properties",
   "nav.properties.new": "Add Property",

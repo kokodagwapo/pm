@@ -43,6 +43,10 @@ import {
   ListChecks,
   Inbox,
   Cpu,
+  Scale,
+  Calculator,
+  Gavel,
+  Eye,
 } from "lucide-react";
 import { UserRole } from "@/types";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
@@ -243,6 +247,24 @@ const navigationSections: NavSection[] = [
           { title: "nav.automation.hub", href: "/dashboard/automation", icon: Cpu, iconColor: "text-rose-200", roles: [UserRole.ADMIN, UserRole.MANAGER] },
           { title: "nav.automation.luna", href: "/dashboard/automation/luna", icon: Bot, iconColor: "text-rose-200", roles: [UserRole.ADMIN, UserRole.MANAGER] },
           { title: "nav.automation.actions", href: "/dashboard/automation/actions", icon: Bot, iconColor: "text-rose-200", roles: [UserRole.ADMIN, UserRole.MANAGER] },
+        ],
+      },
+    ],
+  },
+  {
+    title: "nav.section.compliance",
+    items: [
+      {
+        title: "nav.compliance",
+        href: "/dashboard/compliance",
+        icon: Scale,
+        iconColor: "text-violet-200",
+        roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER],
+        children: [
+          { title: "nav.compliance.hub", href: "/dashboard/compliance", icon: Scale, iconColor: "text-violet-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.compliance.rentCalculator", href: "/dashboard/compliance#rent", icon: Calculator, iconColor: "text-violet-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.compliance.eviction", href: "/dashboard/compliance#eviction", icon: Gavel, iconColor: "text-violet-200", roles: [UserRole.ADMIN, UserRole.MANAGER] },
+          { title: "nav.compliance.fairHousing", href: "/dashboard/compliance#fairHousing", icon: Eye, iconColor: "text-violet-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
         ],
       },
     ],

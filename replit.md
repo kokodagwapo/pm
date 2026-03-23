@@ -50,6 +50,22 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Scripts**: `npm run docker:up`, `docker:down`, `docker:logs` for container management
 - **Production Docker**: `docker compose up` uses the full `docker-compose.yml` with Dockerfile to build and run app + MongoDB together
 
+## Compliance Intelligence Engine (Task #8)
+- **Models**: `src/models/JurisdictionRule.ts` — state-specific regulatory rules DB (FL/CA/NY/TX/WA seeded); `src/models/ComplianceObligation.ts` — per-property compliance tasks with status/severity/due date tracking
+- **API routes**:
+  - `GET/POST /api/compliance/jurisdiction-rules` — query state regulations (filter by stateCode, category)
+  - `GET/POST /api/compliance/obligations` — list/create compliance obligations; auto-stats (total/pending/overdue/critical)
+  - `PATCH/DELETE /api/compliance/obligations/[id]` — update status, mark complete, soft delete
+  - `POST /api/compliance/rent-calculator` — validate rent increases against state law; returns compliance verdict + recommendations
+  - `POST /api/compliance/eviction-workflow` — generate state-specific step-by-step eviction workflow with required docs
+  - `POST /api/compliance/fair-housing` — scan text for discriminatory language (20+ pattern rules, severity-graded)
+  - `GET /api/compliance/cron` — cron endpoint: marks overdue obligations + sends deadline alerts (14-day, 3-day)
+  - `GET/POST /api/compliance/seed` — seeds FL/CA/NY/TX/WA jurisdiction rules on first run
+- **Components**: `src/components/compliance/RentCalculatorModal.tsx`, `EvictionWorkflowModal.tsx`, `FairHousingModal.tsx`, `AddObligationModal.tsx` — all-in-one modal tools
+- **Page**: `/dashboard/compliance` — unified Compliance Hub with stats cards, 3 tool launchers, filterable obligation list with inline status actions
+- **Automation**: Compliance deadline alerts integrated into `notification-automation.ts` — 14-day and 3-day pre-deadline notifications to property managers/owners/assigned users
+- **Sidebar**: New "Legal & Compliance" section (admin/manager/owner roles) with Hub, Rent Calculator, Eviction Workflow, Fair Housing links
+
 ## Predictive Tenant Intelligence Suite (Task #7)
 - **Model**: `src/models/TenantIntelligence.ts` — MongoDB document per tenant storing churn risk score/level, renewal likelihood %, delinquency probability %, lifetime value estimate, sentiment signal, raw signals, explanation array, intervention tracking, and credit builder enrollment
 - **Service**: `src/lib/services/tenant-intelligence.service.ts` — rule-based scoring engine; computes all scores from Payment, Lease, MaintenanceRequest data; `computeAndPersistScores()` upserts to DB with 24h cache

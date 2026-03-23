@@ -21,6 +21,7 @@ import Lease from "@/models/Lease";
 import Payment from "@/models/Payment";
 import { PaymentStatus } from "@/types";
 import MaintenanceRequest from "@/models/MaintenanceRequest";
+import ComplianceObligation from "@/models/ComplianceObligation";
 
 // Automation rule interface
 export interface AutomationRule {
@@ -156,6 +157,33 @@ export class NotificationAutomation {
       },
       enabled: true,
     });
+
+    // Compliance deadline rules
+    this.addRule({
+      id: "compliance_deadline_14_days",
+      name: "Compliance Deadline - 14 Days Notice",
+      type: NotificationType.SYSTEM_ANNOUNCEMENT,
+      trigger: "schedule",
+      conditions: { daysBefore: 14 },
+      schedule: {
+        frequency: "daily",
+        time: "07:00",
+      },
+      enabled: true,
+    });
+
+    this.addRule({
+      id: "compliance_deadline_3_days",
+      name: "Compliance Deadline - 3 Days Notice",
+      type: NotificationType.SYSTEM_ANNOUNCEMENT,
+      trigger: "schedule",
+      conditions: { daysBefore: 3 },
+      schedule: {
+        frequency: "daily",
+        time: "07:00",
+      },
+      enabled: true,
+    });
   }
 
   // Add automation rule
@@ -263,8 +291,77 @@ export class NotificationAutomation {
       case NotificationType.LEASE_EXPIRY:
         await this.processLeaseExpiries(rule);
         break;
+      case NotificationType.SYSTEM_ANNOUNCEMENT:
+        if (rule.id.startsWith("compliance_")) {
+          await this.processComplianceDeadlines(rule);
+        }
+        break;
       default:
         console.warn(`Unknown automation rule type: ${rule.type}`);
+    }
+  }
+
+  // Process compliance deadline alerts
+  private async processComplianceDeadlines(rule: AutomationRule): Promise<void> {
+    const daysBefore = rule.conditions.daysBefore || 7;
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + daysBefore);
+
+    try {
+      const upcomingObligations = await ComplianceObligation.find({
+        isActive: true,
+        status: { $nin: ["completed", "waived", "not_applicable"] },
+        dueDate: {
+          $gte: new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate()),
+          $lt: new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate() + 1),
+        },
+      }).populate([
+        { path: "propertyId", select: "name ownerId managerId" },
+        { path: "assignedTo", select: "firstName lastName email" },
+      ]);
+
+      for (const obligation of upcomingObligations) {
+        try {
+          const property = obligation.propertyId as any;
+          if (!property) continue;
+
+          const recipientIds = new Set<string>();
+          if (obligation.assignedTo) recipientIds.add((obligation.assignedTo as any)._id?.toString());
+          if (property.ownerId) recipientIds.add(property.ownerId.toString());
+          if (property.managerId) recipientIds.add(property.managerId.toString());
+
+          for (const recipientId of recipientIds) {
+            if (!recipientId) continue;
+            const user = await User.findById(recipientId).select("firstName lastName email").lean();
+            if (!user || !(user as any).email) continue;
+
+            await notificationService.sendNotification({
+              type: NotificationType.SYSTEM_ANNOUNCEMENT,
+              priority: obligation.severity === "critical" ? NotificationPriority.CRITICAL : NotificationPriority.HIGH,
+              userId: recipientId,
+              title: `Compliance Deadline in ${daysBefore} Days`,
+              message: `"${obligation.title}" is due in ${daysBefore} days for ${property.name}`,
+              preferences: { email: true, sms: false, push: true, inApp: true },
+              data: {
+                userEmail: (user as any).email,
+                userName: `${(user as any).firstName || ""} ${(user as any).lastName || ""}`.trim() || "User",
+                actionUrl: `/dashboard/compliance`,
+                obligationId: obligation._id.toString(),
+                propertyName: property.name,
+                category: obligation.category,
+                severity: obligation.severity,
+                dueDate: obligation.dueDate?.toISOString(),
+              },
+            });
+          }
+
+          await ComplianceObligation.findByIdAndUpdate(obligation._id, { reminderSentAt: new Date() });
+        } catch (err) {
+          console.error(`Error processing compliance deadline for obligation ${obligation._id}:`, err);
+        }
+      }
+    } catch (err) {
+      console.error("Error processing compliance deadlines:", err);
     }
   }
 
