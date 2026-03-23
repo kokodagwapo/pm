@@ -16,7 +16,10 @@ import {
   DollarSign,
   Heart,
   CheckCircle2,
+  Phone,
+  History,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -115,6 +118,7 @@ export function TenantIntelligenceCard({
   tenantName = "Tenant",
   userRole = "",
 }: TenantIntelligenceCardProps) {
+  const router = useRouter();
   const [data, setData] = useState<TenantIntelligenceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -378,7 +382,7 @@ export function TenantIntelligenceCard({
         )}
 
         {isManager && (
-          <div className="flex items-center gap-2 border-t border-border/40 pt-3">
+          <div className="space-y-2 border-t border-border/40 pt-3">
             {data.interventionSent && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
@@ -388,15 +392,35 @@ export function TenantIntelligenceCard({
                   : ""}
               </div>
             )}
-            <Button
-              size="sm"
-              variant="outline"
-              className="ml-auto flex items-center gap-1.5 text-xs"
-              onClick={() => setOfferDialogOpen(true)}
-            >
-              <Zap className="h-3.5 w-3.5 text-amber-500" />
-              Send Retention Offer
-            </Button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex items-center gap-1.5 text-xs h-7"
+                onClick={() => router.push(`/dashboard/conversations?tenantId=${tenantId}`)}
+              >
+                <Phone className="h-3.5 w-3.5 text-blue-500" />
+                Schedule Call
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex items-center gap-1.5 text-xs h-7"
+                onClick={() => router.push(`/dashboard/payments?tenantId=${tenantId}`)}
+              >
+                <History className="h-3.5 w-3.5 text-muted-foreground" />
+                View History
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="ml-auto flex items-center gap-1.5 text-xs h-7"
+                onClick={() => setOfferDialogOpen(true)}
+              >
+                <Zap className="h-3.5 w-3.5 text-amber-500" />
+                Send Retention Offer
+              </Button>
+            </div>
           </div>
         )}
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,9 @@ import {
   Zap,
   Heart,
   CheckCircle2,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -29,6 +32,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface TenantScore {
   _id: string;
@@ -114,6 +125,8 @@ export default function TenantIntelligenceDashboard() {
   const [total, setTotal] = useState(0);
   const [sendingOffer, setSendingOffer] = useState<string | null>(null);
   const [batchSending, setBatchSending] = useState(false);
+  const [sortKey, setSortKey] = useState<keyof TenantScore | "signals.latePaymentsLast12" | "signals.daysUntilLeaseExpiry">("churnRiskScore");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   const isManager = ["admin", "manager"].includes(userRole.toLowerCase());
 
@@ -217,6 +230,38 @@ export default function TenantIntelligenceDashboard() {
       setSendingOffer(null);
     }
   };
+
+  const handleSort = (key: typeof sortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  };
+
+  const SortIcon = ({ col }: { col: typeof sortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="h-3 w-3 ml-1 text-muted-foreground/50" />;
+    return sortDir === "asc"
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
+
+  const sortedScores = useMemo(() => {
+    const getValue = (s: TenantScore) => {
+      if (sortKey === "signals.latePaymentsLast12") return s.signals.latePaymentsLast12;
+      if (sortKey === "signals.daysUntilLeaseExpiry") return s.signals.daysUntilLeaseExpiry ?? 9999;
+      const v = s[sortKey as keyof TenantScore];
+      return typeof v === "string" ? v.toLowerCase() : (v ?? 0);
+    };
+    return [...scores].sort((a, b) => {
+      const av = getValue(a);
+      const bv = getValue(b);
+      if (av < bv) return sortDir === "asc" ? -1 : 1;
+      if (av > bv) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [scores, sortKey, sortDir]);
 
   if (!isManager && userRole) return null;
 
@@ -365,107 +410,153 @@ export default function TenantIntelligenceDashboard() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-2">
-          {scores.map((score) => {
-            const sentiment = SENTIMENT_MAP[score.sentimentSignal];
-            return (
-              <Card key={score._id} className="border-border/60 hover:border-border transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-medium text-sm truncate">{score.tenantName || "Unknown Tenant"}</span>
-                        <Badge className={`text-xs border ${RISK_COLORS[score.churnRiskLevel]}`}>
-                          {score.churnRiskLevel === "high" ? "High Risk" : score.churnRiskLevel === "medium" ? "Medium Risk" : "Low Risk"}
-                        </Badge>
+        <Card className="border-border/60 overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/30 hover:bg-muted/30">
+                  <TableHead
+                    className="cursor-pointer select-none whitespace-nowrap"
+                    onClick={() => handleSort("tenantName")}
+                  >
+                    <div className="flex items-center">Tenant <SortIcon col="tenantName" /></div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none whitespace-nowrap"
+                    onClick={() => handleSort("churnRiskScore")}
+                  >
+                    <div className="flex items-center">Churn Risk <SortIcon col="churnRiskScore" /></div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none whitespace-nowrap"
+                    onClick={() => handleSort("renewalLikelihoodPct")}
+                  >
+                    <div className="flex items-center">Renewal <SortIcon col="renewalLikelihoodPct" /></div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none whitespace-nowrap"
+                    onClick={() => handleSort("delinquencyProbabilityPct")}
+                  >
+                    <div className="flex items-center">Payment Risk <SortIcon col="delinquencyProbabilityPct" /></div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none whitespace-nowrap"
+                    onClick={() => handleSort("lifetimeValueEstimate")}
+                  >
+                    <div className="flex items-center">LTV <SortIcon col="lifetimeValueEstimate" /></div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none whitespace-nowrap"
+                    onClick={() => handleSort("signals.daysUntilLeaseExpiry")}
+                  >
+                    <div className="flex items-center">Lease Expiry <SortIcon col="signals.daysUntilLeaseExpiry" /></div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none whitespace-nowrap"
+                    onClick={() => handleSort("signals.latePaymentsLast12")}
+                  >
+                    <div className="flex items-center">Late Pmts <SortIcon col="signals.latePaymentsLast12" /></div>
+                  </TableHead>
+                  <TableHead>Sentiment</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedScores.map((score) => {
+                  const sentiment = SENTIMENT_MAP[score.sentimentSignal];
+                  return (
+                    <TableRow key={score._id} className="hover:bg-muted/20">
+                      <TableCell>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm truncate max-w-[140px]">
+                              {score.tenantName || "Unknown"}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate max-w-[140px]">
+                              {score.tenantEmail}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <Badge className={`text-xs border ${RISK_COLORS[score.churnRiskLevel]}`}>
+                            {score.churnRiskLevel === "high" ? "High" : score.churnRiskLevel === "medium" ? "Med" : "Low"}
+                          </Badge>
+                          <p className="text-xs text-muted-foreground tabular-nums">{score.churnRiskScore}/100</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1 min-w-[60px]">
+                          <p className="text-sm font-medium tabular-nums">{score.renewalLikelihoodPct}%</p>
+                          <ScoreBar value={score.renewalLikelihoodPct} color="bg-blue-500" />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1 min-w-[60px]">
+                          <p className={`text-sm font-medium tabular-nums ${score.delinquencyProbabilityPct >= 60 ? "text-red-600" : score.delinquencyProbabilityPct >= 40 ? "text-amber-600" : ""}`}>
+                            {score.delinquencyProbabilityPct}%
+                          </p>
+                          <ScoreBar
+                            value={score.delinquencyProbabilityPct}
+                            color={score.delinquencyProbabilityPct >= 60 ? "bg-red-500" : score.delinquencyProbabilityPct >= 40 ? "bg-amber-500" : "bg-emerald-500"}
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium text-sm tabular-nums whitespace-nowrap">
+                        {formatCurrency(score.lifetimeValueEstimate)}
+                      </TableCell>
+                      <TableCell>
+                        {score.signals.daysUntilLeaseExpiry !== null ? (
+                          <span className={`text-sm ${score.signals.daysUntilLeaseExpiry <= 30 ? "text-red-600 font-medium" : score.signals.daysUntilLeaseExpiry <= 60 ? "text-amber-600" : "text-muted-foreground"}`}>
+                            {score.signals.daysUntilLeaseExpiry > 0 ? `${score.signals.daysUntilLeaseExpiry}d` : "Expired"}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`text-sm tabular-nums ${score.signals.latePaymentsLast12 > 0 ? "text-amber-600 font-medium" : "text-muted-foreground"}`}>
+                          {score.signals.latePaymentsLast12}
+                        </span>
+                      </TableCell>
+                      <TableCell>
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           {sentiment.icon}
                           {sentiment.label}
                         </div>
-                        {score.interventionSent && (
-                          <Badge variant="outline" className="text-xs">
-                            Offer Sent
-                          </Badge>
-                        )}
-                      </div>
-
-                      <div className="mt-2 grid grid-cols-3 gap-3">
-                        <div>
-                          <p className="text-[11px] text-muted-foreground mb-1">
-                            Churn Risk {score.churnRiskScore}/100
-                          </p>
-                          <ScoreBar
-                            value={score.churnRiskScore}
-                            color={
-                              score.churnRiskLevel === "high"
-                                ? "bg-red-500"
-                                : score.churnRiskLevel === "medium"
-                                ? "bg-amber-500"
-                                : "bg-emerald-500"
-                            }
-                          />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {score.interventionSent && (
+                            <Badge variant="outline" className="text-[10px] h-5">Sent</Badge>
+                          )}
+                          <Link href={`/dashboard/tenants/${score.tenantId}`}>
+                            <Button size="sm" variant="ghost" className="h-7 px-2 gap-0.5 text-xs">
+                              View <ChevronRight className="h-3 w-3" />
+                            </Button>
+                          </Link>
+                          {isManager && score.churnRiskLevel === "high" && !score.interventionSent && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2 gap-1 text-xs"
+                              disabled={sendingOffer === score.tenantId}
+                              onClick={() => handleQuickOffer(score.tenantId, score.tenantName)}
+                            >
+                              <Zap className="h-3 w-3 text-amber-500" />
+                              {sendingOffer === score.tenantId ? "…" : "Act"}
+                            </Button>
+                          )}
                         </div>
-                        <div>
-                          <p className="text-[11px] text-muted-foreground mb-1">
-                            Renewal {score.renewalLikelihoodPct}%
-                          </p>
-                          <ScoreBar value={score.renewalLikelihoodPct} color="bg-blue-500" />
-                        </div>
-                        <div>
-                          <p className="text-[11px] text-muted-foreground mb-1">
-                            LTV {formatCurrency(score.lifetimeValueEstimate)}
-                          </p>
-                          <ScoreBar
-                            value={(score.lifetimeValueEstimate / 60000) * 100}
-                            color="bg-violet-500"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-muted-foreground">
-                        {score.signals.latePaymentsLast12 > 0 && (
-                          <span className="text-amber-600">
-                            {score.signals.latePaymentsLast12} late payment{score.signals.latePaymentsLast12 > 1 ? "s" : ""}
-                          </span>
-                        )}
-                        {score.signals.daysUntilLeaseExpiry !== null && score.signals.daysUntilLeaseExpiry <= 90 && score.signals.daysUntilLeaseExpiry > 0 && (
-                          <span className="text-amber-600">
-                            Lease expires in {score.signals.daysUntilLeaseExpiry}d
-                          </span>
-                        )}
-                        <span>{score.signals.tenancyMonths} mo tenancy</span>
-                        {score.signals.monthlyRent > 0 && (
-                          <span>{formatCurrency(score.signals.monthlyRent)}/mo</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                      <Link href={`/dashboard/tenants/${score.tenantId}`}>
-                        <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs">
-                          View
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        </Button>
-                      </Link>
-                      {isManager && score.churnRiskLevel === "high" && !score.interventionSent && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 gap-1 text-xs"
-                          disabled={sendingOffer === score.tenantId}
-                          onClick={() => handleQuickOffer(score.tenantId, score.tenantName)}
-                        >
-                          <Zap className="h-3 w-3 text-amber-500" />
-                          {sendingOffer === score.tenantId ? "Sending…" : "Intervene"}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
       )}
     </div>
   );

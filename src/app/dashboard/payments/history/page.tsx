@@ -184,6 +184,9 @@ export default function PaymentHistoryPage() {
   });
   const [isSearching, setIsSearching] = useState(false);
 
+  // Credit builder state
+  const [creditBuilderOptIn, setCreditBuilderOptIn] = useState(false);
+
   // Modal state
   const [selectedPayment, setSelectedPayment] =
     useState<PaymentHistoryItem | null>(null);
@@ -207,6 +210,18 @@ export default function PaymentHistoryPage() {
       return;
     }
   }, [session, status, router, t]);
+
+  // Fetch credit builder status (for tenants only)
+  useEffect(() => {
+    if (session?.user?.role === UserRole.TENANT && session?.user?.id) {
+      fetch(`/api/tenant-intelligence/credit-builder?tenantId=${session.user.id}`)
+        .then((r) => r.json())
+        .then((j) => {
+          if (j.data?.creditBuilderOptIn) setCreditBuilderOptIn(true);
+        })
+        .catch(() => {});
+    }
+  }, [session?.user?.id, session?.user?.role]);
 
   // Fetch payment history
   useEffect(() => {
@@ -907,7 +922,18 @@ export default function PaymentHistoryPage() {
                           {formatCurrency(payment.amount)}
                         </span>
                       </TableCell>
-                      <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {getStatusBadge(payment.status)}
+                          {creditBuilderOptIn &&
+                            payment.status === PaymentStatus.COMPLETED &&
+                            payment.type === PaymentType.RENT && (
+                              <Badge className="text-[10px] px-1.5 py-0 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800">
+                                Reported
+                              </Badge>
+                            )}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <span
                           className={`${

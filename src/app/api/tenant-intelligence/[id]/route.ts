@@ -107,3 +107,52 @@ export async function GET(
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
+/**
+ * POST /api/tenant-intelligence/[id]
+ * Force-recompute and persist tenant intelligence scores (admin/manager only).
+ */
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: tenantId } = await params;
+    if (!mongoose.Types.ObjectId.isValid(tenantId)) {
+      return NextResponse.json({ error: "Invalid tenant id" }, { status: 400 });
+    }
+
+    const session = await auth();
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const role = (session.user as { role?: string }).role;
+    if (!role || !["admin", "manager"].includes(role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    await connectDB();
+
+    const User = (await import("@/models/User")).default;
+    const tenant = await User.findOne({
+      _id: tenantId,
+      role: UserRole.TENANT,
+      deletedAt: null,
+    })
+      .select("firstName lastName moveInDate")
+      .lean();
+
+    if (!tenant) {
+      return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
+    }
+
+    const result = await computeAndPersistScores({
+      tenantId,
+      tenantName: `${(tenant as unknown as { firstName?: string }).firstName || ""} ${(tenant as unknown as { lastName?: string }).lastName || ""}`.trim(),
+      moveInDate: (tenant as unknown as { moveInDate?: Date }).moveInDate,
+    });
+
+    return NextResponse.json({ data: result, recomputed: true });
+  } catch (err) {
+    console.error("[TenantIntelligence POST]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}

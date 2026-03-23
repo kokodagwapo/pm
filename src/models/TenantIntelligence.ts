@@ -27,6 +27,8 @@ export interface ITenantIntelligence {
   lastCalculatedAt: Date;
   interventionSent: boolean;
   interventionSentAt: Date | null;
+  lastDelinquencyWarnAt: Date | null;
+  lastLeaseExpiryAlertAt: Date | null;
   creditBuilderOptIn: boolean;
   creditBuilderEnrolledAt: Date | null;
   paymentSparkline: number[];
@@ -77,6 +79,8 @@ const TenantIntelligenceSchema = new Schema<ITenantIntelligence>(
     lastCalculatedAt: { type: Date, default: Date.now },
     interventionSent: { type: Boolean, default: false },
     interventionSentAt: { type: Date, default: null },
+    lastDelinquencyWarnAt: { type: Date, default: null },
+    lastLeaseExpiryAlertAt: { type: Date, default: null },
     creditBuilderOptIn: { type: Boolean, default: false },
     creditBuilderEnrolledAt: { type: Date, default: null },
     paymentSparkline: { type: [Number], default: [] },
