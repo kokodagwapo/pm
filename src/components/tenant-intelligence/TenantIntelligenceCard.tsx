@@ -397,7 +397,7 @@ export function TenantIntelligenceCard({
                 size="sm"
                 variant="outline"
                 className="flex items-center gap-1.5 text-xs h-7"
-                onClick={() => router.push(`/dashboard/conversations?tenantId=${tenantId}`)}
+                onClick={() => router.push(`/dashboard/messages?tenantId=${tenantId}`)}
               >
                 <Phone className="h-3.5 w-3.5 text-blue-500" />
                 Schedule Call

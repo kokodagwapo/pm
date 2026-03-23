@@ -163,7 +163,6 @@ export async function POST(req: NextRequest) {
           .select("churnRiskLevel churnRiskScore delinquencyProbabilityPct interventionSent lastDelinquencyWarnAt lastLeaseExpiryAlertAt signals")
           .lean();
 
-        const prevChurnLevel = prevRecord?.churnRiskLevel ?? "low";
         const prevInterventionSent = prevRecord?.interventionSent ?? false;
         const lastDelinquencyWarnAt = prevRecord?.lastDelinquencyWarnAt
           ? new Date(prevRecord.lastDelinquencyWarnAt)
@@ -305,8 +304,10 @@ export async function POST(req: NextRequest) {
         }
 
         // Churn escalation: first-time crossing from non-high → high risk
+        // Use configurable churnHighThreshold so manager settings actually govern when intervention fires
+        const prevChurnHighRisk = (prevRecord?.churnRiskScore ?? 0) >= thresholds.churnHighThreshold;
         const churnEscalated =
-          score.churnRiskLevel === "high" && prevChurnLevel !== "high" && !prevInterventionSent;
+          score.churnRiskScore >= thresholds.churnHighThreshold && !prevChurnHighRisk && !prevInterventionSent;
 
         if (churnEscalated) {
           try {
