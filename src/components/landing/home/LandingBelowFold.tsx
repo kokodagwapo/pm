@@ -240,13 +240,13 @@ export function LandingCapabilities() {
                   key={slug}
                   className={cn(
                     glassCard(dark),
-                    "rounded-2xl p-5 transition-colors sm:p-6",
+                    "rounded-2xl p-5 transition-colors sm:p-6 overflow-hidden min-w-0",
                     dark ? "hover:border-white/25 hover:bg-white/[0.08]" : "hover:border-slate-200 hover:bg-slate-50/80"
                   )}
                 >
                   <div
                     className={cn(
-                      "mb-4 flex h-10 w-10 items-center justify-center rounded-xl",
+                      "mb-4 flex h-10 w-10 items-center justify-center rounded-xl shrink-0",
                       dark ? pastel.dark : pastel.light
                     )}
                   >
@@ -254,7 +254,7 @@ export function LandingCapabilities() {
                   </div>
                   <h3
                     className={cn(
-                      "mb-2 font-[var(--font-playfair)] text-lg font-normal tracking-tight",
+                      "mb-2 font-[var(--font-playfair)] text-lg font-normal tracking-tight break-words",
                       dark ? "text-white" : "text-slate-900"
                     )}
                   >
@@ -262,7 +262,7 @@ export function LandingCapabilities() {
                   </h3>
                   <p
                     className={cn(
-                      "font-[var(--font-jakarta)] text-[15px] font-normal leading-relaxed",
+                      "font-[var(--font-jakarta)] text-[15px] font-normal leading-relaxed break-words",
                       dark ? "text-white/65" : "text-slate-600"
                     )}
                   >
@@ -324,7 +324,7 @@ export function LandingWhySwitch() {
             <div
               className={cn(
                 glassCard(dark),
-                "rounded-2xl p-6 sm:p-8",
+                "rounded-2xl p-6 sm:p-8 overflow-hidden min-w-0",
                 dark ? "border-white/12 bg-black/30" : "border-slate-200/80 bg-white/55"
               )}
             >
@@ -336,12 +336,12 @@ export function LandingWhySwitch() {
               >
                 {t("landing.home.why.colLegacy")}
               </p>
-              <ul className="space-y-3.5">
+              <ul className="space-y-3.5 min-w-0">
                 {PAIN_KEYS.map((k) => (
                   <li
                     key={k}
                     className={cn(
-                      "flex gap-3 border-l-2 pl-4 text-[15px] font-normal leading-relaxed",
+                      "flex gap-3 border-l-2 pl-4 text-[15px] font-normal leading-relaxed break-words min-w-0",
                       dark
                         ? "border-white/10 text-white/70"
                         : "border-slate-200 text-slate-600"
@@ -355,24 +355,24 @@ export function LandingWhySwitch() {
             <div
               className={cn(
                 glassCard(dark),
-                "rounded-2xl p-6 sm:p-8",
+                "rounded-2xl p-6 sm:p-8 overflow-hidden min-w-0",
                 dark ? "border-emerald-400/25 bg-emerald-950/30" : "border-emerald-200/70 bg-emerald-50/50"
               )}
             >
               <p
                 className={cn(
-                  "mb-4 text-xs font-semibold uppercase tracking-wider",
+                  "mb-4 text-xs font-semibold uppercase tracking-wider break-words",
                   dark ? "text-emerald-200/70" : "text-emerald-800/80"
                 )}
               >
                 {t("landing.home.why.colUs")}
               </p>
-              <ul className="space-y-3.5">
+              <ul className="space-y-3.5 min-w-0">
                 {ANSWER_KEYS.map((k) => (
                   <li
                     key={k}
                     className={cn(
-                      "flex gap-3 text-[15px] font-normal leading-relaxed",
+                      "flex gap-3 text-[15px] font-normal leading-relaxed break-words min-w-0",
                       dark ? "text-white/85" : "text-slate-800"
                     )}
                   >
@@ -570,13 +570,13 @@ export function LandingIntegrationsVisual() {
                       key={labelKey}
                       className={cn(
                         glassCard(dark),
-                        "flex items-center gap-3 rounded-xl px-3 py-3 transition-colors sm:px-4",
+                        "flex items-center gap-3 rounded-xl px-3 py-3 transition-colors sm:px-4 overflow-hidden min-w-0",
                         dark ? "hover:border-white/25 hover:bg-white/[0.1]" : "hover:border-slate-200 hover:bg-slate-50/90"
                       )}
                     >
                       <div
                         className={cn(
-                          "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
+                          "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shrink-0",
                           dark ? pastel.dark : pastel.light
                         )}
                       >
@@ -584,7 +584,7 @@ export function LandingIntegrationsVisual() {
                       </div>
                       <span
                         className={cn(
-                          "text-left text-sm font-normal leading-snug",
+                          "text-left text-sm font-normal leading-snug break-words min-w-0",
                           dark ? "text-white/80" : "text-slate-700"
                         )}
                       >
@@ -663,13 +663,13 @@ export function LandingRolesGrid() {
                 key={key}
                 className={cn(
                   glassCard(dark),
-                  "group rounded-2xl p-5 transition-colors sm:p-6",
+                  "group rounded-2xl p-5 transition-colors sm:p-6 overflow-hidden min-w-0",
                   dark ? "hover:border-white/25 hover:bg-white/[0.12]" : "hover:border-slate-200 hover:bg-white"
                 )}
               >
                 <div
                   className={cn(
-                    "mb-4 flex h-10 w-10 items-center justify-center rounded-xl transition-colors",
+                    "mb-4 flex h-10 w-10 items-center justify-center rounded-xl transition-colors shrink-0",
                     dark ? pastel.dark : pastel.light
                   )}
                 >
@@ -677,7 +677,7 @@ export function LandingRolesGrid() {
                 </div>
                 <h3
                   className={cn(
-                    "mb-2 font-[var(--font-playfair)] text-base font-normal tracking-tight",
+                    "mb-2 font-[var(--font-playfair)] text-base font-normal tracking-tight break-words",
                     dark ? "text-white" : "text-slate-900"
                   )}
                 >
@@ -685,7 +685,7 @@ export function LandingRolesGrid() {
                 </h3>
                 <p
                   className={cn(
-                    "font-[var(--font-jakarta)] text-[15px] font-normal leading-relaxed",
+                    "font-[var(--font-jakarta)] text-[15px] font-normal leading-relaxed break-words",
                     dark ? "text-white/65" : "text-slate-600"
                   )}
                 >
@@ -888,7 +888,7 @@ export function LandingMigrationComfort() {
                 key={k}
                 className={cn(
                   glassCard(dark),
-                  "rounded-xl px-4 py-4 text-[15px] font-normal leading-relaxed",
+                  "rounded-xl px-4 py-4 text-[15px] font-normal leading-relaxed overflow-hidden min-w-0 break-words",
                   dark ? "text-white/80" : "text-slate-800"
                 )}
               >
@@ -923,7 +923,7 @@ export function LandingFinalCta() {
           <div
             className={cn(
               glassCard(dark),
-              "mx-auto rounded-3xl px-6 py-10 sm:px-10 sm:py-12",
+              "mx-auto rounded-3xl px-6 py-10 sm:px-10 sm:py-12 overflow-hidden min-w-0",
               dark ? "border-white/12 bg-white/[0.05]" : "border-slate-200/80 bg-white"
             )}
           >

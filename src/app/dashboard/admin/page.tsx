@@ -347,16 +347,16 @@ export default function AdminPage() {
       )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <Card className="gap-2">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+        <Card className="gap-2 overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 min-w-0">
+            <CardTitle className="text-sm font-medium break-words min-w-0">
               {t("admin.stats.totalUsers")}
             </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-muted-foreground shrink-0" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="min-w-0">
             {renderStatValue(formatNumber(systemStats?.totalUsers))}
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground break-words">
               {systemStats ? (
                 t("admin.stats.totalUsersActive", {
                   values: {
@@ -370,16 +370,16 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        <Card className="gap-2">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+        <Card className="gap-2 overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 min-w-0">
+            <CardTitle className="text-sm font-medium break-words min-w-0">
               {t("admin.stats.properties")}
             </CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="min-w-0">
             {renderStatValue(formatNumber(systemStats?.totalProperties))}
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground break-words">
               {systemStats ? (
                 t("admin.stats.propertiesActive", {
                   values: {
@@ -393,17 +393,17 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        <Card className="gap-2">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+        <Card className="gap-2 overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 min-w-0">
+            <CardTitle className="text-sm font-medium break-words min-w-0">
               {t("admin.stats.totalRevenue")}
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="min-w-0">
             {renderStatValue(formatCurrency(systemStats?.totalRevenue ?? 0))}
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" />
+            <p className="text-xs text-muted-foreground flex items-center gap-1 break-words">
+              <TrendingUp className="h-3 w-3 shrink-0" />
               {t("admin.stats.last30Days", {
                 values: {
                   amount: systemStats
@@ -415,18 +415,18 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        <Card className="gap-2">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+        <Card className="gap-2 overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 min-w-0">
+            <CardTitle className="text-sm font-medium break-words min-w-0">
               {t("admin.stats.systemHealth")}
             </CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <Activity className="h-4 w-4 text-muted-foreground shrink-0" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="min-w-0">
             {renderStatValue(
               systemStatus ? `${systemStatus.score}%` : undefined
             )}
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground break-words">
               {systemStatus ? (
                 healthStatusCopy[systemStatus.status]
               ) : (
@@ -436,16 +436,16 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        <Card className="gap-2">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+        <Card className="gap-2 overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 min-w-0">
+            <CardTitle className="text-sm font-medium break-words min-w-0">
               {t("admin.stats.activeSessions")}
             </CardTitle>
-            <Server className="h-4 w-4 text-muted-foreground" />
+            <Server className="h-4 w-4 text-muted-foreground shrink-0" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="min-w-0">
             {renderStatValue(formatNumber(systemStats?.activeSessions))}
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground break-words">
               {systemStats ? (
                 t("admin.stats.last24Hours")
               ) : (
@@ -455,14 +455,14 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        <Card className="gap-2">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+        <Card className="gap-2 overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 min-w-0">
+            <CardTitle className="text-sm font-medium break-words min-w-0">
               {t("admin.stats.database")}
             </CardTitle>
-            <Database className="h-4 w-4 text-muted-foreground" />
+            <Database className="h-4 w-4 text-muted-foreground shrink-0" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="min-w-0">
             {databaseStatus ? (
               <div
                 className={`text-2xl font-bold ${
@@ -482,7 +482,7 @@ export default function AdminPage() {
             ) : (
               <Skeleton className="h-7 w-16" />
             )}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground break-words">
               {databaseStatus ? (
                 databaseStatus.label
               ) : (
