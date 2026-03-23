@@ -1068,24 +1068,24 @@ export function EnhancedPropertyForm({
               return (
                 <div
                   key={item}
-                  className={`group relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md ${
+                  className={`group relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md min-h-[100px] flex flex-col justify-between ${
                     selectedAmenities.includes(item)
                       ? "border-blue-500 bg-blue-50 text-blue-700 shadow-blue-100 dark:bg-blue-950/30 dark:border-blue-400 dark:text-blue-300"
                       : "border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/50 dark:border-gray-700 dark:bg-gray-800/50 dark:hover:border-blue-600 dark:hover:bg-blue-950/20"
                   }`}
                   onClick={() => handleAmenityToggle(item)}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-start gap-2">
                     <Checkbox
                       checked={selectedAmenities.includes(item)}
                       onChange={() => {}} // Handled by parent click
-                      className={`pointer-events-none transition-colors ${
+                      className={`pointer-events-none transition-colors shrink-0 mt-0.5 ${
                         selectedAmenities.includes(item)
                           ? "data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                           : ""
                       }`}
                     />
-                    <span className="flex-1 font-medium text-sm leading-tight">
+                    <span className="flex-1 font-medium text-sm leading-snug line-clamp-3">
                       {t(labelKey)}
                     </span>
                   </div>

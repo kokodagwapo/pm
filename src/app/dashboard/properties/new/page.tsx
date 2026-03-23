@@ -92,21 +92,21 @@ export default function EnhancedNewPropertyPage() {
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <Building2 className="h-8 w-8" />
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="space-y-2 min-w-0 flex-1">
+          <div className="flex items-center gap-3">
+            <Building2 className="h-8 w-8 shrink-0" />
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight break-words">
               {t("properties.newProperty.title")}
             </h1>
-            <p className="text-muted-foreground">
-              {t("properties.newProperty.subtitle")}
-            </p>
           </div>
+          <p className="text-muted-foreground text-sm md:text-base">
+            {t("properties.newProperty.subtitle")}
+          </p>
         </div>
-        <div className="flex items-center gap-2 border rounded-lg">
+        <div className="flex items-center gap-2 border rounded-lg shrink-0">
           <Link href="/dashboard/properties">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="whitespace-nowrap">
               <ArrowLeft className="h-4 w-4 mr-2" />
               {t("properties.newProperty.backToList")}
             </Button>
