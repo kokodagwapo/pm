@@ -42,6 +42,7 @@ import {
   Send,
   ListChecks,
   Inbox,
+  Cpu,
 } from "lucide-react";
 import { UserRole } from "@/types";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
@@ -225,6 +226,22 @@ const navigationSections: NavSection[] = [
           { title: "nav.analytics.financial", href: "/dashboard/analytics/financial", icon: DollarSign, iconColor: "text-purple-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
           { title: "nav.analytics.occupancy", href: "/dashboard/analytics/occupancy", icon: Building2, iconColor: "text-purple-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
           { title: "nav.analytics.maintenance", href: "/dashboard/analytics/maintenance", icon: Wrench, iconColor: "text-purple-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+        ],
+      },
+    ],
+  },
+  {
+    title: "nav.section.automation",
+    items: [
+      {
+        title: "nav.automation",
+        href: "/dashboard/automation",
+        icon: Cpu,
+        iconColor: "text-rose-200",
+        roles: [UserRole.ADMIN, UserRole.MANAGER],
+        children: [
+          { title: "nav.automation.hub", href: "/dashboard/automation", icon: Cpu, iconColor: "text-rose-200", roles: [UserRole.ADMIN, UserRole.MANAGER] },
+          { title: "nav.automation.luna", href: "/dashboard/automation/luna", icon: Bot, iconColor: "text-rose-200", roles: [UserRole.ADMIN, UserRole.MANAGER] },
         ],
       },
     ],

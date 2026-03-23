@@ -50,6 +50,17 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Scripts**: `npm run docker:up`, `docker:down`, `docker:logs` for container management
 - **Production Docker**: `docker compose up` uses the full `docker-compose.yml` with Dockerfile to build and run app + MongoDB together
 
+## Luna Autonomous Operations Agent (Task #6)
+- **Model**: `src/models/LunaAutonomousAction.ts` — MongoDB model logging every action Luna evaluates or takes
+- **Service**: `src/lib/services/luna-autonomous.service.ts` — trigger engine with decision runtime; configurable autonomy mode (full/supervised/off), confidence threshold, per-category enable/disable, human review threshold, max actions/hour
+- **API routes**: `src/app/api/luna/actions/route.ts` (GET log + stats, POST review/demo trigger), `src/app/api/luna/settings/route.ts` (GET/PUT autonomy config)
+- **Pages**: `/dashboard/automation` (hub overview), `/dashboard/automation/luna` (Luna dashboard — action log, review queue, settings)
+- **Component**: `src/components/automation/LunaAutonomousDashboard.tsx` — full-featured client dashboard with action log, pending review queue, settings panel with sliders
+- **UI**: New `src/components/ui/slider.tsx` (native range input, no extra package required)
+- **Sidebar**: New "Automation" section (admin/manager only) with Overview + Luna Agent links
+- **Capabilities**: Payment overdue → auto-send reminder/escalation; Maintenance submitted → auto-triage/emergency escalation; Lease expiry → auto-renewal notices; System digest → daily portfolio summary email
+- **Autonomy modes**: `full` (acts without confirmation), `supervised` (high-confidence auto, low-confidence → human review queue), `off` (log only)
+
 ## Stack
 - **Framework**: Next.js 15.5.12 (App Router)
 - **Language**: TypeScript

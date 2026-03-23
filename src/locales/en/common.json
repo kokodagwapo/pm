@@ -31,10 +31,15 @@
   "nav.section.operations": "Operations",
   "nav.section.financial": "Financial",
   "nav.section.analytics": "Analytics",
+  "nav.section.automation": "Automation",
   "nav.section.communication": "Communication",
   "nav.section.events": "Schedule",
   "nav.section.settings": "Settings",
   "nav.section.administration": "Administration",
+
+  "nav.automation": "Automation",
+  "nav.automation.hub": "Overview",
+  "nav.automation.luna": "Luna Agent",
 
   "nav.properties": "Properties",
   "nav.properties.all": "All Properties",
