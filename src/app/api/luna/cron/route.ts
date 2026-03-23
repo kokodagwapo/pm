@@ -74,7 +74,7 @@ async function runTriggerCycle() {
     status: PaymentStatus.OVERDUE,
     deletedAt: null,
   })
-    .populate("tenantId", "email firstName lastName")
+    .populate("tenantId", "email firstName lastName preferredLocale")
     .populate("propertyId", "name address")
     .sort({ dueDate: 1 })
     .limit(20)
@@ -102,7 +102,7 @@ async function runTriggerCycle() {
         propertyName: property?.name || property?.address || "Property",
         amount: Number(payment.amount) || 0,
         daysOverdue,
-        tenantLocale: "en",
+        tenantLocale: tenant.preferredLocale || "en",
       },
     });
     results.overduePayments++;
@@ -113,7 +113,7 @@ async function runTriggerCycle() {
     status: LeaseStatus.ACTIVE,
     endDate: { $lte: leaseExpiryThreshold, $gte: now },
   })
-    .populate("tenantId", "email firstName lastName")
+    .populate("tenantId", "email firstName lastName preferredLocale")
     .populate("propertyId", "name address")
     .sort({ endDate: 1 })
     .limit(20)
@@ -140,7 +140,7 @@ async function runTriggerCycle() {
         propertyName: property?.name || property?.address || "Property",
         expiryDate: new Date(lease.endDate),
         daysUntilExpiry,
-        tenantLocale: "en",
+        tenantLocale: tenant.preferredLocale || "en",
         tenantResponse: null,
       },
     });
@@ -157,7 +157,7 @@ async function runTriggerCycle() {
     createdAt: { $lte: unassignedCutoff },
     deletedAt: null,
   })
-    .populate("tenantId", "email firstName lastName")
+    .populate("tenantId", "email firstName lastName preferredLocale")
     .populate("propertyId", "name address")
     .limit(10)
     .lean();
@@ -187,7 +187,7 @@ async function runTriggerCycle() {
         hoursUnassigned,
         isEmergency: false,
         estimatedCost: typeof mReq.estimatedCost === "number" ? mReq.estimatedCost : undefined,
-        tenantLocale: "en",
+        tenantLocale: tenant.preferredLocale || "en",
       },
     });
     results.unassignedMaintenance++;
@@ -201,7 +201,7 @@ async function runTriggerCycle() {
     createdAt: { $gte: new Date(now.getTime() - 2 * 60 * 60 * 1000) },
     deletedAt: null,
   })
-    .populate("tenantId", "email firstName lastName")
+    .populate("tenantId", "email firstName lastName preferredLocale")
     .populate("propertyId", "name address")
     .limit(5)
     .lean();
@@ -231,7 +231,7 @@ async function runTriggerCycle() {
         hoursUnassigned,
         isEmergency: true,
         estimatedCost: typeof eReq.estimatedCost === "number" ? eReq.estimatedCost : undefined,
-        tenantLocale: "en",
+        tenantLocale: tenant.preferredLocale || "en",
       },
     });
     results.emergencyMaintenance++;
@@ -385,24 +385,27 @@ async function runTriggerCycle() {
           .lean();
 
         if (managers.length > 0) {
-          const primary = managers[0];
-          await lunaAutonomousService.generateSystemDigest({
-            entityType: "system",
-            data: {
-              propertyCount,
-              activeLeaseCount,
-              overduePaymentCount,
-              overduePaymentTotal,
-              openMaintenanceCount,
-              emergencyMaintenanceCount,
-              expiringLeasesCount,
-              actionsExecutedToday,
-              managerEmail: primary.email,
-              managerName:
-                `${primary.firstName || ""} ${primary.lastName || ""}`.trim(),
-              managerId: String(primary._id),
-            },
-          });
+          await Promise.all(
+            managers.map((mgr) =>
+              lunaAutonomousService.generateSystemDigest({
+                entityType: "system",
+                data: {
+                  propertyCount,
+                  activeLeaseCount,
+                  overduePaymentCount,
+                  overduePaymentTotal,
+                  openMaintenanceCount,
+                  emergencyMaintenanceCount,
+                  expiringLeasesCount,
+                  actionsExecutedToday,
+                  managerEmail: mgr.email,
+                  managerName:
+                    `${mgr.firstName || ""} ${mgr.lastName || ""}`.trim(),
+                  managerId: String(mgr._id),
+                },
+              })
+            )
+          );
         }
       }
     } catch (digestErr) {

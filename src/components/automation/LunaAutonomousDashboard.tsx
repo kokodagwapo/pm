@@ -599,9 +599,9 @@ export default function LunaAutonomousDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {(stats.successRate * 100).toFixed(1)}%
+              {stats.successRate.toFixed(1)}%
             </div>
-            <Progress value={stats.successRate * 100} className="mt-2 h-1" />
+            <Progress value={stats.successRate} className="mt-2 h-1" />
           </CardContent>
         </Card>
       </div>

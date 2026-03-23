@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { UserRole } from "@/types";
 import connectDB from "@/lib/mongodb";
 import LunaAutonomousAction from "@/models/LunaAutonomousAction";
+import MaintenanceRequest from "@/models/MaintenanceRequest";
+import Vendor from "@/models/Vendor";
 import { lunaAutonomousService } from "@/lib/services/luna-autonomous.service";
 import {
   notificationService,
@@ -325,7 +327,45 @@ async function executeApprovedAction(action: {
     case "maintenance_escalation": {
       const tenantEmail = meta.tenantEmail as string | undefined;
       const userId = action.affectedUserId;
+      const requestId = (meta.requestId as string) || (action.triggerEntityId as string);
       if (!tenantEmail || !userId) break;
+
+      // Attempt vendor selection and work-order dispatch
+      let vendorNote = "";
+      if (requestId && requestId !== "demo_maint_001") {
+        try {
+          const category = (meta.category as string) || "General";
+          const vendor = await Vendor.findOne({
+            isApproved: true,
+            $or: [
+              { categories: { $regex: new RegExp(category, "i") } },
+              { categories: { $elemMatch: { $regex: new RegExp(category, "i") } } },
+            ],
+          })
+            .sort({ rating: -1, activeWorkOrders: 1 })
+            .lean();
+
+          if (vendor) {
+            await Promise.all([
+              MaintenanceRequest.findByIdAndUpdate(requestId, {
+                assignedTo: vendor._id,
+                status: "in_progress",
+                vendorId: vendor._id,
+                vendorName: vendor.name,
+                dispatchedAt: new Date(),
+              }),
+              Vendor.findByIdAndUpdate(vendor._id, { $inc: { activeWorkOrders: 1 } }),
+            ]);
+            vendorNote = ` Vendor ${vendor.name} has been dispatched (ETA ~${vendor.responseTimeHours}h).`;
+          } else {
+            await MaintenanceRequest.findByIdAndUpdate(requestId, {
+              status: "in_progress",
+            });
+          }
+        } catch (dispatchErr) {
+          console.error("[Luna executeApprovedAction] Vendor dispatch error:", dispatchErr);
+        }
+      }
 
       await notificationService.sendNotification({
         type: NotificationType.MAINTENANCE_UPDATE,
@@ -338,11 +378,11 @@ async function executeApprovedAction(action: {
           action.category === "maintenance_escalation"
             ? `EMERGENCY: ${meta.category || "Maintenance"} at ${meta.propertyName}`
             : `Maintenance Update — ${meta.propertyName}`,
-        message: `${meta.description || "Your maintenance request has been reviewed."}\n\n—\nSent by SmartStart AI. To speak with a person, reply to this message or contact your property manager directly.`,
+        message: `Your maintenance request has been reviewed and is now in progress.${vendorNote}\n\n—\nSent by SmartStart AI. To speak with a person, contact your property manager directly.`,
         data: {
           userEmail: tenantEmail,
           userName: meta.tenantName || "Tenant",
-          requestId: (meta.requestId as string) || (action.triggerEntityId as string) || "N/A",
+          requestId: requestId || "N/A",
           propertyName: meta.propertyName,
           status:
             action.category === "maintenance_escalation"
