@@ -28,6 +28,46 @@ export interface TenantScoreResult {
   paymentSparkline: number[];
 }
 
+/**
+ * LLM-based sentiment classification with keyword fallback.
+ * Returns score in the same scale as keyword method: positive > 0, negative < 0.
+ */
+async function classifySentimentWithFallback(
+  messages: string[]
+): Promise<{ score: number; method: "llm" | "keyword"; totalMessages: number }> {
+  const totalMessages = messages.length;
+  if (totalMessages === 0) return { score: 0, method: "keyword", totalMessages: 0 };
+
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (openaiKey && messages.length > 0) {
+    try {
+      const sample = messages.slice(0, 10).join("\n---\n").slice(0, 2000);
+      const { default: OpenAI } = await import("openai");
+      const client = new OpenAI({ apiKey: openaiKey });
+      const response = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        max_tokens: 20,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a property management sentiment analyzer. Given tenant messages, respond with exactly one word: positive, neutral, or negative. Nothing else.",
+          },
+          { role: "user", content: `Tenant messages:\n${sample}` },
+        ],
+      });
+      const label = (response.choices[0]?.message?.content ?? "").trim().toLowerCase();
+      const score = label === "positive" ? 3 : label === "negative" ? -3 : 0;
+      return { score, method: "llm", totalMessages };
+    } catch {
+      // Fall through to keyword
+    }
+  }
+
+  const { score } = analyzeMessageSentiment(messages);
+  return { score, method: "keyword", totalMessages };
+}
+
 function clamp(v: number, min = 0, max = 100) {
   return Math.max(min, Math.min(max, Math.round(v)));
 }
@@ -145,34 +185,64 @@ export async function computeTenantScores(
         })
           .select("_id")
           .lean();
-        if (convs.length === 0) return { content: [], totalConversations: 0, repliedConversations: 0 };
+        if (convs.length === 0) return { content: [], totalConversations: 0, repliedConversations: 0, avgReplyLatencyMinutes: 0 };
         const convIds = convs.map((c) => (c as unknown as { _id: mongoose.Types.ObjectId })._id);
         const msgs = await Message.find({
           conversationId: { $in: convIds },
           deletedAt: null,
           createdAt: { $gte: threeMonthsAgo },
         })
-          .select("content senderId conversationId")
+          .select("content senderId conversationId createdAt")
+          .sort({ conversationId: 1, createdAt: 1 })
           .lean();
 
         const repliedConvSet = new Set<string>();
         const tenantContent: string[] = [];
 
+        // Track messages per conversation for reply latency computation
+        type MsgEntry = { senderId: string; createdAt: Date };
+        const convMsgs = new Map<string, MsgEntry[]>();
+
+        const tenantIdStr = tenantObjId.toString();
         for (const m of msgs) {
-          const mm = m as unknown as { senderId: mongoose.Types.ObjectId; content?: string; conversationId: mongoose.Types.ObjectId };
-          if (mm.senderId.toString() === tenantObjId.toString()) {
-            repliedConvSet.add(mm.conversationId.toString());
+          const mm = m as unknown as {
+            senderId: mongoose.Types.ObjectId;
+            content?: string;
+            conversationId: mongoose.Types.ObjectId;
+            createdAt: Date;
+          };
+          const senderStr = mm.senderId.toString();
+          const convStr = mm.conversationId.toString();
+          if (!convMsgs.has(convStr)) convMsgs.set(convStr, []);
+          convMsgs.get(convStr)!.push({ senderId: senderStr, createdAt: new Date(mm.createdAt) });
+          if (senderStr === tenantIdStr) {
+            repliedConvSet.add(convStr);
             tenantContent.push(mm.content || "");
           }
         }
+
+        // Compute average reply latency: time from non-tenant message to tenant reply
+        const latenciesMs: number[] = [];
+        for (const [, msgList] of convMsgs) {
+          for (let i = 0; i < msgList.length - 1; i++) {
+            if (msgList[i].senderId !== tenantIdStr && msgList[i + 1].senderId === tenantIdStr) {
+              latenciesMs.push(msgList[i + 1].createdAt.getTime() - msgList[i].createdAt.getTime());
+            }
+          }
+        }
+        const avgReplyLatencyMinutes =
+          latenciesMs.length > 0
+            ? Math.round(latenciesMs.reduce((a, b) => a + b, 0) / latenciesMs.length / 60000)
+            : 0;
 
         return {
           content: tenantContent,
           totalConversations: convs.length,
           repliedConversations: repliedConvSet.size,
+          avgReplyLatencyMinutes,
         };
       } catch {
-        return { content: [], totalConversations: 0, repliedConversations: 0 };
+        return { content: [], totalConversations: 0, repliedConversations: 0, avgReplyLatencyMinutes: 0 };
       }
     })(),
   ]);
@@ -232,8 +302,14 @@ export async function computeTenantScores(
     return allOnTime ? 1 : -1;
   });
 
-  const msgData = recentMessages as { content: string[]; totalConversations: number; repliedConversations: number };
-  const sentimentAnalysis = analyzeMessageSentiment(msgData.content);
+  const msgData = recentMessages as {
+    content: string[];
+    totalConversations: number;
+    repliedConversations: number;
+    avgReplyLatencyMinutes: number;
+  };
+  // Use LLM sentiment classification with keyword fallback
+  const sentimentAnalysis = await classifySentimentWithFallback(msgData.content);
   const conversationResponseRatePct =
     msgData.totalConversations > 0
       ? Math.min(100, Math.round((msgData.repliedConversations / msgData.totalConversations) * 100))
@@ -269,11 +345,13 @@ export async function computeTenantScores(
     maintenanceRequestsLast6Months,
     avgMaintenanceResponseDays: 0,
     conversationResponseRatePercent: conversationResponseRatePct,
+    avgReplyLatencyMinutes: msgData.avgReplyLatencyMinutes,
     daysUntilLeaseExpiry,
     leaseRenewals,
     tenancyMonths,
     monthlyRent,
     sentimentScore: sentimentAnalysis.score,
+    sentimentMethod: sentimentAnalysis.method,
   };
 
   const explanation: string[] = [];
@@ -339,6 +417,18 @@ export async function computeTenantScores(
     );
   }
 
+  // Reply latency signal: slow responses (>8h avg) indicate lower engagement
+  const avgLatency = msgData.avgReplyLatencyMinutes;
+  if (avgLatency > 480) {
+    churnRisk += 5;
+    explanation.push(
+      `Average tenant reply time is ${avgLatency >= 1440 ? Math.round(avgLatency / 1440) + " day(s)" : Math.round(avgLatency / 60) + "h"} — slow response pattern detected.`
+    );
+  } else if (avgLatency > 0 && avgLatency <= 60) {
+    churnRisk -= 3;
+    explanation.push("Tenant responds quickly to messages, indicating high engagement.");
+  }
+
   churnRisk = clamp(churnRisk);
 
   const churnRiskLevel: "low" | "medium" | "high" =
@@ -372,10 +462,11 @@ export async function computeTenantScores(
       ? "positive"
       : "neutral";
 
+  const sentimentSource = sentimentAnalysis.method === "llm" ? "AI sentiment analysis" : "message keyword analysis";
   if (sentimentSignal === "positive") {
-    explanation.push("Sentiment signal is positive based on message analysis, long tenancy, or renewal history.");
+    explanation.push(`Sentiment signal is positive based on ${sentimentSource}, long tenancy, or renewal history.`);
   } else if (sentimentSignal === "negative") {
-    explanation.push("Sentiment signal is negative — message content or behavioral signals indicate dissatisfaction.");
+    explanation.push(`Sentiment signal is negative — ${sentimentSource} or behavioral signals indicate dissatisfaction.`);
   }
 
   if (explanation.length === 0) {

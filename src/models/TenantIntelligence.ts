@@ -7,11 +7,13 @@ export interface ITenantIntelligenceSignals {
   maintenanceRequestsLast6Months: number;
   avgMaintenanceResponseDays: number;
   conversationResponseRatePercent: number;
+  avgReplyLatencyMinutes: number;
   daysUntilLeaseExpiry: number | null;
   leaseRenewals: number;
   tenancyMonths: number;
   monthlyRent: number;
   sentimentScore: number;
+  sentimentMethod: "llm" | "keyword";
 }
 
 export interface ITenantIntelligence {
@@ -42,11 +44,13 @@ const SignalsSchema = new Schema<ITenantIntelligenceSignals>(
     maintenanceRequestsLast6Months: { type: Number, default: 0 },
     avgMaintenanceResponseDays: { type: Number, default: 0 },
     conversationResponseRatePercent: { type: Number, default: 100 },
+    avgReplyLatencyMinutes: { type: Number, default: 0 },
     daysUntilLeaseExpiry: { type: Number, default: null },
     leaseRenewals: { type: Number, default: 0 },
     tenancyMonths: { type: Number, default: 0 },
     monthlyRent: { type: Number, default: 0 },
     sentimentScore: { type: Number, default: 0 },
+    sentimentMethod: { type: String, enum: ["llm", "keyword"], default: "keyword" },
   },
   { _id: false }
 );
