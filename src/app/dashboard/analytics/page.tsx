@@ -48,6 +48,8 @@ import {
   PieChart as PieChartIcon,
   Download,
   RefreshCw,
+  Brain,
+  ChevronRight,
 } from "lucide-react";
 import {
   AnalyticsCard,
@@ -405,6 +407,27 @@ export default function AnalyticsPage() {
             }}
           />
         </AnalyticsCardGrid>
+      )}
+
+      {["admin", "manager"].includes(
+        ((session?.user as { role?: string })?.role || "").toLowerCase()
+      ) && (
+        <Link href="/dashboard/analytics/tenant-intelligence" className="block">
+          <Card className="border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-950/20 hover:border-violet-400 dark:hover:border-violet-600 transition-colors cursor-pointer">
+            <CardContent className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/40">
+                  <Brain className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Tenant Intelligence Suite</p>
+                  <p className="text-xs text-muted-foreground">Churn prediction, renewal likelihood, LTV scoring, and retention tools</p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </Link>
       )}
 
       <Tabs

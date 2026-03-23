@@ -50,6 +50,19 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Scripts**: `npm run docker:up`, `docker:down`, `docker:logs` for container management
 - **Production Docker**: `docker compose up` uses the full `docker-compose.yml` with Dockerfile to build and run app + MongoDB together
 
+## Predictive Tenant Intelligence Suite (Task #7)
+- **Model**: `src/models/TenantIntelligence.ts` — MongoDB document per tenant storing churn risk score/level, renewal likelihood %, delinquency probability %, lifetime value estimate, sentiment signal, raw signals, explanation array, intervention tracking, and credit builder enrollment
+- **Service**: `src/lib/services/tenant-intelligence.service.ts` — rule-based scoring engine; computes all scores from Payment, Lease, MaintenanceRequest data; `computeAndPersistScores()` upserts to DB with 24h cache
+- **API routes**:
+  - `GET/POST /api/tenant-intelligence/[id]` — compute/fetch score for a single tenant (24h cache with `?refresh=true` bypass)
+  - `GET /api/tenant-intelligence/portfolio` — paginated scored tenant list with filters (all/high_churn/medium_churn/payment_risk/renewal_soon/high_ltv); auto-computes stale scores
+  - `GET/POST /api/tenant-intelligence/credit-builder` — tenant self-service credit builder opt-in (tenant role only)
+  - `GET /api/tenant-intelligence/intervention` — list retention offer templates; `POST` sends a named offer to a tenant
+- **Components**: `src/components/tenant-intelligence/TenantIntelligenceCard.tsx` (compact card with gauge bars, expandable signals, retention offer dialog — shown on tenant profile page for admin/manager/owner), `src/components/tenant-intelligence/CreditBuilderWidget.tsx` (benefit list + enroll/unenroll toggle for tenant settings)
+- **Pages**: `/dashboard/analytics/tenant-intelligence` — full portfolio intelligence dashboard with summary stats, filter bar, scored tenant list with inline 1-click intervention
+- **Integration**: TenantIntelligenceCard injected into `/dashboard/tenants/[id]`; CreditBuilderWidget injected into `/dashboard/settings/profile` (tenants only); "Tenant Intelligence Suite" feature link card on `/dashboard/analytics` (admin/manager only)
+- **Scoring signals**: payment history (12 mo), avg days late, maintenance volume (6 mo), days until lease expiry, lease renewals, tenancy length, monthly rent
+
 ## Luna Autonomous Operations Agent (Task #6)
 - **Model**: `src/models/LunaAutonomousAction.ts` — MongoDB model logging every action Luna evaluates or takes
 - **Service**: `src/lib/services/luna-autonomous.service.ts` — trigger engine with decision runtime; configurable autonomy mode (full/supervised/off), confidence threshold, per-category enable/disable, human review threshold, max actions/hour

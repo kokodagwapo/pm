@@ -49,6 +49,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { TenantIntelligenceCard } from "@/components/tenant-intelligence/TenantIntelligenceCard";
 
 interface Tenant {
   _id: string;
@@ -602,6 +603,15 @@ export default function TenantDetailPage() {
             ))}
           </CardContent>
         </Card>
+      )}
+
+      {/* Tenant Intelligence (managers and admin/owner only) */}
+      {["admin", "manager", "owner"].includes((session?.user?.role || "").toLowerCase()) && (
+        <TenantIntelligenceCard
+          tenantId={tenant._id}
+          tenantName={`${tenant.firstName} ${tenant.lastName}`.trim()}
+          userRole={session?.user?.role || ""}
+        />
       )}
 
       {/* Invoice History */}
