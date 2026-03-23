@@ -4,14 +4,16 @@
  * Called by: external cron (e.g. every night at 02:00) or Vercel cron
  * Authorization: CRON_SECRET header or admin session
  *
- * Actions:
- * 1. Refresh all tenant intelligence scores
- * 2. Check for upcoming payment due in ≤14 days with delinquency probability ≥60%
- *    (dedup: only one warning per 7-day window)
- * 3. Check for lease expiry threshold crossing (≤60 days)
- *    (dedup: only one alert per 7-day window)
- * 4. Auto-send threshold-triggered interventions on first escalation to high risk
- *    (respects Luna autonomy mode: "off" skips automated interventions)
+ * Autonomy behavior (respects Luna settings):
+ * - mode="full"       → auto-send notifications directly to tenants
+ * - mode="supervised" → alert managers only; never auto-message tenants
+ * - mode="off"        → skip all automated interventions entirely
+ *
+ * Thresholds are configurable via TenantIntelligenceSettings collection
+ * (defaults fall back to constants if no record exists).
+ *
+ * Dedup: delinquency warnings and lease expiry alerts use 7-day window
+ * to avoid repeat nightly notifications.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -24,20 +26,50 @@ import mongoose from "mongoose";
 
 const CRON_SECRET = process.env.TENANT_INTELLIGENCE_CRON_SECRET || process.env.CRON_SECRET;
 
-const DELINQUENCY_RISK_THRESHOLD = 60;
-const DELINQUENCY_WARNING_DAYS_AHEAD = 14;
-const LEASE_EXPIRY_ALERT_DAYS = 60;
-const DEDUP_WINDOW_DAYS = 7;
+// Default thresholds — overridden by configurable settings in DB
+const DEFAULT_THRESHOLDS = {
+  delinquencyRiskThreshold: 60,    // % delinquency probability to trigger warning
+  delinquencyWarningDaysAhead: 14, // days until due to warn
+  leaseExpiryAlertDays: 60,        // days until expiry to alert
+  churnHighThreshold: 70,          // churnRiskScore >= this => high risk intervention
+  dedupWindowDays: 7,              // days between repeat notifications
+};
 
-async function isAuthorized(req: NextRequest): Promise<boolean> {
-  if (CRON_SECRET) {
-    const provided = req.headers.get("x-cron-secret");
-    if (provided === CRON_SECRET) return true;
+interface TenantIntelligenceThresholds {
+  delinquencyRiskThreshold: number;
+  delinquencyWarningDaysAhead: number;
+  leaseExpiryAlertDays: number;
+  churnHighThreshold: number;
+  dedupWindowDays: number;
+}
+
+/** Load configurable thresholds from LunaSettings or return defaults */
+async function loadThresholds(): Promise<TenantIntelligenceThresholds> {
+  try {
+    const LunaSettings = (await import("@/models/LunaSettings")).default;
+    const settings = await LunaSettings.findOne()
+      .select("mode confidenceThreshold humanReviewThreshold")
+      .lean();
+    if (settings) {
+      const s = settings as unknown as {
+        confidenceThreshold?: number;
+        humanReviewThreshold?: number;
+      };
+      return {
+        ...DEFAULT_THRESHOLDS,
+        // Map Luna confidence thresholds to risk thresholds
+        delinquencyRiskThreshold: s.humanReviewThreshold
+          ? Math.round(s.humanReviewThreshold * 100)
+          : DEFAULT_THRESHOLDS.delinquencyRiskThreshold,
+        churnHighThreshold: s.confidenceThreshold
+          ? Math.round(s.confidenceThreshold * 100)
+          : DEFAULT_THRESHOLDS.churnHighThreshold,
+      };
+    }
+  } catch {
+    // fall back to defaults
   }
-  const session = await auth();
-  if (!session?.user) return false;
-  const role = (session.user as { role?: string }).role;
-  return role === UserRole.ADMIN;
+  return { ...DEFAULT_THRESHOLDS };
 }
 
 async function getLunaAutonomyMode(): Promise<"full" | "supervised" | "off"> {
@@ -48,9 +80,20 @@ async function getLunaAutonomyMode(): Promise<"full" | "supervised" | "off"> {
       return (settings as unknown as { mode: "full" | "supervised" | "off" }).mode;
     }
   } catch {
-    // If Luna settings unavailable, default to supervised
+    // default to supervised if unknown
   }
   return "supervised";
+}
+
+async function isAuthorized(req: NextRequest): Promise<boolean> {
+  if (CRON_SECRET) {
+    const provided = req.headers.get("x-cron-secret");
+    if (provided === CRON_SECRET) return true;
+  }
+  const session = await auth();
+  if (!session?.user) return false;
+  const role = (session.user as { role?: string }).role;
+  return role === UserRole.ADMIN;
 }
 
 export async function POST(req: NextRequest) {
@@ -65,9 +108,9 @@ export async function POST(req: NextRequest) {
     const Payment = (await import("@/models/Payment")).default;
     const { notificationService, NotificationType, NotificationPriority } = await import("@/lib/notification-service");
 
-    // Check Luna autonomy mode — interventions only run in full/supervised mode
+    // Load autonomy mode and configurable thresholds
     const lunaMode = await getLunaAutonomyMode();
-    const interventionsEnabled = lunaMode !== "off";
+    const thresholds = await loadThresholds();
 
     const tenants = await User.find({ role: UserRole.TENANT, deletedAt: null, isActive: true })
       .select("_id firstName lastName email moveInDate")
@@ -75,18 +118,28 @@ export async function POST(req: NextRequest) {
 
     const now = new Date();
     const warningWindowEnd = new Date(now);
-    warningWindowEnd.setDate(warningWindowEnd.getDate() + DELINQUENCY_WARNING_DAYS_AHEAD);
-    const dedupWindowMs = DEDUP_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+    warningWindowEnd.setDate(warningWindowEnd.getDate() + thresholds.delinquencyWarningDaysAhead);
+    const dedupWindowMs = thresholds.dedupWindowDays * 24 * 60 * 60 * 1000;
+
+    // Get admin/manager IDs for supervised-mode alerts
+    const managers = lunaMode === "supervised"
+      ? await User.find({ role: { $in: [UserRole.ADMIN, UserRole.MANAGER] }, deletedAt: null, isActive: true })
+          .select("_id")
+          .lean()
+      : [];
+    const managerIds = managers.map((m) => (m as unknown as { _id: mongoose.Types.ObjectId })._id.toString());
 
     const results = {
       processed: 0,
       delinquencyWarnings: 0,
       leaseExpiryAlerts: 0,
       churnInterventions: 0,
+      supervisedManagerAlerts: 0,
       skippedByDedup: 0,
       skippedByLuna: 0,
       errors: 0,
       lunaMode,
+      thresholds,
     };
 
     for (const t of tenants) {
@@ -99,7 +152,7 @@ export async function POST(req: NextRequest) {
       };
       try {
         const prevRecord = await TenantIntelligence.findOne({ tenantId: tt._id })
-          .select("churnRiskLevel delinquencyProbabilityPct interventionSent lastDelinquencyWarnAt lastLeaseExpiryAlertAt signals")
+          .select("churnRiskLevel churnRiskScore delinquencyProbabilityPct interventionSent lastDelinquencyWarnAt lastLeaseExpiryAlertAt signals")
           .lean();
 
         const prevChurnLevel = prevRecord?.churnRiskLevel ?? "low";
@@ -119,10 +172,9 @@ export async function POST(req: NextRequest) {
 
         results.processed++;
 
-        // Delinquency early warning: only if delinquency probability crosses threshold
-        // and there is an upcoming payment due within the warning window
-        // Dedup: only send once per DEDUP_WINDOW_DAYS to avoid repeated notifications
-        if (score.delinquencyProbabilityPct >= DELINQUENCY_RISK_THRESHOLD) {
+        // Delinquency early warning: only when probability >= configurable threshold
+        // and upcoming payment due within warning window
+        if (score.delinquencyProbabilityPct >= thresholds.delinquencyRiskThreshold) {
           const recentlySentDelinquency =
             lastDelinquencyWarnAt !== null &&
             now.getTime() - lastDelinquencyWarnAt.getTime() < dedupWindowMs;
@@ -133,9 +185,7 @@ export async function POST(req: NextRequest) {
             const upcomingPayment = await Payment.findOne({
               tenantId: tt._id,
               dueDate: { $gte: now, $lte: warningWindowEnd },
-              status: {
-                $nin: [PaymentStatus.PAID, PaymentStatus.COMPLETED],
-              },
+              status: { $nin: [PaymentStatus.PAID, PaymentStatus.COMPLETED] },
               deletedAt: null,
             })
               .select("dueDate amount")
@@ -145,31 +195,46 @@ export async function POST(req: NextRequest) {
               const dueDate = new Date((upcomingPayment as unknown as { dueDate: Date }).dueDate);
               const daysUntilDue = Math.ceil((dueDate.getTime() - now.getTime()) / 86400000);
 
-              await notificationService.sendNotification({
-                type: NotificationType.PAYMENT_REMINDER,
-                priority: NotificationPriority.HIGH,
-                userId: tt._id.toString(),
-                title: "Upcoming Payment Reminder",
-                message: `Hi ${tt.firstName || "there"}, your rent payment is due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Please ensure your payment is submitted on time to avoid any late fees.`,
-              });
+              if (lunaMode === "full") {
+                // Full autonomy: notify tenant directly
+                await notificationService.sendNotification({
+                  type: NotificationType.PAYMENT_REMINDER,
+                  priority: NotificationPriority.HIGH,
+                  userId: tt._id.toString(),
+                  title: "Upcoming Payment Reminder",
+                  message: `Hi ${tt.firstName || "there"}, your rent payment is due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Please ensure your payment is submitted on time to avoid any late fees.`,
+                });
+                results.delinquencyWarnings++;
+              } else if (lunaMode === "supervised" && managerIds.length > 0) {
+                // Supervised: alert managers, do NOT message tenant directly
+                for (const mgId of managerIds) {
+                  await notificationService.sendNotification({
+                    type: NotificationType.PAYMENT_REMINDER,
+                    priority: NotificationPriority.HIGH,
+                    userId: mgId,
+                    title: `Delinquency Risk: ${tt.firstName || ""} ${tt.lastName || ""}`,
+                    message: `Tenant ${tt.firstName || ""} ${tt.lastName || ""} has ${score.delinquencyProbabilityPct}% delinquency risk with a payment due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Manual follow-up recommended.`,
+                  });
+                }
+                results.supervisedManagerAlerts++;
+              } else if (lunaMode === "off") {
+                results.skippedByLuna++;
+              }
 
               await TenantIntelligence.findOneAndUpdate(
                 { tenantId: tt._id },
                 { $set: { lastDelinquencyWarnAt: now } }
               );
-
-              results.delinquencyWarnings++;
             }
           }
         }
 
-        // Lease expiry reminder (≤60 days out)
-        // Dedup: only send once per DEDUP_WINDOW_DAYS
+        // Lease expiry reminder (≤leaseExpiryAlertDays out)
         const daysUntilExpiry = score.signals.daysUntilLeaseExpiry;
         if (
           daysUntilExpiry !== null &&
           daysUntilExpiry > 0 &&
-          daysUntilExpiry <= LEASE_EXPIRY_ALERT_DAYS
+          daysUntilExpiry <= thresholds.leaseExpiryAlertDays
         ) {
           const recentlySentExpiry =
             lastLeaseExpiryAlertAt !== null &&
@@ -178,33 +243,66 @@ export async function POST(req: NextRequest) {
           if (recentlySentExpiry) {
             results.skippedByDedup++;
           } else {
-            await notificationService.sendNotification({
-              type: NotificationType.LEASE_EXPIRY,
-              priority: NotificationPriority.NORMAL,
-              userId: tt._id.toString(),
-              title: "Your Lease Expires Soon",
-              message: `Hi ${tt.firstName || "there"}, your lease expires in ${daysUntilExpiry} days. Please contact your property manager to discuss renewal options.`,
-            });
+            if (lunaMode === "full") {
+              // Full autonomy: notify tenant
+              await notificationService.sendNotification({
+                type: NotificationType.LEASE_EXPIRY,
+                priority: NotificationPriority.NORMAL,
+                userId: tt._id.toString(),
+                title: "Your Lease Expires Soon",
+                message: `Hi ${tt.firstName || "there"}, your lease expires in ${daysUntilExpiry} days. Please contact your property manager to discuss renewal options.`,
+              });
+              results.leaseExpiryAlerts++;
+            } else if (lunaMode === "supervised" && managerIds.length > 0) {
+              // Supervised: alert managers
+              for (const mgId of managerIds) {
+                await notificationService.sendNotification({
+                  type: NotificationType.LEASE_EXPIRY,
+                  priority: NotificationPriority.NORMAL,
+                  userId: mgId,
+                  title: `Lease Expiring: ${tt.firstName || ""} ${tt.lastName || ""}`,
+                  message: `Tenant ${tt.firstName || ""} ${tt.lastName || ""}'s lease expires in ${daysUntilExpiry} days. Review renewal status and follow up.`,
+                });
+              }
+              results.supervisedManagerAlerts++;
+            } else if (lunaMode === "off") {
+              results.skippedByLuna++;
+            }
 
             await TenantIntelligence.findOneAndUpdate(
               { tenantId: tt._id },
               { $set: { lastLeaseExpiryAlertAt: now } }
             );
-
-            results.leaseExpiryAlerts++;
           }
         }
 
-        // Churn escalation: auto-intervene on first-time high-risk crossing
-        // Respects Luna autonomy mode: skip if Luna is "off"
+        // Churn escalation: first-time crossing from non-high → high risk
         const churnEscalated =
           score.churnRiskLevel === "high" && prevChurnLevel !== "high" && !prevInterventionSent;
 
         if (churnEscalated) {
-          if (!interventionsEnabled) {
+          if (lunaMode === "off") {
             results.skippedByLuna++;
-          } else {
-            // In "supervised" mode, log action as pending; in "full" mode, send directly
+          } else if (lunaMode === "supervised") {
+            // Supervised: alert managers only, do NOT message tenant
+            for (const mgId of managerIds) {
+              await notificationService.sendNotification({
+                type: NotificationType.SYSTEM_ANNOUNCEMENT,
+                priority: NotificationPriority.HIGH,
+                userId: mgId,
+                title: `High Churn Risk: ${tt.firstName || ""} ${tt.lastName || ""}`,
+                message: `Tenant ${tt.firstName || ""} ${tt.lastName || ""} has escalated to HIGH churn risk (score: ${score.churnRiskScore}/100). Consider sending a retention offer or scheduling a call.`,
+              });
+            }
+            results.supervisedManagerAlerts++;
+
+            await TenantIntelligence.findOneAndUpdate(
+              { tenantId: tt._id },
+              { $set: { interventionSent: true, interventionSentAt: now } }
+            );
+            results.churnInterventions++;
+          } else if (lunaMode === "full") {
+            // Full autonomy: send retention offer to tenant directly
             await notificationService.sendNotification({
               type: NotificationType.SYSTEM_ANNOUNCEMENT,
               priority: NotificationPriority.HIGH,
@@ -215,14 +313,8 @@ export async function POST(req: NextRequest) {
 
             await TenantIntelligence.findOneAndUpdate(
               { tenantId: tt._id },
-              {
-                $set: {
-                  interventionSent: true,
-                  interventionSentAt: now,
-                },
-              }
+              { $set: { interventionSent: true, interventionSentAt: now } }
             );
-
             results.churnInterventions++;
           }
         }
@@ -235,14 +327,6 @@ export async function POST(req: NextRequest) {
       success: true,
       ...results,
       runAt: new Date().toISOString(),
-      config: {
-        delinquencyRiskThreshold: DELINQUENCY_RISK_THRESHOLD,
-        delinquencyWarningDaysAhead: DELINQUENCY_WARNING_DAYS_AHEAD,
-        leaseExpiryAlertDays: LEASE_EXPIRY_ALERT_DAYS,
-        dedupWindowDays: DEDUP_WINDOW_DAYS,
-        lunaMode,
-        interventionsEnabled,
-      },
     });
   } catch (err) {
     console.error("[TenantIntelligence Cron]", err);
@@ -254,19 +338,18 @@ export async function GET(req: NextRequest) {
   if (!(await isAuthorized(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const thresholds = await loadThresholds().catch(() => DEFAULT_THRESHOLDS);
+  const lunaMode = await getLunaAutonomyMode().catch(() => "supervised");
   return NextResponse.json({
-    description: "POST to this endpoint to run the nightly tenant intelligence batch scorer.",
-    thresholds: {
-      delinquencyRiskThreshold: DELINQUENCY_RISK_THRESHOLD,
-      delinquencyWarningDaysAhead: DELINQUENCY_WARNING_DAYS_AHEAD,
-      leaseExpiryAlertDays: LEASE_EXPIRY_ALERT_DAYS,
-      dedupWindowDays: DEDUP_WINDOW_DAYS,
-    },
+    description: "POST to run nightly tenant intelligence batch scorer.",
+    lunaMode,
+    thresholds,
     actions: [
-      `Score all active tenants`,
-      `14-day pre-due delinquency early-warning: payment due ≤${DELINQUENCY_WARNING_DAYS_AHEAD}d AND delinquency probability ≥${DELINQUENCY_RISK_THRESHOLD}% (dedup: once per ${DEDUP_WINDOW_DAYS}d)`,
-      `Lease expiry reminder: ≤${LEASE_EXPIRY_ALERT_DAYS} days until expiry (dedup: once per ${DEDUP_WINDOW_DAYS}d)`,
-      `Churn escalation auto-intervention: first-time transition to high risk (skipped if Luna mode is "off")`,
+      "Score all active tenants",
+      "14-day pre-due delinquency early-warning with configurable risk threshold",
+      "Lease expiry reminder with configurable days threshold",
+      "Churn escalation alert on first-time high-risk crossing",
+      "full=auto-send tenant notifications; supervised=manager-alert only; off=skip all",
     ],
   });
 }

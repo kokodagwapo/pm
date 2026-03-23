@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const filter = searchParams.get("filter") || "all";
-    const limit = Math.min(Number(searchParams.get("limit") || "100"), 200);
+    const limit = Math.min(Number(searchParams.get("limit") || "100"), 500);
     const refresh = searchParams.get("refresh") === "true";
     const page = Math.max(1, Number(searchParams.get("page") || "1"));
     const skip = (page - 1) * limit;
@@ -86,9 +86,30 @@ export async function GET(req: NextRequest) {
 
     const activeTenantIds = tenants.map((t) => (t as unknown as { _id: mongoose.Types.ObjectId })._id);
 
-    if (refresh) {
+    // Ensure ALL tenants have a score record — compute in parallel with concurrency cap
+    // to avoid missing any tenant from results
+    const existing = await TenantIntelligence.find({ tenantId: { $in: activeTenantIds } })
+      .select("tenantId lastCalculatedAt")
+      .lean();
+
+    const existingMap = new Map(
+      existing.map((e) => [e.tenantId.toString(), e.lastCalculatedAt])
+    );
+
+    const maxAgeMs = 24 * 60 * 60 * 1000;
+    const tenantsNeedingScore = tenants.filter((t) => {
+      const tt = t as unknown as { _id: mongoose.Types.ObjectId };
+      const lastCalc = existingMap.get(tt._id.toString());
+      if (!lastCalc) return true;
+      return refresh || (Date.now() - new Date(lastCalc).getTime() > maxAgeMs);
+    });
+
+    // Process ALL tenants needing scores in batches of 10 to avoid timeouts
+    const BATCH_SIZE = 10;
+    for (let i = 0; i < tenantsNeedingScore.length; i += BATCH_SIZE) {
+      const batch = tenantsNeedingScore.slice(i, i + BATCH_SIZE);
       await Promise.all(
-        tenants.slice(0, 50).map((t) => {
+        batch.map((t) => {
           const tt = t as unknown as { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; moveInDate?: Date };
           return computeAndPersistScores({
             tenantId: tt._id.toString(),
@@ -97,34 +118,6 @@ export async function GET(req: NextRequest) {
           }).catch(() => null);
         })
       );
-    } else {
-      const existing = await TenantIntelligence.find({ tenantId: { $in: activeTenantIds } })
-        .select("tenantId lastCalculatedAt")
-        .lean();
-
-      const existingMap = new Map(
-        existing.map((e) => [e.tenantId.toString(), e.lastCalculatedAt])
-      );
-
-      const stale = tenants.filter((t) => {
-        const tt = t as unknown as { _id: mongoose.Types.ObjectId };
-        const lastCalc = existingMap.get(tt._id.toString());
-        if (!lastCalc) return true;
-        return Date.now() - new Date(lastCalc).getTime() > 24 * 60 * 60 * 1000;
-      });
-
-      if (stale.length > 0) {
-        await Promise.all(
-          stale.slice(0, 20).map((t) => {
-            const tt = t as unknown as { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; moveInDate?: Date };
-            return computeAndPersistScores({
-              tenantId: tt._id.toString(),
-              tenantName: `${tt.firstName || ""} ${tt.lastName || ""}`.trim(),
-              moveInDate: tt.moveInDate,
-            }).catch(() => null);
-          })
-        );
-      }
     }
 
     let query: mongoose.FilterQuery<typeof TenantIntelligence> = { tenantId: { $in: activeTenantIds } };
