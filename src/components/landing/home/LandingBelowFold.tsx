@@ -532,7 +532,7 @@ export function LandingIntegrationsVisual() {
             <div
               className={cn(
                 glassCard(dark),
-                "relative rounded-3xl p-8 sm:p-12",
+                "relative rounded-3xl p-5 sm:p-12 overflow-hidden min-w-0",
                 dark ? "border-white/12 bg-white/[0.06]" : "border-slate-200/80 bg-white"
               )}
             >
@@ -540,13 +540,13 @@ export function LandingIntegrationsVisual() {
                 <div
                   className={cn(
                     glassCard(dark),
-                    "landing-connect-hub mb-8 rounded-2xl px-6 py-4 text-center",
+                    "landing-connect-hub mb-6 sm:mb-8 rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-center overflow-hidden min-w-0",
                     dark ? "border-indigo-400/30 bg-indigo-950/40" : "border-indigo-200/90 bg-indigo-50"
                   )}
                 >
                   <p
                     className={cn(
-                      "mb-1 text-xs font-medium uppercase tracking-widest",
+                      "mb-1 text-xs font-medium uppercase tracking-widest break-words",
                       dark ? "text-indigo-200/75" : "text-indigo-700"
                     )}
                   >
@@ -554,7 +554,7 @@ export function LandingIntegrationsVisual() {
                   </p>
                   <p
                     className={cn(
-                      "font-[var(--font-jakarta)] text-lg font-semibold tracking-tight",
+                      "font-[var(--font-jakarta)] text-lg font-semibold tracking-tight break-words",
                       dark ? "text-white" : "text-slate-900"
                     )}
                   >
@@ -562,7 +562,7 @@ export function LandingIntegrationsVisual() {
                   </p>
                 </div>
 
-                <div className="grid w-full max-w-3xl grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+                <div className="grid w-full max-w-3xl grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 overflow-hidden">
                   {nodes.map(({ icon: Icon, labelKey }, i) => {
                     const pastel = NODE_PASTEL[i % NODE_PASTEL.length];
                     return (
