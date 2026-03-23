@@ -317,97 +317,143 @@ const NavItemComponent = memo(function NavItemComponent({
   const isExpanded = expandedItems.includes(item.href) || hasActiveChild;
   const isParentActive = isActive || hasActiveChild;
 
+  const sharedClassName = cn(
+    "relative flex items-center gap-2.5 transition-all duration-300 w-full text-left",
+    level === 0 ? (isCollapsed ? "rounded-lg" : "rounded-2xl") : "rounded-xl",
+    "select-none outline-none",
+    isLight
+      ? "focus-visible:ring-2 focus-visible:ring-sky-500/35"
+      : "focus-visible:ring-2 focus-visible:ring-white/25",
+    level === 0 &&
+      "min-h-11 px-3 py-2.5 text-base font-normal tracking-wide md:min-h-0 md:py-2",
+    level > 0 &&
+      "ml-5 min-h-10 py-2 pl-3 pr-3 text-sm font-light tracking-wide md:min-h-0 md:py-1.5",
+    !isLight &&
+      !isParentActive &&
+      "border border-transparent text-white hover:border-white/[0.16] hover:bg-white/[0.06] active:scale-[0.98]",
+    isLight &&
+      !isParentActive &&
+      "border border-transparent text-slate-700 hover:border-slate-200 hover:bg-slate-100 active:scale-[0.98]",
+    !isLight &&
+      isParentActive &&
+      level === 0 &&
+      "border border-white/[0.24] bg-white/[0.1] font-normal text-white hover:border-white/[0.3] hover:bg-white/[0.12]",
+    isLight &&
+      isParentActive &&
+      level === 0 &&
+      "border border-slate-200 bg-slate-100 font-normal text-slate-900 hover:border-slate-300 hover:bg-slate-100/90",
+    !isLight && isActive && level > 0 && "border border-white/[0.2] bg-white/[0.08] font-normal text-white",
+    isLight && isActive && level > 0 && "border border-slate-200 bg-slate-100 font-normal text-slate-900",
+    !isLight &&
+      !isActive &&
+      level > 0 &&
+      "border border-transparent text-white hover:border-white/[0.14] hover:bg-white/[0.06] active:scale-[0.98]",
+    isLight &&
+      !isActive &&
+      level > 0 &&
+      "border border-transparent text-slate-700 hover:border-slate-200 hover:bg-slate-50 active:scale-[0.98]",
+    isCollapsed && level === 0 && "justify-center px-1",
+  );
+
   return (
     <div>
-      <Link
-        href={item.href}
-        prefetch={true}
-        onClick={(e) => {
-          if (hasChildren && filteredChildren && filteredChildren.length > 0) {
-            e.preventDefault();
-            toggleExpanded(item.href);
-          }
-        }}
-        className={cn(
-          "relative flex items-center gap-2.5 transition-all duration-300",
-          level === 0 ? (isCollapsed ? "rounded-lg" : "rounded-2xl") : "rounded-xl",
-          "select-none outline-none",
-          isLight
-            ? "focus-visible:ring-2 focus-visible:ring-sky-500/35"
-            : "focus-visible:ring-2 focus-visible:ring-white/25",
-          level === 0 &&
-            "min-h-11 px-3 py-2.5 text-base font-normal tracking-wide md:min-h-0 md:py-2",
-          level > 0 &&
-            "ml-5 min-h-10 py-2 pl-3 pr-3 text-sm font-light tracking-wide md:min-h-0 md:py-1.5",
-          !isLight &&
-            !isParentActive &&
-            "border border-transparent text-white hover:border-white/[0.16] hover:bg-white/[0.06] active:scale-[0.98]",
-          isLight &&
-            !isParentActive &&
-            "border border-transparent text-slate-700 hover:border-slate-200 hover:bg-slate-100 active:scale-[0.98]",
-          !isLight &&
-            isParentActive &&
-            level === 0 &&
-            "border border-white/[0.24] bg-white/[0.1] font-normal text-white hover:border-white/[0.3] hover:bg-white/[0.12]",
-          isLight &&
-            isParentActive &&
-            level === 0 &&
-            "border border-slate-200 bg-slate-100 font-normal text-slate-900 hover:border-slate-300 hover:bg-slate-100/90",
-          !isLight && isActive && level > 0 && "border border-white/[0.2] bg-white/[0.08] font-normal text-white",
-          isLight && isActive && level > 0 && "border border-slate-200 bg-slate-100 font-normal text-slate-900",
-          !isLight &&
-            !isActive &&
-            level > 0 &&
-            "border border-transparent text-white hover:border-white/[0.14] hover:bg-white/[0.06] active:scale-[0.98]",
-          isLight &&
-            !isActive &&
-            level > 0 &&
-            "border border-transparent text-slate-700 hover:border-slate-200 hover:bg-slate-50 active:scale-[0.98]",
-          isCollapsed && level === 0 && "justify-center px-1",
-        )}
-      >
-        {/* Active indicator bar */}
-        {isParentActive && level === 0 && (
-          <span className="nav-active-indicator" />
-        )}
-
-        <PastelIcon
-          icon={item.icon}
-          tint={pastelTintFromLegacyIconColor(item.iconColor)}
-          size={level === 0 ? "nav" : "sm"}
-          className={cn(
-            "transition-opacity duration-200",
-            isParentActive ? "opacity-100" : "opacity-90",
+      {hasChildren && filteredChildren && filteredChildren.length > 0 ? (
+        <button
+          type="button"
+          onClick={() => toggleExpanded(item.href)}
+          className={sharedClassName}
+        >
+          {/* Active indicator bar */}
+          {isParentActive && level === 0 && (
+            <span className="nav-active-indicator" />
           )}
-        />
 
-        {!isCollapsed && (
-          <>
-            <span className="flex-1 truncate tracking-[-0.01em]">
-              {safeTranslate(t, item.title)}
-            </span>
-            {item.badge && (
-              <span
-                className={cn(
-                  "ml-auto flex h-4.5 min-w-[18px] items-center justify-center rounded-lg px-1 text-[10px] font-medium",
-                  isLight ? "bg-slate-900 text-white" : "bg-white text-slate-900"
-                )}
-              >
-                {item.badge}
+          <PastelIcon
+            icon={item.icon}
+            tint={pastelTintFromLegacyIconColor(item.iconColor)}
+            size={level === 0 ? "nav" : "sm"}
+            className={cn(
+              "transition-opacity duration-200",
+              isParentActive ? "opacity-100" : "opacity-90",
+            )}
+          />
+
+          {!isCollapsed && (
+            <>
+              <span className="flex-1 truncate tracking-[-0.01em]">
+                {safeTranslate(t, item.title)}
               </span>
+              {item.badge && (
+                <span
+                  className={cn(
+                    "ml-auto flex h-4.5 min-w-[18px] items-center justify-center rounded-lg px-1 text-[10px] font-medium",
+                    isLight ? "bg-slate-900 text-white" : "bg-white text-slate-900"
+                  )}
+                >
+                  {item.badge}
+                </span>
+              )}
+              {hasChildren && filteredChildren && filteredChildren.length > 0 && (
+                <ChevronDown
+                  className={cn(
+                    "h-3.5 w-3.5 shrink-0 transition-transform duration-250 ease-out",
+                    isLight ? "text-slate-500" : "text-white/55",
+                    isExpanded && "rotate-180",
+                  )}
+                />
+              )}
+            </>
+          )}
+        </button>
+      ) : (
+        <Link
+          href={item.href}
+          prefetch={true}
+          className={sharedClassName}
+        >
+          {/* Active indicator bar */}
+          {isParentActive && level === 0 && (
+            <span className="nav-active-indicator" />
+          )}
+
+          <PastelIcon
+            icon={item.icon}
+            tint={pastelTintFromLegacyIconColor(item.iconColor)}
+            size={level === 0 ? "nav" : "sm"}
+            className={cn(
+              "transition-opacity duration-200",
+              isParentActive ? "opacity-100" : "opacity-90",
             )}
-            {hasChildren && filteredChildren && filteredChildren.length > 0 && (
-              <ChevronDown
-                className={cn(
-                  "h-3.5 w-3.5 shrink-0 transition-transform duration-250 ease-out",
-                  isLight ? "text-slate-500" : "text-white/55",
-                  isExpanded && "rotate-180",
-                )}
-              />
-            )}
-          </>
-        )}
-      </Link>
+          />
+
+          {!isCollapsed && (
+            <>
+              <span className="flex-1 truncate tracking-[-0.01em]">
+                {safeTranslate(t, item.title)}
+              </span>
+              {item.badge && (
+                <span
+                  className={cn(
+                    "ml-auto flex h-4.5 min-w-[18px] items-center justify-center rounded-lg px-1 text-[10px] font-medium",
+                    isLight ? "bg-slate-900 text-white" : "bg-white text-slate-900"
+                  )}
+                >
+                  {item.badge}
+                </span>
+              )}
+              {hasChildren && filteredChildren && filteredChildren.length > 0 && (
+                <ChevronDown
+                  className={cn(
+                    "h-3.5 w-3.5 shrink-0 transition-transform duration-250 ease-out",
+                    isLight ? "text-slate-500" : "text-white/55",
+                    isExpanded && "rotate-180",
+                  )}
+                />
+              )}
+            </>
+          )}
+        </Link>
+      )}
 
       {/* Smooth accordion using CSS grid */}
       {!isCollapsed && hasChildren && filteredChildren && filteredChildren.length > 0 && (
