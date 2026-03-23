@@ -45,6 +45,7 @@ export interface ILunaAutonomousAction {
   undoneBy?: string;
   executionError?: string;
   metadata: Record<string, unknown>;
+  dedupKey?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -154,6 +155,10 @@ const LunaAutonomousActionSchema = new Schema<ILunaAutonomousAction>(
       type: Schema.Types.Mixed,
       default: {},
     },
+    dedupKey: {
+      type: String,
+      sparse: true,
+    },
   },
   {
     timestamps: true,
@@ -174,6 +179,7 @@ LunaAutonomousActionSchema.index({ affectedUserId: 1 });
 LunaAutonomousActionSchema.index({ affectedPropertyId: 1 });
 LunaAutonomousActionSchema.index({ humanReviewRequired: 1, status: 1 });
 LunaAutonomousActionSchema.index({ triggerEntityId: 1, category: 1, createdAt: -1 });
+LunaAutonomousActionSchema.index({ dedupKey: 1 }, { unique: true, sparse: true });
 
 if (mongoose.models.LunaAutonomousAction) {
   delete mongoose.models.LunaAutonomousAction;

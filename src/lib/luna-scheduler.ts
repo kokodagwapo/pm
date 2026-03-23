@@ -16,7 +16,6 @@ const DIGEST_DAILY_MS = 24 * 60 * 60 * 1000;
 const DIGEST_WEEKLY_MS = 7 * 24 * 60 * 60 * 1000;
 
 let schedulerStarted = false;
-let lastDigestSentAt: Date | null = null;
 
 async function runLunaTriggerCycle(): Promise<void> {
   try {
@@ -300,12 +299,24 @@ async function runLunaTriggerCycle(): Promise<void> {
       });
     }
 
-    // 6. System digest (daily or weekly, dedup via lastDigestSentAt)
+    // 6. System digest (daily or weekly, dedup via DB to survive restarts)
     const digestFrequency = currentSettings.digestEmailFrequency;
     const digestIntervalMs = digestFrequency === "weekly" ? DIGEST_WEEKLY_MS : DIGEST_DAILY_MS;
-    const shouldSendDigest =
-      currentSettings.digestEmailEnabled &&
-      (!lastDigestSentAt || now.getTime() - lastDigestSentAt.getTime() >= digestIntervalMs);
+
+    let shouldSendDigest = false;
+    if (currentSettings.digestEmailEnabled) {
+      const LunaAutonomousAction = (await import("@/models/LunaAutonomousAction")).default;
+      const lastDigestRecord = await LunaAutonomousAction.findOne({
+        category: "system_digest",
+        status: "executed",
+      })
+        .sort({ createdAt: -1 })
+        .lean();
+      const lastDigestTs = lastDigestRecord
+        ? new Date(lastDigestRecord.createdAt).getTime()
+        : 0;
+      shouldSendDigest = now.getTime() - lastDigestTs >= digestIntervalMs;
+    }
 
     if (shouldSendDigest) {
       try {
@@ -378,7 +389,6 @@ async function runLunaTriggerCycle(): Promise<void> {
               })
             )
           );
-          lastDigestSentAt = now;
           console.log(`[Luna Scheduler] Digest sent to ${managers.length} managers at ${now.toISOString()}`);
         }
       } catch (digestErr) {
@@ -393,6 +403,11 @@ async function runLunaTriggerCycle(): Promise<void> {
 }
 
 export function startLunaScheduler(): void {
+  if (process.env.LUNA_SCHEDULER_ENABLED !== "true") {
+    console.log("[Luna Scheduler] Disabled (LUNA_SCHEDULER_ENABLED not set). Use external cron via /api/luna/cron.");
+    return;
+  }
+
   if (schedulerStarted) return;
   schedulerStarted = true;
 

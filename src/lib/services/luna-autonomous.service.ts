@@ -390,8 +390,13 @@ export class LunaAutonomousService {
   }
 
   /**
-   * Deduplication guard: returns true if an action of this category was already
-   * executed (or is pending review) for the same entity within the cooldown window.
+   * Atomic deduplication guard: returns true if an action of this category was
+   * already executed (or is pending review) for the same entity within the
+   * cooldown window.
+   *
+   * Uses a sparse unique index on `dedupKey` to make the check-and-claim
+   * atomic — concurrent callers that race through the check will get a
+   * duplicate-key error on the second upsert, preventing double execution.
    */
   private async isDuplicate(entityId: string, category: LunaActionCategory): Promise<boolean> {
     if (!entityId) return false;
@@ -404,6 +409,54 @@ export class LunaAutonomousService {
       createdAt: { $gte: cutoff },
     }).lean();
     return !!existing;
+  }
+
+  /**
+   * Claim an action slot atomically using the dedupKey unique index.
+   * Returns false if the slot was already claimed (duplicate), true if claimed now.
+   * The caller MUST call this before executing any side effects.
+   */
+  private async claimActionSlot(entityId: string, category: LunaActionCategory): Promise<boolean> {
+    if (!entityId) return true;
+    await connectDB();
+    const windowHours = Math.ceil(COOLDOWN_MS / 3_600_000);
+    const windowBucket = Math.floor(Date.now() / COOLDOWN_MS);
+    const dedupKey = `${entityId}::${category}::${windowBucket}`;
+    try {
+      await LunaAutonomousAction.updateOne(
+        { dedupKey },
+        {
+          $setOnInsert: {
+            dedupKey,
+            category,
+            triggerEntityId: entityId,
+            triggerEntityType: "system",
+            triggerEvent: "dedup_claim",
+            title: `[Dedup] ${category}`,
+            description: `Dedup slot for ${entityId} window ${windowBucket}`,
+            reasoning: `Claimed at window ${windowBucket} (${windowHours}h TTL)`,
+            confidence: 0,
+            status: "skipped",
+            actionsTaken: [],
+            notificationsSent: [],
+            humanReviewRequired: false,
+            metadata: {},
+          },
+        },
+        { upsert: true }
+      );
+      return true;
+    } catch (err: unknown) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "code" in err &&
+        (err as { code: number }).code === 11000
+      ) {
+        return false;
+      }
+      throw err;
+    }
   }
 
   /**
@@ -498,6 +551,9 @@ export class LunaAutonomousService {
     };
 
     if (decision.shouldAct && this.settings.mode !== "off" && this.canExecuteMoreActions()) {
+      if (context.entityId && !await this.claimActionSlot(context.entityId, category)) {
+        return null;
+      }
       if (this.settings.mode === "full" || !humanReviewRequired) {
         try {
           await notificationService.sendNotification({
@@ -618,6 +674,9 @@ export class LunaAutonomousService {
     };
 
     if (decision.shouldAct && this.settings.mode !== "off" && this.canExecuteMoreActions()) {
+      if (context.entityId && !await this.claimActionSlot(context.entityId, actionCategory)) {
+        return null;
+      }
       if (this.settings.mode === "full" || !humanReviewFinal) {
         try {
           if (vendor && !exceedsSpendingLimit) {
@@ -805,6 +864,9 @@ export class LunaAutonomousService {
     };
 
     if (decision.shouldAct && this.settings.mode !== "off" && this.canExecuteMoreActions()) {
+      if (context.entityId && !await this.claimActionSlot(context.entityId, actionCategory)) {
+        return null;
+      }
       if (this.settings.mode === "full" || !humanReviewRequired) {
         try {
           await notificationService.sendNotification({
@@ -929,6 +991,9 @@ export class LunaAutonomousService {
     };
 
     if (decision.shouldAct && this.settings.mode !== "off" && this.canExecuteMoreActions()) {
+      if (context.entityId && !await this.claimActionSlot(context.entityId, "tenant_communication")) {
+        return null;
+      }
       if (this.settings.mode === "full" || !humanReviewRequired) {
         try {
           const ackMsg = getAckMessage(locale, data.tenantName);
