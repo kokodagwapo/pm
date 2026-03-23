@@ -194,6 +194,63 @@ const LEASE_RENEWAL_TEMPLATES: Record<string, (name: string, property: string, d
   "fil": (n, p, d, a) => `Mahal na ${n}, ang iyong lease para sa ${p} ay mag-eexpire sa loob ng ${d} araw. ${a ? `Ikinagagalak naming mag-alok ng pagpapanibago sa $${a}/buwan. ` : ""}Mangyaring mag-log in sa iyong tenant portal upang suriin at tanggapin ang iyong renewal offer, o tumugon upang talakayin ang iyong mga opsyon.`,
 };
 
+const LEASE_ACCEPTED_TEMPLATES: Record<string, (name: string, property: string) => string> = {
+  "en": (n, p) => `Dear ${n}, thank you for accepting your lease renewal for ${p}. Your renewed lease has been noted and our team will process the paperwork shortly.`,
+  "en-US": (n, p) => `Dear ${n}, thank you for accepting your lease renewal for ${p}. Your renewed lease has been noted and our team will process the paperwork shortly.`,
+  "de": (n, p) => `Liebe/r ${n}, vielen Dank für die Annahme Ihrer Mietvertragsverlängerung für ${p}. Ihre Verlängerung wurde vermerkt und unser Team wird die Unterlagen in Kürze bearbeiten.`,
+  "es": (n, p) => `Estimado/a ${n}, gracias por aceptar la renovación de su contrato de arrendamiento para ${p}. Su renovación ha sido registrada y nuestro equipo procesará la documentación en breve.`,
+  "fr": (n, p) => `Cher/Chère ${n}, merci d'avoir accepté le renouvellement de votre bail pour ${p}. Votre renouvellement a été enregistré et notre équipe traitera les documents sous peu.`,
+  "it": (n, p) => `Gentile ${n}, grazie per aver accettato il rinnovo del contratto di locazione per ${p}. Il rinnovo è stato registrato e il nostro team elaborerà i documenti a breve.`,
+  "ja": (n, p) => `${n} 様、${p} の賃貸契約更新をご承認いただきありがとうございます。更新内容を記録しました。担当者がまもなく手続きを進めます。`,
+  "ru": (n, p) => `Уважаемый/ая ${n}, спасибо за принятие продления договора аренды на ${p}. Ваше продление зафиксировано, и наша команда обработает документы в ближайшее время.`,
+  "zh": (n, p) => `亲爱的 ${n}，感谢您接受 ${p} 的租约续签。您的续约已记录，我们的团队将很快处理相关文件。`,
+  "fil": (n, p) => `Mahal na ${n}, salamat sa pagtanggap ng iyong lease renewal para sa ${p}. Naitala na ang iyong renewal at ang aming koponan ay magpoproseso ng mga papeles sa lalong madaling panahon.`,
+};
+
+const LEASE_NEGOTIATING_TEMPLATES: Record<string, (name: string, property: string) => string> = {
+  "en": (n, p) => `Dear ${n}, thank you for your response regarding your lease renewal for ${p}. We have received your request to negotiate and have forwarded it to your property manager, who will be in touch shortly.`,
+  "en-US": (n, p) => `Dear ${n}, thank you for your response regarding your lease renewal for ${p}. We have received your request to negotiate and have forwarded it to your property manager, who will be in touch shortly.`,
+  "de": (n, p) => `Liebe/r ${n}, vielen Dank für Ihre Antwort zur Mietvertragsverlängerung für ${p}. Wir haben Ihren Verhandlungswunsch erhalten und an Ihren Verwalter weitergeleitet, der sich in Kürze bei Ihnen melden wird.`,
+  "es": (n, p) => `Estimado/a ${n}, gracias por su respuesta sobre la renovación de su contrato para ${p}. Hemos recibido su solicitud de negociación y la hemos enviado a su administrador, quien se pondrá en contacto en breve.`,
+  "fr": (n, p) => `Cher/Chère ${n}, merci pour votre réponse concernant le renouvellement de votre bail pour ${p}. Nous avons bien reçu votre demande de négociation et l'avons transmise à votre gestionnaire, qui vous contactera prochainement.`,
+  "it": (n, p) => `Gentile ${n}, grazie per la sua risposta riguardo al rinnovo del contratto per ${p}. Abbiamo ricevuto la sua richiesta di negoziazione e l'abbiamo inoltrata al suo amministratore, che la contatterà a breve.`,
+  "ja": (n, p) => `${n} 様、${p} の賃貸契約更新についてのご返信ありがとうございます。交渉のご希望を承りました。担当の物件マネージャーにお伝えし、まもなくご連絡いたします。`,
+  "ru": (n, p) => `Уважаемый/ая ${n}, спасибо за ответ по продлению договора аренды на ${p}. Мы получили вашу просьбу о переговорах и передали её вашему управляющему, который свяжется с вами в ближайшее время.`,
+  "zh": (n, p) => `亲爱的 ${n}，感谢您就 ${p} 的租约续签作出回复。我们已收到您的协商请求，并已转交给您的物业经理，他们将很快与您联系。`,
+  "fil": (n, p) => `Mahal na ${n}, salamat sa iyong tugon tungkol sa lease renewal para sa ${p}. Natanggap namin ang iyong kahilingang makipag-negotiate at ipinasa na ito sa iyong property manager, na makikipag-ugnayan sa iyo sa lalong madaling panahon.`,
+};
+
+const LEASE_DECLINED_TEMPLATES: Record<string, (name: string, property: string) => string> = {
+  "en": (n, p) => `Dear ${n}, thank you for letting us know regarding your lease for ${p}. We have noted your decision and your property manager will be in touch to discuss the end-of-tenancy process.`,
+  "en-US": (n, p) => `Dear ${n}, thank you for letting us know regarding your lease for ${p}. We have noted your decision and your property manager will be in touch to discuss the end-of-tenancy process.`,
+  "de": (n, p) => `Liebe/r ${n}, vielen Dank, dass Sie uns bezüglich Ihres Mietvertrags für ${p} informiert haben. Wir haben Ihre Entscheidung vermerkt und Ihr Verwalter wird sich bezüglich des Auszugsverfahrens melden.`,
+  "es": (n, p) => `Estimado/a ${n}, gracias por informarnos sobre su contrato para ${p}. Hemos registrado su decisión y su administrador se pondrá en contacto para hablar sobre el proceso de fin de arrendamiento.`,
+  "fr": (n, p) => `Cher/Chère ${n}, merci de nous avoir informés concernant votre bail pour ${p}. Nous avons pris note de votre décision et votre gestionnaire vous contactera pour discuter du processus de fin de location.`,
+  "it": (n, p) => `Gentile ${n}, grazie per averci comunicato la sua decisione riguardo al contratto per ${p}. Abbiamo preso nota e il suo amministratore la contatterà per discutere la fine della locazione.`,
+  "ja": (n, p) => `${n} 様、${p} の賃貸契約についてお知らせいただきありがとうございます。ご決定を承りました。担当の物件マネージャーが退去手続きについてまもなくご連絡いたします。`,
+  "ru": (n, p) => `Уважаемый/ая ${n}, спасибо, что сообщили нам о вашем решении по аренде ${p}. Мы зафиксировали ваше решение, и ваш управляющий свяжется с вами для обсуждения процедуры завершения аренды.`,
+  "zh": (n, p) => `亲爱的 ${n}，感谢您告知我们有关 ${p} 租约的决定。我们已记录您的决定，您的物业经理将很快与您联系，讨论退租流程。`,
+  "fil": (n, p) => `Mahal na ${n}, salamat sa pagpapaalam sa amin tungkol sa iyong lease para sa ${p}. Naitala na namin ang iyong desisyon at makikipag-ugnayan ang iyong property manager para talakayin ang proseso ng pagtatapos ng tenancy.`,
+};
+
+function getLeaseAcceptedMessage(locale: string, name: string, property: string): string {
+  const lang = locale.split("-")[0];
+  const fn = LEASE_ACCEPTED_TEMPLATES[locale] || LEASE_ACCEPTED_TEMPLATES[lang] || LEASE_ACCEPTED_TEMPLATES["en"];
+  return fn(name, property) + getAIFooter(locale);
+}
+
+function getLeaseNegotiatingMessage(locale: string, name: string, property: string): string {
+  const lang = locale.split("-")[0];
+  const fn = LEASE_NEGOTIATING_TEMPLATES[locale] || LEASE_NEGOTIATING_TEMPLATES[lang] || LEASE_NEGOTIATING_TEMPLATES["en"];
+  return fn(name, property) + getAIFooter(locale);
+}
+
+function getLeaseDeclinedMessage(locale: string, name: string, property: string): string {
+  const lang = locale.split("-")[0];
+  const fn = LEASE_DECLINED_TEMPLATES[locale] || LEASE_DECLINED_TEMPLATES[lang] || LEASE_DECLINED_TEMPLATES["en"];
+  return fn(name, property) + getAIFooter(locale);
+}
+
 const ACK_TEMPLATES: Record<string, (name: string) => string> = {
   "en": (n) => `Dear ${n}, thank you for your message. Your property manager has been notified and will respond shortly.`,
   "en-US": (n) => `Dear ${n}, thank you for your message. Your property manager has been notified and will respond shortly.`,
@@ -702,11 +759,11 @@ export class LunaAutonomousService {
 
     let renewalMessage: string;
     if (tenantResponse === "accepted") {
-      renewalMessage = `Dear ${data.tenantName}, thank you for accepting your lease renewal for ${data.propertyName}. Your renewed lease has been noted and our team will process the paperwork shortly.${getAIFooter(locale)}`;
+      renewalMessage = getLeaseAcceptedMessage(locale, data.tenantName, data.propertyName);
     } else if (tenantResponse === "negotiating") {
-      renewalMessage = `Dear ${data.tenantName}, thank you for your response regarding your lease renewal for ${data.propertyName}. We have received your request to negotiate and have forwarded your request to your property manager, who will be in touch shortly.${getAIFooter(locale)}`;
+      renewalMessage = getLeaseNegotiatingMessage(locale, data.tenantName, data.propertyName);
     } else if (tenantResponse === "declined") {
-      renewalMessage = `Dear ${data.tenantName}, thank you for letting us know regarding your lease for ${data.propertyName}. We have noted your decision and your property manager will be in touch to discuss the end-of-tenancy process.${getAIFooter(locale)}`;
+      renewalMessage = getLeaseDeclinedMessage(locale, data.tenantName, data.propertyName);
     } else {
       renewalMessage = getLeaseRenewalMessage(locale, data.tenantName, data.propertyName, daysUntilExpiry, amountStr);
     }

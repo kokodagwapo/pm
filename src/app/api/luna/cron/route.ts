@@ -245,7 +245,7 @@ async function runTriggerCycle() {
     isArchived: false,
     deletedAt: null,
   })
-    .populate("participants.userId", "email firstName lastName role")
+    .populate("participants.userId", "email firstName lastName role preferredLocale")
     .sort({ "lastMessage.createdAt": 1 })
     .limit(10)
     .lean();
@@ -305,7 +305,7 @@ async function runTriggerCycle() {
           ? `${manager.firstName || ""} ${manager.lastName || ""}`.trim()
           : undefined,
         managerId: manager ? String(manager._id) : undefined,
-        tenantLocale: "en",
+        tenantLocale: tenant.preferredLocale || "en",
       },
     });
     results.unansweredMessages++;
