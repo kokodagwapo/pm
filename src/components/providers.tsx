@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { LocalizationProvider } from "@/components/providers/LocalizationProvider";
 import { BrandingProvider } from "@/components/providers/BrandingProvider";
 import { UserAvatarProvider } from "@/components/providers/UserAvatarProvider";
+import { HydrationGuard } from "@/components/HydrationGuard";
 import { memo } from "react";
 
 interface ProvidersProps {
@@ -13,23 +14,25 @@ interface ProvidersProps {
 
 export const Providers = memo(function Providers({ children }: ProvidersProps) {
   return (
-    <SessionProvider
-      basePath="/api/auth"
-      refetchOnWindowFocus={false}
-      refetchInterval={0}
-    >
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="light"
-        disableTransitionOnChange
+    <HydrationGuard>
+      <SessionProvider
+        basePath="/api/auth"
+        refetchOnWindowFocus={false}
+        refetchInterval={0}
       >
-        <BrandingProvider>
-          <LocalizationProvider>
-            <UserAvatarProvider>{children}</UserAvatarProvider>
-          </LocalizationProvider>
-        </BrandingProvider>
-      </ThemeProvider>
-    </SessionProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          disableTransitionOnChange
+        >
+          <BrandingProvider>
+            <LocalizationProvider>
+              <UserAvatarProvider>{children}</UserAvatarProvider>
+            </LocalizationProvider>
+          </BrandingProvider>
+        </ThemeProvider>
+      </SessionProvider>
+    </HydrationGuard>
   );
 });
 
