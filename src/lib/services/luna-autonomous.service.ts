@@ -960,6 +960,41 @@ export class LunaAutonomousService {
     return this.logAction(decision, context, "daily_digest_trigger");
   }
 
+  /**
+   * Compute action stats from the DB for the dashboard.
+   */
+  async getActionStats(): Promise<{
+    totalToday: number;
+    totalWeek: number;
+    executedToday: number;
+    pendingHuman: number;
+    failedTotal: number;
+    successRate: number;
+  }> {
+    await connectDB();
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const [totalToday, totalWeek, executedToday, pendingHuman, failedTotal, executedTotal] =
+      await Promise.all([
+        LunaAutonomousAction.countDocuments({ createdAt: { $gte: startOfToday } }),
+        LunaAutonomousAction.countDocuments({ createdAt: { $gte: startOfWeek } }),
+        LunaAutonomousAction.countDocuments({
+          status: "executed",
+          createdAt: { $gte: startOfToday },
+        }),
+        LunaAutonomousAction.countDocuments({ status: "pending_human" }),
+        LunaAutonomousAction.countDocuments({ status: "failed" }),
+        LunaAutonomousAction.countDocuments({ status: "executed" }),
+      ]);
+
+    const total = executedTotal + failedTotal;
+    const successRate = total > 0 ? Math.round((executedTotal / total) * 100) : 100;
+
+    return { totalToday, totalWeek, executedToday, pendingHuman, failedTotal, successRate };
+  }
+
   private async logAction(
     decision: LunaDecision,
     context: TriggerContext,

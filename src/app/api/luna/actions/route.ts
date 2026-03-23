@@ -83,6 +83,19 @@ export async function POST(req: NextRequest) {
     if (action === "review" && actionId) {
       await connectDB();
 
+      // Enforce roleAutonomyConfig: only roles with canApproveActions may review
+      const settings = lunaAutonomousService.getSettings();
+      const userRole = session.user.role as string;
+      const roleConfig = Array.isArray(settings.roleAutonomyConfig)
+        ? settings.roleAutonomyConfig.find((r) => r.role === userRole)
+        : undefined;
+      if (roleConfig && !roleConfig.canApproveActions) {
+        return NextResponse.json(
+          { error: "Your role is not permitted to approve Luna actions" },
+          { status: 403 }
+        );
+      }
+
       const existingAction = await LunaAutonomousAction.findById(actionId);
       if (!existingAction) {
         return NextResponse.json({ error: "Action not found" }, { status: 404 });
@@ -135,6 +148,19 @@ export async function POST(req: NextRequest) {
     // ── Undo an executed action ───────────────────────────────────────────────
     if (action === "undo" && actionId) {
       await connectDB();
+
+      // Enforce roleAutonomyConfig: only roles with canOverrideActions may undo
+      const settings = lunaAutonomousService.getSettings();
+      const userRole = session.user.role as string;
+      const roleConfig = Array.isArray(settings.roleAutonomyConfig)
+        ? settings.roleAutonomyConfig.find((r) => r.role === userRole)
+        : undefined;
+      if (roleConfig && !roleConfig.canOverrideActions) {
+        return NextResponse.json(
+          { error: "Your role is not permitted to override Luna actions" },
+          { status: 403 }
+        );
+      }
 
       const existingAction = await LunaAutonomousAction.findById(actionId);
       if (!existingAction) {

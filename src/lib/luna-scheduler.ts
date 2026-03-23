@@ -12,8 +12,11 @@
 import connectDB from "@/lib/mongodb";
 
 const DEFAULT_INTERVAL_MS = 30 * 60 * 1000;
+const DIGEST_DAILY_MS = 24 * 60 * 60 * 1000;
+const DIGEST_WEEKLY_MS = 7 * 24 * 60 * 60 * 1000;
 
 let schedulerStarted = false;
+let lastDigestSentAt: Date | null = null;
 
 async function runLunaTriggerCycle(): Promise<void> {
   try {
@@ -172,6 +175,7 @@ async function runLunaTriggerCycle(): Promise<void> {
           description: String(mReq.description || ""),
           hoursUnassigned,
           isEmergency: false,
+          estimatedCost: typeof mReq.estimatedCost === "number" ? mReq.estimatedCost : undefined,
           tenantLocale: "en",
         },
       });
@@ -215,6 +219,7 @@ async function runLunaTriggerCycle(): Promise<void> {
           description: String(eReq.description || ""),
           hoursUnassigned,
           isEmergency: true,
+          estimatedCost: typeof eReq.estimatedCost === "number" ? eReq.estimatedCost : undefined,
           tenantLocale: "en",
         },
       });
@@ -290,6 +295,89 @@ async function runLunaTriggerCycle(): Promise<void> {
           tenantLocale: "en",
         },
       });
+    }
+
+    // 6. System digest (daily or weekly, dedup via lastDigestSentAt)
+    const digestFrequency = currentSettings.digestEmailFrequency;
+    const digestIntervalMs = digestFrequency === "weekly" ? DIGEST_WEEKLY_MS : DIGEST_DAILY_MS;
+    const shouldSendDigest =
+      currentSettings.digestEmailEnabled &&
+      (!lastDigestSentAt || now.getTime() - lastDigestSentAt.getTime() >= digestIntervalMs);
+
+    if (shouldSendDigest) {
+      try {
+        const User = (await import("@/models/User")).default;
+        const { UserRole } = await import("@/types");
+
+        const [
+          propertyCount,
+          activeLeaseCount,
+          overduePaymentCount,
+          overduePaymentAgg,
+          openMaintenanceCount,
+          emergencyMaintenanceCount,
+          expiringLeasesCount,
+          actionsExecutedToday,
+        ] = await Promise.all([
+          (await import("@/models/Property")).default.countDocuments({ deletedAt: null }),
+          Lease.countDocuments({ status: LeaseStatus.ACTIVE }),
+          Payment.countDocuments({ status: PaymentStatus.OVERDUE, deletedAt: null }),
+          Payment.aggregate([
+            { $match: { status: PaymentStatus.OVERDUE, deletedAt: null } },
+            { $group: { _id: null, total: { $sum: "$amount" } } },
+          ]),
+          MaintenanceRequest.countDocuments({
+            status: { $nin: [MaintenanceStatus.COMPLETED, MaintenanceStatus.CANCELLED] },
+            deletedAt: null,
+          }),
+          MaintenanceRequest.countDocuments({
+            priority: MaintenancePriority.EMERGENCY,
+            status: { $nin: [MaintenanceStatus.COMPLETED, MaintenanceStatus.CANCELLED] },
+          }),
+          Lease.countDocuments({
+            status: LeaseStatus.ACTIVE,
+            endDate: { $lte: new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000), $gte: now },
+          }),
+          (await import("@/models/LunaAutonomousAction")).default.countDocuments({
+            status: "executed",
+            createdAt: { $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) },
+          }),
+        ]);
+
+        const overduePaymentTotal = (overduePaymentAgg as Array<{ total: number }>)[0]?.total || 0;
+
+        const managers = await User.find({
+          role: { $in: [UserRole.ADMIN, UserRole.MANAGER] },
+          deletedAt: null,
+        })
+          .select("email firstName lastName")
+          .limit(5)
+          .lean();
+
+        if (managers.length > 0) {
+          const primary = managers[0];
+          await lunaAutonomousService.generateSystemDigest({
+            entityType: "system",
+            data: {
+              propertyCount,
+              activeLeaseCount,
+              overduePaymentCount,
+              overduePaymentTotal,
+              openMaintenanceCount,
+              emergencyMaintenanceCount,
+              expiringLeasesCount,
+              actionsExecutedToday,
+              managerEmail: primary.email,
+              managerName: `${primary.firstName || ""} ${primary.lastName || ""}`.trim(),
+              managerId: String(primary._id),
+            },
+          });
+          lastDigestSentAt = now;
+          console.log(`[Luna Scheduler] Digest sent at ${now.toISOString()}`);
+        }
+      } catch (digestErr) {
+        console.error("[Luna Scheduler] Digest error:", digestErr);
+      }
     }
 
     console.log(`[Luna Scheduler] Cycle complete at ${now.toISOString()}`);

@@ -194,6 +194,7 @@ export async function POST(req: NextRequest) {
           description: String(mReq.description || ""),
           hoursUnassigned,
           isEmergency: false,
+          estimatedCost: typeof mReq.estimatedCost === "number" ? mReq.estimatedCost : undefined,
           tenantLocale: tenant.preferredLocale || "en-US",
         },
       });
@@ -238,6 +239,7 @@ export async function POST(req: NextRequest) {
           description: String(eReq.description || ""),
           hoursUnassigned,
           isEmergency: true,
+          estimatedCost: typeof eReq.estimatedCost === "number" ? eReq.estimatedCost : undefined,
           tenantLocale: tenant.preferredLocale || "en-US",
         },
       });
