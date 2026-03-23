@@ -17,6 +17,8 @@ import {
   LandingRolesGrid,
   LandingAiPractical,
   LandingMigrationComfort,
+  LandingDormitories,
+  LandingWhiteLabel,
   LandingFinalCta,
 } from "@/components/landing/home/LandingBelowFold";
 
@@ -97,8 +99,10 @@ export default function HomePage() {
           <LandingDifferentiator />
           <LandingWhySwitch />
           <LandingPricingComparison />
+          <LandingDormitories />
           <LandingIntegrationsVisual />
           <LandingRolesGrid />
+          <LandingWhiteLabel />
           <LandingAiPractical />
           <LandingMigrationComfort />
           <LandingFinalCta />

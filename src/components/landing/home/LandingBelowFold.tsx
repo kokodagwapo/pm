@@ -12,6 +12,7 @@ import {
   Calculator,
   Calendar,
   CalendarOff,
+  Check,
   Cloud,
   Cpu,
   ClipboardList,
@@ -893,6 +894,164 @@ export function LandingMigrationComfort() {
                 )}
               >
                 {t(k)}
+              </div>
+            ))}
+          </div>
+        </LandingReveal>
+      </div>
+    </section>
+  );
+}
+
+export function LandingDormitories() {
+  const { t } = useLocalizationContext();
+  const { theme } = useLandingTheme();
+  const dark = theme === "dark";
+  const items = [
+    "landing.home.dormitories.item.1",
+    "landing.home.dormitories.item.2",
+    "landing.home.dormitories.item.3",
+    "landing.home.dormitories.item.4",
+    "landing.home.dormitories.item.5",
+  ] as const;
+
+  return (
+    <section
+      id="dormitories"
+      data-landing-nav-bg="light"
+      className={cn(
+        "relative z-10 scroll-mt-24 border-t",
+        dark ? "border-white/[0.06] bg-[rgba(3,7,18,0.97)]" : "border-slate-200/80 bg-white"
+      )}
+    >
+      <div className="mx-auto max-w-6xl px-5 sm:px-8 py-16 sm:py-20">
+        <LandingReveal>
+          <div className="mb-4 flex justify-center">
+            <span
+              className={cn(
+                "inline-flex items-center justify-center rounded-2xl p-3 shadow-sm",
+                dark ? "bg-indigo-500/15 text-indigo-200" : "bg-indigo-100 text-indigo-800"
+              )}
+              aria-hidden
+            >
+              <Building2 className="h-5 w-5" strokeWidth={1.75} />
+            </span>
+          </div>
+          <p
+            className={cn(
+              "mb-4 text-center font-[var(--font-jakarta)] text-xs font-medium uppercase tracking-widest",
+              dark ? "text-white/50" : "text-slate-500"
+            )}
+          >
+            {t("landing.home.dormitories.kicker")}
+          </p>
+          <h2
+            className={cn(
+              "mb-3 text-center font-[var(--font-playfair)] text-balance text-3xl font-normal leading-[1.12] tracking-tight sm:text-4xl md:text-[2.75rem] md:leading-[1.1]",
+              dark ? "text-white" : "text-slate-900"
+            )}
+          >
+            {t("landing.home.dormitories.title")}
+          </h2>
+          <p
+            className={cn(
+              "mx-auto mb-12 max-w-xl text-center font-[var(--font-jakarta)] text-base font-normal leading-relaxed sm:mb-16 sm:text-lg",
+              dark ? "text-white/65" : "text-slate-600"
+            )}
+          >
+            {t("landing.home.dormitories.sub")}
+          </p>
+          <div className="mx-auto grid max-w-4xl gap-4 sm:gap-5">
+            {items.map((k) => (
+              <div
+                key={k}
+                className={cn(
+                  glassCard(dark),
+                  "rounded-xl px-4 py-4 sm:px-6 sm:py-4 flex items-start gap-3 text-[15px] font-normal leading-relaxed overflow-hidden min-w-0",
+                  dark ? "text-white/80" : "text-slate-800"
+                )}
+              >
+                <Check className={cn("h-5 w-5 shrink-0 mt-0.5", dark ? "text-indigo-400/80" : "text-indigo-600")} strokeWidth={2} />
+                <span className="min-w-0 break-words">{t(k)}</span>
+              </div>
+            ))}
+          </div>
+        </LandingReveal>
+      </div>
+    </section>
+  );
+}
+
+export function LandingWhiteLabel() {
+  const { t } = useLocalizationContext();
+  const { theme } = useLandingTheme();
+  const dark = theme === "dark";
+  const items = [
+    "landing.home.whitelabel.item.1",
+    "landing.home.whitelabel.item.2",
+    "landing.home.whitelabel.item.3",
+    "landing.home.whitelabel.item.4",
+    "landing.home.whitelabel.item.5",
+  ] as const;
+
+  return (
+    <section
+      id="whitelabel"
+      data-landing-nav-bg="light"
+      className={cn(
+        "relative z-10 scroll-mt-24 border-t",
+        dark ? "border-white/[0.06] bg-[rgba(2,6,15,0.97)]" : "border-slate-200/80 bg-slate-50"
+      )}
+    >
+      <div className="mx-auto max-w-6xl px-5 sm:px-8 py-16 sm:py-20">
+        <LandingReveal>
+          <div className="mb-4 flex justify-center">
+            <span
+              className={cn(
+                "inline-flex items-center justify-center rounded-2xl p-3 shadow-sm",
+                dark ? "bg-fuchsia-500/15 text-fuchsia-200" : "bg-fuchsia-100 text-fuchsia-800"
+              )}
+              aria-hidden
+            >
+              <Layers2 className="h-5 w-5" strokeWidth={1.75} />
+            </span>
+          </div>
+          <p
+            className={cn(
+              "mb-4 text-center font-[var(--font-jakarta)] text-xs font-medium uppercase tracking-widest",
+              dark ? "text-white/50" : "text-slate-500"
+            )}
+          >
+            {t("landing.home.whitelabel.kicker")}
+          </p>
+          <h2
+            className={cn(
+              "mb-3 text-center font-[var(--font-playfair)] text-balance text-3xl font-normal leading-[1.12] tracking-tight sm:text-4xl md:text-[2.75rem] md:leading-[1.1]",
+              dark ? "text-white" : "text-slate-900"
+            )}
+          >
+            {t("landing.home.whitelabel.title")}
+          </h2>
+          <p
+            className={cn(
+              "mx-auto mb-12 max-w-xl text-center font-[var(--font-jakarta)] text-base font-normal leading-relaxed sm:mb-16 sm:text-lg",
+              dark ? "text-white/65" : "text-slate-600"
+            )}
+          >
+            {t("landing.home.whitelabel.sub")}
+          </p>
+          <div className="mx-auto grid max-w-4xl gap-4 sm:gap-5">
+            {items.map((k) => (
+              <div
+                key={k}
+                className={cn(
+                  glassCard(dark),
+                  "rounded-xl px-4 py-4 sm:px-6 sm:py-4 flex items-start gap-3 text-[15px] font-normal leading-relaxed overflow-hidden min-w-0",
+                  dark ? "text-white/80" : "text-slate-800"
+                )}
+              >
+                <Check className={cn("h-5 w-5 shrink-0 mt-0.5", dark ? "text-fuchsia-400/80" : "text-fuchsia-600")} strokeWidth={2} />
+                <span className="min-w-0 break-words">{t(k)}</span>
               </div>
             ))}
           </div>
