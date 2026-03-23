@@ -39,14 +39,19 @@ async function classifySentimentWithFallback(
   if (totalMessages === 0) return { score: 0, method: "keyword", totalMessages: 0 };
 
   const openaiKey = process.env.OPENAI_API_KEY;
-  if (openaiKey && messages.length > 0) {
+  // LLM sentiment: only run when key is configured AND message count is low enough
+  // to avoid timeout/cost spikes during batch scoring (cron processes many tenants).
+  // Hard cap: skip LLM if more than 5 messages (keyword handles high volume).
+  // This prevents latency/cost spikes during nightly batch runs.
+  const LLM_MSG_CAP = 5;
+  if (openaiKey && messages.length > 0 && messages.length <= LLM_MSG_CAP) {
     try {
-      const sample = messages.slice(0, 10).join("\n---\n").slice(0, 2000);
+      const sample = messages.slice(0, 5).join("\n---\n").slice(0, 1000);
       const { default: OpenAI } = await import("openai");
-      const client = new OpenAI({ apiKey: openaiKey });
+      const client = new OpenAI({ apiKey: openaiKey, timeout: 5000 });
       const response = await client.chat.completions.create({
         model: "gpt-4o-mini",
-        max_tokens: 20,
+        max_tokens: 10,
         messages: [
           {
             role: "system",
@@ -60,7 +65,7 @@ async function classifySentimentWithFallback(
       const score = label === "positive" ? 3 : label === "negative" ? -3 : 0;
       return { score, method: "llm", totalMessages };
     } catch {
-      // Fall through to keyword
+      // Fall through to keyword on any error (timeout, quota, network)
     }
   }
 

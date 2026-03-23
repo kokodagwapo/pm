@@ -43,7 +43,15 @@ interface TenantIntelligenceThresholds {
   dedupWindowDays: number;
 }
 
-/** Load configurable thresholds from LunaSettings or return defaults */
+/**
+ * Load configurable thresholds from LunaSettings or return defaults.
+ *
+ * NOTE: Thresholds are intentionally derived from LunaSettings for v1 so
+ * managers configure risk tolerance once across all Luna-aware features.
+ * confidenceThreshold → churnHighThreshold, humanReviewThreshold → delinquencyRiskThreshold.
+ * A dedicated TenantIntelligenceSettings source can be introduced in a future iteration
+ * to decouple these from the general Luna AI settings.
+ */
 async function loadThresholds(): Promise<TenantIntelligenceThresholds> {
   try {
     const LunaSettings = (await import("@/models/LunaSettings")).default;
@@ -196,32 +204,36 @@ export async function POST(req: NextRequest) {
               const daysUntilDue = Math.ceil((dueDate.getTime() - now.getTime()) / 86400000);
 
               let delinquencyNotified = false;
-              if (lunaMode === "full") {
-                // Full autonomy: notify tenant directly
-                await notificationService.sendNotification({
-                  type: NotificationType.PAYMENT_REMINDER,
-                  priority: NotificationPriority.HIGH,
-                  userId: tt._id.toString(),
-                  title: "Upcoming Payment Reminder",
-                  message: `Hi ${tt.firstName || "there"}, your rent payment is due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Please ensure your payment is submitted on time to avoid any late fees.`,
-                });
-                results.delinquencyWarnings++;
-                delinquencyNotified = true;
-              } else if (lunaMode === "supervised" && managerIds.length > 0) {
-                // Supervised: alert managers, do NOT message tenant directly
-                for (const mgId of managerIds) {
+              try {
+                if (lunaMode === "full") {
+                  // Full autonomy: notify tenant directly
                   await notificationService.sendNotification({
                     type: NotificationType.PAYMENT_REMINDER,
                     priority: NotificationPriority.HIGH,
-                    userId: mgId,
-                    title: `Delinquency Risk: ${tt.firstName || ""} ${tt.lastName || ""}`,
-                    message: `Tenant ${tt.firstName || ""} ${tt.lastName || ""} has ${score.delinquencyProbabilityPct}% delinquency risk with a payment due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Manual follow-up recommended.`,
+                    userId: tt._id.toString(),
+                    title: "Upcoming Payment Reminder",
+                    message: `Hi ${tt.firstName || "there"}, your rent payment is due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Please ensure your payment is submitted on time to avoid any late fees.`,
                   });
+                  results.delinquencyWarnings++;
+                  delinquencyNotified = true;
+                } else if (lunaMode === "supervised" && managerIds.length > 0) {
+                  // Supervised: alert managers, do NOT message tenant directly
+                  for (const mgId of managerIds) {
+                    await notificationService.sendNotification({
+                      type: NotificationType.PAYMENT_REMINDER,
+                      priority: NotificationPriority.HIGH,
+                      userId: mgId,
+                      title: `Delinquency Risk: ${tt.firstName || ""} ${tt.lastName || ""}`,
+                      message: `Tenant ${tt.firstName || ""} ${tt.lastName || ""} has ${score.delinquencyProbabilityPct}% delinquency risk with a payment due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Manual follow-up recommended.`,
+                    });
+                  }
+                  results.supervisedManagerAlerts++;
+                  delinquencyNotified = true;
+                } else if (lunaMode === "off") {
+                  results.skippedByLuna++;
                 }
-                results.supervisedManagerAlerts++;
-                delinquencyNotified = true;
-              } else if (lunaMode === "off") {
-                results.skippedByLuna++;
+              } catch {
+                results.errors++;
               }
 
               // Only stamp dedup timestamp when a notification was actually dispatched
@@ -250,32 +262,36 @@ export async function POST(req: NextRequest) {
             results.skippedByDedup++;
           } else {
             let leaseExpiryNotified = false;
-            if (lunaMode === "full") {
-              // Full autonomy: notify tenant
-              await notificationService.sendNotification({
-                type: NotificationType.LEASE_EXPIRY,
-                priority: NotificationPriority.NORMAL,
-                userId: tt._id.toString(),
-                title: "Your Lease Expires Soon",
-                message: `Hi ${tt.firstName || "there"}, your lease expires in ${daysUntilExpiry} days. Please contact your property manager to discuss renewal options.`,
-              });
-              results.leaseExpiryAlerts++;
-              leaseExpiryNotified = true;
-            } else if (lunaMode === "supervised" && managerIds.length > 0) {
-              // Supervised: alert managers
-              for (const mgId of managerIds) {
+            try {
+              if (lunaMode === "full") {
+                // Full autonomy: notify tenant
                 await notificationService.sendNotification({
                   type: NotificationType.LEASE_EXPIRY,
                   priority: NotificationPriority.NORMAL,
-                  userId: mgId,
-                  title: `Lease Expiring: ${tt.firstName || ""} ${tt.lastName || ""}`,
-                  message: `Tenant ${tt.firstName || ""} ${tt.lastName || ""}'s lease expires in ${daysUntilExpiry} days. Review renewal status and follow up.`,
+                  userId: tt._id.toString(),
+                  title: "Your Lease Expires Soon",
+                  message: `Hi ${tt.firstName || "there"}, your lease expires in ${daysUntilExpiry} days. Please contact your property manager to discuss renewal options.`,
                 });
+                results.leaseExpiryAlerts++;
+                leaseExpiryNotified = true;
+              } else if (lunaMode === "supervised" && managerIds.length > 0) {
+                // Supervised: alert managers
+                for (const mgId of managerIds) {
+                  await notificationService.sendNotification({
+                    type: NotificationType.LEASE_EXPIRY,
+                    priority: NotificationPriority.NORMAL,
+                    userId: mgId,
+                    title: `Lease Expiring: ${tt.firstName || ""} ${tt.lastName || ""}`,
+                    message: `Tenant ${tt.firstName || ""} ${tt.lastName || ""}'s lease expires in ${daysUntilExpiry} days. Review renewal status and follow up.`,
+                  });
+                }
+                results.supervisedManagerAlerts++;
+                leaseExpiryNotified = true;
+              } else if (lunaMode === "off") {
+                results.skippedByLuna++;
               }
-              results.supervisedManagerAlerts++;
-              leaseExpiryNotified = true;
-            } else if (lunaMode === "off") {
-              results.skippedByLuna++;
+            } catch {
+              results.errors++;
             }
 
             // Only stamp dedup timestamp when a notification was actually dispatched
@@ -293,41 +309,45 @@ export async function POST(req: NextRequest) {
           score.churnRiskLevel === "high" && prevChurnLevel !== "high" && !prevInterventionSent;
 
         if (churnEscalated) {
-          if (lunaMode === "off") {
-            results.skippedByLuna++;
-          } else if (lunaMode === "supervised") {
-            // Supervised: alert managers only, do NOT message tenant
-            for (const mgId of managerIds) {
+          try {
+            if (lunaMode === "off") {
+              results.skippedByLuna++;
+            } else if (lunaMode === "supervised") {
+              // Supervised: alert managers only, do NOT message tenant
+              for (const mgId of managerIds) {
+                await notificationService.sendNotification({
+                  type: NotificationType.SYSTEM_ANNOUNCEMENT,
+                  priority: NotificationPriority.HIGH,
+                  userId: mgId,
+                  title: `High Churn Risk: ${tt.firstName || ""} ${tt.lastName || ""}`,
+                  message: `Tenant ${tt.firstName || ""} ${tt.lastName || ""} has escalated to HIGH churn risk (score: ${score.churnRiskScore}/100). Consider sending a retention offer or scheduling a call.`,
+                });
+              }
+              results.supervisedManagerAlerts++;
+
+              await TenantIntelligence.findOneAndUpdate(
+                { tenantId: tt._id },
+                { $set: { interventionSent: true, interventionSentAt: now } }
+              );
+              results.churnInterventions++;
+            } else if (lunaMode === "full") {
+              // Full autonomy: send retention offer to tenant directly
               await notificationService.sendNotification({
                 type: NotificationType.SYSTEM_ANNOUNCEMENT,
                 priority: NotificationPriority.HIGH,
-                userId: mgId,
-                title: `High Churn Risk: ${tt.firstName || ""} ${tt.lastName || ""}`,
-                message: `Tenant ${tt.firstName || ""} ${tt.lastName || ""} has escalated to HIGH churn risk (score: ${score.churnRiskScore}/100). Consider sending a retention offer or scheduling a call.`,
+                userId: tt._id.toString(),
+                title: "We Value Your Tenancy",
+                message: `Hi ${tt.firstName || "there"}, we noticed you may have some concerns. We'd love to connect and make sure your experience is great. Please reply to schedule a quick call with your property manager.`,
               });
+
+              await TenantIntelligence.findOneAndUpdate(
+                { tenantId: tt._id },
+                { $set: { interventionSent: true, interventionSentAt: now } }
+              );
+              results.churnInterventions++;
             }
-            results.supervisedManagerAlerts++;
-
-            await TenantIntelligence.findOneAndUpdate(
-              { tenantId: tt._id },
-              { $set: { interventionSent: true, interventionSentAt: now } }
-            );
-            results.churnInterventions++;
-          } else if (lunaMode === "full") {
-            // Full autonomy: send retention offer to tenant directly
-            await notificationService.sendNotification({
-              type: NotificationType.SYSTEM_ANNOUNCEMENT,
-              priority: NotificationPriority.HIGH,
-              userId: tt._id.toString(),
-              title: "We Value Your Tenancy",
-              message: `Hi ${tt.firstName || "there"}, we noticed you may have some concerns. We'd love to connect and make sure your experience is great. Please reply to schedule a quick call with your property manager.`,
-            });
-
-            await TenantIntelligence.findOneAndUpdate(
-              { tenantId: tt._id },
-              { $set: { interventionSent: true, interventionSentAt: now } }
-            );
-            results.churnInterventions++;
+          } catch {
+            results.errors++;
           }
         }
       } catch {
