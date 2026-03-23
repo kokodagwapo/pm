@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useBranding } from "@/components/providers/BrandingProvider";
@@ -111,22 +111,16 @@ export function PwaInstallHint({
           className={cn(
             "relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl shadow-lg",
             variant === "light"
-              ? "bg-gradient-to-br from-slate-50 to-white ring-1 ring-slate-200/90 shadow-slate-900/[0.06]"
-              : "bg-gradient-to-br from-white/20 to-white/[0.06] ring-1 ring-white/25 shadow-black/25"
+              ? "bg-gradient-to-br from-blue-50 to-indigo-50 ring-1 ring-blue-200/90 shadow-blue-900/[0.08]"
+              : "bg-gradient-to-br from-blue-600 to-indigo-600 ring-1 ring-white/25 shadow-blue-900/25"
           )}
           aria-hidden
         >
-          <img
-            src={logoSrc}
-            alt=""
-            width={44}
-            height={44}
-            className="h-[2.125rem] w-[2.125rem] object-contain"
-            onError={(e) => {
-              if (iconFallbackDone.current) return;
-              iconFallbackDone.current = true;
-              e.currentTarget.src = DEFAULT_VECTOR_LOGO;
-            }}
+          <Download
+            className={cn(
+              "h-6 w-6",
+              variant === "light" ? "text-blue-600" : "text-white"
+            )}
           />
         </div>
         <div
