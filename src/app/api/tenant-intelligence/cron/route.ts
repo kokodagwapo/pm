@@ -207,7 +207,7 @@ export async function POST(req: NextRequest) {
               try {
                 if (lunaMode === "full") {
                   // Full autonomy: notify tenant directly
-                  await notificationService.sendNotification({
+                  const sent = await notificationService.sendNotification({
                     type: NotificationType.PAYMENT_REMINDER,
                     priority: NotificationPriority.HIGH,
                     userId: tt._id.toString(),
@@ -219,13 +219,13 @@ export async function POST(req: NextRequest) {
                       daysUntilDue,
                     },
                   });
-                  results.delinquencyWarnings++;
-                  delinquencyNotified = true;
+                  if (sent) { results.delinquencyWarnings++; delinquencyNotified = true; }
                 } else if (lunaMode === "supervised" && managerIds.length > 0) {
                   // Supervised: alert managers, do NOT message tenant directly
                   const tenantFullName = `${tt.firstName || ""} ${tt.lastName || ""}`.trim();
+                  let anySent = false;
                   for (const mgId of managerIds) {
-                    await notificationService.sendNotification({
+                    const mgSent = await notificationService.sendNotification({
                       type: NotificationType.PAYMENT_REMINDER,
                       priority: NotificationPriority.HIGH,
                       userId: mgId,
@@ -233,9 +233,9 @@ export async function POST(req: NextRequest) {
                       message: `Tenant ${tenantFullName} has ${score.delinquencyProbabilityPct}% delinquency risk with a payment due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Manual follow-up recommended.`,
                       data: { tenantName: tenantFullName, tenantEmail: tt.email, daysUntilDue },
                     });
+                    if (mgSent) anySent = true;
                   }
-                  results.supervisedManagerAlerts++;
-                  delinquencyNotified = true;
+                  if (anySent) { results.supervisedManagerAlerts++; delinquencyNotified = true; }
                 } else if (lunaMode === "off") {
                   results.skippedByLuna++;
                 }
@@ -273,7 +273,7 @@ export async function POST(req: NextRequest) {
               const leaseFullName = `${tt.firstName || ""} ${tt.lastName || ""}`.trim();
               if (lunaMode === "full") {
                 // Full autonomy: notify tenant
-                await notificationService.sendNotification({
+                const leaseSent = await notificationService.sendNotification({
                   type: NotificationType.LEASE_EXPIRY,
                   priority: NotificationPriority.NORMAL,
                   userId: tt._id.toString(),
@@ -285,12 +285,12 @@ export async function POST(req: NextRequest) {
                     daysUntilExpiry,
                   },
                 });
-                results.leaseExpiryAlerts++;
-                leaseExpiryNotified = true;
+                if (leaseSent) { results.leaseExpiryAlerts++; leaseExpiryNotified = true; }
               } else if (lunaMode === "supervised" && managerIds.length > 0) {
                 // Supervised: alert managers
+                let anyLeaseSent = false;
                 for (const mgId of managerIds) {
-                  await notificationService.sendNotification({
+                  const mgLeaseSent = await notificationService.sendNotification({
                     type: NotificationType.LEASE_EXPIRY,
                     priority: NotificationPriority.NORMAL,
                     userId: mgId,
@@ -298,9 +298,9 @@ export async function POST(req: NextRequest) {
                     message: `Tenant ${leaseFullName}'s lease expires in ${daysUntilExpiry} days. Review renewal status and follow up.`,
                     data: { tenantName: leaseFullName, tenantEmail: tt.email, daysUntilExpiry },
                   });
+                  if (mgLeaseSent) anyLeaseSent = true;
                 }
-                results.supervisedManagerAlerts++;
-                leaseExpiryNotified = true;
+                if (anyLeaseSent) { results.supervisedManagerAlerts++; leaseExpiryNotified = true; }
               } else if (lunaMode === "off") {
                 results.skippedByLuna++;
               }
@@ -361,7 +361,7 @@ export async function POST(req: NextRequest) {
               const template = await getTemplateById(templateId);
               const interventionMsg = template?.message ?? "Your property manager would like to connect with you. Please reply at your convenience.";
               const interventionFullName = `${tt.firstName || ""} ${tt.lastName || ""}`.trim();
-              await notificationService.sendNotification({
+              const churnSent = await notificationService.sendNotification({
                 type: NotificationType.SYSTEM_ANNOUNCEMENT,
                 priority: NotificationPriority.HIGH,
                 userId: tt._id.toString(),
@@ -375,11 +375,13 @@ export async function POST(req: NextRequest) {
                 },
               });
 
-              await TenantIntelligence.findOneAndUpdate(
-                { tenantId: tt._id },
-                { $set: { interventionSent: true, interventionSentAt: now } }
-              );
-              results.churnInterventions++;
+              if (churnSent) {
+                await TenantIntelligence.findOneAndUpdate(
+                  { tenantId: tt._id },
+                  { $set: { interventionSent: true, interventionSentAt: now } }
+                );
+                results.churnInterventions++;
+              }
             }
           } catch {
             results.errors++;

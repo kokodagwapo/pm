@@ -184,16 +184,18 @@ export async function computeTenantScores(
       try {
         const Message = (await import("@/models/Message")).default;
         const Conversation = (await import("@/models/Conversation")).default;
+        // Include all non-archived conversations (not just recently-created ones)
+        // so we capture recent messages in long-running conversations.
         const convs = await Conversation.find({
           "participants.userId": tenantObjId,
           isArchived: false,
           deletedAt: null,
-          createdAt: { $gte: threeMonthsAgo },
         })
           .select("_id")
           .lean();
         if (convs.length === 0) return { content: [], totalConversations: 0, repliedConversations: 0, avgReplyLatencyMinutes: 0 };
         const convIds = convs.map((c) => (c as unknown as { _id: mongoose.Types.ObjectId })._id);
+        // Only fetch messages from the last 3 months — recency window applied to messages
         const msgs = await Message.find({
           conversationId: { $in: convIds },
           deletedAt: null,
