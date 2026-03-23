@@ -85,13 +85,15 @@ export async function POST(req: NextRequest) {
     if (action === "review" && actionId) {
       await connectDB();
 
-      // Enforce roleAutonomyConfig: only roles with canApproveActions may review
-      const settings = lunaAutonomousService.getSettings();
+      // Enforce roleAutonomyConfig: reload from DB to avoid stale in-memory settings
+      const LunaSettings = (await import("@/models/LunaSettings")).default;
+      const dbSettings = await LunaSettings.findOne({}).lean();
       const userRole = session.user.role as string;
-      const roleConfig = Array.isArray(settings.roleAutonomyConfig)
-        ? settings.roleAutonomyConfig.find((r) => r.role === userRole)
-        : undefined;
-      if (roleConfig && !roleConfig.canApproveActions) {
+      const roleAutonomyConfig = Array.isArray(dbSettings?.roleAutonomyConfig)
+        ? dbSettings.roleAutonomyConfig
+        : lunaAutonomousService.getSettings().roleAutonomyConfig;
+      const roleConfig = roleAutonomyConfig.find((r: { role: string }) => r.role === userRole);
+      if (roleConfig && !(roleConfig as { canApproveActions?: boolean }).canApproveActions) {
         return NextResponse.json(
           { error: "Your role is not permitted to approve Luna actions" },
           { status: 403 }
@@ -151,13 +153,15 @@ export async function POST(req: NextRequest) {
     if (action === "undo" && actionId) {
       await connectDB();
 
-      // Enforce roleAutonomyConfig: only roles with canOverrideActions may undo
-      const settings = lunaAutonomousService.getSettings();
-      const userRole = session.user.role as string;
-      const roleConfig = Array.isArray(settings.roleAutonomyConfig)
-        ? settings.roleAutonomyConfig.find((r) => r.role === userRole)
-        : undefined;
-      if (roleConfig && !roleConfig.canOverrideActions) {
+      // Enforce roleAutonomyConfig: reload from DB to avoid stale in-memory settings
+      const LunaSettings2 = (await import("@/models/LunaSettings")).default;
+      const dbSettings2 = await LunaSettings2.findOne({}).lean();
+      const userRole2 = session.user.role as string;
+      const roleAutonomyConfig2 = Array.isArray(dbSettings2?.roleAutonomyConfig)
+        ? dbSettings2.roleAutonomyConfig
+        : lunaAutonomousService.getSettings().roleAutonomyConfig;
+      const roleConfig2 = roleAutonomyConfig2.find((r: { role: string }) => r.role === userRole2);
+      if (roleConfig2 && !(roleConfig2 as { canOverrideActions?: boolean }).canOverrideActions) {
         return NextResponse.json(
           { error: "Your role is not permitted to override Luna actions" },
           { status: 403 }

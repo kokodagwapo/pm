@@ -412,39 +412,19 @@ export class LunaAutonomousService {
   }
 
   /**
-   * Claim an action slot atomically using the dedupKey unique index.
-   * Returns false if the slot was already claimed (duplicate), true if claimed now.
-   * The caller MUST call this before executing any side effects.
+   * Atomically claim an action slot via a dedicated lock collection (LunaActionLock).
+   * Uses MongoDB's unique index + upsert to prevent concurrent duplicate execution.
+   * The lock collection has a TTL index and does NOT write to the actions log.
+   * Returns true if the slot was claimed, false if already locked (duplicate).
    */
   private async claimActionSlot(entityId: string, category: LunaActionCategory): Promise<boolean> {
     if (!entityId) return true;
     await connectDB();
-    const windowHours = Math.ceil(COOLDOWN_MS / 3_600_000);
+    const LunaActionLock = (await import("@/models/LunaActionLock")).default;
     const windowBucket = Math.floor(Date.now() / COOLDOWN_MS);
-    const dedupKey = `${entityId}::${category}::${windowBucket}`;
+    const lockKey = `${entityId}::${category}::${windowBucket}`;
     try {
-      await LunaAutonomousAction.updateOne(
-        { dedupKey },
-        {
-          $setOnInsert: {
-            dedupKey,
-            category,
-            triggerEntityId: entityId,
-            triggerEntityType: "system",
-            triggerEvent: "dedup_claim",
-            title: `[Dedup] ${category}`,
-            description: `Dedup slot for ${entityId} window ${windowBucket}`,
-            reasoning: `Claimed at window ${windowBucket} (${windowHours}h TTL)`,
-            confidence: 0,
-            status: "skipped",
-            actionsTaken: [],
-            notificationsSent: [],
-            humanReviewRequired: false,
-            metadata: {},
-          },
-        },
-        { upsert: true }
-      );
+      await LunaActionLock.create({ lockKey });
       return true;
     } catch (err: unknown) {
       if (
