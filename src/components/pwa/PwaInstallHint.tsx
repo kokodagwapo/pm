@@ -33,7 +33,6 @@ export function PwaInstallHint({
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [standalone, setStandalone] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
   const logoSrc = useMemo(() => {
     const f = branding.favicon?.trim();
@@ -53,19 +52,6 @@ export function PwaInstallHint({
     check();
     mq.addEventListener("change", check);
     return () => mq.removeEventListener("change", check);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mobileQuery = window.matchMedia("(max-width: 767px)");
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsMobile(e.matches);
-    };
-
-    setIsMobile(mobileQuery.matches);
-    mobileQuery.addEventListener("change", handleChange);
-    return () => mobileQuery.removeEventListener("change", handleChange);
   }, []);
 
   useEffect(() => {
@@ -103,7 +89,7 @@ export function PwaInstallHint({
     dismiss();
   }, [deferred, dismiss]);
 
-  if (!visible || !deferred || !isMobile) return null;
+  if (!visible || !deferred) return null;
 
   return (
     <div

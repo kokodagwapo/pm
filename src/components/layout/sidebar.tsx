@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useMemo, useState, useCallback, memo, useEffect } from "react";
+import { useMemo, useState, useCallback, memo } from "react";
 import { useUserAvatar } from "@/components/providers/UserAvatarProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -299,7 +299,6 @@ const NavItemComponent = memo(function NavItemComponent({
   toggleExpanded,
   t,
   isLight,
-  isMobile,
 }: {
   item: NavItem;
   level: number;
@@ -310,7 +309,6 @@ const NavItemComponent = memo(function NavItemComponent({
   toggleExpanded: (href: string) => void;
   t: (key: string) => string;
   isLight: boolean;
-  isMobile: boolean;
 }) {
   const isActive = pathname === item.href;
   const hasChildren = item.children && item.children.length > 0;
@@ -357,7 +355,7 @@ const NavItemComponent = memo(function NavItemComponent({
     isCollapsed && level === 0 && "justify-center px-1",
   );
 
-  const useButton = isMobile && hasChildren && filteredChildren && filteredChildren.length > 0;
+  const useButton = hasChildren && filteredChildren && filteredChildren.length > 0;
 
   return (
     <div>
@@ -476,7 +474,6 @@ const NavItemComponent = memo(function NavItemComponent({
                   toggleExpanded={toggleExpanded}
                   t={t}
                   isLight={isLight}
-                  isMobile={isMobile}
                 />
               ))}
             </div>
@@ -492,7 +489,6 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
   const isCollapsed = collapseCtx?.isCollapsed ?? false;
   const setIsCollapsed = collapseCtx?.setIsCollapsed ?? (() => {});
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
   const { avatarUrl } = useUserAvatar();
   const { data: session } = useSession();
@@ -500,19 +496,6 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
   const { isLight } = useDashboardAppearance();
 
   const userRole = session?.user?.role as UserRole;
-
-  // Detect mobile breakpoint (< 768px)
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 767px)");
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsMobile(e.matches);
-    };
-
-    setIsMobile(mediaQuery.matches);
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
 
   const dashboardLogoSrc = isLight ? "/images/logo-light.svg" : "/images/logo-dark.svg";
 
@@ -629,7 +612,6 @@ export const Sidebar = memo(function Sidebar({ className }: SidebarProps) {
                   toggleExpanded={toggleExpanded}
                   t={t}
                   isLight={isLight}
-                  isMobile={isMobile}
                 />
               ))}
             </div>
