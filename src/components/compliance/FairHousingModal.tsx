@@ -16,9 +16,24 @@ const SEVERITY_COLORS = {
   medium: "text-amber-500 bg-amber-500/10 border-amber-500/20",
 };
 
+interface FairHousingIssue {
+  pattern: string;
+  match: string;
+  severity: "critical" | "high" | "medium";
+  explanation: string;
+  suggestion: string;
+}
+
+interface FairHousingResult {
+  compliant: boolean;
+  score: number;
+  issues: FairHousingIssue[];
+  recommendations: string[];
+}
+
 export default function FairHousingModal({ isLight, onClose }: Props) {
   const [text, setText] = useState("");
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<FairHousingResult | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleAnalyze = async () => {
@@ -139,7 +154,7 @@ export default function FairHousingModal({ isLight, onClose }: Props) {
                   <p className={cn("text-xs font-semibold uppercase tracking-wider", isLight ? "text-slate-500" : "text-white/50")}>
                     Issues Detected
                   </p>
-                  {result.issues.map((issue: any, i: number) => (
+                  {result.issues.map((issue: FairHousingIssue, i: number) => (
                     <div
                       key={i}
                       className={cn("rounded-lg border p-3 text-xs", SEVERITY_COLORS[issue.severity as keyof typeof SEVERITY_COLORS])}

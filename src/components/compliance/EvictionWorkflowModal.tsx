@@ -42,9 +42,34 @@ interface Props {
   onClose: () => void;
 }
 
+interface EvictionStep {
+  step: number;
+  title: string;
+  description: string;
+  daysFromStart: number;
+  requiredDocuments: string[];
+  legalReference?: string;
+  warnings?: string[];
+}
+
+interface EvictionResult {
+  stateCode: string;
+  stateName: string;
+  reason: string;
+  noticePeriodDays: number;
+  totalEstimatedDays: number;
+  workflow: {
+    steps: EvictionStep[];
+    requiredDocuments: string[];
+    importantNotes: string[];
+    estimatedCost: string;
+  };
+  fairHousingReminder: string;
+}
+
 export default function EvictionWorkflowModal({ isLight, onClose }: Props) {
   const [form, setForm] = useState({ stateCode: "FL", reason: "Non-payment of rent", tenantName: "", propertyAddress: "" });
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<EvictionResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [expandedStep, setExpandedStep] = useState<number | null>(0);
 
@@ -192,7 +217,7 @@ export default function EvictionWorkflowModal({ isLight, onClose }: Props) {
               )}
 
               <div className="space-y-2">
-                {result.workflow.steps.map((step: any, i: number) => (
+                {result.workflow.steps.map((step: EvictionStep, i: number) => (
                   <div
                     key={i}
                     className={cn("overflow-hidden rounded-xl border transition-all", isLight ? "border-slate-200" : "border-white/[0.08]")}

@@ -30,6 +30,28 @@ interface Props {
   onClose: () => void;
 }
 
+interface RentResult {
+  currentRent: number;
+  proposedIncrease: number;
+  proposedIncreasePercent: number;
+  newRent: number;
+  stateCode: string;
+  jurisdictionRule?: {
+    title: string;
+    maxRentIncreasePercent?: number;
+    rentControlled: boolean;
+    noticePeriodDays?: number;
+    description: string;
+  };
+  compliance: {
+    isCompliant: boolean;
+    issues: string[];
+    recommendations: string[];
+    requiredNoticeDays: number;
+    effectiveDate: string;
+  };
+}
+
 export default function RentCalculatorModal({ isLight, onClose }: Props) {
   const [form, setForm] = useState({
     currentRent: "",
@@ -37,7 +59,7 @@ export default function RentCalculatorModal({ isLight, onClose }: Props) {
     stateCode: "FL",
     noticeDays: "30",
   });
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<RentResult | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleCalculate = async () => {

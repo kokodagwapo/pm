@@ -29,8 +29,14 @@ const CATEGORIES = [
   { value: "general", label: "General" },
 ];
 
+interface PropertyOption {
+  _id: string;
+  name: string;
+  address?: { city?: string; state?: string };
+}
+
 export default function AddObligationModal({ isLight, onClose, onCreated }: Props) {
-  const [properties, setProperties] = useState<any[]>([]);
+  const [properties, setProperties] = useState<PropertyOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     propertyId: "",
@@ -56,8 +62,9 @@ export default function AddObligationModal({ isLight, onClose, onCreated }: Prop
     if (!form.propertyId || !form.title || !form.description) return;
     setLoading(true);
     try {
-      const payload: any = { ...form };
-      if (!payload.dueDate) delete payload.dueDate;
+      const { dueDate, ...rest } = form;
+      const payload: Record<string, string> = { ...rest };
+      if (dueDate) payload.dueDate = dueDate;
       const res = await fetch("/api/compliance/obligations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

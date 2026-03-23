@@ -108,15 +108,36 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const data = await request.json();
+    const body = await request.json();
 
-    if (data.status === "completed" && !data.completedDate) {
-      data.completedDate = new Date();
+    const ALLOWED_FIELDS = [
+      "status",
+      "title",
+      "description",
+      "severity",
+      "dueDate",
+      "assignedTo",
+      "notes",
+      "reminderDays",
+      "completedDate",
+    ] as const;
+
+    type AllowedField = typeof ALLOWED_FIELDS[number];
+
+    const update: Partial<Record<AllowedField, unknown>> & { completedDate?: Date } = {};
+    for (const key of ALLOWED_FIELDS) {
+      if (key in body) {
+        update[key] = body[key];
+      }
+    }
+
+    if (update.status === "completed" && !update.completedDate) {
+      update.completedDate = new Date();
     }
 
     const obligation = await ComplianceObligation.findByIdAndUpdate(
       id,
-      { $set: data },
+      { $set: update },
       { new: true }
     )
       .populate("propertyId", "name address")
