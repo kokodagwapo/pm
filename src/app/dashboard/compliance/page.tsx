@@ -286,6 +286,18 @@ export default function CompliancePage() {
     fetchObligations();
   }, [fetchObligations]);
 
+  // Handle hash navigation for modal opening
+  useEffect(() => {
+    const hash = window.location.hash.substring(1);
+    if (hash === "rent" || hash === "eviction" || hash === "fairHousing") {
+      setActiveModal(hash as "rent" | "eviction" | "fairHousing");
+      // Smooth scroll to tools section if modal opens
+      setTimeout(() => {
+        document.querySelector('[data-tools-section]')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, []);
+
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
       await fetch(`/api/compliance/obligations/${id}`, {
@@ -367,7 +379,7 @@ export default function CompliancePage() {
       </div>
 
       {/* Tools Grid */}
-      <div>
+      <div data-tools-section>
         <h2 className={cn("mb-3 text-sm font-semibold uppercase tracking-wider", isLight ? "text-slate-500" : "text-white/50")}>
           Compliance Tools
         </h2>
