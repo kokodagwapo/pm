@@ -409,7 +409,7 @@ export default function AnalyticsPage() {
         </AnalyticsCardGrid>
       )}
 
-      {["admin", "manager"].includes(
+      {["admin", "manager", "owner"].includes(
         ((session?.user as { role?: string })?.role || "").toLowerCase()
       ) && (
         <Link href="/dashboard/analytics/tenant-intelligence" className="block">

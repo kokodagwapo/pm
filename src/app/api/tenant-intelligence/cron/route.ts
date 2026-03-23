@@ -195,6 +195,7 @@ export async function POST(req: NextRequest) {
               const dueDate = new Date((upcomingPayment as unknown as { dueDate: Date }).dueDate);
               const daysUntilDue = Math.ceil((dueDate.getTime() - now.getTime()) / 86400000);
 
+              let delinquencyNotified = false;
               if (lunaMode === "full") {
                 // Full autonomy: notify tenant directly
                 await notificationService.sendNotification({
@@ -205,6 +206,7 @@ export async function POST(req: NextRequest) {
                   message: `Hi ${tt.firstName || "there"}, your rent payment is due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Please ensure your payment is submitted on time to avoid any late fees.`,
                 });
                 results.delinquencyWarnings++;
+                delinquencyNotified = true;
               } else if (lunaMode === "supervised" && managerIds.length > 0) {
                 // Supervised: alert managers, do NOT message tenant directly
                 for (const mgId of managerIds) {
@@ -217,14 +219,18 @@ export async function POST(req: NextRequest) {
                   });
                 }
                 results.supervisedManagerAlerts++;
+                delinquencyNotified = true;
               } else if (lunaMode === "off") {
                 results.skippedByLuna++;
               }
 
-              await TenantIntelligence.findOneAndUpdate(
-                { tenantId: tt._id },
-                { $set: { lastDelinquencyWarnAt: now } }
-              );
+              // Only stamp dedup timestamp when a notification was actually dispatched
+              if (delinquencyNotified) {
+                await TenantIntelligence.findOneAndUpdate(
+                  { tenantId: tt._id },
+                  { $set: { lastDelinquencyWarnAt: now } }
+                );
+              }
             }
           }
         }
@@ -243,6 +249,7 @@ export async function POST(req: NextRequest) {
           if (recentlySentExpiry) {
             results.skippedByDedup++;
           } else {
+            let leaseExpiryNotified = false;
             if (lunaMode === "full") {
               // Full autonomy: notify tenant
               await notificationService.sendNotification({
@@ -253,6 +260,7 @@ export async function POST(req: NextRequest) {
                 message: `Hi ${tt.firstName || "there"}, your lease expires in ${daysUntilExpiry} days. Please contact your property manager to discuss renewal options.`,
               });
               results.leaseExpiryAlerts++;
+              leaseExpiryNotified = true;
             } else if (lunaMode === "supervised" && managerIds.length > 0) {
               // Supervised: alert managers
               for (const mgId of managerIds) {
@@ -265,14 +273,18 @@ export async function POST(req: NextRequest) {
                 });
               }
               results.supervisedManagerAlerts++;
+              leaseExpiryNotified = true;
             } else if (lunaMode === "off") {
               results.skippedByLuna++;
             }
 
-            await TenantIntelligence.findOneAndUpdate(
-              { tenantId: tt._id },
-              { $set: { lastLeaseExpiryAlertAt: now } }
-            );
+            // Only stamp dedup timestamp when a notification was actually dispatched
+            if (leaseExpiryNotified) {
+              await TenantIntelligence.findOneAndUpdate(
+                { tenantId: tt._id },
+                { $set: { lastLeaseExpiryAlertAt: now } }
+              );
+            }
           }
         }
 
