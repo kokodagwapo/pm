@@ -213,18 +213,25 @@ export async function POST(req: NextRequest) {
                     userId: tt._id.toString(),
                     title: "Upcoming Payment Reminder",
                     message: `Hi ${tt.firstName || "there"}, your rent payment is due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Please ensure your payment is submitted on time to avoid any late fees.`,
+                    data: {
+                      userEmail: tt.email,
+                      userName: `${tt.firstName || ""} ${tt.lastName || ""}`.trim(),
+                      daysUntilDue,
+                    },
                   });
                   results.delinquencyWarnings++;
                   delinquencyNotified = true;
                 } else if (lunaMode === "supervised" && managerIds.length > 0) {
                   // Supervised: alert managers, do NOT message tenant directly
+                  const tenantFullName = `${tt.firstName || ""} ${tt.lastName || ""}`.trim();
                   for (const mgId of managerIds) {
                     await notificationService.sendNotification({
                       type: NotificationType.PAYMENT_REMINDER,
                       priority: NotificationPriority.HIGH,
                       userId: mgId,
-                      title: `Delinquency Risk: ${tt.firstName || ""} ${tt.lastName || ""}`,
-                      message: `Tenant ${tt.firstName || ""} ${tt.lastName || ""} has ${score.delinquencyProbabilityPct}% delinquency risk with a payment due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Manual follow-up recommended.`,
+                      title: `Delinquency Risk: ${tenantFullName}`,
+                      message: `Tenant ${tenantFullName} has ${score.delinquencyProbabilityPct}% delinquency risk with a payment due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}. Manual follow-up recommended.`,
+                      data: { tenantName: tenantFullName, tenantEmail: tt.email, daysUntilDue },
                     });
                   }
                   results.supervisedManagerAlerts++;
@@ -263,6 +270,7 @@ export async function POST(req: NextRequest) {
           } else {
             let leaseExpiryNotified = false;
             try {
+              const leaseFullName = `${tt.firstName || ""} ${tt.lastName || ""}`.trim();
               if (lunaMode === "full") {
                 // Full autonomy: notify tenant
                 await notificationService.sendNotification({
@@ -271,6 +279,11 @@ export async function POST(req: NextRequest) {
                   userId: tt._id.toString(),
                   title: "Your Lease Expires Soon",
                   message: `Hi ${tt.firstName || "there"}, your lease expires in ${daysUntilExpiry} days. Please contact your property manager to discuss renewal options.`,
+                  data: {
+                    userEmail: tt.email,
+                    userName: leaseFullName,
+                    daysUntilExpiry,
+                  },
                 });
                 results.leaseExpiryAlerts++;
                 leaseExpiryNotified = true;
@@ -281,8 +294,9 @@ export async function POST(req: NextRequest) {
                     type: NotificationType.LEASE_EXPIRY,
                     priority: NotificationPriority.NORMAL,
                     userId: mgId,
-                    title: `Lease Expiring: ${tt.firstName || ""} ${tt.lastName || ""}`,
-                    message: `Tenant ${tt.firstName || ""} ${tt.lastName || ""}'s lease expires in ${daysUntilExpiry} days. Review renewal status and follow up.`,
+                    title: `Lease Expiring: ${leaseFullName}`,
+                    message: `Tenant ${leaseFullName}'s lease expires in ${daysUntilExpiry} days. Review renewal status and follow up.`,
+                    data: { tenantName: leaseFullName, tenantEmail: tt.email, daysUntilExpiry },
                   });
                 }
                 results.supervisedManagerAlerts++;
@@ -316,13 +330,15 @@ export async function POST(req: NextRequest) {
               results.skippedByLuna++;
             } else if (lunaMode === "supervised") {
               // Supervised: alert managers only, do NOT message tenant
+              const churnFullName = `${tt.firstName || ""} ${tt.lastName || ""}`.trim();
               for (const mgId of managerIds) {
                 await notificationService.sendNotification({
                   type: NotificationType.SYSTEM_ANNOUNCEMENT,
                   priority: NotificationPriority.HIGH,
                   userId: mgId,
-                  title: `High Churn Risk: ${tt.firstName || ""} ${tt.lastName || ""}`,
-                  message: `Tenant ${tt.firstName || ""} ${tt.lastName || ""} has escalated to HIGH churn risk (score: ${score.churnRiskScore}/100). Consider sending a retention offer or scheduling a call.`,
+                  title: `High Churn Risk: ${churnFullName}`,
+                  message: `Tenant ${churnFullName} has escalated to HIGH churn risk (score: ${score.churnRiskScore}/100). Consider sending a retention offer or scheduling a call.`,
+                  data: { tenantName: churnFullName, tenantEmail: tt.email, churnScore: score.churnRiskScore },
                 });
               }
               results.supervisedManagerAlerts++;
@@ -344,12 +360,19 @@ export async function POST(req: NextRequest) {
               });
               const template = await getTemplateById(templateId);
               const interventionMsg = template?.message ?? "Your property manager would like to connect with you. Please reply at your convenience.";
+              const interventionFullName = `${tt.firstName || ""} ${tt.lastName || ""}`.trim();
               await notificationService.sendNotification({
                 type: NotificationType.SYSTEM_ANNOUNCEMENT,
                 priority: NotificationPriority.HIGH,
                 userId: tt._id.toString(),
                 title: "We Value Your Tenancy",
                 message: `Hi ${tt.firstName || "there"}, ${interventionMsg}`,
+                data: {
+                  userEmail: tt.email,
+                  userName: interventionFullName,
+                  templateId,
+                  templateLabel: template?.label,
+                },
               });
 
               await TenantIntelligence.findOneAndUpdate(

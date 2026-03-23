@@ -41,16 +41,17 @@ export async function POST(req: NextRequest) {
       role: UserRole.TENANT,
       deletedAt: null,
     })
-      .select("_id firstName lastName")
+      .select("_id firstName lastName email")
       .lean();
 
     if (!tenant) {
       return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
     }
 
-    const tt = tenant as unknown as { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string };
+    const tt = tenant as unknown as { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email?: string };
     const message = customMessage ?? offer?.message ?? "";
     const label = offer?.label ?? "Custom Retention Offer";
+    const tenantName = `${tt.firstName || ""} ${tt.lastName || ""}`.trim() || "Tenant";
 
     const { notificationService } = await import("@/lib/notification-service");
     await notificationService.sendNotification({
@@ -59,6 +60,12 @@ export async function POST(req: NextRequest) {
       userId: tenantId,
       title: `Retention Offer: ${label}`,
       message: `Hi ${tt.firstName || "there"}, ${message}`,
+      data: {
+        userEmail: tt.email,
+        userName: tenantName,
+        templateId: offerId,
+        templateLabel: label,
+      },
     });
 
     // Do NOT upsert — only update if a scored record already exists to avoid
