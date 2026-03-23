@@ -289,7 +289,7 @@ export default function CompliancePage() {
 
   // Handle modal opening from URL hash
   useEffect(() => {
-    const checkAndOpenModal = () => {
+    const handleHashChange = () => {
       const hash = window.location.hash.substring(1);
       if (hash === "rent" || hash === "eviction" || hash === "fairHousing") {
         setActiveModal(hash as "rent" | "eviction" | "fairHousing");
@@ -304,17 +304,13 @@ export default function CompliancePage() {
     };
 
     // Check on initial render
-    checkAndOpenModal();
+    handleHashChange();
 
-    // Use popstate event which fires for hash changes in Next.js
-    window.addEventListener("popstate", checkAndOpenModal);
-    
-    // Also check periodically for hash changes (fallback)
-    const interval = setInterval(checkAndOpenModal, 100);
+    // Listen for hash changes
+    window.addEventListener("hashchange", handleHashChange);
     
     return () => {
-      window.removeEventListener("popstate", checkAndOpenModal);
-      clearInterval(interval);
+      window.removeEventListener("hashchange", handleHashChange);
     };
   }, []);
 
