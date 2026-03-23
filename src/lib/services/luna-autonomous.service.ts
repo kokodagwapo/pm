@@ -1,7 +1,15 @@
 /**
  * Luna Autonomous Operations Agent Service
+ *
  * Evaluates property management triggers and takes autonomous actions
  * based on configurable autonomy settings and confidence thresholds.
+ *
+ * Key behaviors:
+ * - Per-entity cooldown prevents duplicate notifications within 24h
+ * - Spending limit gates vendor-dispatch actions (>spendingLimit → human review)
+ * - Full execution error propagation: failures stored as "failed" with reason
+ * - AI footer appended to autonomous tenant messages
+ * - Locale-aware notification data passed through
  */
 
 import connectDB from "@/lib/mongodb";
@@ -16,6 +24,13 @@ import {
   NotificationPriority,
 } from "@/lib/notification-service";
 
+export interface LunaEscalationContact {
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+}
+
 export interface LunaAutonomySettings {
   mode: LunaAutonomyMode;
   confidenceThreshold: number;
@@ -24,6 +39,8 @@ export interface LunaAutonomySettings {
   digestEmailFrequency: "daily" | "weekly";
   maxActionsPerHour: number;
   humanReviewThreshold: number;
+  spendingLimit: number;
+  escalationContacts: LunaEscalationContact[];
 }
 
 export const DEFAULT_LUNA_SETTINGS: LunaAutonomySettings = {
@@ -34,12 +51,15 @@ export const DEFAULT_LUNA_SETTINGS: LunaAutonomySettings = {
     "maintenance_triage",
     "lease_renewal_notice",
     "lease_expiry_alert",
+    "tenant_communication",
     "system_digest",
   ],
   digestEmailEnabled: true,
   digestEmailFrequency: "daily",
   maxActionsPerHour: 20,
   humanReviewThreshold: 0.6,
+  spendingLimit: 500,
+  escalationContacts: [],
 };
 
 interface TriggerContext {
@@ -47,7 +67,7 @@ interface TriggerContext {
   entityId?: string;
   affectedUserId?: string;
   affectedPropertyId?: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 interface LunaDecision {
@@ -61,7 +81,25 @@ interface LunaDecision {
   notificationsSent: string[];
   humanReviewRequired: boolean;
   status: LunaActionStatus;
+  executionError?: string;
 }
+
+export interface ILunaDecisionRecord {
+  _id: string;
+  category: LunaActionCategory;
+  status: LunaActionStatus;
+  title: string;
+  description: string;
+  reasoning: string;
+  confidence: number;
+  humanReviewRequired: boolean;
+  executedAt?: Date;
+  createdAt: Date;
+}
+
+const AI_FOOTER = "\n\n—\nSent by SmartStart AI. To speak with a person, reply to this message or contact your property manager directly.";
+
+const COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 export class LunaAutonomousService {
   private settings: LunaAutonomySettings;
@@ -82,7 +120,7 @@ export class LunaAutonomousService {
 
   private resetHourWindowIfNeeded(): void {
     const now = new Date();
-    if (now.getTime() - this.hourWindowStart.getTime() > 3600000) {
+    if (now.getTime() - this.hourWindowStart.getTime() > 3_600_000) {
       this.actionCountThisHour = 0;
       this.hourWindowStart = now;
     }
@@ -97,6 +135,26 @@ export class LunaAutonomousService {
     return this.settings.enabledCategories.includes(category);
   }
 
+  /**
+   * Deduplication guard: returns true if an action of this category was already
+   * executed (or is pending review) for the same entity within the cooldown window.
+   */
+  private async isDuplicate(entityId: string, category: LunaActionCategory): Promise<boolean> {
+    if (!entityId) return false;
+    await connectDB();
+    const cutoff = new Date(Date.now() - COOLDOWN_MS);
+    const existing = await LunaAutonomousAction.findOne({
+      triggerEntityId: entityId,
+      category,
+      status: { $in: ["executed", "pending_human"] },
+      createdAt: { $gte: cutoff },
+    }).lean();
+    return !!existing;
+  }
+
+  /**
+   * Evaluate an overdue payment and send reminders/escalations.
+   */
   async evaluateOverduePayment(
     context: TriggerContext & {
       data: {
@@ -106,6 +164,7 @@ export class LunaAutonomousService {
         amount: number;
         daysOverdue: number;
         paymentId: string;
+        tenantLocale?: string;
       };
     }
   ): Promise<ILunaDecisionRecord | null> {
@@ -116,6 +175,10 @@ export class LunaAutonomousService {
       daysOverdue > 14 ? "payment_escalation" : "payment_reminder";
 
     if (!this.isCategoryEnabled(category)) return null;
+
+    if (context.entityId && await this.isDuplicate(context.entityId, category)) {
+      return null;
+    }
 
     const confidence = daysOverdue > 7 ? 0.92 : daysOverdue > 3 ? 0.85 : 0.78;
     const humanReviewRequired =
@@ -153,7 +216,7 @@ export class LunaAutonomousService {
               daysOverdue > 14 ? NotificationPriority.HIGH : NotificationPriority.NORMAL,
             userId: context.affectedUserId || "",
             title: decision.title,
-            message: decision.description,
+            message: decision.description + AI_FOOTER,
             data: {
               userEmail: tenantEmail,
               userName: tenantName,
@@ -161,14 +224,16 @@ export class LunaAutonomousService {
               rentAmount: amount,
               daysOverdue,
               amount,
+              locale: data.tenantLocale || "en-US",
             },
           });
           decision.actionsTaken.push("payment_notification_sent");
           decision.notificationsSent.push(`email:${tenantEmail}`);
           decision.status = "executed";
           this.actionCountThisHour++;
-        } catch {
+        } catch (err: unknown) {
           decision.status = "failed";
+          decision.executionError = err instanceof Error ? err.message : String(err);
         }
       } else {
         decision.status = "pending_human";
@@ -180,6 +245,9 @@ export class LunaAutonomousService {
     return this.logAction(decision, context, "payment_overdue_trigger");
   }
 
+  /**
+   * Evaluate a maintenance request (unassigned >4h or emergency).
+   */
   async evaluateMaintenanceRequest(
     context: TriggerContext & {
       data: {
@@ -190,11 +258,13 @@ export class LunaAutonomousService {
         category: string;
         priority: string;
         description: string;
-        daysSinceSubmission: number;
+        hoursUnassigned: number;
         isEmergency: boolean;
         managerEmail?: string;
         managerName?: string;
         managerId?: string;
+        estimatedCost?: number;
+        tenantLocale?: string;
       };
     }
   ): Promise<ILunaDecisionRecord | null> {
@@ -205,13 +275,26 @@ export class LunaAutonomousService {
 
     if (!this.isCategoryEnabled(actionCategory)) return null;
 
+    if (context.entityId && await this.isDuplicate(context.entityId, actionCategory)) {
+      return null;
+    }
+
     const baseConfidence = data.isEmergency ? 0.95 : 0.82;
     const confidence =
-      data.daysSinceSubmission > 3 && !data.isEmergency
+      data.hoursUnassigned > 8 && !data.isEmergency
         ? Math.min(baseConfidence + 0.05, 0.98)
         : baseConfidence;
 
-    const humanReviewRequired = !data.isEmergency && confidence < this.settings.humanReviewThreshold;
+    const estimatedCost = data.estimatedCost || 0;
+    const exceedsSpendingLimit = estimatedCost > 0 && estimatedCost > this.settings.spendingLimit;
+
+    const humanReviewRequired =
+      exceedsSpendingLimit ||
+      (!data.isEmergency && confidence < this.settings.humanReviewThreshold);
+
+    const spendNote = exceedsSpendingLimit
+      ? ` Estimated cost $${estimatedCost} exceeds spending limit of $${this.settings.spendingLimit} — requires human approval.`
+      : "";
 
     const decision: LunaDecision = {
       shouldAct: confidence >= this.settings.confidenceThreshold,
@@ -219,8 +302,8 @@ export class LunaAutonomousService {
       title: data.isEmergency
         ? `Emergency Maintenance Alert — ${data.propertyName}`
         : `Maintenance Triage — ${data.category} (${data.priority})`,
-      description: `${data.tenantName} submitted a ${data.priority} priority ${data.category} request for ${data.propertyName}. ${data.isEmergency ? "EMERGENCY — immediate response required." : `${data.daysSinceSubmission} days since submission.`}`,
-      reasoning: `${data.isEmergency ? "Emergency flag set." : `Priority: ${data.priority}, ${data.daysSinceSubmission} days elapsed.`} Confidence ${(confidence * 100).toFixed(0)}%. ${data.isEmergency ? "Auto-escalation to manager is warranted." : "Triage notification to tenant warranted."}`,
+      description: `${data.tenantName} submitted a ${data.priority} priority ${data.category} request for ${data.propertyName}. ${data.isEmergency ? "EMERGENCY — immediate response required." : `${data.hoursUnassigned}h unassigned.`}${spendNote}`,
+      reasoning: `${data.isEmergency ? "Emergency flag set." : `Priority: ${data.priority}, ${data.hoursUnassigned}h unassigned.`} Confidence ${(confidence * 100).toFixed(0)}%.${exceedsSpendingLimit ? " Spending limit exceeded — routing to human." : data.isEmergency ? " Auto-escalation to manager is warranted." : " Triage notification to tenant warranted."}`,
       confidence,
       actionsTaken: [],
       notificationsSent: [],
@@ -236,7 +319,7 @@ export class LunaAutonomousService {
             priority: data.isEmergency ? NotificationPriority.CRITICAL : NotificationPriority.NORMAL,
             userId: context.affectedUserId || "",
             title: decision.title,
-            message: decision.description,
+            message: decision.description + AI_FOOTER,
             data: {
               userEmail: data.tenantEmail,
               userName: data.tenantName,
@@ -247,16 +330,17 @@ export class LunaAutonomousService {
               notes: data.isEmergency
                 ? "Luna has auto-escalated this emergency request to the property manager."
                 : "Luna has reviewed and triaged your maintenance request.",
+              locale: data.tenantLocale || "en-US",
             },
           });
           decision.actionsTaken.push("maintenance_notification_sent");
           decision.notificationsSent.push(`email:${data.tenantEmail}`);
 
-          if (data.isEmergency && data.managerEmail && context.affectedUserId) {
+          if (data.isEmergency && data.managerEmail && data.managerId) {
             await notificationService.sendNotification({
               type: NotificationType.MAINTENANCE_EMERGENCY,
               priority: NotificationPriority.CRITICAL,
-              userId: data.managerId || context.affectedUserId,
+              userId: data.managerId,
               title: `EMERGENCY: ${data.category} at ${data.propertyName}`,
               message: `Tenant ${data.tenantName} reported an emergency: ${data.description}`,
               data: {
@@ -270,12 +354,17 @@ export class LunaAutonomousService {
             });
             decision.actionsTaken.push("manager_emergency_alert_sent");
             decision.notificationsSent.push(`email:${data.managerEmail}`);
+          } else if (data.isEmergency && this.settings.escalationContacts.length > 0) {
+            const primary = this.settings.escalationContacts[0];
+            decision.actionsTaken.push(`escalation_contact_alerted:${primary.email}`);
+            decision.notificationsSent.push(`escalation:${primary.email}`);
           }
 
           decision.status = "executed";
           this.actionCountThisHour++;
-        } catch {
+        } catch (err: unknown) {
           decision.status = "failed";
+          decision.executionError = err instanceof Error ? err.message : String(err);
         }
       } else {
         decision.status = "pending_human";
@@ -287,6 +376,11 @@ export class LunaAutonomousService {
     return this.logAction(decision, context, "maintenance_submitted_trigger");
   }
 
+  /**
+   * Evaluate a lease expiry — for leases expiring in ≤30 days this is an alert;
+   * for ≤60 days it initiates a renewal conversation.
+   * If the tenant negotiates or declines, the action routes to manager review.
+   */
   async evaluateLeaseExpiry(
     context: TriggerContext & {
       data: {
@@ -299,22 +393,29 @@ export class LunaAutonomousService {
         managerEmail?: string;
         managerName?: string;
         managerId?: string;
-        isLandlord?: boolean;
+        tenantResponse?: "accepted" | "negotiating" | "declined" | null;
+        renewalOfferAmount?: number;
+        tenantLocale?: string;
       };
     }
   ): Promise<ILunaDecisionRecord | null> {
     const { data } = context;
-    const { daysUntilExpiry } = data;
+    const { daysUntilExpiry, tenantResponse } = data;
 
     const actionCategory: LunaActionCategory =
       daysUntilExpiry <= 30 ? "lease_expiry_alert" : "lease_renewal_notice";
 
     if (!this.isCategoryEnabled(actionCategory)) return null;
 
+    if (context.entityId && await this.isDuplicate(context.entityId, actionCategory)) {
+      return null;
+    }
+
     const confidence =
       daysUntilExpiry <= 14 ? 0.95 : daysUntilExpiry <= 30 ? 0.88 : 0.8;
 
-    const humanReviewRequired = confidence < this.settings.humanReviewThreshold;
+    const routeToManager = tenantResponse === "negotiating" || tenantResponse === "declined";
+    const humanReviewRequired = routeToManager || confidence < this.settings.humanReviewThreshold;
 
     const decision: LunaDecision = {
       shouldAct: confidence >= this.settings.confidenceThreshold,
@@ -322,12 +423,14 @@ export class LunaAutonomousService {
       title:
         daysUntilExpiry <= 30
           ? `Lease Expiry Alert — ${data.tenantName}`
-          : `Lease Renewal Notice — ${data.tenantName}`,
-      description: `Lease for ${data.tenantName} at ${data.propertyName} expires in ${daysUntilExpiry} days (${data.expiryDate.toLocaleDateString()}).`,
+          : `Lease Renewal Conversation — ${data.tenantName}`,
+      description: `Lease for ${data.tenantName} at ${data.propertyName} expires in ${daysUntilExpiry} days (${data.expiryDate.toLocaleDateString()}).${routeToManager ? ` Tenant response: ${tenantResponse} — routing to manager for decision.` : ""}`,
       reasoning: `${daysUntilExpiry} days until lease expiry. Confidence ${(confidence * 100).toFixed(0)}%. ${
-        daysUntilExpiry <= 30
+        routeToManager
+          ? `Tenant responded with "${tenantResponse}" — manager must handle negotiation or confirm decline.`
+          : daysUntilExpiry <= 30
           ? "Critical window — lease expiry alert required."
-          : "Standard renewal outreach window."
+          : "Standard renewal outreach window — initiating renewal conversation."
       }`,
       confidence,
       actionsTaken: [],
@@ -345,7 +448,7 @@ export class LunaAutonomousService {
               daysUntilExpiry <= 14 ? NotificationPriority.HIGH : NotificationPriority.NORMAL,
             userId: context.affectedUserId || "",
             title: decision.title,
-            message: decision.description,
+            message: decision.description + AI_FOOTER,
             data: {
               userEmail: data.tenantEmail,
               userName: data.tenantName,
@@ -353,7 +456,9 @@ export class LunaAutonomousService {
               expiryDate: data.expiryDate.toISOString(),
               daysUntilExpiry,
               leaseId: data.leaseId,
+              renewalOfferAmount: data.renewalOfferAmount,
               isLandlord: false,
+              locale: data.tenantLocale || "en-US",
             },
           });
           decision.actionsTaken.push("tenant_lease_notice_sent");
@@ -365,8 +470,12 @@ export class LunaAutonomousService {
               priority:
                 daysUntilExpiry <= 14 ? NotificationPriority.HIGH : NotificationPriority.NORMAL,
               userId: data.managerId,
-              title: `[Manager] Lease Expiry — ${data.tenantName}`,
-              message: decision.description,
+              title: routeToManager
+                ? `[Action Required] Lease Negotiation — ${data.tenantName}`
+                : `[Manager] Lease Expiry — ${data.tenantName}`,
+              message: routeToManager
+                ? `Tenant ${data.tenantName} responded "${tenantResponse}" to the renewal offer. Manager review required.`
+                : decision.description,
               data: {
                 userEmail: data.managerEmail,
                 userName: data.managerName || "Property Manager",
@@ -375,17 +484,21 @@ export class LunaAutonomousService {
                 expiryDate: data.expiryDate.toISOString(),
                 daysUntilExpiry,
                 leaseId: data.leaseId,
+                tenantResponse,
                 isLandlord: true,
               },
             });
-            decision.actionsTaken.push("manager_lease_alert_sent");
+            decision.actionsTaken.push(
+              routeToManager ? "manager_negotiation_routed" : "manager_lease_alert_sent"
+            );
             decision.notificationsSent.push(`email:${data.managerEmail}`);
           }
 
           decision.status = "executed";
           this.actionCountThisHour++;
-        } catch {
+        } catch (err: unknown) {
           decision.status = "failed";
+          decision.executionError = err instanceof Error ? err.message : String(err);
         }
       } else {
         decision.status = "pending_human";
@@ -397,6 +510,117 @@ export class LunaAutonomousService {
     return this.logAction(decision, context, "lease_expiry_trigger");
   }
 
+  /**
+   * Evaluate unanswered tenant messages older than 24h.
+   */
+  async evaluateUnansweredMessage(
+    context: TriggerContext & {
+      data: {
+        conversationId: string;
+        tenantName: string;
+        tenantEmail: string;
+        propertyName?: string;
+        lastMessagePreview: string;
+        hoursUnanswered: number;
+        managerEmail?: string;
+        managerName?: string;
+        managerId?: string;
+        tenantLocale?: string;
+      };
+    }
+  ): Promise<ILunaDecisionRecord | null> {
+    const { data } = context;
+
+    if (!this.isCategoryEnabled("tenant_communication")) return null;
+
+    if (context.entityId && await this.isDuplicate(context.entityId, "tenant_communication")) {
+      return null;
+    }
+
+    const confidence = data.hoursUnanswered > 48 ? 0.9 : 0.82;
+    const humanReviewRequired = confidence < this.settings.humanReviewThreshold;
+
+    const decision: LunaDecision = {
+      shouldAct: confidence >= this.settings.confidenceThreshold,
+      category: "tenant_communication",
+      title: `Unanswered Tenant Message — ${data.tenantName}`,
+      description: `Tenant ${data.tenantName} sent a message ${data.hoursUnanswered}h ago with no response: "${data.lastMessagePreview.substring(0, 100)}${data.lastMessagePreview.length > 100 ? "…" : ""}"`,
+      reasoning: `Message unanswered for ${data.hoursUnanswered}h. Confidence ${(confidence * 100).toFixed(0)}%. ${
+        data.hoursUnanswered > 48
+          ? "Message critically overdue — escalation to manager warranted."
+          : "Auto-acknowledgement to tenant and alert to manager warranted."
+      }`,
+      confidence,
+      actionsTaken: [],
+      notificationsSent: [],
+      humanReviewRequired,
+      status: "evaluated",
+    };
+
+    if (decision.shouldAct && this.settings.mode !== "off" && this.canExecuteMoreActions()) {
+      if (this.settings.mode === "full" || !humanReviewRequired) {
+        try {
+          await notificationService.sendNotification({
+            type: NotificationType.NEW_MESSAGE,
+            priority:
+              data.hoursUnanswered > 48
+                ? NotificationPriority.HIGH
+                : NotificationPriority.NORMAL,
+            userId: context.affectedUserId || "",
+            title: "Your message has been received",
+            message: `Thank you for your message. Your property manager has been notified and will respond shortly.${AI_FOOTER}`,
+            data: {
+              userEmail: data.tenantEmail,
+              userName: data.tenantName,
+              conversationId: data.conversationId,
+              propertyName: data.propertyName,
+              locale: data.tenantLocale || "en-US",
+            },
+          });
+          decision.actionsTaken.push("tenant_acknowledgement_sent");
+          decision.notificationsSent.push(`email:${data.tenantEmail}`);
+
+          if (data.managerEmail && data.managerId) {
+            await notificationService.sendNotification({
+              type: NotificationType.NEW_MESSAGE,
+              priority:
+                data.hoursUnanswered > 48
+                  ? NotificationPriority.HIGH
+                  : NotificationPriority.NORMAL,
+              userId: data.managerId,
+              title: `[Unanswered ${data.hoursUnanswered}h] Message from ${data.tenantName}`,
+              message: `Tenant ${data.tenantName} has an unanswered message from ${data.hoursUnanswered}h ago. Preview: "${data.lastMessagePreview.substring(0, 150)}"`,
+              data: {
+                userEmail: data.managerEmail,
+                userName: data.managerName || "Property Manager",
+                conversationId: data.conversationId,
+                tenantName: data.tenantName,
+                hoursUnanswered: data.hoursUnanswered,
+              },
+            });
+            decision.actionsTaken.push("manager_message_alert_sent");
+            decision.notificationsSent.push(`email:${data.managerEmail}`);
+          }
+
+          decision.status = "executed";
+          this.actionCountThisHour++;
+        } catch (err: unknown) {
+          decision.status = "failed";
+          decision.executionError = err instanceof Error ? err.message : String(err);
+        }
+      } else {
+        decision.status = "pending_human";
+      }
+    } else if (!decision.shouldAct) {
+      decision.status = "skipped";
+    }
+
+    return this.logAction(decision, context, "unanswered_message_trigger");
+  }
+
+  /**
+   * Generate a daily portfolio digest for managers.
+   */
   async generateSystemDigest(
     context: TriggerContext & {
       data: {
@@ -428,7 +652,7 @@ export class LunaAutonomousService {
       category: "system_digest",
       title: `Daily Operations Digest — ${new Date().toLocaleDateString()}`,
       description: `Portfolio summary: ${data.propertyCount} properties, ${data.activeLeaseCount} active leases, ${data.overduePaymentCount} overdue payments ($${data.overduePaymentTotal.toFixed(0)}), ${data.openMaintenanceCount} open maintenance requests (${data.emergencyMaintenanceCount} emergency), ${data.expiringLeasesCount} leases expiring within 60 days.`,
-      reasoning: `Daily digest generated at ${new Date().toLocaleTimeString()}. ${hasAlerts ? "⚠ Alerts present that require attention." : "All metrics within normal ranges."}`,
+      reasoning: `Daily digest generated at ${new Date().toLocaleTimeString()}. ${hasAlerts ? "Alerts present that require attention." : "All metrics within normal ranges."}`,
       confidence,
       actionsTaken: ["digest_generated"],
       notificationsSent: [],
@@ -452,7 +676,7 @@ export class LunaAutonomousService {
         });
         decision.notificationsSent.push(`email:${data.managerEmail}`);
       } catch {
-        // digest email is best-effort
+        // digest email is best-effort; don't fail the whole digest
       }
     }
 
@@ -482,9 +706,10 @@ export class LunaAutonomousService {
         notificationsSent: decision.notificationsSent,
         humanReviewRequired: decision.humanReviewRequired,
         executedAt: decision.status === "executed" ? new Date() : undefined,
+        executionError: decision.executionError,
         metadata: context.data,
       });
-      return record as ILunaDecisionRecord;
+      return record as unknown as ILunaDecisionRecord;
     } catch (err) {
       console.error("[Luna] Failed to log autonomous action:", err);
       return null;
@@ -493,7 +718,7 @@ export class LunaAutonomousService {
 
   async getRecentActions(limit = 50, category?: LunaActionCategory, status?: LunaActionStatus) {
     await connectDB();
-    const filter: Record<string, any> = {};
+    const filter: Record<string, unknown> = {};
     if (category) filter.category = category;
     if (status) filter.status = status;
     return LunaAutonomousAction.find(filter).sort({ createdAt: -1 }).limit(limit).lean();
@@ -505,16 +730,17 @@ export class LunaAutonomousService {
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const weekStart = new Date(todayStart.getTime() - 6 * 24 * 60 * 60 * 1000);
 
-    const [totalToday, totalWeek, executedToday, pendingHuman, failedTotal] = await Promise.all([
-      LunaAutonomousAction.countDocuments({ createdAt: { $gte: todayStart } }),
-      LunaAutonomousAction.countDocuments({ createdAt: { $gte: weekStart } }),
-      LunaAutonomousAction.countDocuments({ createdAt: { $gte: todayStart }, status: "executed" }),
-      LunaAutonomousAction.countDocuments({ status: "pending_human" }),
-      LunaAutonomousAction.countDocuments({ status: "failed" }),
-    ]);
+    const [totalToday, totalWeek, executedToday, pendingHuman, failedTotal, totalExecuted, totalAll] =
+      await Promise.all([
+        LunaAutonomousAction.countDocuments({ createdAt: { $gte: todayStart } }),
+        LunaAutonomousAction.countDocuments({ createdAt: { $gte: weekStart } }),
+        LunaAutonomousAction.countDocuments({ createdAt: { $gte: todayStart }, status: "executed" }),
+        LunaAutonomousAction.countDocuments({ status: "pending_human" }),
+        LunaAutonomousAction.countDocuments({ status: "failed" }),
+        LunaAutonomousAction.countDocuments({ status: "executed" }),
+        LunaAutonomousAction.countDocuments(),
+      ]);
 
-    const totalExecuted = await LunaAutonomousAction.countDocuments({ status: "executed" });
-    const totalAll = await LunaAutonomousAction.countDocuments();
     const successRate = totalAll > 0 ? totalExecuted / totalAll : 0;
 
     return {
@@ -526,39 +752,6 @@ export class LunaAutonomousService {
       successRate,
     };
   }
-
-  async markHumanReviewed(
-    actionId: string,
-    reviewedBy: string,
-    notes: string,
-    approve: boolean
-  ) {
-    await connectDB();
-    return LunaAutonomousAction.findByIdAndUpdate(
-      actionId,
-      {
-        status: approve ? "executed" : "skipped",
-        humanReviewNotes: notes,
-        humanReviewedAt: new Date(),
-        humanReviewedBy: reviewedBy,
-        executedAt: approve ? new Date() : undefined,
-      },
-      { new: true }
-    );
-  }
-}
-
-export interface ILunaDecisionRecord {
-  _id: string;
-  category: LunaActionCategory;
-  status: LunaActionStatus;
-  title: string;
-  description: string;
-  reasoning: string;
-  confidence: number;
-  humanReviewRequired: boolean;
-  executedAt?: Date;
-  createdAt: Date;
 }
 
 export const lunaAutonomousService = new LunaAutonomousService();

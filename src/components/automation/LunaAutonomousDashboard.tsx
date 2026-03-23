@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -53,7 +54,12 @@ import {
   XCircle,
   UserCheck,
   BarChart3,
+  RotateCcw,
+  Plus,
+  Trash2,
+  Phone,
 } from "lucide-react";
+
 type LunaActionCategory =
   | "payment_reminder"
   | "payment_escalation"
@@ -70,7 +76,15 @@ type LunaActionStatus =
   | "executed"
   | "skipped"
   | "failed"
-  | "pending_human";
+  | "pending_human"
+  | "undone";
+
+interface LunaEscalationContact {
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+}
 
 interface LunaAutonomySettings {
   mode: "full" | "supervised" | "off";
@@ -80,6 +94,8 @@ interface LunaAutonomySettings {
   digestEmailFrequency: "daily" | "weekly";
   maxActionsPerHour: number;
   humanReviewThreshold: number;
+  spendingLimit: number;
+  escalationContacts: LunaEscalationContact[];
 }
 
 interface LunaAction {
@@ -98,6 +114,8 @@ interface LunaAction {
   humanReviewNotes?: string;
   humanReviewedAt?: string;
   executedAt?: string;
+  undoneAt?: string;
+  executionError?: string;
   createdAt: string;
 }
 
@@ -170,6 +188,7 @@ const STATUS_CONFIG: Record<
   skipped: { label: "Skipped", variant: "outline", color: "text-slate-400" },
   failed: { label: "Failed", variant: "destructive", color: "text-red-500" },
   pending_human: { label: "Needs Review", variant: "secondary", color: "text-amber-600" },
+  undone: { label: "Undone", variant: "outline", color: "text-slate-500" },
 };
 
 const ALL_CATEGORIES: LunaActionCategory[] = [
@@ -184,6 +203,25 @@ const ALL_CATEGORIES: LunaActionCategory[] = [
   "system_digest",
 ];
 
+const DEFAULT_SETTINGS: LunaAutonomySettings = {
+  mode: "supervised",
+  confidenceThreshold: 0.75,
+  enabledCategories: [
+    "payment_reminder",
+    "maintenance_triage",
+    "lease_renewal_notice",
+    "lease_expiry_alert",
+    "tenant_communication",
+    "system_digest",
+  ],
+  digestEmailEnabled: true,
+  digestEmailFrequency: "daily",
+  maxActionsPerHour: 20,
+  humanReviewThreshold: 0.6,
+  spendingLimit: 500,
+  escalationContacts: [],
+};
+
 export default function LunaAutonomousDashboard() {
   const [actions, setActions] = useState<LunaAction[]>([]);
   const [stats, setStats] = useState<ActionStats>({
@@ -194,35 +232,31 @@ export default function LunaAutonomousDashboard() {
     failedTotal: 0,
     successRate: 0,
   });
-  const [settings, setSettings] = useState<LunaAutonomySettings>({
-    mode: "supervised",
-    confidenceThreshold: 0.75,
-    enabledCategories: [
-      "payment_reminder",
-      "maintenance_triage",
-      "lease_renewal_notice",
-      "lease_expiry_alert",
-      "system_digest",
-    ],
-    digestEmailEnabled: true,
-    digestEmailFrequency: "daily",
-    maxActionsPerHour: 20,
-    humanReviewThreshold: 0.6,
-  });
+  const [settings, setSettings] = useState<LunaAutonomySettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [triggering, setTriggering] = useState(false);
   const [scanningLive, setScanningLive] = useState(false);
-  const [lastScanResult, setLastScanResult] = useState<{ triggered: number; breakdown: Record<string, number> } | null>(null);
+  const [lastScanResult, setLastScanResult] = useState<{
+    triggered: number;
+    breakdown: Record<string, number>;
+  } | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [reviewDialog, setReviewDialog] = useState<{
     open: boolean;
     action: LunaAction | null;
-  }>({ open: false, action: null });
+    mode: "review" | "undo";
+  }>({ open: false, action: null, mode: "review" });
   const [reviewNotes, setReviewNotes] = useState("");
   const [reviewApprove, setReviewApprove] = useState(true);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [newContact, setNewContact] = useState<LunaEscalationContact>({
+    name: "",
+    email: "",
+    phone: "",
+    role: "",
+  });
 
   const fetchData = useCallback(async () => {
     try {
@@ -232,12 +266,12 @@ export default function LunaAutonomousDashboard() {
 
       const res = await fetch(`/api/luna/actions?${params.toString()}`);
       if (res.ok) {
-        const data = await res.json();
+        const data = await res.json() as { actions: LunaAction[]; stats: ActionStats };
         setActions(data.actions || []);
         setStats(data.stats || stats);
       }
     } catch {
-      // silent
+      // silent — data may not be available
     } finally {
       setLoading(false);
     }
@@ -247,8 +281,14 @@ export default function LunaAutonomousDashboard() {
     try {
       const res = await fetch("/api/luna/settings");
       if (res.ok) {
-        const data = await res.json();
-        if (data.settings) setSettings(data.settings);
+        const data = await res.json() as { settings: LunaAutonomySettings };
+        if (data.settings) {
+          setSettings({
+            ...DEFAULT_SETTINGS,
+            ...data.settings,
+            escalationContacts: data.settings.escalationContacts || [],
+          });
+        }
       }
     } catch {
       // silent
@@ -261,7 +301,7 @@ export default function LunaAutonomousDashboard() {
   }, [fetchData, fetchSettings]);
 
   useEffect(() => {
-    const interval = setInterval(fetchData, 30000);
+    const interval = setInterval(fetchData, 30_000);
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -273,9 +313,7 @@ export default function LunaAutonomousDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "trigger_demo" }),
       });
-      if (res.ok) {
-        await fetchData();
-      }
+      if (res.ok) await fetchData();
     } finally {
       setTriggering(false);
     }
@@ -290,7 +328,7 @@ export default function LunaAutonomousDashboard() {
         headers: { "Content-Type": "application/json" },
       });
       if (res.ok) {
-        const data = await res.json();
+        const data = await res.json() as { triggered: number; breakdown: Record<string, number> };
         setLastScanResult({ triggered: data.triggered, breakdown: data.breakdown });
         await fetchData();
       }
@@ -316,17 +354,29 @@ export default function LunaAutonomousDashboard() {
     if (!reviewDialog.action) return;
     setSubmittingReview(true);
     try {
-      await fetch("/api/luna/actions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "review",
-          actionId: reviewDialog.action._id,
-          notes: reviewNotes,
-          approve: reviewApprove,
-        }),
-      });
-      setReviewDialog({ open: false, action: null });
+      if (reviewDialog.mode === "undo") {
+        await fetch("/api/luna/actions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "undo",
+            actionId: reviewDialog.action._id,
+            notes: reviewNotes,
+          }),
+        });
+      } else {
+        await fetch("/api/luna/actions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "review",
+            actionId: reviewDialog.action._id,
+            notes: reviewNotes,
+            approve: reviewApprove,
+          }),
+        });
+      }
+      setReviewDialog({ open: false, action: null, mode: "review" });
       setReviewNotes("");
       await fetchData();
     } finally {
@@ -343,11 +393,27 @@ export default function LunaAutonomousDashboard() {
     }));
   };
 
+  const addEscalationContact = () => {
+    if (!newContact.name || !newContact.email || !newContact.role) return;
+    setSettings((prev) => ({
+      ...prev,
+      escalationContacts: [...prev.escalationContacts, { ...newContact }],
+    }));
+    setNewContact({ name: "", email: "", phone: "", role: "" });
+  };
+
+  const removeEscalationContact = (idx: number) => {
+    setSettings((prev) => ({
+      ...prev,
+      escalationContacts: prev.escalationContacts.filter((_, i) => i !== idx),
+    }));
+  };
+
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
+    const diffMins = Math.floor(diffMs / 60_000);
     if (diffMins < 1) return "Just now";
     if (diffMins < 60) return `${diffMins}m ago`;
     const diffHours = Math.floor(diffMins / 60);
@@ -427,11 +493,12 @@ export default function LunaAutonomousDashboard() {
         <Alert className="border-green-300 bg-green-50 dark:bg-green-950/20">
           <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800 dark:text-green-200">
-            Live scan complete — <strong>{lastScanResult.triggered} trigger(s)</strong> evaluated.
-            {" "}Overdue payments: {lastScanResult.breakdown.overduePayments},
-            Expiring leases: {lastScanResult.breakdown.expiringLeases},
-            Stale maintenance: {lastScanResult.breakdown.staleMaintenance},
-            Emergencies: {lastScanResult.breakdown.emergencyMaintenance}.
+            Live scan complete — <strong>{lastScanResult.triggered} trigger(s)</strong> evaluated.{" "}
+            Overdue payments: {lastScanResult.breakdown.overduePayments ?? 0},{" "}
+            Expiring leases: {lastScanResult.breakdown.expiringLeases ?? 0},{" "}
+            Unassigned maintenance: {lastScanResult.breakdown.unassignedMaintenance ?? 0},{" "}
+            Emergencies: {lastScanResult.breakdown.emergencyMaintenance ?? 0},{" "}
+            Unanswered messages: {lastScanResult.breakdown.unansweredMessages ?? 0}.
           </AlertDescription>
         </Alert>
       )}
@@ -551,113 +618,125 @@ export default function LunaAutonomousDashboard() {
                 <SelectItem value="pending_human">Needs Review</SelectItem>
                 <SelectItem value="skipped">Skipped</SelectItem>
                 <SelectItem value="failed">Failed</SelectItem>
+                <SelectItem value="undone">Undone</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <Card>
-            <CardHeader>
-              <CardTitle>Autonomous Actions</CardTitle>
-              <CardDescription>
-                Every event Luna evaluated, with reasoning and outcome
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               {actions.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Bot className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">No actions logged yet.</p>
-                  <p className="text-xs mt-1">
-                    Click &quot;Run Evaluation&quot; to trigger a demo evaluation.
+                <div className="text-center py-16 text-muted-foreground">
+                  <Bot className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                  <p className="text-sm">
+                    No autonomous actions yet. Run a scan or switch to Supervised or Full mode.
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="divide-y">
                   {actions.map((action) => {
                     const catConf = CATEGORY_CONFIG[action.category];
-                    const statConf = STATUS_CONFIG[action.status];
+                    const statusConf = STATUS_CONFIG[action.status];
                     return (
-                      <div
-                        key={action._id}
-                        className="flex items-start gap-4 p-4 rounded-lg border hover:bg-muted/30 transition-colors"
-                      >
-                        <div className={`mt-0.5 flex-shrink-0 ${catConf?.color}`}>
-                          {catConf?.icon}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <p className="font-medium text-sm leading-tight">{action.title}</p>
+                      <div key={action._id} className="p-4 hover:bg-muted/30 transition-colors">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <div className={`mt-0.5 flex-shrink-0 ${catConf?.color}`}>
+                              {catConf?.icon}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="font-medium text-sm truncate">{action.title}</p>
+                                <Badge variant={statusConf.variant} className="text-xs shrink-0">
+                                  {statusConf.label}
+                                </Badge>
+                              </div>
                               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
                                 {action.description}
                               </p>
-                            </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <Badge variant={statConf?.variant} className="text-xs">
-                                {statConf?.label}
-                              </Badge>
-                              {action.humanReviewRequired && action.status === "pending_human" && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-7 text-xs border-amber-300 text-amber-700"
-                                  onClick={() => {
-                                    setReviewDialog({ open: true, action });
-                                    setReviewNotes("");
-                                    setReviewApprove(true);
-                                  }}
-                                >
-                                  <Eye className="h-3 w-3 mr-1" />
-                                  Review
-                                </Button>
+                              {action.executionError && (
+                                <p className="text-xs text-red-500 mt-1">
+                                  Error: {action.executionError}
+                                </p>
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-4 mt-2">
-                            <div className="flex items-center gap-1.5">
-                              <Brain className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">
-                                Confidence:{" "}
-                                <span
-                                  className={`font-medium ${
-                                    action.confidence >= 0.85
-                                      ? "text-green-600"
-                                      : action.confidence >= 0.7
-                                      ? "text-amber-600"
-                                      : "text-red-500"
-                                  }`}
-                                >
-                                  {(action.confidence * 100).toFixed(0)}%
-                                </span>
-                              </span>
-                            </div>
-                            {action.actionsTaken.length > 0 && (
-                              <span className="text-xs text-muted-foreground">
-                                <CheckCircle className="h-3 w-3 inline mr-1 text-green-500" />
-                                {action.actionsTaken.length} action(s)
-                              </span>
+                          <div className="flex gap-2 flex-shrink-0">
+                            {action.status === "pending_human" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs border-amber-300 text-amber-700"
+                                onClick={() => {
+                                  setReviewDialog({ open: true, action, mode: "review" });
+                                  setReviewNotes("");
+                                  setReviewApprove(true);
+                                }}
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                Review
+                              </Button>
                             )}
-                            {action.notificationsSent.length > 0 && (
-                              <span className="text-xs text-muted-foreground">
-                                <Mail className="h-3 w-3 inline mr-1 text-blue-500" />
-                                {action.notificationsSent.length} notification(s)
-                              </span>
+                            {action.status === "executed" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs border-slate-300 text-slate-600"
+                                onClick={() => {
+                                  setReviewDialog({ open: true, action, mode: "undo" });
+                                  setReviewNotes("");
+                                }}
+                              >
+                                <RotateCcw className="h-3 w-3 mr-1" />
+                                Override
+                              </Button>
                             )}
-                            <span className="text-xs text-muted-foreground ml-auto">
-                              <Clock className="h-3 w-3 inline mr-1" />
-                              {formatTime(action.createdAt)}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 mt-2">
+                          <div className="flex items-center gap-1.5">
+                            <Brain className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">
+                              Confidence:{" "}
+                              <span
+                                className={`font-medium ${
+                                  action.confidence >= 0.85
+                                    ? "text-green-600"
+                                    : action.confidence >= 0.7
+                                    ? "text-amber-600"
+                                    : "text-red-500"
+                                }`}
+                              >
+                                {(action.confidence * 100).toFixed(0)}%
+                              </span>
                             </span>
                           </div>
-                          <details className="mt-2">
-                            <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground flex items-center gap-1">
-                              <ChevronRight className="h-3 w-3" />
-                              Luna&apos;s reasoning
-                            </summary>
-                            <p className="text-xs text-muted-foreground mt-1.5 pl-4 border-l-2 border-muted">
-                              {action.reasoning}
-                            </p>
-                          </details>
+                          {action.actionsTaken.length > 0 && (
+                            <span className="text-xs text-muted-foreground">
+                              <CheckCircle className="h-3 w-3 inline mr-1 text-green-500" />
+                              {action.actionsTaken.length} action(s)
+                            </span>
+                          )}
+                          {action.notificationsSent.length > 0 && (
+                            <span className="text-xs text-muted-foreground">
+                              <Mail className="h-3 w-3 inline mr-1 text-blue-500" />
+                              {action.notificationsSent.length} notification(s)
+                            </span>
+                          )}
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            <Clock className="h-3 w-3 inline mr-1" />
+                            {formatTime(action.createdAt)}
+                          </span>
                         </div>
+                        <details className="mt-2">
+                          <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground flex items-center gap-1">
+                            <ChevronRight className="h-3 w-3" />
+                            Luna&apos;s reasoning
+                          </summary>
+                          <p className="text-xs text-muted-foreground mt-1.5 pl-4 border-l-2 border-muted">
+                            {action.reasoning}
+                          </p>
+                        </details>
                       </div>
                     );
                   })}
@@ -713,7 +792,7 @@ export default function LunaAutonomousDashboard() {
                                 variant="outline"
                                 className="border-red-300 text-red-600 hover:bg-red-50 h-8"
                                 onClick={() => {
-                                  setReviewDialog({ open: true, action });
+                                  setReviewDialog({ open: true, action, mode: "review" });
                                   setReviewNotes("");
                                   setReviewApprove(false);
                                 }}
@@ -725,7 +804,7 @@ export default function LunaAutonomousDashboard() {
                                 size="sm"
                                 className="bg-green-600 hover:bg-green-700 text-white h-8"
                                 onClick={() => {
-                                  setReviewDialog({ open: true, action });
+                                  setReviewDialog({ open: true, action, mode: "review" });
                                   setReviewNotes("");
                                   setReviewApprove(true);
                                 }}
@@ -850,6 +929,120 @@ export default function LunaAutonomousDashboard() {
               </CardContent>
             </Card>
 
+            {/* Spending Limit */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Spending Limit</CardTitle>
+                <CardDescription>
+                  Maximum amount Luna can autonomously authorize for vendor dispatch. Actions
+                  above this limit are routed to human review.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="spending-limit">Autonomous Spending Limit ($)</Label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">$</span>
+                    <Input
+                      id="spending-limit"
+                      type="number"
+                      min={0}
+                      max={10000}
+                      step={50}
+                      value={settings.spendingLimit}
+                      onChange={(e) =>
+                        setSettings((p) => ({ ...p, spendingLimit: Number(e.target.value) }))
+                      }
+                      className="w-36"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Vendor dispatch estimates above ${settings.spendingLimit} will require manager
+                    approval before execution.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Escalation Contacts */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Escalation Contacts</CardTitle>
+                <CardDescription>
+                  People Luna alerts for emergency or high-priority situations when a property
+                  manager is not assigned
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {settings.escalationContacts.length > 0 && (
+                  <div className="space-y-2">
+                    {settings.escalationContacts.map((contact, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-2 rounded-lg bg-muted/40"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{contact.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {contact.role} · {contact.email}
+                            {contact.phone ? ` · ${contact.phone}` : ""}
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 w-7 p-0 text-destructive"
+                          onClick={() => removeEscalationContact(idx)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="grid gap-2 grid-cols-2">
+                  <Input
+                    placeholder="Name"
+                    value={newContact.name}
+                    onChange={(e) => setNewContact((p) => ({ ...p, name: e.target.value }))}
+                  />
+                  <Input
+                    placeholder="Role (e.g. Maintenance Lead)"
+                    value={newContact.role}
+                    onChange={(e) => setNewContact((p) => ({ ...p, role: e.target.value }))}
+                  />
+                  <Input
+                    placeholder="Email"
+                    type="email"
+                    value={newContact.email}
+                    onChange={(e) => setNewContact((p) => ({ ...p, email: e.target.value }))}
+                  />
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Phone (optional)"
+                      value={newContact.phone || ""}
+                      onChange={(e) => setNewContact((p) => ({ ...p, phone: e.target.value }))}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0"
+                      onClick={addEscalationContact}
+                      disabled={!newContact.name || !newContact.email || !newContact.role}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                {settings.escalationContacts.length === 0 && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Phone className="h-3 w-3" />
+                    No escalation contacts yet. Add people Luna should alert in emergencies.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Enabled Categories */}
             <Card className="lg:col-span-2">
               <CardHeader>
@@ -944,7 +1137,7 @@ export default function LunaAutonomousDashboard() {
         </TabsContent>
       </Tabs>
 
-      {/* Review Dialog */}
+      {/* Review / Undo Dialog */}
       <Dialog
         open={reviewDialog.open}
         onOpenChange={(open) => setReviewDialog((d) => ({ ...d, open }))}
@@ -952,42 +1145,60 @@ export default function LunaAutonomousDashboard() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {reviewApprove ? "Approve Action" : "Skip Action"}
+              {reviewDialog.mode === "undo"
+                ? "Override / Undo Action"
+                : reviewApprove
+                ? "Approve Action"
+                : "Skip Action"}
             </DialogTitle>
-            <DialogDescription>
-              {reviewDialog.action?.title}
-            </DialogDescription>
+            <DialogDescription>{reviewDialog.action?.title}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <p className="text-sm text-muted-foreground">
               {reviewDialog.action?.description}
             </p>
-            <div className="flex gap-3">
-              <Button
-                variant={reviewApprove ? "default" : "outline"}
-                size="sm"
-                onClick={() => setReviewApprove(true)}
-                className={reviewApprove ? "bg-green-600 hover:bg-green-700 text-white" : ""}
-              >
-                <CheckCircle className="h-4 w-4 mr-1.5" />
-                Approve & Execute
-              </Button>
-              <Button
-                variant={!reviewApprove ? "default" : "outline"}
-                size="sm"
-                onClick={() => setReviewApprove(false)}
-                className={!reviewApprove ? "bg-red-600 hover:bg-red-700 text-white" : ""}
-              >
-                <XCircle className="h-4 w-4 mr-1.5" />
-                Skip
-              </Button>
-            </div>
+
+            {reviewDialog.mode === "undo" ? (
+              <Alert className="border-orange-300 bg-orange-50 dark:bg-orange-950/20">
+                <AlertTriangle className="h-4 w-4 text-orange-600" />
+                <AlertDescription className="text-orange-800 dark:text-orange-200 text-xs">
+                  This marks the action as overridden. Notifications already sent cannot be
+                  recalled, but the audit trail will reflect this override.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <div className="flex gap-3">
+                <Button
+                  variant={reviewApprove ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setReviewApprove(true)}
+                  className={reviewApprove ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+                >
+                  <CheckCircle className="h-4 w-4 mr-1.5" />
+                  Approve & Execute
+                </Button>
+                <Button
+                  variant={!reviewApprove ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setReviewApprove(false)}
+                  className={!reviewApprove ? "bg-red-600 hover:bg-red-700 text-white" : ""}
+                >
+                  <XCircle className="h-4 w-4 mr-1.5" />
+                  Skip
+                </Button>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label>Notes (optional)</Label>
               <Textarea
                 value={reviewNotes}
                 onChange={(e) => setReviewNotes(e.target.value)}
-                placeholder="Add any notes about this decision…"
+                placeholder={
+                  reviewDialog.mode === "undo"
+                    ? "Reason for overriding this action…"
+                    : "Add any notes about this decision…"
+                }
                 rows={3}
               />
             </div>
@@ -995,7 +1206,7 @@ export default function LunaAutonomousDashboard() {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setReviewDialog({ open: false, action: null })}
+              onClick={() => setReviewDialog({ open: false, action: null, mode: "review" })}
             >
               Cancel
             </Button>
@@ -1003,7 +1214,9 @@ export default function LunaAutonomousDashboard() {
               onClick={handleSubmitReview}
               disabled={submittingReview}
               className={
-                reviewApprove
+                reviewDialog.mode === "undo"
+                  ? "bg-orange-600 hover:bg-orange-700 text-white"
+                  : reviewApprove
                   ? "bg-green-600 hover:bg-green-700 text-white"
                   : "bg-red-600 hover:bg-red-700 text-white"
               }
@@ -1011,7 +1224,7 @@ export default function LunaAutonomousDashboard() {
               {submittingReview ? (
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
               ) : null}
-              Confirm
+              {reviewDialog.mode === "undo" ? "Confirm Override" : "Confirm"}
             </Button>
           </DialogFooter>
         </DialogContent>

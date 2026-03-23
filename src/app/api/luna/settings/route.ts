@@ -12,6 +12,7 @@ function isAuthorized(role?: string): boolean {
 }
 
 export async function GET(req: NextRequest) {
+  void req;
   try {
     const session = await auth();
     if (!session?.user || !isAuthorized(session.user.role)) {
@@ -19,13 +20,24 @@ export async function GET(req: NextRequest) {
     }
 
     await connectDB();
-    let settings = await LunaSettings.findOne().sort({ updatedAt: -1 }).lean();
+    const settings = await LunaSettings.findOne().sort({ updatedAt: -1 }).lean();
 
     if (!settings) {
-      settings = { ...DEFAULT_LUNA_SETTINGS } as any;
+      return NextResponse.json({ settings: DEFAULT_LUNA_SETTINGS });
     }
 
-    lunaAutonomousService.updateSettings(settings as any);
+    lunaAutonomousService.updateSettings({
+      mode: settings.mode,
+      confidenceThreshold: settings.confidenceThreshold,
+      enabledCategories: settings.enabledCategories as never[],
+      digestEmailEnabled: settings.digestEmailEnabled,
+      digestEmailFrequency: settings.digestEmailFrequency,
+      maxActionsPerHour: settings.maxActionsPerHour,
+      humanReviewThreshold: settings.humanReviewThreshold,
+      spendingLimit: settings.spendingLimit ?? DEFAULT_LUNA_SETTINGS.spendingLimit,
+      escalationContacts: (settings.escalationContacts ?? []) as never[],
+    });
+
     return NextResponse.json({ settings });
   } catch (error) {
     console.error("[Luna Settings GET]", error);
@@ -40,32 +52,34 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json();
+    const body = await req.json() as { settings?: Record<string, unknown> };
     const { settings } = body;
 
     if (!settings) {
       return NextResponse.json({ error: "Settings payload required" }, { status: 400 });
     }
 
-    const allowedFields: Record<string, boolean> = {
-      mode: true,
-      confidenceThreshold: true,
-      enabledCategories: true,
-      digestEmailEnabled: true,
-      digestEmailFrequency: true,
-      maxActionsPerHour: true,
-      humanReviewThreshold: true,
-    };
+    const allowedFields = new Set([
+      "mode",
+      "confidenceThreshold",
+      "enabledCategories",
+      "digestEmailEnabled",
+      "digestEmailFrequency",
+      "maxActionsPerHour",
+      "humanReviewThreshold",
+      "spendingLimit",
+      "escalationContacts",
+    ]);
 
-    const sanitized: Record<string, any> = {};
+    const sanitized: Record<string, unknown> = {};
     for (const key of Object.keys(settings)) {
-      if (allowedFields[key]) sanitized[key] = settings[key];
+      if (allowedFields.has(key)) sanitized[key] = settings[key];
     }
 
-    const updatedBy =
-      (session.user as any).id ||
+    const updatedBy: string =
+      (session.user as { id?: string }).id ||
       session.user.email ||
-      (session.user as any).name ||
+      (session.user as { name?: string }).name ||
       "unknown";
 
     await connectDB();
@@ -75,7 +89,7 @@ export async function PUT(req: NextRequest) {
       { upsert: true, new: true, setDefaultsOnInsert: true }
     ).lean();
 
-    lunaAutonomousService.updateSettings(sanitized as any);
+    lunaAutonomousService.updateSettings(sanitized as Parameters<typeof lunaAutonomousService.updateSettings>[0]);
 
     return NextResponse.json({
       success: true,

@@ -242,6 +242,7 @@ const navigationSections: NavSection[] = [
         children: [
           { title: "nav.automation.hub", href: "/dashboard/automation", icon: Cpu, iconColor: "text-rose-200", roles: [UserRole.ADMIN, UserRole.MANAGER] },
           { title: "nav.automation.luna", href: "/dashboard/automation/luna", icon: Bot, iconColor: "text-rose-200", roles: [UserRole.ADMIN, UserRole.MANAGER] },
+          { title: "nav.automation.actions", href: "/dashboard/automation/actions", icon: Bot, iconColor: "text-rose-200", roles: [UserRole.ADMIN, UserRole.MANAGER] },
         ],
       },
     ],

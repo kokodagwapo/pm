@@ -16,7 +16,8 @@ export type LunaActionStatus =
   | "executed"
   | "skipped"
   | "failed"
-  | "pending_human";
+  | "pending_human"
+  | "undone";
 
 export type LunaAutonomyMode = "full" | "supervised" | "off";
 
@@ -40,7 +41,10 @@ export interface ILunaAutonomousAction {
   humanReviewedAt?: Date;
   humanReviewedBy?: string;
   executedAt?: Date;
-  metadata: Record<string, any>;
+  undoneAt?: Date;
+  undoneBy?: string;
+  executionError?: string;
+  metadata: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -64,7 +68,7 @@ const LunaAutonomousActionSchema = new Schema<ILunaAutonomousAction>(
     },
     status: {
       type: String,
-      enum: ["evaluated", "executed", "skipped", "failed", "pending_human"],
+      enum: ["evaluated", "executed", "skipped", "failed", "pending_human", "undone"],
       default: "evaluated",
       required: true,
     },
@@ -136,6 +140,16 @@ const LunaAutonomousActionSchema = new Schema<ILunaAutonomousAction>(
     executedAt: {
       type: Date,
     },
+    undoneAt: {
+      type: Date,
+    },
+    undoneBy: {
+      type: String,
+    },
+    executionError: {
+      type: String,
+      trim: true,
+    },
     metadata: {
       type: Schema.Types.Mixed,
       default: {},
@@ -145,7 +159,7 @@ const LunaAutonomousActionSchema = new Schema<ILunaAutonomousAction>(
     timestamps: true,
     toJSON: {
       virtuals: true,
-      transform: function (doc, ret) {
+      transform: function (_doc, ret) {
         delete ret.__v;
         return ret;
       },
@@ -159,6 +173,7 @@ LunaAutonomousActionSchema.index({ createdAt: -1 });
 LunaAutonomousActionSchema.index({ affectedUserId: 1 });
 LunaAutonomousActionSchema.index({ affectedPropertyId: 1 });
 LunaAutonomousActionSchema.index({ humanReviewRequired: 1, status: 1 });
+LunaAutonomousActionSchema.index({ triggerEntityId: 1, category: 1, createdAt: -1 });
 
 if (mongoose.models.LunaAutonomousAction) {
   delete mongoose.models.LunaAutonomousAction;

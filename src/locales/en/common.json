@@ -40,6 +40,7 @@
   "nav.automation": "Automation",
   "nav.automation.hub": "Overview",
   "nav.automation.luna": "Luna Agent",
+  "nav.automation.actions": "Actions Log",
 
   "nav.properties": "Properties",
   "nav.properties.all": "All Properties",

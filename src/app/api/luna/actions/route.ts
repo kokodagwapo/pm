@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     await connectDB();
-    const filter: Record<string, any> = {};
+    const filter: Record<string, unknown> = {};
     if (category) filter.category = category;
     if (status) filter.status = status;
 
@@ -65,13 +65,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json();
+    const body = await req.json() as {
+      action: string;
+      actionId?: string;
+      notes?: string;
+      approve?: boolean;
+    };
     const { action, actionId, notes, approve } = body;
 
+    const reviewerId: string =
+      (session.user as { id?: string }).id ||
+      session.user.email ||
+      (session.user as { name?: string }).name ||
+      "unknown";
+
+    // ── Review (approve or skip) a pending_human action ─────────────────────
     if (action === "review" && actionId) {
       await connectDB();
 
-      const existingAction = await LunaAutonomousAction.findById(actionId).lean();
+      const existingAction = await LunaAutonomousAction.findById(actionId);
       if (!existingAction) {
         return NextResponse.json({ error: "Action not found" }, { status: 404 });
       }
@@ -83,27 +95,67 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const reviewedBy =
-        (session.user as any).id ||
-        session.user.email ||
-        (session.user as any).name ||
-        "unknown";
+      let finalStatus: "executed" | "skipped" | "failed" = approve === true ? "executed" : "skipped";
+      let executionError: string | undefined;
 
       if (approve === true) {
-        await executeApprovedAction(existingAction as any);
+        try {
+          await executeApprovedAction(existingAction);
+        } catch (err: unknown) {
+          finalStatus = "failed";
+          executionError = err instanceof Error ? err.message : String(err);
+        }
+      }
+
+      const updatePayload: Record<string, unknown> = {
+        status: finalStatus,
+        humanReviewNotes: notes || "",
+        humanReviewedAt: new Date(),
+        humanReviewedBy: reviewerId,
+      };
+      if (finalStatus === "executed") {
+        updatePayload.executedAt = new Date();
+        updatePayload.$push = { actionsTaken: "human_approved_and_executed" };
+      } else if (finalStatus === "skipped") {
+        updatePayload.$push = { actionsTaken: "human_skipped" };
+      } else {
+        updatePayload.executionError = executionError;
+        updatePayload.$push = { actionsTaken: "human_approve_execution_failed" };
+      }
+
+      const updated = await LunaAutonomousAction.findByIdAndUpdate(
+        actionId,
+        updatePayload,
+        { new: true }
+      );
+
+      return NextResponse.json({ success: true, action: updated });
+    }
+
+    // ── Undo an executed action ───────────────────────────────────────────────
+    if (action === "undo" && actionId) {
+      await connectDB();
+
+      const existingAction = await LunaAutonomousAction.findById(actionId);
+      if (!existingAction) {
+        return NextResponse.json({ error: "Action not found" }, { status: 404 });
+      }
+
+      if (existingAction.status !== "executed") {
+        return NextResponse.json(
+          { error: "Only executed actions can be undone" },
+          { status: 400 }
+        );
       }
 
       const updated = await LunaAutonomousAction.findByIdAndUpdate(
         actionId,
         {
-          status: approve === true ? "executed" : "skipped",
-          humanReviewNotes: notes || "",
-          humanReviewedAt: new Date(),
-          humanReviewedBy: reviewedBy,
-          executedAt: approve === true ? new Date() : undefined,
-          $push: approve === true
-            ? { actionsTaken: "human_approved_and_executed" }
-            : { actionsTaken: "human_skipped" },
+          status: "undone",
+          undoneAt: new Date(),
+          undoneBy: reviewerId,
+          humanReviewNotes: notes || "Manually overridden by manager.",
+          $push: { actionsTaken: `undone_by:${reviewerId}` },
         },
         { new: true }
       );
@@ -111,6 +163,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, action: updated });
     }
 
+    // ── Demo scan with synthetic data ─────────────────────────────────────────
     if (action === "trigger_demo") {
       await connectDB();
       const demoActions = await Promise.all([
@@ -126,6 +179,7 @@ export async function POST(req: NextRequest) {
             amount: 1850,
             daysOverdue: 8,
             paymentId: "demo_payment_001",
+            tenantLocale: "en-US",
           },
         }),
         lunaAutonomousService.evaluateLeaseExpiry({
@@ -143,6 +197,8 @@ export async function POST(req: NextRequest) {
             managerEmail: "manager@example.com",
             managerName: "Alex Rivera",
             managerId: "demo_manager_001",
+            tenantResponse: null,
+            tenantLocale: "en-US",
           },
         }),
         lunaAutonomousService.evaluateMaintenanceRequest({
@@ -158,28 +214,26 @@ export async function POST(req: NextRequest) {
             category: "Plumbing",
             priority: "high",
             description: "Water heater not working — no hot water for 2 days",
-            daysSinceSubmission: 2,
+            hoursUnassigned: 6,
             isEmergency: false,
+            tenantLocale: "en-US",
           },
         }),
-        lunaAutonomousService.evaluateMaintenanceRequest({
-          entityType: "maintenance",
-          entityId: "demo_maint_002",
+        lunaAutonomousService.evaluateUnansweredMessage({
+          entityType: "tenant",
+          entityId: "demo_conv_001",
           affectedUserId: "demo_tenant_004",
-          affectedPropertyId: "demo_property_004",
           data: {
-            requestId: "demo_maint_002",
+            conversationId: "demo_conv_001",
             tenantName: "James Rivera",
             tenantEmail: "demo4@example.com",
             propertyName: "Harbor Lofts 305",
-            category: "Electrical",
-            priority: "emergency",
-            description: "Power outage in entire unit, sparks from main panel",
-            daysSinceSubmission: 0,
-            isEmergency: true,
+            lastMessagePreview: "Hi, when will the parking permit issue be resolved? I was told last week...",
+            hoursUnanswered: 31,
             managerEmail: "manager@example.com",
             managerName: "Alex Rivera",
             managerId: "demo_manager_001",
+            tenantLocale: "en-US",
           },
         }),
       ]);
@@ -200,106 +254,131 @@ export async function POST(req: NextRequest) {
 
 async function executeApprovedAction(action: {
   category: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   affectedUserId?: string;
   triggerEntityType?: string;
   triggerEntityId?: string;
 }): Promise<void> {
-  try {
-    const meta = action.metadata || {};
+  const meta = (action.metadata || {}) as Record<string, string | number | undefined>;
 
-    switch (action.category) {
-      case "payment_reminder":
-      case "payment_escalation": {
-        if (!meta.tenantEmail || !action.affectedUserId) break;
-        await notificationService.sendNotification({
-          type:
-            action.category === "payment_escalation"
-              ? NotificationType.PAYMENT_OVERDUE
-              : NotificationType.PAYMENT_REMINDER,
-          priority:
-            action.category === "payment_escalation"
-              ? NotificationPriority.HIGH
-              : NotificationPriority.NORMAL,
-          userId: action.affectedUserId,
-          title:
-            action.category === "payment_escalation"
-              ? "Overdue Payment — Immediate Action Required"
-              : "Payment Reminder",
-          message: `A payment is ${action.category === "payment_escalation" ? "significantly overdue" : "due soon"} for ${meta.propertyName || "your property"}.`,
-          data: {
-            userEmail: meta.tenantEmail,
-            userName: meta.tenantName || "Tenant",
-            propertyName: meta.propertyName,
-            rentAmount: meta.amount,
-            daysOverdue: meta.daysOverdue,
-            amount: meta.amount,
-          },
-        });
-        break;
-      }
+  switch (action.category) {
+    case "payment_reminder":
+    case "payment_escalation": {
+      const tenantEmail = meta.tenantEmail as string | undefined;
+      const userId = action.affectedUserId;
+      if (!tenantEmail || !userId) break;
 
-      case "maintenance_triage":
-      case "maintenance_escalation": {
-        if (!meta.tenantEmail || !action.affectedUserId) break;
-        await notificationService.sendNotification({
-          type: NotificationType.MAINTENANCE_UPDATE,
-          priority:
-            action.category === "maintenance_escalation"
-              ? NotificationPriority.CRITICAL
-              : NotificationPriority.NORMAL,
-          userId: action.affectedUserId,
-          title:
-            action.category === "maintenance_escalation"
-              ? `EMERGENCY: ${meta.category || "Maintenance"} at ${meta.propertyName}`
-              : `Maintenance Update — ${meta.propertyName}`,
-          message: meta.description || "Your maintenance request has been reviewed.",
-          data: {
-            userEmail: meta.tenantEmail,
-            userName: meta.tenantName || "Tenant",
-            requestId: meta.requestId || action.triggerEntityId || "N/A",
-            propertyName: meta.propertyName,
-            status:
-              action.category === "maintenance_escalation"
-                ? "emergency_escalated"
-                : "triaged",
-            description: meta.description,
-            notes:
-              "This action was approved and executed by a property manager via Luna review.",
-          },
-        });
-        break;
-      }
-
-      case "lease_renewal_notice":
-      case "lease_expiry_alert": {
-        if (!meta.tenantEmail || !action.affectedUserId) break;
-        await notificationService.sendNotification({
-          type: NotificationType.LEASE_EXPIRY,
-          priority:
-            (meta.daysUntilExpiry || 30) <= 14
-              ? NotificationPriority.HIGH
-              : NotificationPriority.NORMAL,
-          userId: action.affectedUserId,
-          title: `Lease ${action.category === "lease_expiry_alert" ? "Expiry Alert" : "Renewal Notice"}`,
-          message: `Your lease for ${meta.propertyName} expires in ${meta.daysUntilExpiry || "N/A"} days.`,
-          data: {
-            userEmail: meta.tenantEmail,
-            userName: meta.tenantName || "Tenant",
-            propertyName: meta.propertyName,
-            expiryDate: meta.expiryDate,
-            daysUntilExpiry: meta.daysUntilExpiry,
-            leaseId: meta.leaseId,
-            isLandlord: false,
-          },
-        });
-        break;
-      }
-
-      default:
-        break;
+      await notificationService.sendNotification({
+        type:
+          action.category === "payment_escalation"
+            ? NotificationType.PAYMENT_OVERDUE
+            : NotificationType.PAYMENT_REMINDER,
+        priority:
+          action.category === "payment_escalation"
+            ? NotificationPriority.HIGH
+            : NotificationPriority.NORMAL,
+        userId,
+        title:
+          action.category === "payment_escalation"
+            ? "Overdue Payment — Immediate Action Required"
+            : "Payment Reminder",
+        message: `A payment is ${action.category === "payment_escalation" ? "significantly overdue" : "due soon"} for ${meta.propertyName || "your property"}.\n\n—\nSent by SmartStart AI. To speak with a person, reply to this message or contact your property manager directly.`,
+        data: {
+          userEmail: tenantEmail,
+          userName: meta.tenantName || "Tenant",
+          propertyName: meta.propertyName,
+          rentAmount: meta.amount,
+          daysOverdue: meta.daysOverdue,
+          amount: meta.amount,
+        },
+      });
+      break;
     }
-  } catch (err) {
-    console.error("[Luna] executeApprovedAction failed:", err);
+
+    case "maintenance_triage":
+    case "maintenance_escalation": {
+      const tenantEmail = meta.tenantEmail as string | undefined;
+      const userId = action.affectedUserId;
+      if (!tenantEmail || !userId) break;
+
+      await notificationService.sendNotification({
+        type: NotificationType.MAINTENANCE_UPDATE,
+        priority:
+          action.category === "maintenance_escalation"
+            ? NotificationPriority.CRITICAL
+            : NotificationPriority.NORMAL,
+        userId,
+        title:
+          action.category === "maintenance_escalation"
+            ? `EMERGENCY: ${meta.category || "Maintenance"} at ${meta.propertyName}`
+            : `Maintenance Update — ${meta.propertyName}`,
+        message: `${meta.description || "Your maintenance request has been reviewed."}\n\n—\nSent by SmartStart AI. To speak with a person, reply to this message or contact your property manager directly.`,
+        data: {
+          userEmail: tenantEmail,
+          userName: meta.tenantName || "Tenant",
+          requestId: (meta.requestId as string) || (action.triggerEntityId as string) || "N/A",
+          propertyName: meta.propertyName,
+          status:
+            action.category === "maintenance_escalation"
+              ? "emergency_escalated"
+              : "triaged",
+          description: meta.description,
+          notes:
+            "This action was approved and executed by a property manager via Luna review.",
+        },
+      });
+      break;
+    }
+
+    case "lease_renewal_notice":
+    case "lease_expiry_alert": {
+      const tenantEmail = meta.tenantEmail as string | undefined;
+      const userId = action.affectedUserId;
+      if (!tenantEmail || !userId) break;
+
+      await notificationService.sendNotification({
+        type: NotificationType.LEASE_EXPIRY,
+        priority:
+          Number(meta.daysUntilExpiry || 30) <= 14
+            ? NotificationPriority.HIGH
+            : NotificationPriority.NORMAL,
+        userId,
+        title: `Lease ${action.category === "lease_expiry_alert" ? "Expiry Alert" : "Renewal Notice"}`,
+        message: `Your lease for ${meta.propertyName} expires in ${meta.daysUntilExpiry || "N/A"} days.\n\n—\nSent by SmartStart AI. To speak with a person, reply to this message or contact your property manager directly.`,
+        data: {
+          userEmail: tenantEmail,
+          userName: meta.tenantName || "Tenant",
+          propertyName: meta.propertyName,
+          expiryDate: meta.expiryDate,
+          daysUntilExpiry: meta.daysUntilExpiry,
+          leaseId: meta.leaseId,
+          isLandlord: false,
+        },
+      });
+      break;
+    }
+
+    case "tenant_communication": {
+      const tenantEmail = meta.tenantEmail as string | undefined;
+      const userId = action.affectedUserId;
+      if (!tenantEmail || !userId) break;
+
+      await notificationService.sendNotification({
+        type: NotificationType.NEW_MESSAGE,
+        priority: NotificationPriority.NORMAL,
+        userId,
+        title: "Your message has been received",
+        message: `Thank you for your message. Your property manager has been notified and will respond shortly.\n\n—\nSent by SmartStart AI. To speak with a person, reply to this message or contact your property manager directly.`,
+        data: {
+          userEmail: tenantEmail,
+          userName: meta.tenantName || "Tenant",
+          conversationId: meta.conversationId,
+        },
+      });
+      break;
+    }
+
+    default:
+      break;
   }
 }
