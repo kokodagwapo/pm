@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
 import { PwaInstallHint } from "@/components/pwa/PwaInstallHint";
+import { HydrationGuard } from "@/components/HydrationGuard";
 import type { Metadata } from "next";
 
 const inter = Inter({
@@ -76,12 +77,14 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={`${inter.variable} ${inter.className} ${playfair.variable} ${montserrat.variable} ${plusJakarta.variable} font-light`} suppressHydrationWarning>
-        <Providers>
-          {children}
-          <Toaster />
-          <ServiceWorkerRegistration />
-          <PwaInstallHint variant="dark" />
-        </Providers>
+        <HydrationGuard>
+          <Providers>
+            {children}
+            <Toaster />
+            <ServiceWorkerRegistration />
+            <PwaInstallHint variant="dark" />
+          </Providers>
+        </HydrationGuard>
       </body>
     </html>
   );
