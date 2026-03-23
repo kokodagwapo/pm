@@ -457,7 +457,7 @@ async function executeApprovedAction(action: {
       );
 
       await notificationService.sendNotification({
-        type: NotificationType.NEW_MESSAGE,
+        type: NotificationType.SYSTEM_ANNOUNCEMENT,
         priority: NotificationPriority.NORMAL,
         userId,
         title: "Your message has been received",

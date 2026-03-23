@@ -130,6 +130,11 @@ async function runTriggerCycle() {
     const leaseMilestone = daysUntilExpiry <= 15 ? "15d" : daysUntilExpiry <= 30 ? "30d" : "60d";
     const leaseEntityId = `${String(lease._id)}_${leaseMilestone}`;
 
+    const cronRenewalResponse = (lease as Record<string, unknown>).lunaRenewalResponse as
+      | "accepted"
+      | "negotiating"
+      | "declined"
+      | null;
     await lunaAutonomousService.evaluateLeaseExpiry({
       entityType: "lease",
       entityId: leaseEntityId,
@@ -143,7 +148,7 @@ async function runTriggerCycle() {
         expiryDate: new Date(lease.endDate),
         daysUntilExpiry,
         tenantLocale: tenant.preferredLocale || "en",
-        tenantResponse: null,
+        tenantResponse: cronRenewalResponse ?? null,
       },
     });
     results.expiringLeases++;

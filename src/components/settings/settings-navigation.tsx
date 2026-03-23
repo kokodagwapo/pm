@@ -17,6 +17,7 @@ import {
   Search,
   Settings,
   ChevronRight,
+  Bot,
 } from "lucide-react";
 
 interface NavigationItem {
@@ -129,6 +130,21 @@ export default function SettingsNavigation({
         { id: "email", title: "Email Configuration", href: "/dashboard/settings/system#email" },
         { id: "payment", title: "Payment Settings", href: "/dashboard/settings/system#payment" },
         { id: "maintenance", title: "Maintenance Mode", href: "/dashboard/settings/system#maintenance" },
+      ],
+    },
+    {
+      id: "automation",
+      title: "Luna Automation",
+      description: "Configure AI autonomous operations mode and settings",
+      href: "/dashboard/settings/automation",
+      icon: Bot,
+      adminOnly: true,
+      badge: "AI",
+      sections: [
+        { id: "mode", title: "Autonomy Mode", href: "/dashboard/settings/automation#mode" },
+        { id: "thresholds", title: "Confidence & Spending", href: "/dashboard/settings/automation#thresholds" },
+        { id: "digest", title: "Digest Notifications", href: "/dashboard/settings/automation#digest" },
+        { id: "roles", title: "Role Permissions", href: "/dashboard/settings/automation#roles" },
       ],
     },
     {

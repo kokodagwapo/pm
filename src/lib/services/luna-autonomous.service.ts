@@ -978,7 +978,7 @@ export class LunaAutonomousService {
         try {
           const ackMsg = getAckMessage(locale, data.tenantName);
           await notificationService.sendNotification({
-            type: NotificationType.NEW_MESSAGE,
+            type: NotificationType.SYSTEM_ANNOUNCEMENT,
             priority:
               data.hoursUnanswered > 48
                 ? NotificationPriority.HIGH
@@ -999,7 +999,7 @@ export class LunaAutonomousService {
 
           if (data.managerEmail && data.managerId) {
             await notificationService.sendNotification({
-              type: NotificationType.NEW_MESSAGE,
+              type: NotificationType.SYSTEM_ANNOUNCEMENT,
               priority:
                 data.hoursUnanswered > 48
                   ? NotificationPriority.HIGH

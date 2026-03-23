@@ -148,6 +148,11 @@ export async function POST(req: NextRequest) {
       const leaseEntityId = `${String(lease._id)}_${leaseMilestone}`;
       if (!isCategoryAllowedForRole("lease_renewal_notice") && !isCategoryAllowedForRole("lease_expiry_alert")) continue;
 
+      const renewalResponse = (lease as Record<string, unknown>).lunaRenewalResponse as
+        | "accepted"
+        | "negotiating"
+        | "declined"
+        | null;
       await lunaAutonomousService.evaluateLeaseExpiry({
         entityType: "lease",
         entityId: leaseEntityId,
@@ -161,7 +166,7 @@ export async function POST(req: NextRequest) {
           expiryDate: new Date(lease.endDate),
           daysUntilExpiry,
           tenantLocale: tenant.preferredLocale || "en-US",
-          tenantResponse: null,
+          tenantResponse: renewalResponse ?? null,
         },
       });
       results.expiringLeases++;

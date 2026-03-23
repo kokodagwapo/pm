@@ -389,6 +389,15 @@ const LeaseSchema = new Schema<ILease>(
       trim: true,
       maxlength: [2000, "Notes cannot exceed 2000 characters"],
     },
+    lunaRenewalResponse: {
+      type: String,
+      enum: ["accepted", "negotiating", "declined", null],
+      default: null,
+    },
+    lunaRenewalRespondedAt: {
+      type: Date,
+      default: null,
+    },
     deletedAt: {
       type: Date,
       default: null,
