@@ -211,6 +211,8 @@ export default function LunaAutonomousDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [triggering, setTriggering] = useState(false);
+  const [scanningLive, setScanningLive] = useState(false);
+  const [lastScanResult, setLastScanResult] = useState<{ triggered: number; breakdown: Record<string, number> } | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -276,6 +278,24 @@ export default function LunaAutonomousDashboard() {
       }
     } finally {
       setTriggering(false);
+    }
+  };
+
+  const handleRunLiveScan = async () => {
+    setScanningLive(true);
+    setLastScanResult(null);
+    try {
+      const res = await fetch("/api/luna/trigger", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setLastScanResult({ triggered: data.triggered, breakdown: data.breakdown });
+        await fetchData();
+      }
+    } finally {
+      setScanningLive(false);
     }
   };
 
@@ -369,26 +389,52 @@ export default function LunaAutonomousDashboard() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={fetchData}>
             <RefreshCw className="h-4 w-4 mr-1.5" />
             Refresh
           </Button>
           <Button
             size="sm"
+            variant="outline"
             onClick={handleTriggerDemo}
-            disabled={triggering}
-            className="bg-rose-600 hover:bg-rose-700 text-white"
+            disabled={triggering || scanningLive}
           >
             {triggering ? (
               <RefreshCw className="h-4 w-4 mr-1.5 animate-spin" />
             ) : (
               <Play className="h-4 w-4 mr-1.5" />
             )}
-            Run Evaluation
+            Demo Scan
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleRunLiveScan}
+            disabled={triggering || scanningLive}
+            className="bg-rose-600 hover:bg-rose-700 text-white"
+          >
+            {scanningLive ? (
+              <RefreshCw className="h-4 w-4 mr-1.5 animate-spin" />
+            ) : (
+              <Zap className="h-4 w-4 mr-1.5" />
+            )}
+            Run Live Scan
           </Button>
         </div>
       </div>
+
+      {lastScanResult && (
+        <Alert className="border-green-300 bg-green-50 dark:bg-green-950/20">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-800 dark:text-green-200">
+            Live scan complete — <strong>{lastScanResult.triggered} trigger(s)</strong> evaluated.
+            {" "}Overdue payments: {lastScanResult.breakdown.overduePayments},
+            Expiring leases: {lastScanResult.breakdown.expiringLeases},
+            Stale maintenance: {lastScanResult.breakdown.staleMaintenance},
+            Emergencies: {lastScanResult.breakdown.emergencyMaintenance}.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Mode Alert */}
       {settings.mode === "off" && (

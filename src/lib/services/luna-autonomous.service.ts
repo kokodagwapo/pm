@@ -4,7 +4,7 @@
  * based on configurable autonomy settings and confidence thresholds.
  */
 
-import dbConnect from "@/lib/db";
+import connectDB from "@/lib/mongodb";
 import LunaAutonomousAction, {
   LunaActionCategory,
   LunaActionStatus,
@@ -465,7 +465,7 @@ export class LunaAutonomousService {
     triggerEvent: string
   ): Promise<ILunaDecisionRecord | null> {
     try {
-      await dbConnect();
+      await connectDB();
       const record = await LunaAutonomousAction.create({
         category: decision.category,
         status: decision.status,
@@ -492,7 +492,7 @@ export class LunaAutonomousService {
   }
 
   async getRecentActions(limit = 50, category?: LunaActionCategory, status?: LunaActionStatus) {
-    await dbConnect();
+    await connectDB();
     const filter: Record<string, any> = {};
     if (category) filter.category = category;
     if (status) filter.status = status;
@@ -500,7 +500,7 @@ export class LunaAutonomousService {
   }
 
   async getActionStats() {
-    await dbConnect();
+    await connectDB();
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const weekStart = new Date(todayStart.getTime() - 6 * 24 * 60 * 60 * 1000);
@@ -533,7 +533,7 @@ export class LunaAutonomousService {
     notes: string,
     approve: boolean
   ) {
-    await dbConnect();
+    await connectDB();
     return LunaAutonomousAction.findByIdAndUpdate(
       actionId,
       {
