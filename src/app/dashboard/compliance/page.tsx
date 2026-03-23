@@ -248,9 +248,12 @@ export default function CompliancePage() {
   const seedJurisdictions = async () => {
     setSeeding(true);
     try {
-      const res = await fetch("/api/compliance/seed", { method: "POST" });
-      const data = await res.json();
-      console.log("Seed result:", data);
+      const checkRes = await fetch("/api/compliance/seed");
+      if (!checkRes.ok) return;
+      const checkData = await checkRes.json();
+      if (!checkData.seeded) {
+        await fetch("/api/compliance/seed", { method: "POST" });
+      }
     } catch (e) {
       console.error("Seed error:", e);
     } finally {
@@ -279,7 +282,7 @@ export default function CompliancePage() {
     }
   };
 
-  const userRole = (session?.user as any)?.role;
+  const userRole = (session?.user as { id?: string; role?: string } | undefined)?.role ?? "";
   const isManager = ["admin", "super_admin", "manager"].includes(userRole);
 
   const filteredObligations =
@@ -349,34 +352,36 @@ export default function CompliancePage() {
           Compliance Tools
         </h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {[
-            {
-              id: "rent",
-              icon: Calculator,
-              title: "Rent Increase Calculator",
-              description: "Verify proposed rent increases comply with state regulations and calculate proper notice periods",
-              color: isLight ? "from-emerald-50 to-emerald-100/50 border-emerald-200 text-emerald-700" : "from-emerald-500/10 to-emerald-600/5 border-emerald-500/20 text-emerald-400",
-            },
-            {
-              id: "eviction",
-              icon: Gavel,
-              title: "Eviction Workflow Builder",
-              description: "Step-by-step eviction procedures with state-specific legal requirements and required documents",
-              color: isLight ? "from-orange-50 to-orange-100/50 border-orange-200 text-orange-700" : "from-orange-500/10 to-orange-600/5 border-orange-500/20 text-orange-400",
-            },
-            {
-              id: "fairHousing",
-              icon: Eye,
-              title: "Fair Housing Guardrails",
-              description: "Scan listings and communications for discriminatory language before publishing",
-              color: isLight ? "from-violet-50 to-violet-100/50 border-violet-200 text-violet-700" : "from-violet-500/10 to-violet-600/5 border-violet-500/20 text-violet-400",
-            },
-          ].map((tool) => {
+          {(
+            [
+              {
+                id: "rent" as const,
+                icon: Calculator,
+                title: "Rent Increase Calculator",
+                description: "Verify proposed rent increases comply with state regulations and calculate proper notice periods",
+                color: isLight ? "from-emerald-50 to-emerald-100/50 border-emerald-200 text-emerald-700" : "from-emerald-500/10 to-emerald-600/5 border-emerald-500/20 text-emerald-400",
+              },
+              {
+                id: "eviction" as const,
+                icon: Gavel,
+                title: "Eviction Workflow Builder",
+                description: "Step-by-step eviction procedures with state-specific legal requirements and required documents",
+                color: isLight ? "from-orange-50 to-orange-100/50 border-orange-200 text-orange-700" : "from-orange-500/10 to-orange-600/5 border-orange-500/20 text-orange-400",
+              },
+              {
+                id: "fairHousing" as const,
+                icon: Eye,
+                title: "Fair Housing Guardrails",
+                description: "Scan listings and communications for discriminatory language before publishing",
+                color: isLight ? "from-violet-50 to-violet-100/50 border-violet-200 text-violet-700" : "from-violet-500/10 to-violet-600/5 border-violet-500/20 text-violet-400",
+              },
+            ] as const
+          ).map((tool) => {
             const Icon = tool.icon;
             return (
               <button
                 key={tool.id}
-                onClick={() => setActiveModal(tool.id as any)}
+                onClick={() => setActiveModal(tool.id)}
                 className={cn(
                   "group rounded-2xl border bg-gradient-to-br p-4 text-left transition-all duration-200 hover:scale-[1.01] hover:shadow-md",
                   tool.color

@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { connectDB } from "@/lib/mongodb";
+import connectDB from "@/lib/mongodb";
 import JurisdictionRule from "@/models/JurisdictionRule";
+
+interface SessionUser {
+  id: string;
+  role: string;
+}
 
 export interface EvictionStep {
   step: number;
@@ -165,7 +170,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = (session.user as any).role;
+    const { role: userRole } = session.user as SessionUser;
     if (!["admin", "super_admin", "manager"].includes(userRole)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

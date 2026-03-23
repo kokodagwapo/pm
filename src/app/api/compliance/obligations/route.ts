@@ -1,8 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { connectDB } from "@/lib/mongodb";
+import connectDB from "@/lib/mongodb";
 import ComplianceObligation from "@/models/ComplianceObligation";
 import Property from "@/models/Property";
+import mongoose from "mongoose";
+
+interface SessionUser {
+  id: string;
+  role: string;
+}
+
+async function getAuthorizedPropertyIds(userId: string, role: string): Promise<mongoose.Types.ObjectId[] | null> {
+  if (["admin", "super_admin"].includes(role)) return null;
+  if (role === "manager") {
+    const managed = await Property.find({ managerId: userId }, "_id").lean();
+    const owned = await Property.find({ ownerId: userId }, "_id").lean();
+    const ids = [...managed, ...owned].map((p) => p._id as mongoose.Types.ObjectId);
+    return ids;
+  }
+  const owned = await Property.find({ ownerId: userId }, "_id").lean();
+  return owned.map((p) => p._id as mongoose.Types.ObjectId);
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,6 +31,7 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
+    const user = session.user as SessionUser;
     const { searchParams } = new URL(request.url);
     const propertyId = searchParams.get("propertyId");
     const status = searchParams.get("status");
@@ -20,16 +39,24 @@ export async function GET(request: NextRequest) {
     const severity = searchParams.get("severity");
     const upcoming = searchParams.get("upcoming");
 
-    const query: any = { isActive: true };
+    const query: Record<string, unknown> = { isActive: true };
 
     if (propertyId) {
-      query.propertyId = propertyId;
+      if (!mongoose.Types.ObjectId.isValid(propertyId)) {
+        return NextResponse.json({ error: "Invalid propertyId" }, { status: 400 });
+      }
+      const authorizedIds = await getAuthorizedPropertyIds(user.id, user.role);
+      if (authorizedIds !== null) {
+        const isAuthorized = authorizedIds.some((id) => id.toString() === propertyId);
+        if (!isAuthorized) {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+      }
+      query.propertyId = new mongoose.Types.ObjectId(propertyId);
     } else {
-      const userRole = (session.user as any).role;
-      const userId = (session.user as any).id;
-      if (!["admin", "super_admin", "manager"].includes(userRole)) {
-        const ownedProperties = await Property.find({ ownerId: userId }, "_id").lean();
-        query.propertyId = { $in: ownedProperties.map((p) => p._id) };
+      const authorizedIds = await getAuthorizedPropertyIds(user.id, user.role);
+      if (authorizedIds !== null) {
+        query.propertyId = { $in: authorizedIds };
       }
     }
 
@@ -74,17 +101,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = (session.user as any).role;
-    if (!["admin", "super_admin", "manager"].includes(userRole)) {
+    const user = session.user as SessionUser;
+    if (!["admin", "super_admin", "manager"].includes(user.role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     await connectDB();
     const data = await request.json();
 
+    if (!data.propertyId || !mongoose.Types.ObjectId.isValid(data.propertyId)) {
+      return NextResponse.json({ error: "Valid propertyId is required" }, { status: 400 });
+    }
+
+    const authorizedIds = await getAuthorizedPropertyIds(user.id, user.role);
+    if (authorizedIds !== null) {
+      const isAuthorized = authorizedIds.some((id) => id.toString() === data.propertyId);
+      if (!isAuthorized) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+
     const obligation = await ComplianceObligation.create({
       ...data,
-      createdBy: (session.user as any).id,
+      createdBy: user.id,
     });
 
     const populated = await ComplianceObligation.findById(obligation._id)

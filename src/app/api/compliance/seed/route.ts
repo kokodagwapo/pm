@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { connectDB } from "@/lib/mongodb";
+import connectDB from "@/lib/mongodb";
 import JurisdictionRule from "@/models/JurisdictionRule";
 
 const JURISDICTION_SEED_DATA = [
@@ -347,7 +347,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = (session.user as any).role;
+    const { role: userRole } = session.user as { id: string; role: string };
     if (!["admin", "super_admin"].includes(userRole)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
