@@ -119,7 +119,7 @@ export default function TenantIntelligenceDashboard() {
   const userRole = (session?.user as { role?: string })?.role || "";
   const [scores, setScores] = useState<TenantScore[]>([]);
   const [stats, setStats] = useState<PortfolioStats | null>(null);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilterRaw] = useState("all");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [total, setTotal] = useState(0);
@@ -127,6 +127,9 @@ export default function TenantIntelligenceDashboard() {
   const [batchSending, setBatchSending] = useState(false);
   const [sortKey, setSortKey] = useState<keyof TenantScore | "signals.latePaymentsLast12" | "signals.daysUntilLeaseExpiry">("churnRiskScore");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 50;
+  const setFilter = (f: string) => { setFilterRaw(f); setPage(1); };
 
   const isManager = ["admin", "manager"].includes(userRole.toLowerCase());
   const canViewPortfolio = ["admin", "manager", "owner"].includes(userRole.toLowerCase());
@@ -139,7 +142,7 @@ export default function TenantIntelligenceDashboard() {
 
   const fetchData = useCallback(async (forceRefresh = false) => {
     try {
-      const params = new URLSearchParams({ filter, limit: "50" });
+      const params = new URLSearchParams({ filter, limit: String(PAGE_SIZE), page: String(page) });
       if (forceRefresh) params.set("refresh", "true");
       const res = await fetch(`/api/tenant-intelligence/portfolio?${params}`);
       if (!res.ok) return;
@@ -172,7 +175,7 @@ export default function TenantIntelligenceDashboard() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [filter]);
+  }, [filter, page, PAGE_SIZE]);
 
   useEffect(() => {
     fetchData();
@@ -361,7 +364,7 @@ export default function TenantIntelligenceDashboard() {
         </div>
       )}
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <Filter className="h-4 w-4 text-muted-foreground" />
         <Select value={filter} onValueChange={setFilter}>
           <SelectTrigger className="w-52 h-8 text-sm">
@@ -376,7 +379,32 @@ export default function TenantIntelligenceDashboard() {
           </SelectContent>
         </Select>
         {total > 0 && (
-          <span className="text-sm text-muted-foreground">{total} tenant{total !== 1 ? "s" : ""}</span>
+          <span className="text-sm text-muted-foreground">
+            {total} tenant{total !== 1 ? "s" : ""}
+            {total > PAGE_SIZE && ` · page ${page} of ${Math.ceil(total / PAGE_SIZE)}`}
+          </span>
+        )}
+        {total > PAGE_SIZE && (
+          <div className="flex items-center gap-1 ml-auto">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 px-2 text-xs"
+              disabled={page <= 1 || loading}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              Prev
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 px-2 text-xs"
+              disabled={page >= Math.ceil(total / PAGE_SIZE) || loading}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </Button>
+          </div>
         )}
       </div>
 
