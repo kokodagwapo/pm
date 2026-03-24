@@ -859,6 +859,10 @@ export interface IMaintenanceRequest extends Document {
   unitId?: Types.ObjectId; // Optional - for multi-unit properties
   tenantId: Types.ObjectId;
   assignedTo?: Types.ObjectId;
+  /** Set when Luna auto-dispatches an approved maintenance action to the vendor pool */
+  lunaVendorId?: Types.ObjectId;
+  lunaVendorName?: string;
+  lunaDispatchedAt?: Date;
   title: string;
   description: string;
   priority: MaintenancePriority;

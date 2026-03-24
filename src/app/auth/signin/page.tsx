@@ -19,6 +19,7 @@ import {
   Shield,
   Users,
   Home,
+  Calendar,
   ArrowLeft,
 } from "lucide-react";
 
@@ -481,8 +482,8 @@ function SignInContent() {
             </div>
           </div>
 
-          {/* View Rentals */}
-          <div className="text-center">
+          {/* View Rentals + stay finder */}
+          <div className="flex flex-wrap items-center justify-center gap-2">
             <a
               href="/rentals"
               className="inline-flex items-center gap-2 h-[42px] px-7 rounded-2xl border border-white/15 text-white/50 text-xs tracking-wide hover:border-white/30 hover:text-white/80 transition-all duration-300"
@@ -490,6 +491,14 @@ function SignInContent() {
             >
               <Home className="h-3.5 w-3.5" />
               {t("auth.signin.viewRentals")}
+            </a>
+            <a
+              href="/all-in-one-calendar"
+              className="inline-flex items-center gap-2 h-[42px] px-7 rounded-2xl border border-white/15 text-white/50 text-xs tracking-wide hover:border-white/30 hover:text-white/80 transition-all duration-300"
+              style={{ fontWeight: 300 }}
+            >
+              <Calendar className="h-3.5 w-3.5" />
+              {t("auth.signin.checkAvailability")}
             </a>
           </div>
 

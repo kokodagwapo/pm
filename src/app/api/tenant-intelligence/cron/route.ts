@@ -17,15 +17,13 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { UserRole, PaymentStatus } from "@/types";
+import { verifyCronRequestOrAdmin } from "@/lib/cron-auth";
 import connectDB from "@/lib/mongodb";
 import { computeAndPersistScores } from "@/lib/services/tenant-intelligence.service";
 import { getTemplateById, selectTemplateForSignals } from "@/lib/services/intervention-templates.service";
 import TenantIntelligence from "@/models/TenantIntelligence";
 import mongoose from "mongoose";
-
-const CRON_SECRET = process.env.TENANT_INTELLIGENCE_CRON_SECRET || process.env.CRON_SECRET;
 
 // Default thresholds — overridden by configurable settings in DB
 const DEFAULT_THRESHOLDS = {
@@ -94,22 +92,12 @@ async function getLunaAutonomyMode(): Promise<"full" | "supervised" | "off"> {
   return "supervised";
 }
 
-async function isAuthorized(req: NextRequest): Promise<boolean> {
-  if (CRON_SECRET) {
-    const provided = req.headers.get("x-cron-secret");
-    if (provided === CRON_SECRET) return true;
-  }
-  const session = await auth();
-  if (!session?.user) return false;
-  const role = (session.user as { role?: string }).role;
-  return role === UserRole.ADMIN;
-}
-
 export async function POST(req: NextRequest) {
   try {
-    if (!(await isAuthorized(req))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const denied = await verifyCronRequestOrAdmin(req, {
+      envKeys: ["TENANT_INTELLIGENCE_CRON_SECRET", "CRON_SECRET"],
+    });
+    if (denied) return denied;
 
     await connectDB();
 

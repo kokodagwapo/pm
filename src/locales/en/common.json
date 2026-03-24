@@ -70,6 +70,7 @@
   "nav.leases.new": "New Lease",
   "nav.leases.active": "Active Leases",
   "nav.leases.expiring": "Expiring Soon",
+  "nav.leases.renewals": "Renewal pipeline",
   "nav.leases.invoices": "Invoices",
   "nav.leases.my": "My Leases",
   "nav.leases.documents": "Documents",

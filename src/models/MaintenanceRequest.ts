@@ -25,6 +25,20 @@ const MaintenanceRequestSchema = new Schema<IMaintenanceRequest>(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    /** Luna autonomous dispatch — persisted for audit and vendor drill-down */
+    lunaVendorId: {
+      type: Schema.Types.ObjectId,
+      ref: "Vendor",
+      index: true,
+    },
+    lunaVendorName: {
+      type: String,
+      trim: true,
+      maxlength: [200, "Vendor name cannot exceed 200 characters"],
+    },
+    lunaDispatchedAt: {
+      type: Date,
+    },
     title: {
       type: String,
       required: [true, "Title is required"],

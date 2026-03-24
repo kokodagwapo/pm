@@ -67,6 +67,15 @@
   "dashboard.cards.leaseRenewals.title": "Malapit nang Mag-renew",
   "dashboard.cards.leaseRenewals.description": "Mga kontratang matatapos sa susunod na 30 araw",
 
+  "dashboard.cards.leasableUnits.title": "Available units",
+  "dashboard.cards.leasableUnits.description": "Per-unit na availability",
+
+  "dashboard.cards.fullyVacantAssets.title": "Bakanteng property",
+  "dashboard.cards.fullyVacantAssets.description": "Walang naka-occupy na unit",
+
+  "dashboard.cards.renewalPipeline.title": "Renewal pipeline",
+  "dashboard.cards.renewalPipeline.description": "{open} tracked · {expiring90} leases ≤90 araw",
+
   "dashboard.cards.recentEvents.title": "Kamakailang Aktibidad",
   "dashboard.cards.recentEvents.description": "{count} ang nangangailangan ng agarang pansin",
 

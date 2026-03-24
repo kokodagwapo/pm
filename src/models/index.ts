@@ -3,6 +3,7 @@ export { default as Property } from "./Property";
 // Note: Unit model removed - units are now embedded in Property documents
 export { default as Tenant } from "./Tenant";
 export { default as Lease } from "./Lease";
+export { default as RenewalOpportunity } from "./RenewalOpportunity";
 export { default as Invoice } from "./Invoice";
 export { default as Payment, ensurePaymentIndexes } from "./Payment";
 export { default as PaymentNotification } from "./PaymentNotification";
@@ -11,6 +12,7 @@ export { default as RecurringPayment } from "./RecurringPayment";
 export { default as FinancialAction } from "./FinancialAction";
 export { default as MaintenanceRequest } from "./MaintenanceRequest";
 export { default as WorkOrder } from "./WorkOrder";
+export { default as Vendor } from "./Vendor";
 export { default as Document } from "./Document";
 export { default as Application } from "./Application";
 export { default as Inspection } from "./Inspection";

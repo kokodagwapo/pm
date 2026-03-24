@@ -665,12 +665,21 @@ export default function PropertiesPage() {
   const [selectedProperties, setSelectedProperties] = useState<string[]>([]);
   const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
 
-  // Filter and pagination state
-  const [filters, setFilters] = useState<PropertyQueryParams>({
-    page: parseInt(searchParams.get("page") || "1"),
-    limit: parseInt(searchParams.get("limit") || "12"),
-    sortBy: "createdAt",
-    sortOrder: "desc",
+  // Filter and pagination state (honor ?status= for dashboard drilldown links)
+  const [filters, setFilters] = useState<PropertyQueryParams>(() => {
+    const rawStatus = searchParams.get("status");
+    const statusFromUrl =
+      rawStatus &&
+      (Object.values(PropertyStatus) as string[]).includes(rawStatus)
+        ? (rawStatus as PropertyStatus)
+        : undefined;
+    return {
+      page: parseInt(searchParams.get("page") || "1", 10),
+      limit: parseInt(searchParams.get("limit") || "12", 10),
+      sortBy: "createdAt",
+      sortOrder: "desc",
+      ...(statusFromUrl ? { status: statusFromUrl } : {}),
+    };
   });
 
   const [pagination, setPagination] = useState({

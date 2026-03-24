@@ -67,6 +67,15 @@
   "dashboard.cards.leaseRenewals.title": "即将续约",
   "dashboard.cards.leaseRenewals.description": "未来30天到期的租约",
 
+  "dashboard.cards.leasableUnits.title": "可租单元",
+  "dashboard.cards.leasableUnits.description": "按单元的可租数量",
+
+  "dashboard.cards.fullyVacantAssets.title": "整栋空置",
+  "dashboard.cards.fullyVacantAssets.description": "资产内无已占单元",
+
+  "dashboard.cards.renewalPipeline.title": "续约跟进",
+  "dashboard.cards.renewalPipeline.description": "已跟踪 {open} · {expiring90} 份租约≤90天",
+
   "dashboard.cards.recentEvents.title": "近期活动",
   "dashboard.cards.recentEvents.description": "{count} 项需要紧急关注",
 

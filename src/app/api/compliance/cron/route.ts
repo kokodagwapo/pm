@@ -8,6 +8,7 @@ import {
   NotificationPriority,
 } from "@/lib/notification-service";
 import mongoose from "mongoose";
+import { verifyCronRequest } from "@/lib/cron-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -27,13 +28,8 @@ interface UserDoc {
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get("authorization");
-    const isSystemCall = authHeader === `Bearer ${process.env.CRON_SECRET}`;
-    const isDev = process.env.NODE_ENV !== "production";
-
-    if (!isSystemCall && !isDev) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const denied = verifyCronRequest(request);
+    if (denied) return denied;
 
     await connectDB();
 

@@ -67,6 +67,15 @@
   "dashboard.cards.leaseRenewals.title": "Mietvertragsverlängerungen",
   "dashboard.cards.leaseRenewals.description": "Fällig in den nächsten 30 Tagen",
 
+  "dashboard.cards.leasableUnits.title": "Vermietbare Einheiten",
+  "dashboard.cards.leasableUnits.description": "Auf Einheitenebene verfügbar",
+
+  "dashboard.cards.fullyVacantAssets.title": "Vollständig leer",
+  "dashboard.cards.fullyVacantAssets.description": "Gesamtes Objekt ohne Mieter",
+
+  "dashboard.cards.renewalPipeline.title": "Verlängerungs-Pipeline",
+  "dashboard.cards.renewalPipeline.description": "{open} erfasst · {expiring90} Verträge ≤90 Tage",
+
   "dashboard.cards.recentEvents.title": "Aktuelle Ereignisse",
   "dashboard.cards.recentEvents.description": "{count} dringende Aktivitäten",
 

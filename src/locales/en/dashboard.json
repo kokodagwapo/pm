@@ -73,6 +73,15 @@
   "dashboard.cards.leaseRenewals.title": "Renewing Soon",
   "dashboard.cards.leaseRenewals.description": "Leases up in the next 30 days",
 
+  "dashboard.cards.leasableUnits.title": "Market-ready units",
+  "dashboard.cards.leasableUnits.description": "Unit-level availability for leasing",
+
+  "dashboard.cards.fullyVacantAssets.title": "Fully vacant properties",
+  "dashboard.cards.fullyVacantAssets.description": "Entire asset has no occupied units",
+
+  "dashboard.cards.renewalPipeline.title": "Renewal pipeline",
+  "dashboard.cards.renewalPipeline.description": "{open} tracked · {expiring90} leases expiring in 90 days",
+
   "dashboard.cards.recentEvents.title": "Recent Activity",
   "dashboard.cards.recentEvents.description": "{count} need urgent attention",
 

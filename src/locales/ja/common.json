@@ -50,6 +50,7 @@
   "nav.leases.new": "新規契約",
   "nav.leases.active": "有効な契約",
   "nav.leases.expiring": "まもなく期限切れ",
+  "nav.leases.renewals": "更新パイプライン",
   "nav.leases.invoices": "請求書",
   "nav.leases.my": "マイ契約",
   "nav.leases.documents": "書類",

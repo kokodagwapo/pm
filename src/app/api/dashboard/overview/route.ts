@@ -25,8 +25,10 @@ import {
   MaintenanceRequest,
   Payment,
   Event,
+  RenewalOpportunity,
 } from "@/models";
 import { DashboardOverviewResponse } from "@/types/dashboard";
+import { computeOperationsPropertyMetrics } from "@/lib/services/operations-metrics.service";
 
 const ALERT_COLOR_MAP = ["#0ea5e9", "#22c55e", "#f97316", "#ef4444", "#8b5cf6"];
 
@@ -58,6 +60,9 @@ export const GET = withRoleAndDB([UserRole.ADMIN, UserRole.MANAGER])(
       );
       const thirtyDaysFromNow = new Date(
         now.getTime() + 30 * 24 * 60 * 60 * 1000
+      );
+      const ninetyDaysFromNow = new Date(
+        now.getTime() + 90 * 24 * 60 * 60 * 1000
       );
 
       // -----------------------------------------------------------------------
@@ -105,7 +110,7 @@ export const GET = withRoleAndDB([UserRole.ADMIN, UserRole.MANAGER])(
       // -----------------------------------------------------------------------
       // Lease and tenant metrics
       // -----------------------------------------------------------------------
-      const [activeLeasesCount, expiringLeasesCount, tenantStatusBuckets] =
+      const [activeLeasesCount, expiringLeasesCount, expiringLeases90Count, tenantStatusBuckets] =
         await Promise.all([
           Lease.countDocuments({
             status: LeaseStatus.ACTIVE,
@@ -114,6 +119,11 @@ export const GET = withRoleAndDB([UserRole.ADMIN, UserRole.MANAGER])(
           Lease.countDocuments({
             status: LeaseStatus.ACTIVE,
             endDate: { $gte: now, $lte: thirtyDaysFromNow },
+            deletedAt: null,
+          }),
+          Lease.countDocuments({
+            status: LeaseStatus.ACTIVE,
+            endDate: { $gte: now, $lte: ninetyDaysFromNow },
             deletedAt: null,
           }),
           User.aggregate([
@@ -829,6 +839,13 @@ export const GET = withRoleAndDB([UserRole.ADMIN, UserRole.MANAGER])(
         })
       );
 
+      const { availableUnits, fullyVacantProperties } =
+        computeOperationsPropertyMetrics(properties);
+
+      const renewalPipelineOpen = await RenewalOpportunity.countDocuments({
+        status: { $ne: "not_renewing" },
+      });
+
       const response: DashboardOverviewResponse = {
         overview: {
           totalProperties,
@@ -859,6 +876,12 @@ export const GET = withRoleAndDB([UserRole.ADMIN, UserRole.MANAGER])(
             overdueCount: paymentSummary.overdueCount,
             totalDue: paymentSummary.totalDue,
           },
+        },
+        operations: {
+          availableUnits,
+          fullyVacantProperties,
+          renewalPipelineOpen,
+          leasesExpiring90Days: expiringLeases90Count,
         },
         alerts,
         trends: {

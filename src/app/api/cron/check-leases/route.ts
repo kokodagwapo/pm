@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { leaseExpirationService } from "@/lib/services/lease-expiration.service";
+import { verifyCronRequest } from "@/lib/cron-auth";
 
 export async function GET(req: Request) {
   try {
-    await connectToDatabase();
+    const denied = verifyCronRequest(req);
+    if (denied) return denied;
 
-    // specific header check for cron jobs if needed
-    // const authHeader = req.headers.get('authorization');
-    // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    //   return new NextResponse('Unauthorized', { status: 401 });
-    // }
+    await connectToDatabase();
 
     const result = await leaseExpirationService.checkAndExpireLeases();
 

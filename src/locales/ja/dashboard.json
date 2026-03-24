@@ -67,6 +67,15 @@
   "dashboard.cards.leaseRenewals.title": "もうすぐ更新",
   "dashboard.cards.leaseRenewals.description": "今後30日間で期限が切れる契約",
 
+  "dashboard.cards.leasableUnits.title": "募集可能ユニット",
+  "dashboard.cards.leasableUnits.description": "ユニット単位の空室",
+
+  "dashboard.cards.fullyVacantAssets.title": "全室空室の物件",
+  "dashboard.cards.fullyVacantAssets.description": "占有ユニットなし",
+
+  "dashboard.cards.renewalPipeline.title": "更新パイプライン",
+  "dashboard.cards.renewalPipeline.description": "{open} 件追跡 · {expiring90} 件が90日以内",
+
   "dashboard.cards.recentEvents.title": "最近の活動",
   "dashboard.cards.recentEvents.description": "{count} 件が緊急対応が必要",
 

@@ -50,6 +50,7 @@
   "nav.leases.new": "Bagong Kontrata",
   "nav.leases.active": "Mga Aktibong Kontrata",
   "nav.leases.expiring": "Malapit nang Mag-expire",
+  "nav.leases.renewals": "Renewal pipeline",
   "nav.leases.invoices": "Mga Invoice",
   "nav.leases.my": "Aking mga Kontrata",
   "nav.leases.documents": "Mga Dokumento",

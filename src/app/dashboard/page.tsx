@@ -43,6 +43,7 @@ import {
   ChevronRight,
   UserCheck,
   ClipboardList,
+  Key,
 } from "lucide-react";
 import { UserRole } from "@/types";
 import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
@@ -541,6 +542,7 @@ export default function DashboardPage() {
   const alerts = dashboardData?.alerts ?? [];
   const recentActivities = dashboardData?.recentActivities ?? [];
   const upcomingTasks = dashboardData?.upcomingTasks ?? [];
+  const operations = dashboardData?.operations;
 
   const vacantUnits =
     (overview?.totalUnits ?? 0) - (overview?.occupiedUnits ?? 0);
@@ -757,7 +759,41 @@ export default function DashboardPage() {
           description={t("dashboard.cards.leaseRenewals.description")}
           icon={FileText}
           iconColor="warning"
+          href="/dashboard/leases/expiring"
         />
+        {operations && (
+          <>
+            <AnalyticsCard
+              href="/dashboard/properties/available"
+              title={t("dashboard.cards.leasableUnits.title")}
+              value={operations.availableUnits}
+              description={t("dashboard.cards.leasableUnits.description")}
+              icon={Key}
+              iconColor="info"
+            />
+            <AnalyticsCard
+              href="/dashboard/properties/available"
+              title={t("dashboard.cards.fullyVacantAssets.title")}
+              value={operations.fullyVacantProperties}
+              description={t("dashboard.cards.fullyVacantAssets.description")}
+              icon={Building2}
+              iconColor="warning"
+            />
+            <AnalyticsCard
+              href="/dashboard/renewals"
+              title={t("dashboard.cards.renewalPipeline.title")}
+              value={operations.renewalPipelineOpen}
+              description={t("dashboard.cards.renewalPipeline.description", {
+                values: {
+                  open: operations.renewalPipelineOpen,
+                  expiring90: operations.leasesExpiring90Days,
+                },
+              })}
+              icon={ClipboardList}
+              iconColor="primary"
+            />
+          </>
+        )}
         <AnalyticsCard
           title={t("dashboard.cards.recentEvents.title")}
           value={recentActivities.length}

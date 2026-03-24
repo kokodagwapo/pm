@@ -4,9 +4,9 @@ import { NextRequest } from "next/server";
 import connectDB from "@/lib/mongodb";
 import {
   createSuccessResponse,
-  createErrorResponse,
   handleApiError,
 } from "@/lib/api-utils";
+import { verifyCronRequest } from "@/lib/cron-auth";
 
 interface InquiryDoc {
   _id: any;
@@ -21,11 +21,8 @@ interface InquiryDoc {
 
 export async function GET(request: NextRequest) {
   try {
-    const secret = request.headers.get("x-cron-secret");
-    const expected = process.env.CRON_SECRET;
-    if (expected && secret !== expected) {
-      return createErrorResponse("Unauthorized", 401);
-    }
+    const denied = verifyCronRequest(request);
+    if (denied) return denied;
 
     await connectDB();
 

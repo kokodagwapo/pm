@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 import { formatCurrency as formatCurrencyValue } from "@/lib/formatters";
@@ -24,6 +25,8 @@ export interface AnalyticsCardProps {
   variant?: "default" | "financial" | "metric";
   className?: string;
   children?: React.ReactNode;
+  /** When set, the whole card navigates (drilldown KPI). */
+  href?: string;
 }
 
 export interface FinancialCardProps {
@@ -74,15 +77,20 @@ export function AnalyticsCard({
   trend,
   className,
   children,
+  href,
 }: AnalyticsCardProps) {
   const TrendIcon = trend?.icon;
   const dash = useOptionalDashboardAppearance();
   const isLight = dash?.isLight ?? false;
 
-  return (
+  const card = (
     <Card
       className={cn(
         "relative overflow-hidden rounded-xl p-0",
+        href &&
+          (isLight
+            ? "transition-shadow hover:border-slate-200 hover:shadow-md"
+            : "transition-colors hover:bg-white/[0.04]"),
         className
       )}
     >
@@ -158,6 +166,22 @@ export function AnalyticsCard({
       </CardContent>
     </Card>
   );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={cn(
+          "block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50",
+          isLight ? "focus-visible:ring-offset-2 focus-visible:ring-offset-white" : "focus-visible:ring-offset-0"
+        )}
+      >
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 }
 
 export function FinancialCard({

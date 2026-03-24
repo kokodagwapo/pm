@@ -49,6 +49,7 @@
   "nav.leases.new": "Créer un bail",
   "nav.leases.active": "Baux actifs",
   "nav.leases.expiring": "Baux arrivant à expiration",
+  "nav.leases.renewals": "Renouvellements",
   "nav.leases.invoices": "Factures",
   "nav.leases.my": "Mes baux",
   "nav.leases.documents": "Documents",

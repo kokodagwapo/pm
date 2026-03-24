@@ -67,6 +67,15 @@
   "dashboard.cards.leaseRenewals.title": "Скоро продление",
   "dashboard.cards.leaseRenewals.description": "Договоры, истекающие в следующие 30 дней",
 
+  "dashboard.cards.leasableUnits.title": "Готовые к сдаче",
+  "dashboard.cards.leasableUnits.description": "Доступность по юнитам",
+
+  "dashboard.cards.fullyVacantAssets.title": "Полностью свободные",
+  "dashboard.cards.fullyVacantAssets.description": "Нет занятых юнитов",
+
+  "dashboard.cards.renewalPipeline.title": "Воронка продлений",
+  "dashboard.cards.renewalPipeline.description": "{open} в работе · {expiring90} договоров ≤90 дн.",
+
   "dashboard.cards.recentEvents.title": "Последняя активность",
   "dashboard.cards.recentEvents.description": "{count} требуют срочного внимания",
 

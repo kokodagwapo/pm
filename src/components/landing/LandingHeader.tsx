@@ -47,6 +47,7 @@ export function LandingHeader() {
     (isHome && theme === "light") ||
     pathname?.startsWith("/rentals") ||
     pathname?.startsWith("/properties") ||
+    pathname?.startsWith("/all-in-one-calendar") ||
     pathname?.startsWith("/contact");
 
   const dynamicHome = isHome && theme === "light";

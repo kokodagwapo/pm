@@ -67,6 +67,15 @@
   "dashboard.cards.leaseRenewals.title": "Renovaciones de contrato",
   "dashboard.cards.leaseRenewals.description": "Vencen en los próximos 30 días",
 
+  "dashboard.cards.leasableUnits.title": "Unidades listas",
+  "dashboard.cards.leasableUnits.description": "Disponibilidad por unidad",
+
+  "dashboard.cards.fullyVacantAssets.title": "Propiedades vacías",
+  "dashboard.cards.fullyVacantAssets.description": "Todo el activo sin ocupantes",
+
+  "dashboard.cards.renewalPipeline.title": "Pipeline de renovación",
+  "dashboard.cards.renewalPipeline.description": "{open} seguimiento · {expiring90} contratos ≤90 días",
+
   "dashboard.cards.recentEvents.title": "Eventos recientes",
   "dashboard.cards.recentEvents.description": "{count} actividades urgentes",
 

@@ -67,6 +67,15 @@
   "dashboard.cards.leaseRenewals.title": "Renouvellements de bail",
   "dashboard.cards.leaseRenewals.description": "Échéance dans les 30 prochains jours",
 
+  "dashboard.cards.leasableUnits.title": "Unités prêtes",
+  "dashboard.cards.leasableUnits.description": "Disponibilité par unité",
+
+  "dashboard.cards.fullyVacantAssets.title": "Actifs entièrement vacants",
+  "dashboard.cards.fullyVacantAssets.description": "Aucune unité occupée",
+
+  "dashboard.cards.renewalPipeline.title": "Pipeline renouvellement",
+  "dashboard.cards.renewalPipeline.description": "{open} suivis · {expiring90} baux ≤90 jours",
+
   "dashboard.cards.recentEvents.title": "Événements récents",
   "dashboard.cards.recentEvents.description": "{count} activités urgentes",
 

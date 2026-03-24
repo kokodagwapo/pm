@@ -149,6 +149,7 @@ const navigationSections: NavSection[] = [
           { title: "nav.leases.new", href: "/dashboard/leases/new", icon: UserPlus, iconColor: "text-cyan-200", roles: [UserRole.ADMIN, UserRole.MANAGER] },
           { title: "nav.leases.active", href: "/dashboard/leases/active", icon: FileText, iconColor: "text-cyan-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
           { title: "nav.leases.expiring", href: "/dashboard/leases/expiring", icon: Calendar, iconColor: "text-cyan-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.leases.renewals", href: "/dashboard/renewals", icon: ClipboardList, iconColor: "text-cyan-200", roles: [UserRole.ADMIN, UserRole.MANAGER] },
           { title: "nav.leases.invoices", href: "/dashboard/leases/invoices", icon: DollarSign, iconColor: "text-cyan-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
           { title: "nav.leases.my", href: "/dashboard/leases/my-leases", icon: Home, iconColor: "text-cyan-200", roles: [UserRole.TENANT] },
           { title: "nav.leases.documents", href: "/dashboard/leases/documents", icon: FileText, iconColor: "text-cyan-200", roles: [UserRole.TENANT] },

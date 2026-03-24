@@ -49,6 +49,7 @@
   "nav.leases.new": "Crear contrato",
   "nav.leases.active": "Contratos activos",
   "nav.leases.expiring": "Próximos a vencer",
+  "nav.leases.renewals": "Renovaciones",
   "nav.leases.invoices": "Facturas",
   "nav.leases.my": "Mis contratos",
   "nav.leases.documents": "Documentos",

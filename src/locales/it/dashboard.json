@@ -67,6 +67,15 @@
   "dashboard.cards.leaseRenewals.title": "Rinnovi Imminenti",
   "dashboard.cards.leaseRenewals.description": "Contratti in scadenza nei prossimi 30 giorni",
 
+  "dashboard.cards.leasableUnits.title": "Unità pronte",
+  "dashboard.cards.leasableUnits.description": "Disponibilità per unità",
+
+  "dashboard.cards.fullyVacantAssets.title": "Immobili del tutto vacanti",
+  "dashboard.cards.fullyVacantAssets.description": "Nessuna unità occupata",
+
+  "dashboard.cards.renewalPipeline.title": "Pipeline rinnovi",
+  "dashboard.cards.renewalPipeline.description": "{open} tracciati · {expiring90} contratti ≤90 giorni",
+
   "dashboard.cards.recentEvents.title": "Attività Recente",
   "dashboard.cards.recentEvents.description": "{count} richiedono attenzione urgente",
 

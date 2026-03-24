@@ -83,8 +83,22 @@ export interface DashboardPropertyTypeSlice {
   color: string;
 }
 
+/** Leasing / vacancy / renewal pipeline — from portfolio + RenewalOpportunity collection */
+export interface DashboardOperationsMetrics {
+  /** Unit-level count with status available */
+  availableUnits: number;
+  /** Properties where every unit is available (or single-unit asset is available) */
+  fullyVacantProperties: number;
+  /** RenewalOpportunity rows not in terminal "not_renewing" status */
+  renewalPipelineOpen: number;
+  /** Active leases ending within the next 90 days */
+  leasesExpiring90Days: number;
+}
+
 export interface DashboardOverviewResponse {
   overview: DashboardOverviewMetrics;
+  /** Optional extended ops KPIs (admin/manager overview). */
+  operations?: DashboardOperationsMetrics;
   alerts: DashboardAlert[];
   trends: {
     revenue: DashboardTrendPoint[];
