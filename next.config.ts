@@ -20,17 +20,24 @@ const replitDevOrigins: string[] = [
   "127.0.0.1",
 ];
 
+/** Baked into the client bundle for next-auth/react — must match the browser origin or CSRF/login breaks. */
+const isNonProd = process.env.NODE_ENV !== "production";
+const port = process.env.PORT;
+const authUrlForClient =
+  isNonProd && port
+    ? `http://localhost:${port}`
+    : process.env.NEXTAUTH_URL ||
+      process.env.AUTH_URL ||
+      (port ? `http://localhost:${port}` : "");
+
 const nextConfig: NextConfig = {
   reactStrictMode: false,
   allowedDevOrigins: replitDevOrigins,
 
-  // Inline for client bundles (next-auth/react). Must match the origin you use in the browser during dev.
-  // When running `next dev -p 3001`, PORT is set so auth URL matches the actual server port.
+  // Only inject when we know the URL. A wrong default like :3000 breaks sign-in when dev runs on :3101, :3020, etc.
+  // If unset, Auth.js uses the current origin for client-side auth requests.
   env: {
-    NEXTAUTH_URL:
-      process.env.NEXTAUTH_URL ||
-      process.env.AUTH_URL ||
-      (process.env.PORT ? `http://localhost:${process.env.PORT}` : "http://localhost:3000"),
+    ...(authUrlForClient ? { NEXTAUTH_URL: authUrlForClient } : {}),
   },
 
   serverExternalPackages: ["mongodb"],

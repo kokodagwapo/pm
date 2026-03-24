@@ -165,9 +165,17 @@ function CredentialsSignInSection({
   );
 }
 
+/** Landing "See demo" uses `?demo=1` — skip the lead form and enable quick login immediately. */
+function isDemoQuickEntry(demoParam: string | null): boolean {
+  if (!demoParam) return false;
+  const v = demoParam.trim().toLowerCase();
+  return v === "1" || v === "true" || v === "yes";
+}
+
 function SignInContent() {
   const searchParams = useSearchParams();
   const { t } = useLocalizationContext();
+  const isDemoQuick = isDemoQuickEntry(searchParams.get("demo"));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [branding, setBranding] = useState<Branding>(DEFAULT_BRANDING);
@@ -175,6 +183,7 @@ function SignInContent() {
   const [demoAccountsReady, setDemoAccountsReady] = useState(false);
   const [savedDemoLead, setSavedDemoLead] = useState<DemoLead | null>(null);
   const [demoLeadGatePassed, setDemoLeadGatePassed] = useState(false);
+  const quickLoginUnlocked = demoLeadGatePassed || isDemoQuick;
 
   useEffect(() => {
     const existing = getDemoLead();
@@ -432,25 +441,27 @@ function SignInContent() {
                   <Loader2 className="h-3.5 w-3.5 animate-spin text-white/35" aria-hidden />
                 )}
               </div>
-              <DemoLeadForm
-                t={t}
-                savedLead={savedDemoLead}
-                onSaved={(lead) => {
-                  setSavedDemoLead(lead);
-                  setDemoLeadGatePassed(true);
-                }}
-                onCleared={() => {
-                  setSavedDemoLead(null);
-                  setDemoLeadGatePassed(false);
-                }}
-              />
-              <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2 ${!demoLeadGatePassed ? "opacity-35" : ""}`}>
+              {!isDemoQuick && (
+                <DemoLeadForm
+                  t={t}
+                  savedLead={savedDemoLead}
+                  onSaved={(lead) => {
+                    setSavedDemoLead(lead);
+                    setDemoLeadGatePassed(true);
+                  }}
+                  onCleared={() => {
+                    setSavedDemoLead(null);
+                    setDemoLeadGatePassed(false);
+                  }}
+                />
+              )}
+              <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2 ${!quickLoginUnlocked ? "opacity-35" : ""}`}>
                 {demoAccounts.map((account) => (
                   <button
                     key={account.email}
                     type="button"
                     onClick={() => handleQuickLogin(account.email, account.password)}
-                    disabled={isLoading || !demoAccountsReady || !demoLeadGatePassed}
+                    disabled={isLoading || !demoAccountsReady || !quickLoginUnlocked}
                     className={`flex flex-col items-center justify-center gap-1.5 min-h-[52px] py-3 rounded-xl text-white text-[11px] tracking-wide transition-all touch-manipulation disabled:opacity-40 disabled:cursor-not-allowed ${account.color}`}
                     style={{ fontWeight: 300 }}
                   >
@@ -463,7 +474,7 @@ function SignInContent() {
                 className="text-[10px] text-white/25 mt-2.5 text-center tracking-wide"
                 style={{ fontWeight: 300 }}
               >
-                {demoLeadGatePassed
+                {quickLoginUnlocked
                   ? t("auth.signin.devClickToLogin")
                   : t("auth.signin.demoLead.unlockHint")}
               </p>

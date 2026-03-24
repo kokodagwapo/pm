@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 interface GlobalErrorProps {
   error?: Error & { digest?: string };
@@ -11,13 +10,38 @@ interface GlobalErrorProps {
 const MAX_AUTO_RETRIES = 3;
 const MAX_SESSION_AUTO_RECOVERIES = 12;
 const SESSION_TOTAL_KEY = "__smartstart_global_err_session_total";
+const LAST_FP_KEY = "__smartstart_ge_last_fp";
+const RETRY_COUNT_KEY = "__smartstart_ge_retry";
 
-/**
- * Survives GlobalError remounts after `reset()` — useRef does not, which caused
- * infinite retry loops on Replit / slow webpack dev.
- */
-let transientRetryCountForFingerprint = 0;
-let lastErrorFingerprint = "";
+/** In-memory fallback when sessionStorage is blocked (Replit iframe / private mode). */
+const geTransientRetry = { fingerprint: "", count: 0 };
+
+function safeSessionGet(key: string): string | null {
+  try {
+    if (typeof window === "undefined") return null;
+    return sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSessionSet(key: string, value: string): void {
+  try {
+    if (typeof window === "undefined") return;
+    sessionStorage.setItem(key, value);
+  } catch {
+    /* Replit / private mode / sandboxed iframe */
+  }
+}
+
+function safeSessionRemove(key: string): void {
+  try {
+    if (typeof window === "undefined") return;
+    sessionStorage.removeItem(key);
+  } catch {
+    /* ignore */
+  }
+}
 
 function fingerprintError(error: unknown): string {
   try {
@@ -90,14 +114,63 @@ function isTransientDevError(error: unknown): boolean {
 }
 
 function bumpSessionRecoveryTotal(): number {
-  if (typeof window === "undefined") return 0;
   try {
-    const n = parseInt(sessionStorage.getItem(SESSION_TOTAL_KEY) || "0", 10) + 1;
-    sessionStorage.setItem(SESSION_TOTAL_KEY, String(n));
+    const raw = safeSessionGet(SESSION_TOTAL_KEY);
+    const n = parseInt(raw || "0", 10) + 1;
+    safeSessionSet(SESSION_TOTAL_KEY, String(n));
     return n;
   } catch {
     return MAX_SESSION_AUTO_RECOVERIES;
   }
+}
+
+/** Inline icons only — avoid importing lucide (chunk load failures would break this page). */
+function IconAlert({ className, style }: { className?: string; style?: CSSProperties }) {
+  return (
+    <svg
+      className={className}
+      style={style}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden
+    >
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" />
+    </svg>
+  );
+}
+
+function IconRefresh({ className, style }: { className?: string; style?: CSSProperties }) {
+  return (
+    <svg
+      className={className}
+      style={style}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden
+    >
+      <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+    </svg>
+  );
+}
+
+function IconHome({ className, style }: { className?: string; style?: CSSProperties }) {
+  return (
+    <svg
+      className={className}
+      style={style}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden
+    >
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10" />
+    </svg>
+  );
 }
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
@@ -106,59 +179,64 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   resetRef.current = reset;
 
   useEffect(() => {
-    const fp = fingerprintError(error);
-    if (fp !== lastErrorFingerprint) {
-      lastErrorFingerprint = fp;
-      transientRetryCountForFingerprint = 0;
-    }
-
-    const isTransient = isTransientDevError(error);
-    const isDev = process.env.NODE_ENV === "development";
-
-    if (isDev && isTransient) {
-      const sessionTotal = parseInt(
-        typeof window !== "undefined"
-          ? sessionStorage.getItem(SESSION_TOTAL_KEY) || "0"
-          : "0",
-        10
-      );
-      if (sessionTotal >= MAX_SESSION_AUTO_RECOVERIES) {
-        setShowUI(true);
-        return;
+    try {
+      const fp = fingerprintError(error);
+      if (fp !== geTransientRetry.fingerprint) {
+        geTransientRetry.fingerprint = fp;
+        geTransientRetry.count = 0;
+        safeSessionSet(LAST_FP_KEY, fp);
+        safeSessionSet(RETRY_COUNT_KEY, "0");
       }
 
-      if (transientRetryCountForFingerprint < MAX_AUTO_RETRIES) {
-        transientRetryCountForFingerprint += 1;
-        bumpSessionRecoveryTotal();
-        const delay = 500 * transientRetryCountForFingerprint;
-        const timer = setTimeout(() => {
-          try {
-            resetRef.current?.();
-          } catch {
-            setShowUI(true);
-          }
-        }, delay);
-        return () => clearTimeout(timer);
-      }
+      let transientRetryCountForFingerprint = parseInt(safeSessionGet(RETRY_COUNT_KEY) || "0", 10);
+      if (Number.isNaN(transientRetryCountForFingerprint)) transientRetryCountForFingerprint = 0;
+      transientRetryCountForFingerprint = Math.max(transientRetryCountForFingerprint, geTransientRetry.count);
 
-      try {
-        if (typeof window !== "undefined") {
+      const isTransient = isTransientDevError(error);
+      const isDev = process.env.NODE_ENV === "development";
+
+      if (isDev && isTransient) {
+        const sessionTotal = parseInt(safeSessionGet(SESSION_TOTAL_KEY) || "0", 10);
+        if (sessionTotal >= MAX_SESSION_AUTO_RECOVERIES) {
+          setShowUI(true);
+          return;
+        }
+
+        if (transientRetryCountForFingerprint < MAX_AUTO_RETRIES) {
+          const next = transientRetryCountForFingerprint + 1;
+          geTransientRetry.count = next;
+          safeSessionSet(RETRY_COUNT_KEY, String(next));
+          bumpSessionRecoveryTotal();
+          const delay = 500 * next;
+          const timer = setTimeout(() => {
+            try {
+              resetRef.current?.();
+            } catch {
+              setShowUI(true);
+            }
+          }, delay);
+          return () => clearTimeout(timer);
+        }
+
+        try {
           const key = "__smartstart_reload";
-          const count = parseInt(sessionStorage.getItem(key) || "0", 10);
+          const count = parseInt(safeSessionGet(key) || "0", 10);
           if (count < 2) {
             bumpSessionRecoveryTotal();
-            sessionStorage.setItem(key, String(count + 1));
+            safeSessionSet(key, String(count + 1));
             window.location.reload();
             return;
           }
-          sessionStorage.removeItem(key);
+          safeSessionRemove(key);
+        } catch {
+          // ignore
         }
-      } catch {
-        // ignore
       }
-    }
 
-    setShowUI(true);
+      setShowUI(true);
+    } catch {
+      setShowUI(true);
+    }
   }, [error]);
 
   if (!showUI) {
@@ -211,7 +289,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
         <div className="c">
           <div className="h">
             <div className="ic">
-              <AlertTriangle style={{ width: "3rem", height: "3rem" }} />
+              <IconAlert style={{ width: "3rem", height: "3rem" }} />
             </div>
             <h1>Application Error</h1>
             <p>Something went wrong while loading the application</p>
@@ -220,8 +298,8 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
             <div className="al">
               <div className="at">What happened?</div>
               <div className="ad">
-                An error occurred in the application. This is usually caused by a
-                configuration issue, network problem, or temporary server error.
+                An error occurred in the application. This is usually caused by a configuration issue, network
+                problem, or temporary server error.
               </div>
             </div>
             {process.env.NODE_ENV === "development" && (
@@ -230,7 +308,8 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                   <summary>Technical Details</summary>
                   <div className="ec">
                     <div>
-                      <strong>Error:</strong> {devMessage || "(no message — often a transient dev/build glitch)"}
+                      <strong>Error:</strong>{" "}
+                      {devMessage || "(no message — often a transient dev/build glitch or empty error payload)"}
                     </div>
                     {error &&
                       typeof error === "object" &&
@@ -254,6 +333,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
             )}
             <div className="ac">
               <button
+                type="button"
                 onClick={() => {
                   try {
                     resetRef.current?.();
@@ -263,11 +343,11 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 }}
                 className="b bs"
               >
-                <RefreshCw style={{ width: "1rem", height: "1rem" }} />
+                <IconRefresh style={{ width: "1rem", height: "1rem" }} />
                 Try Again
               </button>
               <a href="/" className="b bp">
-                <Home style={{ width: "1rem", height: "1rem" }} />
+                <IconHome style={{ width: "1rem", height: "1rem" }} />
                 Go to Homepage
               </a>
             </div>

@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { MongoClient } from "mongodb";
+import { isValidObjectId } from "mongoose";
 import connectDB, { getMongoUri } from "./mongodb";
 import User, { UserDocument } from "@/models/User";
 import { UserRole } from "@/types";
@@ -200,8 +201,9 @@ export const authOptions: NextAuthConfig = {
     async session({ session, token }) {
       // Send properties to the client
       if (token) {
-        session.user.id =
+        const userId =
           (token?.userId as string) || (token?.sub as string) || "";
+        session.user.id = userId;
 
         session.user.role = (token?.role as UserRole) ?? UserRole.TENANT;
         session.user.isActive = (token?.isActive as boolean) ?? false;
@@ -209,7 +211,10 @@ export const authOptions: NextAuthConfig = {
         // Fetch fresh user data for the session
         try {
           await connectDB();
-          const user = await User.findById(token?.userId).select("-password");
+          const user =
+            userId && isValidObjectId(userId)
+              ? await User.findById(userId).select("-password")
+              : null;
           if (user) {
             session.user.role = (user?.role as UserRole) ?? UserRole.TENANT;
 
@@ -237,31 +242,33 @@ export const authOptions: NextAuthConfig = {
     },
 
     async signIn({ user, account }) {
+      // Credentials were already validated in authorize() with DB access — avoid a second
+      // connectDB() here so a transient DB blip cannot reject an otherwise valid login.
+      if (account?.provider === "credentials") {
+        return true;
+      }
+
       try {
         await connectDB();
 
-        // For OAuth providers, create or update user
-        if (account?.provider !== "credentials") {
-          const existingUser = await User.findOne({ email: user.email });
+        // OAuth: create or update user (credentials handled above)
+        const existingUser = await User.findOne({ email: user.email });
 
-          if (existingUser) {
-            // Update existing user with OAuth info
-            existingUser.avatar = user.avatar || existingUser.avatar;
-            existingUser.emailVerified =
-              existingUser.emailVerified || new Date();
-            await existingUser.save();
-          } else {
-            // Create new user for OAuth
-            await User.create({
-              email: user.email,
-              firstName: user.firstName || "",
-              lastName: user.lastName || "",
-              avatar: user.avatar,
-              role: UserRole.TENANT,
-              isActive: true,
-              emailVerified: new Date(),
-            });
-          }
+        if (existingUser) {
+          existingUser.avatar = user.avatar || existingUser.avatar;
+          existingUser.emailVerified =
+            existingUser.emailVerified || new Date();
+          await existingUser.save();
+        } else {
+          await User.create({
+            email: user.email,
+            firstName: user.firstName || "",
+            lastName: user.lastName || "",
+            avatar: user.avatar,
+            role: UserRole.TENANT,
+            isActive: true,
+            emailVerified: new Date(),
+          });
         }
 
         return true;
