@@ -60,10 +60,19 @@ export const GET = withRoleAndDB([
       });
     }
 
+    // Validate propertyId filter: ensure it belongs to the user's allowed set
+    let scopedPropertyIds = allowedIds;
+    if (propertyId && mongoose.Types.ObjectId.isValid(propertyId)) {
+      const requestedId = new mongoose.Types.ObjectId(propertyId);
+      const isAllowed = allowedIds.some((id) => id.equals(requestedId));
+      if (!isAllowed) {
+        return createSuccessResponse({ totalSpend: 0, byCategory: [], byVendor: [], byMonth: [], jobCount: 0 });
+      }
+      scopedPropertyIds = [requestedId];
+    }
+
     const matchQuery: Record<string, unknown> = {
-      propertyId: { $in: propertyId && mongoose.Types.ObjectId.isValid(propertyId)
-        ? [new mongoose.Types.ObjectId(propertyId)]
-        : allowedIds },
+      propertyId: { $in: scopedPropertyIds },
       status: { $in: PAID_STATUSES },
       createdAt: { $gte: startDate, $lte: endDate },
     };
