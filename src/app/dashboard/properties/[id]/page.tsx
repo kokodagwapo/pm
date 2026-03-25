@@ -56,40 +56,39 @@ export default function PropertyDetailsPage() {
   const { data: session } = useSession();
   const dash = useOptionalDashboardAppearance();
   const isLight = dash?.isLight ?? false;
-  const txTitle = isLight ? "text-black" : "text-white";
-  const txBody = isLight ? "text-black" : "text-white/80";
-  const txMut = isLight ? "text-black" : "text-white/85";
+  /* Match dashboard-main-typography + globals (dashboard-light vs immersive) — same as production shell */
+  const txTitle = "text-foreground";
+  const txBody = "text-muted-foreground";
+  const txMut = "text-foreground/90";
   const outlineActions = cn(
     isLight
-      ? "border-slate-200 bg-white text-black hover:bg-slate-50 [&_svg]:text-black"
-      : "border-white/20 bg-white/[0.06] text-white hover:bg-white/[0.1] [&_svg]:text-white"
+      ? "border-slate-200 bg-white text-foreground hover:bg-slate-50 [&_svg]:text-foreground"
+      : "border-white/20 bg-white/[0.06] text-foreground hover:bg-white/[0.1] [&_svg]:text-foreground"
   );
   const surfaceCard = cn(
-    "border shadow-sm hover:shadow-md transition-all duration-300 ease-out [transform:translateZ(0)]",
-    isLight ? "border-gray-100" : "border-white/14 text-white"
+    "shadow-sm hover:shadow-md transition-all duration-300 ease-out [transform:translateZ(0)]",
+    !isLight && "border border-white/14"
   );
   const panelSurface = cn(
     "dashboard-ui-surface rounded-xl border p-8 shadow-sm transition-all duration-300 ease-out [transform:translateZ(0)]",
-    isLight
-      ? "border-gray-100 bg-white text-black"
-      : "border-white/14 text-white"
+    !isLight && "border-white/14"
   );
   const nestedTile = cn(
     "rounded-lg border transition-all duration-300 hover:shadow-sm",
     isLight
-      ? "border-gray-100 bg-gray-50"
-      : "border-white/10 bg-white/[0.06] text-white"
+      ? "border-slate-200/80 bg-slate-50/80"
+      : "border-white/10 bg-white/[0.06]"
   );
   const cardHeaderMuted = cn(
     "border-b p-4 sm:p-6",
     isLight
-      ? "border-gray-100 bg-gray-50"
+      ? "border-slate-100 bg-slate-50/90"
       : "border-white/10 bg-white/[0.05]"
   );
   const cardHeaderAccent = cn(
     "border-b p-4 sm:p-6",
     isLight
-      ? "border-gray-100 bg-blue-50"
+      ? "border-slate-100 bg-sky-50/80"
       : "border-white/10 bg-white/[0.05]"
   );
   const [property, setProperty] = useState<any>(null);
@@ -410,12 +409,7 @@ export default function PropertyDetailsPage() {
   }
 
   return (
-    <div
-      className={cn(
-        "container mx-auto space-y-5 px-3 py-5 sm:space-y-6 sm:px-4 sm:py-6 md:py-8",
-        isLight && "text-black"
-      )}
-    >
+    <div className="container mx-auto space-y-5 px-3 py-5 sm:space-y-6 sm:px-4 sm:py-6 md:py-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="flex min-w-0 flex-col gap-3">
@@ -521,19 +515,14 @@ export default function PropertyDetailsPage() {
               : "dashboard-ui-surface border-white/14 shadow-none"
           )}
         >
-          <TabsList
-            className={cn(
-              "grid h-auto w-full grid-cols-2 gap-1.5 rounded-lg bg-transparent sm:grid-cols-3 md:grid-cols-6 md:gap-2",
-              isLight ? "!text-black" : "text-white"
-            )}
-          >
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-1.5 rounded-lg bg-transparent text-foreground sm:grid-cols-3 md:grid-cols-6 md:gap-2">
             <TabsTrigger
               value="overview"
               className={cn(
-                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
+                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight text-foreground transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
-                  ? "!text-black hover:bg-slate-100/90"
-                  : "text-white/85 hover:bg-white/10 data-[state=active]:bg-white/15 data-[state=active]:text-white"
+                  ? "hover:bg-slate-100/90 data-[state=active]:bg-slate-200/70"
+                  : "hover:bg-white/10 data-[state=active]:bg-white/15 data-[state=active]:text-foreground"
               )}
             >
               <Building2 className="h-4 w-4 shrink-0 text-blue-600" />
@@ -542,10 +531,10 @@ export default function PropertyDetailsPage() {
             <TabsTrigger
               value="details"
               className={cn(
-                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
+                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight text-foreground transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
-                  ? "!text-black hover:bg-slate-100/90"
-                  : "text-white/85 hover:bg-white/10 data-[state=active]:bg-white/15 data-[state=active]:text-white"
+                  ? "hover:bg-slate-100/90 data-[state=active]:bg-slate-200/70"
+                  : "hover:bg-white/10 data-[state=active]:bg-white/15 data-[state=active]:text-foreground"
               )}
             >
               <Eye className="h-4 w-4 shrink-0 text-blue-600" />
@@ -554,10 +543,10 @@ export default function PropertyDetailsPage() {
             <TabsTrigger
               value="units"
               className={cn(
-                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
+                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight text-foreground transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
-                  ? "!text-black hover:bg-slate-100/90"
-                  : "text-white/85 hover:bg-white/10 data-[state=active]:bg-white/15 data-[state=active]:text-white"
+                  ? "hover:bg-slate-100/90 data-[state=active]:bg-slate-200/70"
+                  : "hover:bg-white/10 data-[state=active]:bg-white/15 data-[state=active]:text-foreground"
               )}
             >
               <Building2 className="h-4 w-4 shrink-0 text-blue-600" />
@@ -566,10 +555,10 @@ export default function PropertyDetailsPage() {
             <TabsTrigger
               value="images"
               className={cn(
-                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
+                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight text-foreground transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
-                  ? "!text-black hover:bg-slate-100/90"
-                  : "text-white/85 hover:bg-white/10 data-[state=active]:bg-white/15 data-[state=active]:text-white"
+                  ? "hover:bg-slate-100/90 data-[state=active]:bg-slate-200/70"
+                  : "hover:bg-white/10 data-[state=active]:bg-white/15 data-[state=active]:text-foreground"
               )}
             >
               <Camera className="h-4 w-4 shrink-0 text-blue-600" />
@@ -578,10 +567,10 @@ export default function PropertyDetailsPage() {
             <TabsTrigger
               value="amenities"
               className={cn(
-                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
+                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight text-foreground transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
-                  ? "!text-black hover:bg-slate-100/90"
-                  : "text-white/85 hover:bg-white/10 data-[state=active]:bg-white/15 data-[state=active]:text-white"
+                  ? "hover:bg-slate-100/90 data-[state=active]:bg-slate-200/70"
+                  : "hover:bg-white/10 data-[state=active]:bg-white/15 data-[state=active]:text-foreground"
               )}
             >
               <Star className="h-4 w-4 shrink-0 text-blue-600" />
@@ -590,10 +579,10 @@ export default function PropertyDetailsPage() {
             <TabsTrigger
               value="compliance"
               className={cn(
-                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
+                "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight text-foreground transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
-                  ? "!text-black hover:bg-slate-100/90"
-                  : "text-white/85 hover:bg-white/10 data-[state=active]:bg-white/15 data-[state=active]:text-white"
+                  ? "hover:bg-slate-100/90 data-[state=active]:bg-slate-200/70"
+                  : "hover:bg-white/10 data-[state=active]:bg-white/15 data-[state=active]:text-foreground"
               )}
             >
               <Shield className="h-4 w-4 shrink-0 text-violet-600" />

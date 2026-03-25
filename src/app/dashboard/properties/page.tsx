@@ -1013,11 +1013,16 @@ export default function PropertiesPage() {
     {
       id: "status",
       header: t("properties.table.status"),
-      cell: (property) => (
+      cell: (property) => {
+        const statusVariant = getStatusBadgeVariant(property.status);
+        return (
         <div className="flex flex-col space-y-1">
           <Badge
-            variant={getStatusBadgeVariant(property.status)}
-            className="w-fit"
+            variant={statusVariant}
+            className={cn(
+              "w-fit",
+              statusVariant === "default" && "!text-black dark:!text-black"
+            )}
           >
             {property?.status
               ? t(`properties.status.${property.status.toLowerCase()}`)
@@ -1034,7 +1039,8 @@ export default function PropertiesPage() {
               : t("properties.type.unknown")}
           </span>
         </div>
-      ),
+        );
+      },
     },
     {
       id: "contact",

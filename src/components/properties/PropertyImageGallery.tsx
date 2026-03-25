@@ -72,12 +72,12 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
   const { t } = useLocalizationContext();
   const dash = useOptionalDashboardAppearance();
   const isLight = dash?.isLight ?? false;
-  const txHead = isLight ? "text-black" : "text-white";
-  const txSub = isLight ? "text-gray-600" : "text-white/80";
-  const thumbBg = isLight ? "bg-gray-100" : "bg-white/10";
+  const txHead = "text-foreground";
+  const txSub = "text-muted-foreground";
+  const thumbBg = "bg-muted/50";
   const galleryCardClass = cn(
     "overflow-hidden py-0 border shadow-sm hover:shadow-md transition-all duration-300 ease-out [transform:translateZ(0)]",
-    isLight ? "border-gray-100" : "border-white/14"
+    !isLight && "border-white/14"
   );
 
   const handleImagesUploaded = async (uploadedImages: UploadedImage[]) => {
@@ -280,9 +280,9 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
         {images.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {images.map((imageUrl, index) => (
-              <Card key={`${imageUrl}::${index}`} className="overflow-hidden py-0">
+              <Card key={`${imageUrl}::${index}`} className={galleryCardClass}>
                 <div className="relative group">
-                  <div className="relative w-full h-58 bg-gray-100 dark:bg-gray-800">
+                  <div className={cn("relative w-full h-58", thumbBg)}>
                     <img
                       src={imageUrl}
                       alt={t("properties.images.alt.thumbnail", {
@@ -291,7 +291,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                           name: propertyName,
                         },
                       })}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
+                      className="absolute inset-0 w-full h-full object-cover"
                       loading="lazy"
                       decoding="async"
                     />
@@ -300,12 +300,12 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                     {index + 1}
                   </Badge>
 
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 opacity-0 group-hover:opacity-100 flex-wrap px-2 py-2 content-center">
+                  <div className="pointer-events-none absolute inset-0 flex flex-wrap content-center items-center justify-center gap-1 px-2 py-2 opacity-0 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100 sm:gap-2">
                     <Button
                       variant="secondary"
                       size="sm"
                       onClick={() => setSelectedImage(imageUrl)}
-                      className="bg-white/90 hover:bg-white text-gray-900"
+                      className="pointer-events-auto bg-white/95 text-slate-900 shadow-sm ring-1 ring-black/10 hover:bg-white [&_svg]:text-slate-900"
                     >
                       <Eye className="h-4 w-4 sm:mr-1" />
                       <span className="hidden sm:inline">
@@ -319,7 +319,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                           size="sm"
                           onClick={() => moveImage(index, -1)}
                           disabled={loading || index === 0}
-                          className="bg-white/90 hover:bg-white text-gray-900"
+                          className="pointer-events-auto bg-white/95 text-slate-900 shadow-sm ring-1 ring-black/10 hover:bg-white [&_svg]:text-slate-900"
                           title={t("properties.images.actions.moveEarlier")}
                         >
                           <ChevronLeft className="h-4 w-4" />
@@ -329,7 +329,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                           size="sm"
                           onClick={() => moveImage(index, 1)}
                           disabled={loading || index === images.length - 1}
-                          className="bg-white/90 hover:bg-white text-gray-900"
+                          className="pointer-events-auto bg-white/95 text-slate-900 shadow-sm ring-1 ring-black/10 hover:bg-white [&_svg]:text-slate-900"
                           title={t("properties.images.actions.moveLater")}
                         >
                           <ChevronRight className="h-4 w-4" />
@@ -339,7 +339,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                           size="sm"
                           onClick={() => openReplaceDialog(imageUrl)}
                           disabled={loading}
-                          className="bg-white/90 hover:bg-white text-gray-900"
+                          className="pointer-events-auto bg-white/95 text-slate-900 shadow-sm ring-1 ring-black/10 hover:bg-white [&_svg]:text-slate-900"
                         >
                           <RefreshCw className="h-4 w-4 sm:mr-1" />
                           <span className="hidden sm:inline">
@@ -351,7 +351,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                           size="sm"
                           onClick={() => openDeleteDialog(imageUrl)}
                           disabled={loading}
-                          className="bg-red-600 hover:bg-red-700"
+                          className="pointer-events-auto shadow-sm"
                         >
                           <Trash2 className="h-4 w-4 sm:mr-1" />
                           <span className="hidden sm:inline">
@@ -369,16 +369,11 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
           <Card
             className={cn(
               "border shadow-sm transition-all duration-300",
-              isLight ? "border-gray-100" : "border-white/14 text-white"
+              !isLight && "border-white/14"
             )}
           >
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <ImageIcon
-                className={cn(
-                  "h-12 w-12 mb-4",
-                  isLight ? "text-gray-400" : "text-white/40"
-                )}
-              />
+              <ImageIcon className="h-12 w-12 mb-4 text-muted-foreground" />
               <h3 className={cn("text-lg font-semibold mb-2", txHead)}>
                 {t("properties.images.empty.title")}
               </h3>
