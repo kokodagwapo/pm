@@ -117,6 +117,12 @@ export async function PATCH(
     }
 
     if (action === "accept") {
+      if (sessionVendor && (sessionVendor as { complianceHold?: boolean }).complianceHold) {
+        return NextResponse.json(
+          { error: "Vendor is on compliance hold and cannot accept jobs" },
+          { status: 409 }
+        );
+      }
       job.status = "accepted";
       if (job.dispatchLog.length > 0) {
         const lastEntry = job.dispatchLog[job.dispatchLog.length - 1];

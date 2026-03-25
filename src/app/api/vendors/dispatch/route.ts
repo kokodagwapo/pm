@@ -115,6 +115,7 @@ export async function POST(request: NextRequest) {
       const preferred = await Vendor.findOne({
         _id: preferredVendorId,
         isApproved: true,
+        isAvailable: true,
         complianceHold: false,
       });
       if (preferred) {

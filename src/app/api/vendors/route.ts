@@ -54,12 +54,25 @@ export async function GET(request: NextRequest) {
       PUBLIC_FIELDS +
       " email phone address zipCode userId licenseNumber licenseExpiryDate insuranceProvider insuranceExpiryDate backgroundCheckDate backgroundCheckStatus complianceHold complianceHoldReason lastComplianceCheck walletBalance totalEarnings pendingPayout bankAccountLast4 bankAccountVerified documents payoutRequests preferredAreas createdAt updatedAt";
 
-    // Non-managers can only query for userId or email to find their own vendor profile
-    const isSelfLookup = !!(email || userId);
-    if (!isManager && !isSelfLookup) {
-      // Enforce public fields and disallow sensitive filters
+    // Non-managers requesting private data must be doing a self-lookup (their own profile)
+    if (!isManager) {
       delete query.complianceHold;
+
+      if (email || userId) {
+        if (email && email.toLowerCase() !== (session.user as { email?: string }).email?.toLowerCase()) {
+          delete query.email;
+        }
+        if (userId && userId !== user.id) {
+          delete query.userId;
+        }
+        query.$or = [
+          { userId: user.id },
+          { email: (session.user as { email?: string }).email?.toLowerCase() },
+        ];
+      }
     }
+
+    const isSelfLookup = !isManager && !!(email || userId);
 
     const total = await Vendor.countDocuments(query);
     const vendors = await Vendor.find(query)
