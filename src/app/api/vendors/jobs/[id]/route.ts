@@ -184,6 +184,12 @@ export async function PATCH(
       if (rest.vendorNotes) job.vendorNotes = rest.vendorNotes;
       if (rest.finalCost !== undefined) job.finalCost = rest.finalCost;
     } else if (action === "approve" && isManager) {
+      if (job.status !== "completed") {
+        return NextResponse.json(
+          { error: `Cannot approve a job in '${job.status}' state — job must be completed first` },
+          { status: 409 }
+        );
+      }
       if (!job.finalCost || job.finalCost <= 0) {
         return NextResponse.json(
           { error: "finalCost must be set on the job before approving — update the job with a final cost first" },
@@ -245,6 +251,12 @@ export async function PATCH(
       job.status = "revision_requested";
       if (rest.managerNotes) job.managerNotes = rest.managerNotes;
     } else if (action === "release_payment" && isManager) {
+      if (job.status !== "approved") {
+        return NextResponse.json(
+          { error: `Cannot release payment on a job in '${job.status}' state — job must be approved first` },
+          { status: 409 }
+        );
+      }
       job.status = "payment_released";
       job.paymentReleasedDate = new Date();
       if (job.assignedVendorId && job.finalCost) {
