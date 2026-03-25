@@ -18,6 +18,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const user = session.user as SessionUser;
+    const isManager = ["admin", "super_admin", "manager"].includes(user.role);
+
     await connectDB();
 
     const { searchParams } = new URL(request.url);
@@ -37,9 +40,25 @@ export async function GET(request: NextRequest) {
       query.propertyId = new mongoose.Types.ObjectId(propertyId);
     if (vendorId && mongoose.Types.ObjectId.isValid(vendorId))
       query.assignedVendorId = new mongoose.Types.ObjectId(vendorId);
+
     if (marketplace === "true") {
+      // Public marketplace: any authenticated user can browse open public jobs
       query.isPublicToMarketplace = true;
       query.status = "open";
+    } else if (!isManager) {
+      // Non-managers: can only see their own vendor's assigned jobs or public marketplace jobs
+      const ownVendor = await Vendor.findOne({ userId: user.id }).select("_id").lean();
+      if (ownVendor) {
+        const ownVendorId = (ownVendor as { _id: { toString: () => string } })._id;
+        query.$or = [
+          { assignedVendorId: ownVendorId },
+          { isPublicToMarketplace: true, status: "open" },
+        ];
+      } else {
+        // No vendor profile → can only see public marketplace
+        query.isPublicToMarketplace = true;
+        query.status = "open";
+      }
     }
 
     const total = await VendorJob.countDocuments(query);

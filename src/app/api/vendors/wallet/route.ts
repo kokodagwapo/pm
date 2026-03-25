@@ -26,14 +26,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid vendorId" }, { status: 400 });
     }
 
+    const user = session.user as SessionUser;
+    const isManager = ["admin", "super_admin", "manager"].includes(user.role);
+
     const vendor = await Vendor.findById(vendorId)
       .select(
-        "name walletBalance totalEarnings pendingPayout bankAccountLast4 bankAccountVerified payoutRequests"
+        "name userId walletBalance totalEarnings pendingPayout bankAccountLast4 bankAccountVerified payoutRequests"
       )
       .lean();
 
     if (!vendor) {
       return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
+    }
+
+    const vendorOwner = (vendor as { userId?: { toString: () => string } }).userId;
+    if (!isManager && vendorOwner?.toString() !== user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const recentJobs = await VendorJob.find({

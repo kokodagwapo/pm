@@ -9,6 +9,12 @@ interface SessionUser {
   role: string;
 }
 
+const PUBLIC_VENDOR_FIELDS =
+  "name contactName categories rating totalRatings city state bio serviceRadius hourlyRate callOutFee responseTimeHours activeWorkOrders completedJobs complianceStatus isApproved isAvailable";
+
+const PRIVATE_VENDOR_FIELDS =
+  "name contactName categories rating totalRatings city state bio serviceRadius hourlyRate callOutFee responseTimeHours activeWorkOrders completedJobs complianceStatus isApproved isAvailable email phone address zipCode licenseNumber licenseExpiryDate insuranceProvider insuranceExpiryDate insurancePolicyNumber backgroundCheckDate backgroundCheckStatus complianceHold complianceHoldReason lastComplianceCheck userId documents preferredAreas createdAt updatedAt";
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -19,6 +25,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const user = session.user as SessionUser;
+    const isManager = ["admin", "super_admin", "manager"].includes(user.role);
+
     const { id } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -26,11 +35,21 @@ export async function GET(
     }
 
     await connectDB();
-    const vendor = await Vendor.findById(id).lean();
 
-    if (!vendor) {
+    const vendorRaw = await Vendor.findById(id)
+      .select(isManager ? PRIVATE_VENDOR_FIELDS : "userId " + PUBLIC_VENDOR_FIELDS)
+      .lean();
+
+    if (!vendorRaw) {
       return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
     }
+
+    const isOwner =
+      (vendorRaw as { userId?: { toString: () => string } }).userId?.toString() === user.id;
+
+    const vendor = isManager || isOwner
+      ? await Vendor.findById(id).select(PRIVATE_VENDOR_FIELDS).lean()
+      : vendorRaw;
 
     return NextResponse.json({ vendor });
   } catch (error) {
