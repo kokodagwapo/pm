@@ -135,6 +135,11 @@ export async function PATCH(
         lastEntry.response = "declined";
         lastEntry.respondedAt = new Date();
       }
+      if (job.assignedVendorId) {
+        await Vendor.findByIdAndUpdate(job.assignedVendorId, {
+          $inc: { activeWorkOrders: -1 },
+        });
+      }
       job.assignedVendorId = undefined;
       job.assignedVendorName = undefined;
       job.status = "open";

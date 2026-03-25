@@ -206,27 +206,14 @@ export async function POST(request: NextRequest) {
       vendor.pendingPayout = Math.max(0, (vendor.pendingPayout || 0) - payoutReq.amount);
       await vendor.save();
 
-      setTimeout(async () => {
-        try {
-          const v2 = await Vendor.findById(vendorId);
-          if (!v2) return;
-          const req2 = (v2.payoutRequests as Array<{ _id: { toString: () => string }; status: string; totalEarnings?: number }>)?.find(
-            (r) => r._id.toString() === payoutRequestId
-          );
-          if (req2 && req2.status === "processing") {
-            req2.status = "paid";
-            v2.totalEarnings = (v2.totalEarnings || 0) + payoutReq.amount;
-            await v2.save();
-          }
-        } catch {
-          // best-effort
-        }
-      }, 2000);
+      // Payout moves to "paid" via the /api/vendors/wallet/process-payouts cron endpoint
+      // which should be called on a schedule (e.g. every minute) to finalize ACH payouts.
 
       return NextResponse.json({
         message: `Payout of $${payoutReq.amount.toFixed(2)} approved and processing via ACH`,
         referenceId: payoutReq.referenceId,
         newBalance: vendor.walletBalance,
+        note: "Payout will be marked as paid once ACH confirms. Check status via GET /api/vendors/wallet.",
       });
     }
 
