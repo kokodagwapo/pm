@@ -5,6 +5,7 @@ import VendorJob from "@/models/VendorJob";
 import Vendor from "@/models/Vendor";
 import Property from "@/models/Property";
 import mongoose from "mongoose";
+import { runDispatch } from "@/lib/vendor-dispatch";
 
 interface SessionUser {
   id: string;
@@ -199,36 +200,7 @@ export async function POST(request: NextRequest) {
     await job.save();
 
     if (isInstantDispatch) {
-      const topVendors = await Vendor.find({
-        categories: category,
-        isApproved: true,
-        isAvailable: true,
-        complianceHold: false,
-      })
-        .sort({ rating: -1, responseTimeHours: 1 })
-        .limit(1)
-        .lean();
-
-      if (topVendors.length > 0) {
-        const topVendor = topVendors[0];
-        const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-        await VendorJob.findByIdAndUpdate(job._id, {
-          status: "dispatched",
-          assignedVendorId: topVendor._id,
-          assignedVendorName: topVendor.name,
-          $push: {
-            dispatchLog: {
-              vendorId: topVendor._id,
-              vendorName: topVendor.name,
-              dispatchedAt: new Date(),
-              expiresAt,
-            },
-          },
-        });
-        await Vendor.findByIdAndUpdate(topVendor._id, {
-          $inc: { activeWorkOrders: 1 },
-        });
-      }
+      await runDispatch(job._id as mongoose.Types.ObjectId, category);
     }
 
     const savedJob = await VendorJob.findById(job._id)

@@ -82,6 +82,17 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .lean();
 
+    // Auto-claim: if a non-manager finds their profile by email but it has no userId, link it now
+    if (isSelfLookup && !isManager && vendors.length > 0) {
+      const unclaimed = vendors.filter((v) => !(v as { userId?: unknown }).userId);
+      if (unclaimed.length > 0) {
+        await Vendor.updateMany(
+          { _id: { $in: unclaimed.map((v) => (v as { _id: unknown })._id) }, userId: { $exists: false } },
+          { $set: { userId: user.id } }
+        );
+      }
+    }
+
     return NextResponse.json({
       vendors,
       total,
@@ -189,7 +200,9 @@ export async function POST(request: NextRequest) {
       backgroundCheckDate: backgroundCheckDate ? new Date(backgroundCheckDate) : undefined,
       isApproved: false,
       complianceHold: false,
-      userId: user.id,
+      // Only link userId for self-registration; manager-created profiles stay unclaimed
+      // so a real vendor user can later access them via email match
+      ...(!isManager && { userId: user.id }),
     });
 
     await vendor.save();
