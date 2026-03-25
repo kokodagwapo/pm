@@ -60,6 +60,14 @@ export async function GET(
       }
     }
 
+    // Redact street address for non-managers to match list endpoint privacy behavior
+    if (!isManager) {
+      const prop = (job as { propertyId?: { address?: string } }).propertyId;
+      if (prop) {
+        delete prop.address;
+      }
+    }
+
     return NextResponse.json({ job });
   } catch (error) {
     console.error("GET /api/vendors/jobs/[id] error:", error);

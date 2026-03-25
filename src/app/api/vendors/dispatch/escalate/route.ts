@@ -4,6 +4,7 @@ import connectDB from "@/lib/mongodb";
 import Vendor from "@/models/Vendor";
 import VendorJob from "@/models/VendorJob";
 import mongoose from "mongoose";
+import { haversineKm, vendorScore } from "@/lib/vendor-dispatch";
 
 const DISPATCH_TIMEOUT_MINUTES = 15;
 
@@ -39,17 +40,48 @@ export async function GET(_request: NextRequest) {
 
       const alreadyContacted = job.dispatchLog.map((d) => d.vendorId.toString());
 
-      const nextVendor = await Vendor.findOne({
+      // Resolve stored property coordinates for distance-aware escalation
+      const storedCoords = (job as unknown as { propertyCoordinates?: { lat: number; lng: number } }).propertyCoordinates;
+      const propLat = storedCoords?.lat ?? null;
+      const propLng = storedCoords?.lng ?? null;
+
+      const geoQuery: Record<string, unknown> = {
         categories: job.category,
         isApproved: true,
         isAvailable: true,
         complianceHold: false,
-        _id: {
-          $nin: alreadyContacted.map((id) => new mongoose.Types.ObjectId(id)),
-        },
-      })
-        .sort({ rating: -1, responseTimeHours: 1 })
-        .lean();
+        _id: { $nin: alreadyContacted.map((id) => new mongoose.Types.ObjectId(id)) },
+      };
+
+      // Add geo filter when property coordinates are known
+      if (propLat !== null && propLng !== null) {
+        geoQuery.location = {
+          $geoWithin: {
+            $centerSphere: [[propLng, propLat], 500 / 6371],
+          },
+        };
+      }
+
+      const candidates = await Vendor.find(geoQuery).lean();
+
+      // Apply service-radius filter and score, matching main dispatch logic
+      const scored = candidates
+        .map((v) => {
+          let distKm: number | null = null;
+          const loc = (v as { location?: { coordinates?: number[] } }).location;
+          if (propLat !== null && propLng !== null && loc?.coordinates?.length === 2) {
+            const [vLng, vLat] = loc.coordinates;
+            const raw = haversineKm(propLat, propLng, vLat, vLng);
+            const radiusKm = ((v as { serviceRadius?: number }).serviceRadius ?? 40) * 1.609;
+            if (raw > radiusKm) return null;
+            distKm = raw;
+          }
+          return { vendor: v, score: vendorScore(v as { rating?: number; responseTimeHours?: number }, distKm) };
+        })
+        .filter(Boolean) as { vendor: (typeof candidates)[0]; score: number }[];
+
+      scored.sort((a, b) => b.score - a.score);
+      const nextVendor = scored[0]?.vendor ?? null;
 
       await VendorJob.findByIdAndUpdate(job._id, {
         $set: {

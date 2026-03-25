@@ -1,7 +1,7 @@
 import mongoose, { Schema, Model } from "mongoose";
 
 export interface IVendorDocument {
-  docType: "license" | "insurance" | "background_check" | "w9" | "other";
+  docType: "license" | "insurance" | "background_check" | "certification" | "w9" | "other";
   url: string;
   filename?: string;
   uploadedAt: Date;
@@ -140,7 +140,7 @@ const VendorSchema = new Schema<IVendor>(
       {
         docType: {
           type: String,
-          enum: ["license", "insurance", "background_check", "w9", "other"],
+          enum: ["license", "insurance", "background_check", "certification", "w9", "other"],
           required: true,
         },
         url: { type: String, required: true, trim: true },
