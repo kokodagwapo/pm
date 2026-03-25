@@ -334,16 +334,17 @@ export async function PATCH(
       }
       // Verify vendor is still approved, available, and not on compliance hold
       const bidVendor = await Vendor.findById(bid.vendorId).select("isApproved isAvailable complianceHold complianceHoldReason").lean();
-      if (bidVendor) {
-        if (!(bidVendor as { isApproved?: boolean }).isApproved) {
-          return NextResponse.json({ error: "Vendor is no longer approved" }, { status: 409 });
-        }
-        if (!(bidVendor as { isAvailable?: boolean }).isAvailable) {
-          return NextResponse.json({ error: "Vendor is currently unavailable" }, { status: 409 });
-        }
-        if ((bidVendor as { complianceHold?: boolean }).complianceHold) {
-          return NextResponse.json({ error: `Vendor is on compliance hold: ${(bidVendor as { complianceHoldReason?: string }).complianceHoldReason || "credentials require review"}` }, { status: 409 });
-        }
+      if (!bidVendor) {
+        return NextResponse.json({ error: "Vendor account no longer exists — bid cannot be accepted" }, { status: 409 });
+      }
+      if (!(bidVendor as { isApproved?: boolean }).isApproved) {
+        return NextResponse.json({ error: "Vendor is no longer approved" }, { status: 409 });
+      }
+      if (!(bidVendor as { isAvailable?: boolean }).isAvailable) {
+        return NextResponse.json({ error: "Vendor is currently unavailable" }, { status: 409 });
+      }
+      if ((bidVendor as { complianceHold?: boolean }).complianceHold) {
+        return NextResponse.json({ error: `Vendor is on compliance hold: ${(bidVendor as { complianceHoldReason?: string }).complianceHoldReason || "credentials require review"}` }, { status: 409 });
       }
       bid.status = "accepted";
       for (const b of job.bids) {
