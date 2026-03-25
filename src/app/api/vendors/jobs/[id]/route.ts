@@ -204,8 +204,17 @@ export async function PATCH(
         );
       }
 
+      // Debit the wallet of the manager who posted the job; fall back to approver if unavailable
+      const postedByRaw = (job as { postedBy?: { _id?: mongoose.Types.ObjectId | string } | mongoose.Types.ObjectId | string }).postedBy;
+      const postedByObjId = postedByRaw && typeof postedByRaw === "object" && "_id" in postedByRaw
+        ? (postedByRaw as { _id: mongoose.Types.ObjectId | string })._id
+        : postedByRaw;
+      const walletOwnerId = postedByObjId
+        ? new mongoose.Types.ObjectId(String(postedByObjId))
+        : new mongoose.Types.ObjectId(user.id);
+
       // Require manager wallet to have sufficient balance before crediting vendor
-      const managerWallet = await ManagerWallet.findOne({ managerId: new mongoose.Types.ObjectId(user.id) });
+      const managerWallet = await ManagerWallet.findOne({ managerId: walletOwnerId });
       const managerBalance = managerWallet?.balance ?? 0;
       if (managerBalance < job.finalCost) {
         return NextResponse.json(
@@ -215,7 +224,7 @@ export async function PATCH(
       }
       // Debit manager wallet atomically with the approval
       await ManagerWallet.findOneAndUpdate(
-        { managerId: new mongoose.Types.ObjectId(user.id) },
+        { managerId: walletOwnerId },
         {
           $inc: { balance: -job.finalCost },
           $push: {
