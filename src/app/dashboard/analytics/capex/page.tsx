@@ -151,6 +151,7 @@ export default function CapexPlanningPage() {
   // System ages state
   const [systemsPropertyId, setSystemsPropertyId] = useState<string>("");
   const [systemsData, setSystemsData] = useState<SystemEntry[]>([]);
+  const [systemsMarketRent, setSystemsMarketRent] = useState<string>("");
   const [systemsLoading, setSystemsLoading] = useState(false);
   const [systemsSaving, setSystemsSaving] = useState(false);
   const [showSystemsPanel, setShowSystemsPanel] = useState(false);
@@ -183,12 +184,14 @@ export default function CapexPlanningPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.message);
       const existing: SystemEntry[] = (json.data?.systems ?? []);
+      const loadedMarketRent = json.data?.marketRent;
       // Merge with defaults: add any missing system types
       const merged: SystemEntry[] = SYSTEM_TYPES.map((st) => {
         const found = existing.find((e) => e.systemType === st);
         return found ?? { systemType: st, estimatedLifespanYears: DEFAULT_LIFESPANS[st] ?? 20 };
       });
       setSystemsData(merged);
+      setSystemsMarketRent(loadedMarketRent ? String(loadedMarketRent) : "");
     } catch {
       toast.error("Could not load system data");
     } finally {
@@ -203,7 +206,7 @@ export default function CapexPlanningPage() {
       const res = await fetch("/api/analytics/property-systems", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ propertyId: systemsPropertyId, systems: systemsData }),
+        body: JSON.stringify({ propertyId: systemsPropertyId, systems: systemsData, marketRent: systemsMarketRent ? Number(systemsMarketRent) : null }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.message);
@@ -215,7 +218,7 @@ export default function CapexPlanningPage() {
       setSystemsSaving(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [systemsPropertyId, systemsData]);
+  }, [systemsPropertyId, systemsData, systemsMarketRent]);
 
   const updateSystem = (index: number, field: keyof SystemEntry, value: string | number) => {
     setSystemsData((prev) => {
@@ -653,6 +656,32 @@ export default function CapexPlanningPage() {
                 </Button>
               )}
             </div>
+
+            {/* Market rent override for this property */}
+            {systemsPropertyId && (
+              <div className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30 p-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Market Rent Override (per unit/month)</p>
+                  <p className="text-xs text-blue-700 dark:text-blue-300 mt-0.5">
+                    Used by the Rent Gap Alerts feature to compare active leases against a known market benchmark for this property.
+                    Leave blank to use the portfolio average.
+                  </p>
+                </div>
+                <div className="shrink-0 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">$</span>
+                  <Input
+                    type="number"
+                    min={0}
+                    step={50}
+                    placeholder="e.g. 1800"
+                    value={systemsMarketRent}
+                    onChange={(e) => setSystemsMarketRent(e.target.value)}
+                    className="w-28 h-8 text-sm"
+                  />
+                  <span className="text-xs text-muted-foreground">/mo</span>
+                </div>
+              </div>
+            )}
 
             {/* System rows */}
             {systemsLoading ? (

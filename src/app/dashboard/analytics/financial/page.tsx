@@ -162,7 +162,7 @@ export default function FinancialAnalyticsPage() {
   const [taxExportLoading, setTaxExportLoading] = useState(false);
 
   const [utilityAnomalies, setUtilityAnomalies] = useState<{
-    anomalies: { propertyId: string; propertyName: string; category: string; currentMonthCost: number; priorMonthCost: number; spikePercent: number; severity: "warning" | "critical" }[];
+    anomalies: { propertyId: string; propertyName: string; category: string; currentMonthCost: number; priorMonthCost: number; spikePercent: number; severity: "warning" | "critical"; affectedUnitCount?: number; affectedUnitIds?: string[]; recommendedAction?: string }[];
     summary: { total: number; critical: number; warning: number; byCategoryCount: Record<string, number> };
     comparisonPeriod?: { current: string; prior: string; thresholdPct: number };
     detectedAt: string;
@@ -1622,13 +1622,21 @@ export default function FinancialAnalyticsPage() {
                               </div>
                               <p className="text-xs text-muted-foreground mt-1">
                                 Prior month: {formatCurrency(a.priorMonthCost)} → Current: {formatCurrency(a.currentMonthCost)}
+                                {a.affectedUnitCount != null && a.affectedUnitCount > 0 && (
+                                  <span className="ml-2 text-muted-foreground">· {a.affectedUnitCount} unit{a.affectedUnitCount !== 1 ? "s" : ""} affected</span>
+                                )}
                               </p>
+                              {a.recommendedAction && (
+                                <p className="text-xs text-blue-700 dark:text-blue-400 mt-1 italic">
+                                  {a.recommendedAction}
+                                </p>
+                              )}
                             </div>
                             <div className="text-right shrink-0 ml-4">
                               <div className={`text-lg font-bold ${a.severity === "critical" ? "text-red-600" : "text-yellow-600"}`}>
                                 +{a.spikePercent}%
                               </div>
-                              <p className="text-xs text-muted-foreground">above avg</p>
+                              <p className="text-xs text-muted-foreground">vs prior month</p>
                             </div>
                           </div>
                         ))}

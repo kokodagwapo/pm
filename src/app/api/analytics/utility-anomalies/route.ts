@@ -7,6 +7,7 @@
  * Algorithm: Compare current calendar month spend vs. prior calendar month spend
  * (month-over-month). Flag if current month is >20% above prior month.
  * Severity: critical if ≥50% spike, warning if 20–49%.
+ * Each anomaly includes affected units and a recommended inspection action.
  */
 
 export const dynamic = "force-dynamic";
@@ -21,6 +22,13 @@ import {
   withRoleAndDB,
 } from "@/lib/api-utils";
 import VendorJob from "@/models/VendorJob";
+
+const RECOMMENDED_ACTION: Record<string, string> = {
+  "Electrical": "Schedule an electrical inspection to identify overloaded circuits, faulty wiring, or new equipment draws.",
+  "Plumbing": "Inspect for hidden leaks, failing fixtures, or water main issues. Consider a leak detection scan.",
+  "HVAC": "Arrange HVAC inspection for refrigerant leaks, compressor wear, or increased load from weather.",
+  "Pest Control": "Conduct a thorough site inspection for active infestation, entry points, and moisture sources.",
+};
 
 const UTILITY_CATEGORIES = ["Electrical", "Plumbing", "HVAC", "Pest Control"];
 const SPIKE_THRESHOLD = 0.20;   // 20% month-over-month increase triggers alert
@@ -79,6 +87,7 @@ export const GET = withRoleAndDB([
             _id: { propertyId: "$propertyId", category: "$category" },
             totalCost: { $sum: { $ifNull: ["$actualCost", "$estimatedCost"] } },
             count: { $sum: 1 },
+            unitIds: { $addToSet: "$unitId" },
           },
         },
       ]),
@@ -113,6 +122,7 @@ export const GET = withRoleAndDB([
             _id: { propertyId: "$propertyId", category: "$category" },
             totalCost: { $sum: { $ifNull: ["$finalCost", "$budget"] } },
             count: { $sum: 1 },
+            unitIds: { $addToSet: "$unitId" },
           },
         },
       ]),
@@ -136,24 +146,30 @@ export const GET = withRoleAndDB([
     ]);
 
     // Combine current and prior month totals per (property, category)
-    type SpendEntry = { current: number; prior: number };
+    type SpendEntry = { current: number; prior: number; unitIds: Set<string> };
     const spendMap = new Map<string, SpendEntry>();
 
     const addEntry = (
       propId: string,
       category: string,
       cost: number,
-      period: "current" | "prior"
+      period: "current" | "prior",
+      unitIds?: string[]
     ) => {
       const key = `${propId}||${category}`;
-      const existing = spendMap.get(key) ?? { current: 0, prior: 0 };
+      const existing = spendMap.get(key) ?? { current: 0, prior: 0, unitIds: new Set<string>() };
       existing[period] += cost;
+      if (period === "current" && unitIds) {
+        for (const uid of unitIds) {
+          if (uid) existing.unitIds.add(uid.toString());
+        }
+      }
       spendMap.set(key, existing);
     };
 
-    for (const r of maintCurrent) addEntry(r._id.propertyId.toString(), r._id.category, r.totalCost ?? 0, "current");
+    for (const r of maintCurrent) addEntry(r._id.propertyId.toString(), r._id.category, r.totalCost ?? 0, "current", r.unitIds ?? []);
     for (const r of maintPrior) addEntry(r._id.propertyId.toString(), r._id.category, r.totalCost ?? 0, "prior");
-    for (const r of vendorCurrent) addEntry(r._id.propertyId.toString(), r._id.category, r.totalCost ?? 0, "current");
+    for (const r of vendorCurrent) addEntry(r._id.propertyId.toString(), r._id.category, r.totalCost ?? 0, "current", r.unitIds ?? []);
     for (const r of vendorPrior) addEntry(r._id.propertyId.toString(), r._id.category, r.totalCost ?? 0, "prior");
 
     // Detect anomalies: current > prior by ≥20%
@@ -165,9 +181,12 @@ export const GET = withRoleAndDB([
       priorMonthCost: number;
       spikePercent: number;
       severity: "warning" | "critical";
+      affectedUnitIds: string[];
+      affectedUnitCount: number;
+      recommendedAction: string;
     }[] = [];
 
-    for (const [key, { current, prior }] of spendMap.entries()) {
+    for (const [key, { current, prior, unitIds }] of spendMap.entries()) {
       const [propId, category] = key.split("||");
 
       // Only flag if there's actual spend this month and a valid prior baseline
@@ -177,6 +196,7 @@ export const GET = withRoleAndDB([
       const spike = (current - prior) / prior;
 
       if (spike >= SPIKE_THRESHOLD) {
+        const affectedUnitIds = Array.from(unitIds).filter(Boolean);
         anomalies.push({
           propertyId: propId,
           propertyName: propertyNameMap.get(propId) ?? "Unknown Property",
@@ -185,6 +205,9 @@ export const GET = withRoleAndDB([
           priorMonthCost: Math.round(prior),
           spikePercent: Math.round(spike * 100),
           severity: spike >= CRITICAL_THRESHOLD ? "critical" : "warning",
+          affectedUnitIds,
+          affectedUnitCount: affectedUnitIds.length,
+          recommendedAction: RECOMMENDED_ACTION[category] ?? "Review recent work orders and vendor invoices for this category.",
         });
       }
     }

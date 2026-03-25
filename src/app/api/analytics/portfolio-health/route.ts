@@ -206,12 +206,18 @@ export const GET = withRoleAndDB([
     let marketRent = 0;
     let unitCount = 0;
     for (const p of properties) {
-      if (p.isMultiUnit && Array.isArray(p.units)) {
+      if (Array.isArray(p.units) && p.units.length > 0) {
         for (const u of p.units as { rentAmount?: number }[]) {
           if (u.rentAmount && u.rentAmount > 0) {
             marketRent += u.rentAmount;
             unitCount++;
           }
+        }
+      } else if (!p.isMultiUnit) {
+        const singleRent = (p as { rentAmount?: number }).rentAmount;
+        if (singleRent && singleRent > 0) {
+          marketRent += singleRent;
+          unitCount++;
         }
       }
     }
