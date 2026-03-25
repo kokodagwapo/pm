@@ -10,6 +10,36 @@ interface SessionUser {
   role: string;
 }
 
+const DISPATCH_TIMEOUT_MINUTES = 15;
+
+function haversineKm(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number
+): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function vendorScore(
+  vendor: { rating: number; responseTimeHours: number; completedJobs: number },
+  distanceKm: number | null
+): number {
+  const ratingScore = (vendor.rating / 5) * 50;
+  const responseScore = Math.max(0, 25 - vendor.responseTimeHours);
+  const distanceScore =
+    distanceKm !== null ? Math.max(0, 25 - distanceKm / 2) : 12;
+  return ratingScore + responseScore + distanceScore;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
@@ -24,7 +54,8 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
-    const { jobId, category, preferredVendorId } = await request.json();
+    const { jobId, category, preferredVendorId, propertyCoordinates } =
+      await request.json();
 
     if (!jobId || !category) {
       return NextResponse.json(
@@ -51,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     const alreadyContacted = job.dispatchLog.map((d) => d.vendorId.toString());
 
-    const query: Record<string, unknown> = {
+    const geoQuery: Record<string, unknown> = {
       categories: category,
       isApproved: true,
       isAvailable: true,
@@ -59,7 +90,26 @@ export async function POST(request: NextRequest) {
       _id: { $nin: alreadyContacted.map((id) => new mongoose.Types.ObjectId(id)) },
     };
 
+    let propLat: number | null = null;
+    let propLng: number | null = null;
+
+    if (
+      Array.isArray(propertyCoordinates) &&
+      propertyCoordinates.length === 2
+    ) {
+      [propLng, propLat] = propertyCoordinates as [number, number];
+      geoQuery.location = {
+        $geoWithin: {
+          $centerSphere: [
+            [propLng, propLat],
+            500 / 6371,
+          ],
+        },
+      };
+    }
+
     let vendorToDispatch = null;
+    let chosenDistance: number | null = null;
 
     if (preferredVendorId && mongoose.Types.ObjectId.isValid(preferredVendorId)) {
       const preferred = await Vendor.findOne({
@@ -67,14 +117,21 @@ export async function POST(request: NextRequest) {
         isApproved: true,
         complianceHold: false,
       });
-      if (preferred) vendorToDispatch = preferred;
+      if (preferred) {
+        vendorToDispatch = preferred;
+        if (
+          propLat !== null &&
+          propLng !== null &&
+          preferred.location?.coordinates?.length === 2
+        ) {
+          const [vLng, vLat] = preferred.location.coordinates;
+          chosenDistance = haversineKm(propLat, propLng, vLat, vLng);
+        }
+      }
     }
 
     if (!vendorToDispatch) {
-      const candidates = await Vendor.find(query)
-        .sort({ rating: -1, responseTimeHours: 1, completedJobs: -1 })
-        .limit(1)
-        .lean();
+      const candidates = await Vendor.find(geoQuery).lean();
 
       if (candidates.length === 0) {
         return NextResponse.json(
@@ -85,10 +142,37 @@ export async function POST(request: NextRequest) {
           { status: 404 }
         );
       }
-      vendorToDispatch = candidates[0];
+
+      const scored = candidates.map((v) => {
+        let distKm: number | null = null;
+        if (
+          propLat !== null &&
+          propLng !== null &&
+          v.location?.coordinates?.length === 2
+        ) {
+          const [vLng, vLat] = v.location.coordinates as [number, number];
+          const distKmRaw = haversineKm(propLat, propLng, vLat, vLng);
+          const radiusKm = (v.serviceRadius ?? 40) * 1.609;
+          if (distKmRaw > radiusKm) return null;
+          distKm = distKmRaw;
+        }
+        return { vendor: v, score: vendorScore(v, distKm), distance: distKm };
+      }).filter(Boolean) as { vendor: (typeof candidates)[0]; score: number; distance: number | null }[];
+
+      if (scored.length === 0) {
+        return NextResponse.json(
+          { error: "No vendors available within the service area for this job location." },
+          { status: 404 }
+        );
+      }
+
+      scored.sort((a, b) => b.score - a.score);
+      vendorToDispatch = scored[0].vendor;
+      chosenDistance = scored[0].distance;
     }
 
     const vendorId = vendorToDispatch._id as unknown as mongoose.Types.ObjectId;
+    const expiresAt = new Date(Date.now() + DISPATCH_TIMEOUT_MINUTES * 60 * 1000);
 
     await VendorJob.findByIdAndUpdate(jobId, {
       status: "dispatched",
@@ -99,6 +183,7 @@ export async function POST(request: NextRequest) {
           vendorId,
           vendorName: vendorToDispatch.name,
           dispatchedAt: new Date(),
+          expiresAt,
         },
       },
     });
@@ -119,7 +204,10 @@ export async function POST(request: NextRequest) {
         name: vendorToDispatch.name,
         rating: vendorToDispatch.rating,
         responseTimeHours: vendorToDispatch.responseTimeHours,
+        distanceKm: chosenDistance ? Math.round(chosenDistance) : null,
       },
+      expiresAt,
+      timeoutMinutes: DISPATCH_TIMEOUT_MINUTES,
     });
   } catch (error) {
     console.error("POST /api/vendors/dispatch error:", error);

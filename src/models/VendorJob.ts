@@ -30,6 +30,7 @@ export interface IDispatchLog {
   vendorId: mongoose.Types.ObjectId;
   vendorName: string;
   dispatchedAt: Date;
+  expiresAt?: Date;
   response?: "accepted" | "declined" | "timeout";
   respondedAt?: Date;
 }
@@ -92,6 +93,7 @@ const DispatchLogSchema = new Schema<IDispatchLog>(
     vendorId: { type: Schema.Types.ObjectId, ref: "Vendor", required: true },
     vendorName: { type: String, required: true, trim: true },
     dispatchedAt: { type: Date, required: true },
+    expiresAt: { type: Date },
     response: {
       type: String,
       enum: ["accepted", "declined", "timeout"],
