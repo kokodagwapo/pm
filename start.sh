@@ -36,4 +36,4 @@ rm -rf .next
 export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=3072"
 
 echo "Starting dev server..."
-exec npm run dev
+exec npm run dev:5000

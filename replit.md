@@ -62,9 +62,25 @@ A Next.js 15 property management application using the App Router (`src/app/`).
   - `GET /api/compliance/cron` — cron endpoint: marks overdue obligations + sends deadline alerts (14-day, 3-day)
   - `GET/POST /api/compliance/seed` — seeds FL/CA/NY/TX/WA jurisdiction rules on first run
 - **Components**: `src/components/compliance/RentCalculatorModal.tsx`, `EvictionWorkflowModal.tsx`, `FairHousingModal.tsx`, `AddObligationModal.tsx` — all-in-one modal tools
-- **Page**: `/dashboard/compliance` — unified Compliance Hub with stats cards, 3 tool launchers, filterable obligation list with inline status actions
-- **Automation**: Compliance deadline alerts integrated into `notification-automation.ts` — 14-day and 3-day pre-deadline notifications to property managers/owners/assigned users
+  - `RentCalculatorModal`: generates downloadable `.txt` rent increase notice via `generateNotice()` after compliance check
+  - `EvictionWorkflowModal`: saves cases to `EvictionCase` collection via `/api/compliance/eviction-cases`; tracks step completion with checkmark UI and confirmation banner
+- **Page**: `/dashboard/compliance` — unified Compliance Hub with stats cards, 3 tool launchers, Jurisdiction Profiles grid (per-state rent control / notice period / max increase %), filterable obligation list with urgency-colored due dates (red ≤7 days / amber ≤30 days / green >30 days)
+- **Automation**: Compliance deadline alerts integrated into `notification-automation.ts` — 14-day and 3-day pre-deadline notifications to property managers/owners/assigned users; held vendors excluded from Luna auto-dispatch
 - **Sidebar**: New "Legal & Compliance" section (admin/manager/owner roles) with Hub, Rent Calculator, Eviction Workflow, Fair Housing links
+
+## Vendor Marketplace & Smart Dispatch (Task #9)
+- **Models**: `src/models/Vendor.ts` extended with serviceArea, location, userId, walletBalance, isAvailable, complianceHold; `src/models/VendorJob.ts` with full status timeline, bids, photos, dispatch log
+- **API routes**:
+  - `GET/POST /api/vendors` — browse/create vendors with filter by category, rating, availability, location
+  - `GET/PATCH/DELETE /api/vendors/[id]` — vendor profile CRUD
+  - `GET/POST /api/vendors/jobs` — post jobs, list marketplace jobs
+  - `GET/POST/PATCH /api/vendors/jobs/[id]` — accept/complete/approve/dispatch/bid on jobs
+  - `POST /api/vendors/dispatch` — smart dispatch: selects top-rated available vendor in category
+  - `POST/GET /api/vendors/ratings` — submit and read vendor ratings
+  - `GET/POST /api/vendors/wallet` — vendor earnings and payout history
+  - `GET /api/vendors/[id]/compliance-check` — check vendor compliance hold status
+- **Pages**: `/dashboard/vendors` — full marketplace UI (browse, filter, post job, rate vendors); `/dashboard/vendors/portal` — vendor-facing portal (profile, jobs, payments)
+- **Sidebar**: "Vendors" nav entry under Operations section (Store icon) for admin/manager/owner roles; localized in all 9 languages
 
 ## Predictive Tenant Intelligence Suite (Task #7)
 - **Model**: `src/models/TenantIntelligence.ts` — MongoDB document per tenant storing churn risk score/level, renewal likelihood %, delinquency probability %, lifetime value estimate, sentiment signal, raw signals, explanation array, intervention tracking, and credit builder enrollment

@@ -151,5 +151,8 @@
   "rentals.noSaved.browseAll": "Browse all properties",
   "rentals.compare.bar.property": "Property",
   "rentals.compare.bar.properties": "Properties",
-  "rentals.compare.bar.compare": "Compare"
+  "rentals.compare.bar.compare": "Compare",
+  "nav.vendors": "Fornitori",
+  "nav.vendors.marketplace": "Mercato",
+  "nav.vendors.portal": "Portale Fornitore"
 }

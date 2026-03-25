@@ -5,9 +5,7 @@
   "common.saving": "Saving...",
   "common.cancel": "Cancel",
   "common.dismiss": "Dismiss",
-
   "common.clearFilters": "Clear Filters",
-
   "common.upload.title": "Upload property images",
   "common.upload.titleDisabled": "Upload disabled",
   "common.upload.titleDragActive": "Drop your images here!",
@@ -25,7 +23,6 @@
   "common.upload.imageNumber": "Image {number}",
   "common.upload.readyToUpload": "{count} image{plural} ready to upload",
   "common.upload.reviewDescription": "Review your images above. You can remove individual images or clear all to start over.",
-
   "nav.dashboard": "Dashboard",
   "nav.section.management": "Management",
   "nav.section.operations": "Operations",
@@ -35,35 +32,29 @@
   "nav.section.communication": "Communication",
   "nav.section.settings": "Settings",
   "nav.section.administration": "Administration",
-
   "nav.automation": "Automation",
   "nav.automation.hub": "Overview",
   "nav.automation.luna": "Luna Agent",
   "nav.automation.actions": "Actions Log",
-
   "nav.section.compliance": "Legal & Compliance",
   "nav.compliance": "Compliance Hub",
   "nav.compliance.hub": "Overview",
   "nav.compliance.rentCalculator": "Rent Calculator",
   "nav.compliance.eviction": "Eviction Workflow",
   "nav.compliance.fairHousing": "Fair Housing",
-
   "nav.properties": "Properties",
   "nav.properties.all": "All Properties",
   "nav.properties.new": "Add Property",
   "nav.properties.available": "Available Units",
   "nav.properties.allUnits": "All Units",
-
   "nav.tenants": "Tenants",
   "nav.tenants.all": "All Tenants",
   "nav.tenants.new": "Add Tenant",
   "nav.tenants.applications": "Applications",
-
   "nav.owners": "Owners",
   "nav.owners.all": "All Owners",
   "nav.owners.new": "Add Owner",
   "nav.owners.properties": "Properties",
-
   "nav.leases": "Leases",
   "nav.leases.all": "All Leases",
   "nav.leases.new": "New Lease",
@@ -73,53 +64,43 @@
   "nav.leases.invoices": "Invoices",
   "nav.leases.my": "My Leases",
   "nav.leases.documents": "Documents",
-
   "nav.maintenance": "Maintenance",
   "nav.maintenance.all": "All Requests",
   "nav.maintenance.emergency": "Emergency",
   "nav.maintenance.submit": "Submit Request",
   "nav.maintenance.mine": "My Requests",
-
   "nav.payments": "Payments",
   "nav.payments.all": "All Payments",
   "nav.payments.overdue": "Overdue",
   "nav.payments.payRent": "Pay Rent",
   "nav.payments.history": "Payment History",
-
   "nav.analytics": "Analytics",
   "nav.analytics.overview": "Overview",
   "nav.analytics.financial": "Financial Reports",
   "nav.analytics.occupancy": "Occupancy",
   "nav.analytics.maintenance": "Maintenance Stats",
-
   "nav.messages": "Messages",
   "nav.announcements": "Announcements",
   "nav.calendar": "What's On",
   "nav.aiHelp": "Luna AI",
   "nav.aiHelp.luna": "AI Chat",
   "nav.aiHelp.faq": "Help Center",
-
   "nav.settings": "Settings",
   "nav.settings.display": "Display",
   "nav.settings.profile": "My Profile",
   "nav.settings.notifications": "Notifications",
   "nav.settings.billing": "Billing & Plans",
-
   "nav.section.rentals": "Rentals",
-
   "nav.properties.calendar": "Property Calendar",
   "nav.properties.stayFinder": "Stay finder",
   "nav.properties.stayFinderHint": "Guest-style availability search (VMS Florida–style flow). Listing cards open each property’s dashboard calendar.",
   "nav.properties.stayFinderPublicLink": "Open public guest page",
   "nav.properties.stayFinderCalendarTeaser": "guest-style availability (VMS Florida–style flow)",
-
   "nav.rentalRequests": "Rental Requests",
   "nav.rentalRequests.all": "All Requests",
-
   "nav.rentals": "Rentals",
   "nav.rentals.request": "Request Rental",
   "nav.rentals.myRequests": "My Requests",
-
   "nav.admin": "Admin Panel",
   "nav.admin.overview": "Overview",
   "nav.admin.users": "User Management",
@@ -127,15 +108,12 @@
   "nav.admin.users.roles": "Roles & Permissions",
   "nav.admin.apiKeys": "API Keys",
   "nav.admin.demoLeads": "Demo leads",
-
   "units.status.available": "Available",
   "units.status.occupied": "Occupied",
   "units.status.maintenance": "Maintenance",
   "units.status.unavailable": "Unavailable",
-
   "properties.allUnits.header.title": "All Units",
   "properties.allUnits.header.subtitle": "Browse every unit across all properties",
-
   "header.menu.profile": "Profile",
   "header.menu.settings": "Settings",
   "header.menu.logout": "Log out",
@@ -144,17 +122,14 @@
   "header.appearance.toDark.aria": "Switch to immersive dark dashboard",
   "header.appearance.toLight.title": "Switch to light dashboard",
   "header.appearance.toLight.aria": "Switch to light dashboard",
-
   "common.showing": "Showing",
   "common.previous": "Previous",
   "common.next": "Next",
   "common.page": "Page",
   "common.of": "of",
   "common.perPage": "per page",
-
   "landing.cta.portal": "Portal",
   "common.language": "Language",
-
   "landing.eyebrow": "Property operations, rebuilt for speed",
   "landing.hero.line1": "Property management",
   "landing.hero.line2": "without the drag",
@@ -171,17 +146,14 @@
   "landing.feature.security.title": "Enterprise Security",
   "landing.feature.security.desc": "Role-based access control, audit logs, and encrypted storage.",
   "landing.footer.wordmark": "Built in Naples, Florida · U.S. team",
-
   "landing.home.nav.pricing": "Pricing",
   "landing.home.nav.features": "Features",
   "landing.home.nav.why": "Why switch",
   "landing.home.nav.connect": "Integrations",
   "landing.home.nav.migrate": "Migration",
   "landing.home.nav.demo": "Demo",
-
   "landing.home.theme.toDark": "Dark theme",
   "landing.home.theme.toLight": "Light theme",
-
   "landing.home.hero.badge": "Enterprise-ready · Any volume",
   "landing.home.hero.eyebrow": "SmartStart PM · Naples, Florida",
   "landing.home.hero.title1": "You, your team, and tenants in one simple hub.",
@@ -195,7 +167,6 @@
   "landing.home.hero.cta.migrate": "Migrate with us",
   "landing.home.hero.link.contact": "Contact",
   "landing.home.hero.link.migrate": "Migration",
-
   "landing.home.trust.label": "At a glance",
   "landing.home.trust.i1": "Naples, Florida",
   "landing.home.trust.i2": "Small U.S. team",
@@ -206,7 +177,6 @@
   "landing.home.trust.i7": "Your cloud OK",
   "landing.home.trust.i8": "API friendly",
   "landing.home.trust.i9": "Works on phones",
-
   "landing.home.capabilities.title": "Everything your portfolio runs on—messaging to screening",
   "landing.home.capabilities.lead": "AI-assisted messaging, direct threads with tenants, maintenance requests, owner-side calendar blocking, online applications, identity verification, automated screening workflows, and income and credit signals—plus rent tracking, accounting-friendly exports, tax-time reporting, and alerts—so your team stops juggling a dozen different tools.",
   "landing.home.capabilities.disclaimer": "Tenant screening, credit, and identity capabilities depend on your region, policies, and which integrations you enable. We help you connect the workflows; your screening providers remain responsible for compliance.",
@@ -234,14 +204,12 @@
   "landing.home.capabilities.items.leasesDocs.desc": "Store agreements, addenda, and disclosures where your team already works—less email attachment roulette.",
   "landing.home.capabilities.items.alerts.title": "Real-time alerts",
   "landing.home.capabilities.items.alerts.desc": "Get nudges for new messages, maintenance updates, applications, and key dates so nothing slips through when you are in the field.",
-
   "landing.home.diff.title": "Fair pricing—and we keep pace with you",
   "landing.home.diff.line.1": "We stay deliberately lean: automation handles repetitive work, and a focused team carries the rest—so your subscription pays for software and support you use, not enterprise overhead you never see.",
   "landing.home.diff.line.2": "You talk to people who can decide. Fewer handoffs between you and a fix, a setting change, or a straight answer—so most requests move in days, not through layers of account managers.",
   "landing.home.diff.line.3": "Rollouts happen in steps you can absorb: core workflows first, then integrations—so your staff is productive early instead of waiting on one big cutover.",
   "landing.home.diff.line.4": "We sit beside what you already run—CRM, accounting, older PM tools, and files—with APIs and guided imports, not a forced rip-and-replace.",
   "landing.home.diff.line.5": "As you add doors or users, pricing stays proportional and predictable—room to grow without surprise fees for basics at every renewal.",
-
   "landing.home.why.title": "Why teams switch",
   "landing.home.why.lead": "Many older tools cost too much per month and still slow people down every day.",
   "landing.home.why.colLegacy": "What we hear",
@@ -259,7 +227,6 @@
   "landing.home.why.answer.4": "Simple pricing tied to portfolio size.",
   "landing.home.why.answer.5": "Onboarding and migration with clear steps and real humans.",
   "landing.home.why.answer.6": "Grow from a small team to a large portfolio without changing software again.",
-
   "landing.home.pricing.kicker": "Pricing",
   "landing.home.pricing.title": "Straightforward pricing",
   "landing.home.pricing.subtitle": "One clear structure that grows with your portfolio. Ask us about volume pricing.",
@@ -293,7 +260,6 @@
   "landing.home.pricing.row.api": "API friendly integrations",
   "landing.home.pricing.row.ai": "AI assisted workflows",
   "landing.home.pricing.footnote": "The table shows the gap—not a binding quote. Fair pricing follows one conversation about your portfolio, integrations, and where you run the app. Strong encryption, optional SSO, SOC 2–aligned practices, and hosting in your own cloud when custody matters.",
-
   "landing.home.dormitories.kicker": "Specialized for scale",
   "landing.home.dormitories.title": "Multi-building and dormitory management",
   "landing.home.dormitories.sub": "Manage dozens of buildings, shared facilities, and complex resident workflows from a single dashboard.",
@@ -302,7 +268,6 @@
   "landing.home.dormitories.item.3": "Bulk import and mass communications for large cohorts.",
   "landing.home.dormitories.item.4": "Sub-metering and allocation of shared utility costs.",
   "landing.home.dormitories.item.5": "Academic calendar integration and seasonal occupancy planning.",
-
   "landing.home.whitelabel.kicker": "Enterprise solutions",
   "landing.home.whitelabel.title": "White-label property management platform",
   "landing.home.whitelabel.sub": "Resell SmartStart as your own brand. Agencies, real estate groups, and software platforms use our API to offer PM directly to their clients.",
@@ -311,7 +276,6 @@
   "landing.home.whitelabel.item.3": "Multi-tenant support so you manage clients and their portfolios.",
   "landing.home.whitelabel.item.4": "Revenue sharing or licensing models—work with us on terms that fit.",
   "landing.home.whitelabel.item.5": "Dedicated technical support and API documentation for your team.",
-
   "landing.home.connect.title": "Works with what you already use",
   "landing.home.connect.sub": "Hook up your CRM, QuickBooks, older PM software, or custom systems. Bring data over in stages instead of a risky day one cutover.",
   "landing.home.connect.hub.kicker": "Your operations",
@@ -325,7 +289,6 @@
   "landing.home.connect.node.calendar": "Calendars & scheduling",
   "landing.home.connect.node.messaging": "Email, SMS, and in-app messages",
   "landing.home.connect.footer": "We connect first, migrate in steps, and keep staff and residents from unnecessary disruption. You can run in your own cloud if you want.",
-
   "landing.home.roles.title": "Who it serves",
   "landing.home.roles.sub": "Each role sees what matters. Less back and forth.",
   "landing.home.roles.pm.title": "Property managers",
@@ -340,7 +303,6 @@
   "landing.home.roles.tenant.desc": "Pay rent, request repairs, and message the office from one clear place.",
   "landing.home.roles.vendor.title": "Vendors & maintenance partners",
   "landing.home.roles.vendor.desc": "Scoped access to assigned work orders, photos, and status—without seeing your full rent roll or resident PII.",
-
   "landing.home.ai.kicker": "Smart helpers",
   "landing.home.ai.title": "AI where it actually helps",
   "landing.home.ai.lead": "No hype. Automation and suggestions for boring work, faster replies, and cleaner data when you move systems.",
@@ -355,7 +317,6 @@
   "landing.home.ai.panel.m1": "Step by step moves from common PM platforms.",
   "landing.home.ai.panel.m2": "CSV import with help mapping fields and spotting problems.",
   "landing.home.ai.panel.m3": "Assisted cleanup and checks. Your team approves what ships.",
-
   "landing.home.migrate.title": "Onboarding that fits real life",
   "landing.home.migrate.sub": "You have live leases, partial files, and daily work. We plan in phases instead of one risky flip.",
   "landing.home.migrate.i1": "Help moving from common legacy PM tools.",
@@ -369,9 +330,7 @@
   "landing.home.cta.primary": "Book a quick tour",
   "landing.home.cta.secondary": "Sign in",
   "landing.home.cta.tertiary": "Rentals",
-
   "landing.home.footer.contact": "Contact",
-
   "rentals.search.placeholder": "Search neighborhoods, properties...",
   "rentals.view.list": "List",
   "rentals.view.map": "Map",
@@ -388,5 +347,8 @@
   "rentals.noSaved.browseAll": "Browse all properties",
   "rentals.compare.bar.property": "Property",
   "rentals.compare.bar.properties": "Properties",
-  "rentals.compare.bar.compare": "Compare"
+  "rentals.compare.bar.compare": "Compare",
+  "nav.vendors": "Vendors",
+  "nav.vendors.marketplace": "Marketplace",
+  "nav.vendors.portal": "Vendor Portal"
 }

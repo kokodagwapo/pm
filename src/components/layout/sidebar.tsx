@@ -48,6 +48,7 @@ import {
   Calculator,
   Gavel,
   Eye,
+  Store,
 } from "lucide-react";
 import { UserRole } from "@/types";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
@@ -206,6 +207,17 @@ const navigationSections: NavSection[] = [
           { title: "nav.maintenance.emergency", href: "/dashboard/maintenance/emergency", icon: Bell, iconColor: "text-orange-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
           { title: "nav.maintenance.submit", href: "/dashboard/maintenance/new", icon: Wrench, iconColor: "text-orange-200", roles: [UserRole.TENANT] },
           { title: "nav.maintenance.mine", href: "/dashboard/maintenance/my-requests", icon: Wrench, iconColor: "text-orange-200", roles: [UserRole.TENANT] },
+        ],
+      },
+      {
+        title: "nav.vendors",
+        href: "/dashboard/vendors",
+        icon: Store,
+        iconColor: "text-amber-200",
+        roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER],
+        children: [
+          { title: "nav.vendors.marketplace", href: "/dashboard/vendors", icon: Store, iconColor: "text-amber-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.vendors.portal", href: "/dashboard/vendors/portal", icon: Wrench, iconColor: "text-amber-200", roles: [UserRole.ADMIN, UserRole.MANAGER] },
         ],
       },
     ],

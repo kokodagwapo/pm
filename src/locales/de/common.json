@@ -147,5 +147,8 @@
   "rentals.noSaved.browseAll": "Browse all properties",
   "rentals.compare.bar.property": "Property",
   "rentals.compare.bar.properties": "Properties",
-  "rentals.compare.bar.compare": "Compare"
+  "rentals.compare.bar.compare": "Compare",
+  "nav.vendors": "Lieferanten",
+  "nav.vendors.marketplace": "Marktplatz",
+  "nav.vendors.portal": "Lieferantenportal"
 }

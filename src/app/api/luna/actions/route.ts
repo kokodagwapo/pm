@@ -347,12 +347,14 @@ async function executeApprovedAction(action: {
           const category = (meta.category as string) || "General";
           const vendor = await Vendor.findOne({
             isApproved: true,
+            isAvailable: true,
+            complianceHold: false,
             $or: [
               { categories: { $regex: new RegExp(category, "i") } },
               { categories: { $elemMatch: { $regex: new RegExp(category, "i") } } },
             ],
           })
-            .sort({ rating: -1, activeWorkOrders: 1 })
+            .sort({ rating: -1, responseTimeHours: 1, activeWorkOrders: 1 })
             .lean();
 
           if (vendor) {

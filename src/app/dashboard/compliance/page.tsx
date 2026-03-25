@@ -184,14 +184,20 @@ function ObligationRow({
           {obligation.dueDate && (
             <span
               className={cn(
-                "flex items-center gap-1 text-xs",
-                isOverdue ? "text-red-400" : isLight ? "text-slate-500" : "text-white/50"
+                "flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium",
+                isOverdue
+                  ? "bg-red-500/10 text-red-500"
+                  : daysUntilDue !== null && daysUntilDue <= 7
+                  ? "bg-red-500/10 text-red-500"
+                  : daysUntilDue !== null && daysUntilDue <= 30
+                  ? "bg-amber-500/10 text-amber-500"
+                  : "bg-emerald-500/10 text-emerald-500"
               )}
             >
               <Calendar className="h-3 w-3" />
               {isOverdue
                 ? `${Math.abs(daysUntilDue!)} days overdue`
-                : daysUntilDue !== null && daysUntilDue <= 14
+                : daysUntilDue !== null && daysUntilDue <= 30
                 ? `Due in ${daysUntilDue} days`
                 : new Date(obligation.dueDate).toLocaleDateString()}
             </span>
@@ -220,6 +226,17 @@ function ObligationRow({
 interface PropertyOption {
   _id: string;
   name: string;
+  address?: { street?: string; city?: string; state?: string; zip?: string };
+}
+
+interface JurisdictionRule {
+  stateCode: string;
+  title: string;
+  rentControlled: boolean;
+  maxRentIncreasePercent?: number;
+  noticePeriodDays?: number;
+  description: string;
+  evictionNoticeRequired?: boolean;
 }
 
 export default function CompliancePage() {
@@ -236,11 +253,35 @@ export default function CompliancePage() {
   const [filterProperty, setFilterProperty] = useState("all");
   const [properties, setProperties] = useState<PropertyOption[]>([]);
   const [activeModal, setActiveModal] = useState<"rent" | "eviction" | "fairHousing" | "addObligation" | null>(null);
+  const [jurisdictionRules, setJurisdictionRules] = useState<JurisdictionRule[]>([]);
 
   useEffect(() => {
-    fetch("/api/properties?limit=100")
+    fetch("/api/properties?limit=100&fields=name,address")
       .then((r) => r.json())
-      .then((d) => setProperties(d.properties || []))
+      .then((d) => {
+        const props: PropertyOption[] = d.properties || [];
+        setProperties(props);
+
+        const states = [...new Set(
+          props
+            .map((p) => p.address?.state)
+            .filter(Boolean) as string[]
+        )].slice(0, 5);
+
+        if (states.length > 0) {
+          Promise.all(
+            states.map((s) =>
+              fetch(`/api/compliance/jurisdiction-rules?stateCode=${s}`)
+                .then((r) => r.json())
+                .then((d) => d.rules?.[0])
+                .catch(() => null)
+            )
+          ).then((results) => {
+            const validRules = results.filter(Boolean) as JurisdictionRule[];
+            setJurisdictionRules(validRules);
+          });
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -448,6 +489,82 @@ export default function CompliancePage() {
           })}
         </div>
       </div>
+
+      {/* Jurisdiction Profiles */}
+      {jurisdictionRules.length > 0 && (
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className={cn("text-sm font-semibold uppercase tracking-wider", isLight ? "text-slate-500" : "text-white/50")}>
+              Jurisdiction Profiles
+            </h2>
+            <span className={cn("text-xs", isLight ? "text-slate-400" : "text-white/40")}>
+              Based on your properties
+            </span>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {jurisdictionRules.map((rule) => {
+              const propertiesInState = properties.filter(
+                (p) => p.address?.state?.toUpperCase() === rule.stateCode?.toUpperCase()
+              );
+              return (
+                <div
+                  key={rule.stateCode}
+                  className={cn(
+                    "rounded-2xl border p-4",
+                    rule.rentControlled
+                      ? isLight ? "border-amber-200 bg-amber-50/50" : "border-amber-500/20 bg-amber-500/5"
+                      : isLight ? "border-slate-200 bg-white" : "border-white/[0.08] bg-white/[0.04]"
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className={cn("flex h-8 w-8 items-center justify-center rounded-xl text-xs font-bold",
+                        isLight ? "bg-slate-100 text-slate-700" : "bg-white/10 text-white"
+                      )}>
+                        {rule.stateCode}
+                      </div>
+                      <div>
+                        <p className={cn("text-sm font-semibold", isLight ? "text-slate-800" : "text-white")}>
+                          {rule.title || `${rule.stateCode} Rules`}
+                        </p>
+                        <p className={cn("text-xs", isLight ? "text-slate-500" : "text-white/50")}>
+                          {propertiesInState.length} {propertiesInState.length === 1 ? "property" : "properties"}
+                        </p>
+                      </div>
+                    </div>
+                    {rule.rentControlled && (
+                      <span className={cn("shrink-0 rounded-md px-1.5 py-0.5 text-xs font-medium", isLight ? "bg-amber-100 text-amber-700" : "bg-amber-500/10 text-amber-400")}>
+                        Rent Control
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mt-3 space-y-1.5 text-xs">
+                    {rule.noticePeriodDays !== undefined && (
+                      <div className="flex items-center justify-between">
+                        <span className={isLight ? "text-slate-500" : "text-white/50"}>Notice Period</span>
+                        <span className={cn("font-medium", isLight ? "text-slate-700" : "text-white/80")}>{rule.noticePeriodDays} days</span>
+                      </div>
+                    )}
+                    {rule.maxRentIncreasePercent !== undefined && (
+                      <div className="flex items-center justify-between">
+                        <span className={isLight ? "text-slate-500" : "text-white/50"}>Max Rent Increase</span>
+                        <span className={cn("font-medium", isLight ? "text-slate-700" : "text-white/80")}>{rule.maxRentIncreasePercent}%</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {rule.description && (
+                    <p className={cn("mt-2 line-clamp-2 text-xs leading-relaxed", isLight ? "text-slate-500" : "text-white/40")}>
+                      {rule.description}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Obligations List */}
       <div>

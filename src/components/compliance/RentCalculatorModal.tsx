@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Calculator, CheckCircle2, AlertTriangle, Info, ChevronDown } from "lucide-react";
+import { X, Calculator, CheckCircle2, AlertTriangle, Info, ChevronDown, Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -58,9 +58,73 @@ export default function RentCalculatorModal({ isLight, onClose }: Props) {
     proposedNewRent: "",
     stateCode: "FL",
     noticeDays: "30",
+    tenantName: "",
+    unitAddress: "",
   });
   const [result, setResult] = useState<RentResult | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const generateNotice = () => {
+    if (!result) return;
+    const stateName = US_STATES.find((s) => s.code === result.stateCode)?.name || result.stateCode;
+    const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    const effectiveDate = new Date(result.compliance.effectiveDate).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
+    const notice = `RENT INCREASE NOTICE
+====================
+
+Date: ${today}
+State: ${stateName}
+
+TO: ${form.tenantName || "[Tenant Name]"}
+RE: ${form.unitAddress || "[Property / Unit Address]"}
+
+Dear ${form.tenantName || "Tenant"},
+
+This letter serves as official notice that your monthly rent will be increased as follows:
+
+  Current Monthly Rent:   $${result.currentRent.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+  Rent Increase Amount:   $${result.proposedIncrease.toLocaleString("en-US", { minimumFractionDigits: 2 })} (${result.proposedIncreasePercent.toFixed(2)}%)
+  New Monthly Rent:       $${result.newRent.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+  Effective Date:         ${effectiveDate}
+
+${result.jurisdictionRule ? `JURISDICTION INFORMATION
+${result.jurisdictionRule.title}
+${result.jurisdictionRule.description}
+${result.jurisdictionRule.rentControlled ? "Note: This property is in a rent-controlled jurisdiction." : ""}
+
+` : ""}NOTICE PERIOD
+This notice is provided ${form.noticeDays} days in advance, meeting the ${result.compliance.requiredNoticeDays}-day requirement under ${stateName} law.
+
+${result.compliance.recommendations.length > 0 ? `NOTES
+${result.compliance.recommendations.map((r) => `• ${r}`).join("\n")}
+
+` : ""}This notice is provided in compliance with ${stateName} landlord-tenant law. If you have any questions, please contact your property manager.
+
+Sincerely,
+
+_______________________________
+Property Manager / Landlord
+Date: ${today}
+
+
+_______________________________
+Tenant Signature (Acknowledgment)
+Date: _______________
+
+
+This document is generated for informational purposes. Consult a licensed attorney for legal advice.`;
+
+    const blob = new Blob([notice], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Rent_Increase_Notice_${result.stateCode}_${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   const handleCalculate = async () => {
     if (!form.currentRent || !form.proposedNewRent) return;
@@ -140,6 +204,33 @@ export default function RentCalculatorModal({ isLight, onClose }: Props) {
                 placeholder="e.g. 2150"
                 value={form.proposedNewRent}
                 onChange={(e) => setForm((f) => ({ ...f, proposedNewRent: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={cn("mb-1.5 block text-xs font-medium", isLight ? "text-slate-600" : "text-white/60")}>
+                Tenant Name (optional)
+              </label>
+              <input
+                type="text"
+                className={inputClass}
+                placeholder="John Smith"
+                value={form.tenantName}
+                onChange={(e) => setForm((f) => ({ ...f, tenantName: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className={cn("mb-1.5 block text-xs font-medium", isLight ? "text-slate-600" : "text-white/60")}>
+                Unit Address (optional)
+              </label>
+              <input
+                type="text"
+                className={inputClass}
+                placeholder="123 Main St, Unit 4B"
+                value={form.unitAddress}
+                onChange={(e) => setForm((f) => ({ ...f, unitAddress: e.target.value }))}
               />
             </div>
           </div>
@@ -263,6 +354,20 @@ export default function RentCalculatorModal({ isLight, onClose }: Props) {
                 Earliest compliant effective date:{" "}
                 <strong>{new Date(result.compliance.effectiveDate).toLocaleDateString()}</strong>
               </p>
+
+              <Button
+                onClick={generateNotice}
+                variant="ghost"
+                className={cn(
+                  "w-full rounded-xl border text-xs font-medium",
+                  isLight
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                    : "border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                )}
+              >
+                <Download className="mr-2 h-3.5 w-3.5" />
+                Generate &amp; Download Rent Increase Notice
+              </Button>
             </div>
           )}
         </div>

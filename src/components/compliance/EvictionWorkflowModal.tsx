@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Gavel, ChevronDown, AlertTriangle, Info, CheckCircle2, Scale } from "lucide-react";
+import { X, Gavel, ChevronDown, AlertTriangle, Info, CheckCircle2, Scale, Save, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -73,9 +73,14 @@ export default function EvictionWorkflowModal({ isLight, onClose }: Props) {
   const [result, setResult] = useState<EvictionResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [expandedStep, setExpandedStep] = useState<number | null>(0);
+  const [savedCaseId, setSavedCaseId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
   const handleGenerate = async () => {
     setLoading(true);
+    setSavedCaseId(null);
+    setCompletedSteps([]);
     try {
       const res = await fetch("/api/compliance/eviction-workflow", {
         method: "POST",
@@ -90,6 +95,44 @@ export default function EvictionWorkflowModal({ isLight, onClose }: Props) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSaveCase = async () => {
+    if (!result) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/compliance/eviction-cases", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tenantName: form.tenantName,
+          propertyAddress: form.propertyAddress,
+          stateCode: form.stateCode,
+          reason: form.reason,
+          totalTimelineDays: result.workflow.totalTimelineDays,
+          steps: result.workflow.steps,
+          notes: `Auto-generated workflow — ${result.workflow.stateCode} ${form.reason}`,
+          status: "active",
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSavedCaseId(data.case?._id || data._id || "saved");
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to save case");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleStepComplete = (stepIndex: number) => {
+    setCompletedSteps((prev) =>
+      prev.includes(stepIndex) ? prev.filter((s) => s !== stepIndex) : [...prev, stepIndex]
+    );
   };
 
   const inputClass = cn(
@@ -210,6 +253,26 @@ export default function EvictionWorkflowModal({ isLight, onClose }: Props) {
                 </span>
               </div>
 
+              {savedCaseId ? (
+                <div className={cn("flex items-center gap-2 rounded-xl border p-3 text-xs", isLight ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-emerald-500/20 bg-emerald-500/10 text-emerald-400")}>
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <span>Case saved to database — track progress in Compliance Hub</span>
+                </div>
+              ) : (
+                <Button
+                  onClick={handleSaveCase}
+                  disabled={saving}
+                  variant="ghost"
+                  className={cn(
+                    "w-full rounded-xl border text-xs font-medium",
+                    isLight ? "border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100" : "border-orange-500/20 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20"
+                  )}
+                >
+                  <Save className="mr-2 h-3.5 w-3.5" />
+                  {saving ? "Saving..." : "Save Case to Database"}
+                </Button>
+              )}
+
               {result.workflow.recommendedAttorney && (
                 <div className={cn("flex gap-2 rounded-lg border p-3 text-xs", isLight ? "border-violet-200 bg-violet-50 text-violet-700" : "border-violet-500/20 bg-violet-500/10 text-violet-400")}>
                   <Scale className="mt-0.5 h-4 w-4 shrink-0" />
@@ -217,32 +280,55 @@ export default function EvictionWorkflowModal({ isLight, onClose }: Props) {
                 </div>
               )}
 
+              {completedSteps.length > 0 && (
+                <div className={cn("rounded-lg p-2 text-xs", isLight ? "bg-slate-50 text-slate-500" : "bg-white/[0.04] text-white/40")}>
+                  {completedSteps.length} of {result.workflow.steps.length} steps marked complete
+                </div>
+              )}
+
               <div className="space-y-2">
-                {result.workflow.steps.map((step: EvictionStep, i: number) => (
+                {result.workflow.steps.map((step: EvictionStep, i: number) => {
+                  const isComplete = completedSteps.includes(i);
+                  return (
                   <div
                     key={i}
-                    className={cn("overflow-hidden rounded-xl border transition-all", isLight ? "border-slate-200" : "border-white/[0.08]")}
+                    className={cn(
+                      "overflow-hidden rounded-xl border transition-all",
+                      isComplete
+                        ? isLight ? "border-emerald-200 bg-emerald-50/50" : "border-emerald-500/20 bg-emerald-500/5"
+                        : isLight ? "border-slate-200" : "border-white/[0.08]"
+                    )}
                   >
-                    <button
-                      onClick={() => setExpandedStep(expandedStep === i ? null : i)}
-                      className={cn(
-                        "flex w-full items-center gap-3 p-3 text-left transition-colors",
-                        isLight ? "hover:bg-slate-50" : "hover:bg-white/[0.04]"
-                      )}
-                    >
-                      <span className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
-                        isLight ? "bg-orange-100 text-orange-700" : "bg-orange-500/20 text-orange-400"
-                      )}>
-                        {step.step}
-                      </span>
-                      <span className={cn("flex-1 text-sm font-medium", isLight ? "text-slate-800" : "text-white")}>
-                        {step.title}
-                      </span>
-                      <span className={cn("shrink-0 text-xs", isLight ? "text-slate-400" : "text-white/40")}>
-                        Day {step.daysFromStart}
-                      </span>
-                      <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform", expandedStep === i && "rotate-180", isLight ? "text-slate-400" : "text-white/40")} />
-                    </button>
+                    <div className={cn("flex items-center gap-3 p-3", isLight ? "hover:bg-slate-50" : "hover:bg-white/[0.04]")}>
+                      <button
+                        onClick={() => toggleStepComplete(i)}
+                        className="shrink-0"
+                        title={isComplete ? "Mark incomplete" : "Mark complete"}
+                      >
+                        {isComplete ? (
+                          <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                        ) : (
+                          <Circle className={cn("h-5 w-5", isLight ? "text-slate-300" : "text-white/20")} />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setExpandedStep(expandedStep === i ? null : i)}
+                        className="flex flex-1 items-center gap-3 text-left"
+                      >
+                        <span className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+                          isComplete ? "bg-emerald-500 text-white" : isLight ? "bg-orange-100 text-orange-700" : "bg-orange-500/20 text-orange-400"
+                        )}>
+                          {step.step}
+                        </span>
+                        <span className={cn("flex-1 text-sm font-medium", isComplete && "line-through opacity-60", isLight ? "text-slate-800" : "text-white")}>
+                          {step.title}
+                        </span>
+                        <span className={cn("shrink-0 text-xs", isLight ? "text-slate-400" : "text-white/40")}>
+                          Day {step.daysFromStart}
+                        </span>
+                        <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform", expandedStep === i && "rotate-180", isLight ? "text-slate-400" : "text-white/40")} />
+                      </button>
+                    </div>
                     {expandedStep === i && (
                       <div className={cn("border-t px-3 pb-3 pt-2 text-xs space-y-2", isLight ? "border-slate-100" : "border-white/[0.06]")}>
                         <p className={isLight ? "text-slate-600" : "text-white/70"}>{step.description}</p>
@@ -285,7 +371,8 @@ export default function EvictionWorkflowModal({ isLight, onClose }: Props) {
                       </div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               {result.workflow.fairHousingWarnings.length > 0 && (
