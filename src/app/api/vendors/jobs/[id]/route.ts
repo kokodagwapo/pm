@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";
 import VendorJob from "@/models/VendorJob";
 import Vendor from "@/models/Vendor";
+import ManagerWallet from "@/models/ManagerWallet";
 import mongoose from "mongoose";
 
 interface SessionUser {
@@ -194,6 +195,34 @@ export async function PATCH(
           { status: 409 }
         );
       }
+
+      // Require manager wallet to have sufficient balance before crediting vendor
+      const managerWallet = await ManagerWallet.findOne({ managerId: new mongoose.Types.ObjectId(user.id) });
+      const managerBalance = managerWallet?.balance ?? 0;
+      if (managerBalance < job.finalCost) {
+        return NextResponse.json(
+          { error: `Insufficient manager wallet balance ($${managerBalance.toFixed(2)} available, $${job.finalCost.toFixed(2)} required). Add funds via POST /api/manager/wallet before approving.` },
+          { status: 409 }
+        );
+      }
+      // Debit manager wallet atomically with the approval
+      await ManagerWallet.findOneAndUpdate(
+        { managerId: new mongoose.Types.ObjectId(user.id) },
+        {
+          $inc: { balance: -job.finalCost },
+          $push: {
+            transactions: {
+              type: "debit",
+              amount: job.finalCost,
+              description: `Job approval: ${job.title || id}`,
+              referenceId: id,
+              relatedVendorId: job.assignedVendorId,
+              createdAt: new Date(),
+            },
+          },
+        }
+      );
+
       job.status = "approved";
       job.approvedDate = new Date();
       if (rest.managerNotes) job.managerNotes = rest.managerNotes;
