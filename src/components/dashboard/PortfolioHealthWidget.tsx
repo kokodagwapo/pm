@@ -29,17 +29,27 @@ interface HealthComponent {
   status: "good" | "fair" | "poor";
 }
 
+interface HistoryPoint {
+  date: string;
+  score: number;
+  grade: string;
+}
+
 interface PortfolioHealthData {
   score: number;
   grade: string;
+  trend: number;
   components: HealthComponent[];
   insights: string[];
+  history: HistoryPoint[];
   meta: {
     totalProperties: number;
     totalUnits: number;
     activeLeases: number;
     expiringIn60Days: number;
     marketRent: number;
+    occupancyRate?: number;
+    collectionRate?: number;
   };
   calculatedAt: string;
 }
@@ -241,6 +251,39 @@ export function PortfolioHealthWidget({ compact = false, propertyId }: Props) {
               : "Poor — immediate action needed"}
           </p>
         </div>
+
+        {/* Trend indicator */}
+        {data.trend !== undefined && data.trend !== 0 && (
+          <div className={`flex items-center justify-center gap-1 text-xs font-medium ${data.trend > 0 ? "text-green-600" : "text-red-600"}`}>
+            {data.trend > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+            {data.trend > 0 ? "+" : ""}{data.trend} pts vs. yesterday
+          </div>
+        )}
+
+        {/* 30-day history sparkline */}
+        {data.history && data.history.length > 1 && !compact && (
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">30-Day Score History</p>
+            <div className="flex items-end gap-0.5 h-10">
+              {data.history.map((h, i) => {
+                const maxScore = Math.max(...data.history.map((x) => x.score));
+                const minScore = Math.min(...data.history.map((x) => x.score));
+                const range = maxScore - minScore || 1;
+                const heightPct = ((h.score - minScore) / range) * 80 + 20;
+                return (
+                  <div
+                    key={i}
+                    title={`${new Date(h.date).toLocaleDateString()}: ${h.score} (${h.grade})`}
+                    className={`flex-1 rounded-sm min-w-[2px] cursor-default transition-colors ${
+                      h.score >= 80 ? "bg-green-400" : h.score >= 65 ? "bg-yellow-400" : "bg-red-400"
+                    }`}
+                    style={{ height: `${heightPct}%` }}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Component breakdown */}
         <div className="space-y-3">

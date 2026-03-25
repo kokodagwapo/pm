@@ -21,6 +21,7 @@ import {
   handleApiError,
   withRoleAndDB,
 } from "@/lib/api-utils";
+import PortfolioHealthSnapshot from "@/models/PortfolioHealthSnapshot";
 
 const PAID_STATUSES = [PaymentStatus.PAID, PaymentStatus.COMPLETED];
 
@@ -258,54 +259,105 @@ export const GET = withRoleAndDB([
     if (insights.length === 0)
       insights.push("Portfolio is performing well across all key metrics.");
 
+    const components = [
+      {
+        label: "Occupancy",
+        score: Math.round(occupancyScore),
+        maxScore: 30,
+        value: `${occupancyRate.toFixed(1)}%`,
+        status: (occupancyRate >= 90 ? "good" : occupancyRate >= 75 ? "fair" : "poor") as "good" | "fair" | "poor",
+      },
+      {
+        label: "Collections",
+        score: Math.round(collectionScore),
+        maxScore: 25,
+        value: `${collectionRate.toFixed(1)}%`,
+        status: (collectionRate >= 95 ? "good" : collectionRate >= 85 ? "fair" : "poor") as "good" | "fair" | "poor",
+      },
+      {
+        label: "Maintenance",
+        score: Math.round(maintScore),
+        maxScore: 20,
+        value: `${completionRate.toFixed(0)}% resolved`,
+        status: (completionRate >= 90 ? "good" : completionRate >= 70 ? "fair" : "poor") as "good" | "fair" | "poor",
+      },
+      {
+        label: "Rent Alignment",
+        score: Math.round(rentScore),
+        maxScore: 15,
+        value: `${rentAlignmentRate.toFixed(0)}% at market`,
+        status: (rentAlignmentRate >= 90 ? "good" : rentAlignmentRate >= 70 ? "fair" : "poor") as "good" | "fair" | "poor",
+      },
+      {
+        label: "Lease Pipeline",
+        score: Math.round(pipelineScore),
+        maxScore: 10,
+        value: `${expiringCount} expiring`,
+        status: (expiringCount === 0 ? "good" : expiringCount <= 2 ? "fair" : "poor") as "good" | "fair" | "poor",
+      },
+    ];
+
+    // ── 10. Persist daily snapshot (fire-and-forget) ──────────────────────────
+    const portfolioKey = propertyId ? `property:${propertyId}` : `user:${user.id}`;
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Save at most one snapshot per calendar day per portfolio scope
+    PortfolioHealthSnapshot.findOneAndUpdate(
+      { portfolioKey, date: { $gte: todayStart } },
+      {
+        $setOnInsert: {
+          date: now,
+          managerId: new mongoose.Types.ObjectId(user.id),
+          portfolioKey,
+          score: totalScore,
+          grade,
+          components,
+          meta: {
+            totalProperties: properties.length,
+            totalUnits,
+            activeLeases: activeLeases.length,
+            occupancyRate,
+            collectionRate,
+            expiringIn60Days: expiringCount,
+          },
+        },
+      },
+      { upsert: true, new: false }
+    ).catch(() => undefined);
+
+    // ── 11. Fetch 30-day history for trend sparkline ──────────────────────────
+    const historyStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const history = await PortfolioHealthSnapshot.find(
+      { portfolioKey, date: { $gte: historyStart } },
+      { date: 1, score: 1, grade: 1 }
+    )
+      .sort({ date: 1 })
+      .limit(30)
+      .lean();
+
+    const prevScore = history.length >= 2 ? history[history.length - 2].score : null;
+    const trend = prevScore !== null ? totalScore - prevScore : 0;
+
     return createSuccessResponse({
       score: totalScore,
       grade,
-      components: [
-        {
-          label: "Occupancy",
-          score: Math.round(occupancyScore),
-          maxScore: 30,
-          value: `${occupancyRate.toFixed(1)}%`,
-          status: occupancyRate >= 90 ? "good" : occupancyRate >= 75 ? "fair" : "poor",
-        },
-        {
-          label: "Collections",
-          score: Math.round(collectionScore),
-          maxScore: 25,
-          value: `${collectionRate.toFixed(1)}%`,
-          status: collectionRate >= 95 ? "good" : collectionRate >= 85 ? "fair" : "poor",
-        },
-        {
-          label: "Maintenance",
-          score: Math.round(maintScore),
-          maxScore: 20,
-          value: `${completionRate.toFixed(0)}% resolved`,
-          status: completionRate >= 90 ? "good" : completionRate >= 70 ? "fair" : "poor",
-        },
-        {
-          label: "Rent Alignment",
-          score: Math.round(rentScore),
-          maxScore: 15,
-          value: `${rentAlignmentRate.toFixed(0)}% at market`,
-          status: rentAlignmentRate >= 90 ? "good" : rentAlignmentRate >= 70 ? "fair" : "poor",
-        },
-        {
-          label: "Lease Pipeline",
-          score: Math.round(pipelineScore),
-          maxScore: 10,
-          value: `${expiringCount} expiring`,
-          status: expiringCount === 0 ? "good" : expiringCount <= 2 ? "fair" : "poor",
-        },
-      ],
+      trend,
+      components,
       insights,
       propertyBreakdown,
+      history: history.map((h) => ({
+        date: h.date,
+        score: h.score,
+        grade: h.grade,
+      })),
       meta: {
         totalProperties: properties.length,
         totalUnits,
         activeLeases: activeLeases.length,
         expiringIn60Days: expiringCount,
         marketRent,
+        occupancyRate,
+        collectionRate,
       },
       calculatedAt: now,
     });

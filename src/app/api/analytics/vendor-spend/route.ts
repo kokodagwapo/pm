@@ -39,8 +39,16 @@ export const GET = withRoleAndDB([
     const propertyQuery: Record<string, unknown> = { deletedAt: null };
     if (user.role === UserRole.OWNER) propertyQuery.ownerId = user.id;
 
-    const properties = await Property.find(propertyQuery).select("_id").lean();
+    const properties = await Property.find(propertyQuery)
+      .select("_id isMultiUnit units totalUnits")
+      .lean();
     const allowedIds = properties.map((p) => p._id as mongoose.Types.ObjectId);
+
+    // Total units for benchmarking
+    const totalPortfolioUnits = properties.reduce((s, p) => {
+      if (p.isMultiUnit) return s + (p.units?.length || (p as { totalUnits?: number }).totalUnits || 1);
+      return s + 1;
+    }, 0);
 
     if (!allowedIds.length) {
       return createSuccessResponse({
@@ -130,14 +138,46 @@ export const GET = withRoleAndDB([
       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ];
 
+    const totalSpend = totals[0]?.totalSpend ?? 0;
+    const jobCount = totals[0]?.jobCount ?? 0;
+
+    // Industry benchmarks (maintenance spend per unit per year)
+    // Source: BOMA/IREM industry standards
+    const BENCHMARK_PER_UNIT_ANNUAL = 500;
+    const dateRangeYears = Math.max(
+      (endDate.getTime() - startDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000),
+      1 / 12
+    );
+    const proRatedBenchmark = BENCHMARK_PER_UNIT_ANNUAL * totalPortfolioUnits * dateRangeYears;
+    const spendPerUnit = totalPortfolioUnits > 0 ? totalSpend / totalPortfolioUnits : 0;
+    const benchmarkPerUnit = BENCHMARK_PER_UNIT_ANNUAL * dateRangeYears;
+    const vsIndustry = benchmarkPerUnit > 0 ? ((spendPerUnit - benchmarkPerUnit) / benchmarkPerUnit) * 100 : null;
+
     return createSuccessResponse({
-      totalSpend: totals[0]?.totalSpend ?? 0,
-      jobCount: totals[0]?.jobCount ?? 0,
+      totalSpend,
+      jobCount,
+      totalUnits: totalPortfolioUnits,
+      spendPerUnit: Math.round(spendPerUnit),
+      benchmark: {
+        perUnitAnnual: BENCHMARK_PER_UNIT_ANNUAL,
+        proRatedTotal: Math.round(proRatedBenchmark),
+        proRatedPerUnit: Math.round(benchmarkPerUnit),
+        vsIndustryPct: vsIndustry !== null ? Math.round(vsIndustry * 10) / 10 : null,
+        status: vsIndustry === null
+          ? "unknown"
+          : vsIndustry > 20
+          ? "above-benchmark"
+          : vsIndustry < -20
+          ? "below-benchmark"
+          : "on-track",
+        note: "Industry benchmark ~$500/unit/year (BOMA/IREM standard for residential maintenance)",
+      },
       byCategory: byCategory.map((r) => ({
         category: r._id || "Uncategorised",
         totalSpend: r.totalSpend ?? 0,
         jobCount: r.jobCount,
         avgCost: Math.round(r.avgCost ?? 0),
+        pctOfTotal: totalSpend > 0 ? Math.round(((r.totalSpend ?? 0) / totalSpend) * 1000) / 10 : 0,
       })),
       byVendor: byVendor.map((r) => ({
         vendorId: r._id?.toString(),
@@ -145,6 +185,7 @@ export const GET = withRoleAndDB([
         totalSpend: r.totalSpend ?? 0,
         jobCount: r.jobCount,
         avgRating: r.avgRating ? Math.round(r.avgRating * 10) / 10 : null,
+        pctOfTotal: totalSpend > 0 ? Math.round(((r.totalSpend ?? 0) / totalSpend) * 1000) / 10 : 0,
       })),
       byMonth: byMonth.map((r) => ({
         month: MONTH_LABELS[(r._id.month ?? 1) - 1],

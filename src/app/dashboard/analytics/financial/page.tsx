@@ -47,7 +47,7 @@ import {
   PropertyPerformanceChart,
   ProfitLossChart,
 } from "@/components/analytics/financial-charts";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, AlertTriangle } from "lucide-react";
 import {
   AnalyticsReportResponse,
   ProfitLossReportResponse,
@@ -160,6 +160,13 @@ export default function FinancialAnalyticsPage() {
     summary: { totalIncome: number; totalExpenses: number; netIncome: number };
   } | null>(null);
   const [taxExportLoading, setTaxExportLoading] = useState(false);
+
+  const [utilityAnomalies, setUtilityAnomalies] = useState<{
+    anomalies: { propertyId: string; propertyName: string; category: string; currentMonthCost: number; baselineAvg: number; spikePercent: number; severity: "warning" | "critical" }[];
+    summary: { total: number; critical: number; warning: number; byCategoryCount: Record<string, number> };
+    detectedAt: string;
+  } | null>(null);
+  const [utilityAnomaliesLoading, setUtilityAnomaliesLoading] = useState(false);
 
   const currentDateRange = useMemo(() => {
     return {
@@ -547,6 +554,17 @@ export default function FinancialAnalyticsPage() {
     window.open(`/api/analytics/tax-export?${params.toString()}`, "_blank");
   }, [taxYear, selectedProperty]);
 
+  const fetchUtilityAnomalies = useCallback(async () => {
+    try {
+      setUtilityAnomaliesLoading(true);
+      const params = new URLSearchParams();
+      if (selectedProperty !== "all") params.set("propertyId", selectedProperty);
+      const res = await fetch(`/api/analytics/utility-anomalies?${params.toString()}`, { cache: "no-store" });
+      const json = await res.json();
+      if (res.ok) setUtilityAnomalies(json.data);
+    } catch { /* silent */ } finally { setUtilityAnomaliesLoading(false); }
+  }, [selectedProperty]);
+
   const { lastUpdate } = useRealTimePayments({
     propertyId: selectedProperty !== "all" ? selectedProperty : undefined,
     enabled: true,
@@ -587,7 +605,8 @@ export default function FinancialAnalyticsPage() {
     if (activeTab === "vendor-spend") fetchVendorSpend();
     if (activeTab === "market-rent") fetchMarketRent();
     if (activeTab === "tax-export") fetchTaxExport();
-  }, [session, activeTab, fetchVendorSpend, fetchMarketRent, fetchTaxExport]);
+    if (activeTab === "utility-anomalies") fetchUtilityAnomalies();
+  }, [session, activeTab, fetchVendorSpend, fetchMarketRent, fetchTaxExport, fetchUtilityAnomalies]);
 
   if (!session) {
     return (
@@ -847,6 +866,10 @@ export default function FinancialAnalyticsPage() {
               <FileText className="h-3 w-3" />
               Tax Export
             </TabsTrigger>
+            <TabsTrigger value="utility-anomalies" className="flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" />
+              Utility Alerts
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -1070,7 +1093,7 @@ export default function FinancialAnalyticsPage() {
             ) : vendorSpendData ? (
               <>
                 {/* KPI row */}
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-4">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Total Vendor Spend</CardTitle>
@@ -1083,16 +1106,39 @@ export default function FinancialAnalyticsPage() {
                   </Card>
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Avg Cost Per Job</CardTitle>
+                      <CardTitle className="text-sm font-medium">Spend Per Unit</CardTitle>
                       <Target className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {formatCurrency(vendorSpendData.jobCount > 0 ? vendorSpendData.totalSpend / vendorSpendData.jobCount : 0)}
+                        {formatCurrency((vendorSpendData as { spendPerUnit?: number }).spendPerUnit ?? (vendorSpendData.jobCount > 0 ? vendorSpendData.totalSpend / vendorSpendData.jobCount : 0))}
                       </div>
-                      <p className="text-xs text-muted-foreground">across all categories</p>
+                      <p className="text-xs text-muted-foreground">YTD per unit</p>
                     </CardContent>
                   </Card>
+                  {(vendorSpendData as { benchmark?: { proRatedPerUnit?: number; vsIndustryPct?: number | null; status?: string } }).benchmark && (
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Industry Benchmark</CardTitle>
+                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{formatCurrency((vendorSpendData as { benchmark?: { proRatedPerUnit?: number } }).benchmark!.proRatedPerUnit ?? 0)}</div>
+                        <p className={`text-xs font-medium ${
+                          (vendorSpendData as { benchmark?: { status?: string } }).benchmark!.status === "above-benchmark" ? "text-red-600"
+                          : (vendorSpendData as { benchmark?: { status?: string } }).benchmark!.status === "below-benchmark" ? "text-green-600"
+                          : "text-muted-foreground"
+                        }`}>
+                          {(() => {
+                            const b = (vendorSpendData as { benchmark?: { vsIndustryPct?: number | null; status?: string } }).benchmark!;
+                            if (b.status === "above-benchmark") return `${b.vsIndustryPct}% above BOMA avg`;
+                            if (b.status === "below-benchmark") return `${Math.abs(b.vsIndustryPct ?? 0)}% below BOMA avg`;
+                            return "On track with BOMA avg";
+                          })()}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Categories</CardTitle>
@@ -1402,13 +1448,54 @@ export default function FinancialAnalyticsPage() {
                   </Card>
                 </div>
 
+                {/* IRS Schedule E Summary */}
+                {Array.isArray((taxExportData as { scheduleE?: unknown[] }).scheduleE) && (taxExportData as { scheduleE?: unknown[] }).scheduleE!.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>IRS Schedule E Summary</CardTitle>
+                      <p className="text-sm text-muted-foreground">Form 1040 — Supplemental Income and Loss (Part I)</p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b text-muted-foreground">
+                              <th className="text-left py-2 pr-4 font-medium">Line</th>
+                              <th className="text-left py-2 pr-4 font-medium">Description</th>
+                              <th className="text-right py-2 pr-4 font-medium text-green-700">Income</th>
+                              <th className="text-right py-2 font-medium text-red-700">Expenses</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border">
+                            {((taxExportData as { scheduleE?: Array<{line:string;description:string;income:number;expenses:number}> }).scheduleE ?? []).map((s) => (
+                              <tr key={s.line} className="hover:bg-muted/30">
+                                <td className="py-2 pr-4 font-mono font-semibold text-muted-foreground">Line {s.line}</td>
+                                <td className="py-2 pr-4">{s.description}</td>
+                                <td className="py-2 pr-4 text-right font-mono">
+                                  {s.income > 0 ? <span className="text-green-600">{formatCurrency(s.income)}</span> : <span className="text-muted-foreground">—</span>}
+                                </td>
+                                <td className="py-2 text-right font-mono">
+                                  {s.expenses > 0 ? <span className="text-red-600">{formatCurrency(s.expenses)}</span> : <span className="text-muted-foreground">—</span>}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        * Consult a licensed CPA to verify these classifications. Categories are mapped automatically based on type.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
                 <Card className="border-dashed">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3 text-sm text-muted-foreground">
                       <FileText className="h-5 w-5 shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium text-foreground mb-1">CSV Export</p>
-                        <p>Click <strong>Download CSV</strong> above to export all income and expense line items as a spreadsheet for your accountant or tax software. The export includes property names, categories, and monthly totals.</p>
+                        <p className="font-medium text-foreground mb-1">CSV Export (with Schedule E)</p>
+                        <p>Click <strong>Download CSV</strong> above to export all income and expense line items with IRS Schedule E classifications as a spreadsheet for your accountant or tax software.</p>
                       </div>
                     </div>
                   </CardContent>
@@ -1416,6 +1503,129 @@ export default function FinancialAnalyticsPage() {
               </>
             ) : (
               <Card><CardContent className="p-6"><p className="text-center text-muted-foreground py-8">Select a year and click Load to generate your tax summary</p></CardContent></Card>
+            )}
+          </TabsContent>
+
+          {/* ── Utility Anomalies Tab ───────────────────────────────────── */}
+          <TabsContent value="utility-anomalies" className="space-y-6">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h3 className="text-lg font-semibold">Utility Cost Anomaly Detection</h3>
+                <p className="text-sm text-muted-foreground">
+                  Flags utility-related categories (Electrical, Plumbing, HVAC, Pest Control) with ≥30% spend spike vs. 3-month rolling average
+                </p>
+              </div>
+              <Button variant="outline" size="sm" onClick={fetchUtilityAnomalies} disabled={utilityAnomaliesLoading}>
+                <RefreshCw className={`h-4 w-4 mr-2 ${utilityAnomaliesLoading ? "animate-spin" : ""}`} />
+                Refresh
+              </Button>
+            </div>
+
+            {utilityAnomaliesLoading ? (
+              <div className="space-y-3">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
+            ) : utilityAnomalies ? (
+              <>
+                {/* Summary bar */}
+                <div className="grid gap-4 md:grid-cols-3">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Alerts</CardTitle>
+                      <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className={`text-2xl font-bold ${utilityAnomalies.summary.total > 0 ? "text-orange-600" : "text-green-600"}`}>
+                        {utilityAnomalies.summary.total}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Across all properties this month</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Critical Spikes</CardTitle>
+                      <AlertTriangle className="h-4 w-4 text-red-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className={`text-2xl font-bold ${utilityAnomalies.summary.critical > 0 ? "text-red-600" : "text-green-600"}`}>
+                        {utilityAnomalies.summary.critical}
+                      </div>
+                      <p className="text-xs text-muted-foreground">≥60% above baseline</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Warnings</CardTitle>
+                      <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className={`text-2xl font-bold ${utilityAnomalies.summary.warning > 0 ? "text-yellow-600" : "text-green-600"}`}>
+                        {utilityAnomalies.summary.warning}
+                      </div>
+                      <p className="text-xs text-muted-foreground">30–59% above baseline</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Anomaly list */}
+                {utilityAnomalies.anomalies.length === 0 ? (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <div className="text-green-600 font-semibold text-lg mb-1">All Clear</div>
+                      <p className="text-sm text-muted-foreground">
+                        No utility cost anomalies detected this month. All categories are within normal range.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card>
+                    <CardHeader><CardTitle>Detected Anomalies</CardTitle></CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {utilityAnomalies.anomalies.map((a, i) => (
+                          <div
+                            key={i}
+                            className={`flex items-center justify-between p-3 rounded-lg border ${
+                              a.severity === "critical"
+                                ? "border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-800"
+                                : "border-yellow-200 bg-yellow-50 dark:bg-yellow-900/10 dark:border-yellow-800"
+                            }`}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-medium text-sm">{a.propertyName}</span>
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-white dark:bg-gray-800 border">
+                                  {a.category}
+                                </span>
+                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                                  a.severity === "critical"
+                                    ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                    : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                }`}>
+                                  {a.severity}
+                                </span>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Baseline avg: {formatCurrency(a.baselineAvg)}/mo → Current: {formatCurrency(a.currentMonthCost)}
+                              </p>
+                            </div>
+                            <div className="text-right shrink-0 ml-4">
+                              <div className={`text-lg font-bold ${a.severity === "critical" ? "text-red-600" : "text-yellow-600"}`}>
+                                +{a.spikePercent}%
+                              </div>
+                              <p className="text-xs text-muted-foreground">above avg</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            ) : (
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <p className="text-muted-foreground text-sm">Click Refresh to scan for utility cost anomalies</p>
+                </CardContent>
+              </Card>
             )}
           </TabsContent>
 

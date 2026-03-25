@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -30,6 +31,9 @@ import {
   TrendingUp,
   Wrench,
   DollarSign,
+  Save,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import {
   BarChart,
@@ -54,6 +58,25 @@ interface PropertyCapex {
   historicalCategories: string[];
   projectedYears: { year: number; projected: number }[];
 }
+
+interface SystemEntry {
+  systemType: string;
+  lastReplacedYear?: number;
+  estimatedLifespanYears: number;
+  notes?: string;
+}
+
+const SYSTEM_TYPES = [
+  "Roof", "HVAC", "Electrical", "Plumbing", "Water Heater",
+  "Foundation", "Windows", "Exterior", "Flooring", "Appliances",
+  "Elevators", "Other",
+];
+
+const DEFAULT_LIFESPANS: Record<string, number> = {
+  "Roof": 25, "HVAC": 20, "Electrical": 30, "Plumbing": 40,
+  "Water Heater": 12, "Foundation": 80, "Windows": 20,
+  "Exterior": 15, "Flooring": 15, "Appliances": 10, "Elevators": 25, "Other": 20,
+};
 
 interface CategorySpend {
   category: string;
@@ -100,9 +123,14 @@ export default function CapexPlanningPage() {
   const [loading, setLoading] = useState(true);
   const [years, setYears] = useState("5");
   const [selectedProperty, setSelectedProperty] = useState("all");
-  const [propertyOptions, setPropertyOptions] = useState<
-    { id: string; name: string }[]
-  >([]);
+  const [propertyOptions, setPropertyOptions] = useState<{ id: string; name: string }[]>([]);
+
+  // System ages state
+  const [systemsPropertyId, setSystemsPropertyId] = useState<string>("");
+  const [systemsData, setSystemsData] = useState<SystemEntry[]>([]);
+  const [systemsLoading, setSystemsLoading] = useState(false);
+  const [systemsSaving, setSystemsSaving] = useState(false);
+  const [showSystemsPanel, setShowSystemsPanel] = useState(false);
 
   const fetchProperties = useCallback(async () => {
     try {
@@ -123,6 +151,56 @@ export default function CapexPlanningPage() {
       /* silent */
     }
   }, []);
+
+  const fetchSystems = useCallback(async (pid: string) => {
+    if (!pid) return;
+    setSystemsLoading(true);
+    try {
+      const res = await fetch(`/api/analytics/property-systems?propertyId=${pid}`, { cache: "no-store" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message);
+      const existing: SystemEntry[] = (json.data?.systems ?? []);
+      // Merge with defaults: add any missing system types
+      const merged: SystemEntry[] = SYSTEM_TYPES.map((st) => {
+        const found = existing.find((e) => e.systemType === st);
+        return found ?? { systemType: st, estimatedLifespanYears: DEFAULT_LIFESPANS[st] ?? 20 };
+      });
+      setSystemsData(merged);
+    } catch {
+      toast.error("Could not load system data");
+    } finally {
+      setSystemsLoading(false);
+    }
+  }, []);
+
+  const saveSystems = useCallback(async () => {
+    if (!systemsPropertyId) return;
+    setSystemsSaving(true);
+    try {
+      const res = await fetch("/api/analytics/property-systems", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId: systemsPropertyId, systems: systemsData }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message);
+      toast.success("System ages saved");
+      fetchCapex();
+    } catch {
+      toast.error("Failed to save system data");
+    } finally {
+      setSystemsSaving(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [systemsPropertyId, systemsData]);
+
+  const updateSystem = (index: number, field: keyof SystemEntry, value: string | number) => {
+    setSystemsData((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+  };
 
   const fetchCapex = useCallback(async () => {
     try {
@@ -447,6 +525,145 @@ export default function CapexPlanningPage() {
         </Card>
       </div>
 
+      {/* System Ages Panel */}
+      <Card>
+        <CardHeader
+          className="cursor-pointer select-none"
+          onClick={() => setShowSystemsPanel((v) => !v)}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Wrench className="h-5 w-5" />
+                Building System Ages
+              </CardTitle>
+              <CardDescription>
+                Enter when each major system was last replaced to improve CapEx forecasts
+              </CardDescription>
+            </div>
+            {showSystemsPanel ? (
+              <ChevronUp className="h-5 w-5 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-muted-foreground" />
+            )}
+          </div>
+        </CardHeader>
+
+        {showSystemsPanel && (
+          <CardContent className="space-y-4">
+            {/* Property selector */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <Select
+                value={systemsPropertyId}
+                onValueChange={(pid) => {
+                  setSystemsPropertyId(pid);
+                  fetchSystems(pid);
+                }}
+              >
+                <SelectTrigger className="w-[240px]">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Select a property…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {propertyOptions.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {systemsPropertyId && (
+                <Button
+                  size="sm"
+                  onClick={saveSystems}
+                  disabled={systemsSaving || systemsLoading}
+                  className="gap-2"
+                >
+                  <Save className="h-4 w-4" />
+                  {systemsSaving ? "Saving…" : "Save Systems"}
+                </Button>
+              )}
+            </div>
+
+            {/* System rows */}
+            {systemsLoading ? (
+              <div className="space-y-2">
+                {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+              </div>
+            ) : systemsPropertyId && systemsData.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b text-muted-foreground">
+                      <th className="text-left py-2 pr-4 font-medium">System</th>
+                      <th className="text-left py-2 pr-4 font-medium">Last Replaced (Year)</th>
+                      <th className="text-left py-2 pr-4 font-medium">Lifespan (yrs)</th>
+                      <th className="text-left py-2 font-medium">Age / Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {systemsData.map((sys, i) => {
+                      const currentYear = new Date().getFullYear();
+                      const age = sys.lastReplacedYear ? currentYear - sys.lastReplacedYear : null;
+                      const pctLife = age !== null ? (age / sys.estimatedLifespanYears) * 100 : null;
+                      const statusColor = pctLife === null ? "text-gray-400"
+                        : pctLife >= 90 ? "text-red-600 font-semibold"
+                        : pctLife >= 70 ? "text-orange-600"
+                        : pctLife >= 50 ? "text-yellow-600"
+                        : "text-green-600";
+
+                      return (
+                        <tr key={sys.systemType}>
+                          <td className="py-2 pr-4 font-medium">{sys.systemType}</td>
+                          <td className="py-2 pr-4">
+                            <Input
+                              type="number"
+                              min={1900}
+                              max={currentYear}
+                              placeholder="e.g. 2015"
+                              value={sys.lastReplacedYear ?? ""}
+                              onChange={(e) => updateSystem(i, "lastReplacedYear", parseInt(e.target.value) || 0)}
+                              className="w-28 h-8 text-sm"
+                            />
+                          </td>
+                          <td className="py-2 pr-4">
+                            <Input
+                              type="number"
+                              min={1}
+                              max={100}
+                              value={sys.estimatedLifespanYears}
+                              onChange={(e) => updateSystem(i, "estimatedLifespanYears", parseInt(e.target.value) || 20)}
+                              className="w-20 h-8 text-sm"
+                            />
+                          </td>
+                          <td className={`py-2 text-sm ${statusColor}`}>
+                            {age !== null ? (
+                              <>
+                                {age} yr{age !== 1 ? "s" : ""} old
+                                {pctLife !== null && (
+                                  <span className="text-xs ml-1">({Math.round(pctLife)}% of life)</span>
+                                )}
+                              </>
+                            ) : (
+                              <span className="text-muted-foreground">Not recorded</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : systemsPropertyId ? (
+              <p className="text-sm text-muted-foreground">Select a property to manage its system ages.</p>
+            ) : (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                Select a property above to view and edit its building system ages.
+              </p>
+            )}
+          </CardContent>
+        )}
+      </Card>
+
       {/* Benchmark note */}
       <Card className="border-dashed">
         <CardContent className="p-4">
@@ -460,7 +677,7 @@ export default function CapexPlanningPage() {
                 Projections use industry benchmarks: $300/unit/yr (0–10 yrs),
                 $700 (11–20 yrs), $1,200 (21–30 yrs), $2,000 (31–50 yrs),
                 $3,000+ (50+ yrs). Actual costs vary based on property
-                condition, region, and system upgrades.
+                condition, region, and system upgrades. Enter system ages above to enable per-system replacement forecasting.
               </p>
             </div>
           </div>

@@ -254,6 +254,7 @@ const navigationSections: NavSection[] = [
           { title: "nav.analytics.occupancy", href: "/dashboard/analytics/occupancy", icon: Building2, iconColor: "text-purple-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
           { title: "nav.analytics.maintenance", href: "/dashboard/analytics/maintenance", icon: Wrench, iconColor: "text-purple-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
           { title: "nav.analytics.capex", href: "/dashboard/analytics/capex", icon: Wrench, iconColor: "text-purple-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.analytics.roi", href: "/dashboard/analytics/roi", icon: DollarSign, iconColor: "text-purple-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
         ],
       },
     ],
