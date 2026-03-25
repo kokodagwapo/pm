@@ -162,8 +162,9 @@ export default function FinancialAnalyticsPage() {
   const [taxExportLoading, setTaxExportLoading] = useState(false);
 
   const [utilityAnomalies, setUtilityAnomalies] = useState<{
-    anomalies: { propertyId: string; propertyName: string; category: string; currentMonthCost: number; baselineAvg: number; spikePercent: number; severity: "warning" | "critical" }[];
+    anomalies: { propertyId: string; propertyName: string; category: string; currentMonthCost: number; priorMonthCost: number; spikePercent: number; severity: "warning" | "critical" }[];
     summary: { total: number; critical: number; warning: number; byCategoryCount: Record<string, number> };
+    comparisonPeriod?: { current: string; prior: string; thresholdPct: number };
     detectedAt: string;
   } | null>(null);
   const [utilityAnomaliesLoading, setUtilityAnomaliesLoading] = useState(false);
@@ -1512,7 +1513,7 @@ export default function FinancialAnalyticsPage() {
               <div>
                 <h3 className="text-lg font-semibold">Utility Cost Anomaly Detection</h3>
                 <p className="text-sm text-muted-foreground">
-                  Flags utility-related categories (Electrical, Plumbing, HVAC, Pest Control) with ≥30% spend spike vs. 3-month rolling average
+                  Flags utility-related categories (Electrical, Plumbing, HVAC, Pest Control) with &gt;20% month-over-month spend increase vs. the prior month
                 </p>
               </div>
               <Button variant="outline" size="sm" onClick={fetchUtilityAnomalies} disabled={utilityAnomaliesLoading}>
@@ -1604,7 +1605,7 @@ export default function FinancialAnalyticsPage() {
                                 </span>
                               </div>
                               <p className="text-xs text-muted-foreground mt-1">
-                                Baseline avg: {formatCurrency(a.baselineAvg)}/mo → Current: {formatCurrency(a.currentMonthCost)}
+                                Prior month: {formatCurrency(a.priorMonthCost)} → Current: {formatCurrency(a.currentMonthCost)}
                               </p>
                             </div>
                             <div className="text-right shrink-0 ml-4">

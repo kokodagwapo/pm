@@ -4,8 +4,9 @@
  * Detects abnormal spikes in utility-related maintenance and vendor costs.
  * Utility categories: Electrical, Plumbing, HVAC, Pest Control.
  *
- * Algorithm: Compare current month's spend in each utility category
- * against the 3-month rolling average. Flag if spend is ≥30% above baseline.
+ * Algorithm: Compare current calendar month spend vs. prior calendar month spend
+ * (month-over-month). Flag if current month is >20% above prior month.
+ * Severity: critical if ≥50% spike, warning if 20–49%.
  */
 
 export const dynamic = "force-dynamic";
@@ -21,8 +22,9 @@ import {
 } from "@/lib/api-utils";
 import VendorJob from "@/models/VendorJob";
 
-const UTILITY_CATEGORIES = ["Electrical", "Plumbing", "HVAC", "Pest Control", "Cleaning"];
-const SPIKE_THRESHOLD = 0.30;
+const UTILITY_CATEGORIES = ["Electrical", "Plumbing", "HVAC", "Pest Control"];
+const SPIKE_THRESHOLD = 0.20;   // 20% month-over-month increase triggers alert
+const CRITICAL_THRESHOLD = 0.50; // 50% = critical severity
 
 export const GET = withRoleAndDB([
   UserRole.ADMIN,
@@ -34,8 +36,15 @@ export const GET = withRoleAndDB([
     const propertyId = searchParams.get("propertyId");
 
     const now = new Date();
-    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+    // Current month: e.g. March 2026 → 2026-03
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-indexed
+    const currentMonthStart = new Date(currentYear, currentMonth, 1);
+    const currentMonthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
+
+    // Prior month
+    const priorMonthStart = new Date(currentYear, currentMonth - 1, 1);
+    const priorMonthEnd = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999);
 
     // Property scope
     const propertyQuery: Record<string, unknown> = { deletedAt: null };
@@ -51,52 +60,74 @@ export const GET = withRoleAndDB([
     );
 
     if (!propertyIds.length) {
-      return createSuccessResponse({ anomalies: [], summary: { total: 0, byCategoryCount: {} } });
+      return createSuccessResponse({ anomalies: [], summary: { total: 0, critical: 0, warning: 0, byCategoryCount: {} } });
     }
 
-    const [maintByMonth, vendorByMonth] = await Promise.all([
-      // Maintenance costs by category and month
+    // Aggregate maintenance and vendor spend for current and prior month
+    const [maintCurrent, maintPrior, vendorCurrent, vendorPrior] = await Promise.all([
       MaintenanceRequest.aggregate([
         {
           $match: {
             propertyId: { $in: propertyIds },
             deletedAt: null,
             category: { $in: UTILITY_CATEGORIES },
-            createdAt: { $gte: threeMonthsAgo },
+            createdAt: { $gte: currentMonthStart, $lte: currentMonthEnd },
           },
         },
         {
           $group: {
-            _id: {
-              propertyId: "$propertyId",
-              category: "$category",
-              year: { $year: "$createdAt" },
-              month: { $month: "$createdAt" },
-            },
+            _id: { propertyId: "$propertyId", category: "$category" },
             totalCost: { $sum: { $ifNull: ["$actualCost", "$estimatedCost"] } },
             count: { $sum: 1 },
           },
         },
       ]),
-
-      // Vendor job costs by category and month
+      MaintenanceRequest.aggregate([
+        {
+          $match: {
+            propertyId: { $in: propertyIds },
+            deletedAt: null,
+            category: { $in: UTILITY_CATEGORIES },
+            createdAt: { $gte: priorMonthStart, $lte: priorMonthEnd },
+          },
+        },
+        {
+          $group: {
+            _id: { propertyId: "$propertyId", category: "$category" },
+            totalCost: { $sum: { $ifNull: ["$actualCost", "$estimatedCost"] } },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
       VendorJob.aggregate([
         {
           $match: {
             propertyId: { $in: propertyIds },
             status: { $in: ["payment_released", "approved", "completed"] },
             category: { $in: UTILITY_CATEGORIES },
-            createdAt: { $gte: threeMonthsAgo },
+            createdAt: { $gte: currentMonthStart, $lte: currentMonthEnd },
           },
         },
         {
           $group: {
-            _id: {
-              propertyId: "$propertyId",
-              category: "$category",
-              year: { $year: "$createdAt" },
-              month: { $month: "$createdAt" },
-            },
+            _id: { propertyId: "$propertyId", category: "$category" },
+            totalCost: { $sum: { $ifNull: ["$finalCost", "$budget"] } },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      VendorJob.aggregate([
+        {
+          $match: {
+            propertyId: { $in: propertyIds },
+            status: { $in: ["payment_released", "approved", "completed"] },
+            category: { $in: UTILITY_CATEGORIES },
+            createdAt: { $gte: priorMonthStart, $lte: priorMonthEnd },
+          },
+        },
+        {
+          $group: {
+            _id: { propertyId: "$propertyId", category: "$category" },
             totalCost: { $sum: { $ifNull: ["$finalCost", "$budget"] } },
             count: { $sum: 1 },
           },
@@ -104,84 +135,57 @@ export const GET = withRoleAndDB([
       ]),
     ]);
 
-    // Combine maintenance and vendor spend into unified map
-    type MonthData = { totalCost: number; count: number };
-    type CategoryMonthMap = Map<string, MonthData>;
-    type PropertyCategoryMap = Map<string, CategoryMonthMap>;
+    // Combine current and prior month totals per (property, category)
+    type SpendEntry = { current: number; prior: number };
+    const spendMap = new Map<string, SpendEntry>();
 
-    const spendMap = new Map<string, PropertyCategoryMap>();
-
-    const addToMap = (
+    const addEntry = (
       propId: string,
       category: string,
-      year: number,
-      month: number,
       cost: number,
-      count: number
+      period: "current" | "prior"
     ) => {
-      const monthKey = `${year}-${String(month).padStart(2, "0")}`;
-      const propKey = propId;
-      if (!spendMap.has(propKey)) spendMap.set(propKey, new Map());
-      const catMap = spendMap.get(propKey)!;
-      if (!catMap.has(category)) catMap.set(category, new Map());
-      const mMap = catMap.get(category)! as unknown as Map<string, MonthData>;
-      const existing = mMap.get(monthKey) ?? { totalCost: 0, count: 0 };
-      mMap.set(monthKey, { totalCost: existing.totalCost + cost, count: existing.count + count });
+      const key = `${propId}||${category}`;
+      const existing = spendMap.get(key) ?? { current: 0, prior: 0 };
+      existing[period] += cost;
+      spendMap.set(key, existing);
     };
 
-    for (const r of [...maintByMonth, ...vendorByMonth]) {
-      addToMap(
-        r._id.propertyId.toString(),
-        r._id.category,
-        r._id.year,
-        r._id.month,
-        r.totalCost ?? 0,
-        r.count
-      );
-    }
+    for (const r of maintCurrent) addEntry(r._id.propertyId.toString(), r._id.category, r.totalCost ?? 0, "current");
+    for (const r of maintPrior) addEntry(r._id.propertyId.toString(), r._id.category, r.totalCost ?? 0, "prior");
+    for (const r of vendorCurrent) addEntry(r._id.propertyId.toString(), r._id.category, r.totalCost ?? 0, "current");
+    for (const r of vendorPrior) addEntry(r._id.propertyId.toString(), r._id.category, r.totalCost ?? 0, "prior");
 
-    // Compute current month key
-    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-
-    // Detect anomalies
+    // Detect anomalies: current > prior by ≥20%
     const anomalies: {
       propertyId: string;
       propertyName: string;
       category: string;
       currentMonthCost: number;
-      baselineAvg: number;
+      priorMonthCost: number;
       spikePercent: number;
       severity: "warning" | "critical";
     }[] = [];
 
-    for (const [propId, catMap] of spendMap.entries()) {
-      for (const [category, monthData] of (catMap as unknown as Map<string, Map<string, MonthData>>).entries()) {
-        const allMonths = Array.from(monthData.entries());
-        const currentMonthEntry = allMonths.find(([k]) => k === currentMonthKey);
-        const historicalEntries = allMonths.filter(([k]) => k !== currentMonthKey);
+    for (const [key, { current, prior }] of spendMap.entries()) {
+      const [propId, category] = key.split("||");
 
-        if (!currentMonthEntry || historicalEntries.length === 0) continue;
+      // Only flag if there's actual spend this month and a valid prior baseline
+      if (current <= 0) continue;
+      if (prior <= 0) continue; // no baseline for comparison
 
-        const currentCost = currentMonthEntry[1].totalCost;
-        const avgHistorical =
-          historicalEntries.reduce((s, [, d]) => s + d.totalCost, 0) /
-          historicalEntries.length;
+      const spike = (current - prior) / prior;
 
-        if (avgHistorical <= 0) continue;
-
-        const spike = (currentCost - avgHistorical) / avgHistorical;
-
-        if (spike >= SPIKE_THRESHOLD) {
-          anomalies.push({
-            propertyId: propId,
-            propertyName: propertyNameMap.get(propId) ?? "Unknown Property",
-            category,
-            currentMonthCost: currentCost,
-            baselineAvg: Math.round(avgHistorical),
-            spikePercent: Math.round(spike * 100),
-            severity: spike >= 0.6 ? "critical" : "warning",
-          });
-        }
+      if (spike >= SPIKE_THRESHOLD) {
+        anomalies.push({
+          propertyId: propId,
+          propertyName: propertyNameMap.get(propId) ?? "Unknown Property",
+          category,
+          currentMonthCost: Math.round(current),
+          priorMonthCost: Math.round(prior),
+          spikePercent: Math.round(spike * 100),
+          severity: spike >= CRITICAL_THRESHOLD ? "critical" : "warning",
+        });
       }
     }
 
@@ -192,6 +196,9 @@ export const GET = withRoleAndDB([
       byCategoryCount[a.category] = (byCategoryCount[a.category] ?? 0) + 1;
     }
 
+    const currentMonthLabel = currentMonthStart.toLocaleString("en-US", { month: "long", year: "numeric" });
+    const priorMonthLabel = priorMonthStart.toLocaleString("en-US", { month: "long", year: "numeric" });
+
     return createSuccessResponse({
       anomalies,
       summary: {
@@ -199,6 +206,11 @@ export const GET = withRoleAndDB([
         critical: anomalies.filter((a) => a.severity === "critical").length,
         warning: anomalies.filter((a) => a.severity === "warning").length,
         byCategoryCount,
+      },
+      comparisonPeriod: {
+        current: currentMonthLabel,
+        prior: priorMonthLabel,
+        thresholdPct: Math.round(SPIKE_THRESHOLD * 100),
       },
       detectedAt: now,
     });

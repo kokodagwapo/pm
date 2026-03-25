@@ -78,6 +78,19 @@ const VENDOR_TO_SCHEDULE_E: Record<string, { line: string; description: string }
   "Doors": { line: "14", description: "Repairs — Doors (Vendor)" },
   "General": { line: "14", description: "Repairs — General (Vendor)" },
   "Emergency": { line: "14", description: "Repairs — Emergency (Vendor)" },
+  // Property management and operating expense categories
+  "Management": { line: "11", description: "Management Fees" },
+  "Property Management": { line: "11", description: "Management Fees" },
+  "Insurance": { line: "9",  description: "Insurance" },
+  "Property Tax": { line: "16", description: "Taxes" },
+  "Taxes": { line: "16", description: "Taxes" },
+  "Advertising": { line: "5",  description: "Advertising" },
+  "Legal": { line: "10", description: "Legal and Professional Fees" },
+  "Accounting": { line: "10", description: "Legal and Professional Fees — Accounting" },
+  "Utilities": { line: "17", description: "Utilities" },
+  "Water": { line: "17", description: "Utilities — Water" },
+  "Gas": { line: "17", description: "Utilities — Gas" },
+  "Depreciation": { line: "18", description: "Depreciation Expense" },
   "Other": { line: "19", description: "Other Expenses (Vendor)" },
 };
 
@@ -216,34 +229,53 @@ export const GET = withRoleAndDB([
       "July", "August", "September", "October", "November", "December",
     ];
 
-    // Map payment type to Schedule E income line
-    const paymentTypeToScheduleE = (payType: string): { line: string; description: string } => {
+    // Map payment type to Schedule E income or expense line
+    const paymentTypeToScheduleE = (payType: string): { line: string; description: string; incomeOrExpense: "income" | "expense" } => {
       const t = String(payType ?? "").toLowerCase();
-      if (t.includes("rent")) return { line: "3", description: "Rents Received" };
-      if (t.includes("late")) return { line: "3", description: "Rents Received — Late Fees" };
-      if (t.includes("deposit")) return { line: "3", description: "Deposits (if income)" };
-      if (t.includes("util")) return { line: "17", description: "Utilities" };
-      return { line: "3", description: "Rents Received — Other" };
+      if (t.includes("rent")) return { line: "3", description: "Rents Received", incomeOrExpense: "income" };
+      if (t.includes("late")) return { line: "3", description: "Rents Received — Late Fees", incomeOrExpense: "income" };
+      if (t.includes("deposit")) return { line: "3", description: "Deposits (if income)", incomeOrExpense: "income" };
+      if (t.includes("util")) return { line: "17", description: "Utilities", incomeOrExpense: "expense" };
+      if (t.includes("maintenance")) return { line: "14", description: "Repairs", incomeOrExpense: "expense" };
+      if (t.includes("invoice")) return { line: "11", description: "Management Fees / Professional Services", incomeOrExpense: "expense" };
+      return { line: "3", description: "Rents Received — Other", incomeOrExpense: "income" };
     };
 
-    const income = incomeRows.map((r) => {
+    type TaxRow = {
+      year: number; month: number; monthName: string; propertyId: string | undefined;
+      propertyName: string; type: string; category: string; amount: number; count: number;
+      scheduleELine: string; scheduleEDescription: string;
+    };
+    // Separate payments into income vs expense based on type classification
+    const paymentIncome: TaxRow[] = [];
+    const paymentExpenses: TaxRow[] = [];
+
+    for (const r of incomeRows) {
       const se = paymentTypeToScheduleE(String(r._id.type ?? ""));
-      return {
+      const row = {
         year,
         month: r._id.month,
         monthName: MONTH_NAMES[r._id.month - 1],
         propertyId: r._id.propertyId?.toString(),
         propertyName: propertyNameMap.get(r._id.propertyId?.toString()) ?? "Unknown",
-        type: "income",
+        type: se.incomeOrExpense,
         category: String(r._id.type ?? "other").replace(/_/g, " "),
         amount: r.amount ?? 0,
         count: r.count,
         scheduleELine: se.line,
         scheduleEDescription: se.description,
       };
-    });
+      if (se.incomeOrExpense === "expense") {
+        paymentExpenses.push(row);
+      } else {
+        paymentIncome.push(row);
+      }
+    }
+
+    const income = paymentIncome;
 
     const expenses = [
+      ...paymentExpenses,
       ...maintRows.map((r) => {
         const se = MAINTENANCE_TO_SCHEDULE_E[r._id.category] ?? { line: "14", description: "Repairs" };
         return {

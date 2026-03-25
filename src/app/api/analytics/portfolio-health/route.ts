@@ -3,11 +3,12 @@
  * Computes a 0-100 composite score for the property portfolio.
  *
  * Scoring weights:
- *   Occupancy rate        30 pts
- *   Collection rate       25 pts
- *   Maintenance health    20 pts  (completion rate + avg resolution days)
+ *   Occupancy rate        25 pts
+ *   Collection rate       20 pts  (collection rate + delinquency count penalty)
+ *   Maintenance health    20 pts  (completion rate + avg resolution days + backlog age)
  *   Rent alignment        15 pts  (leases at or near market rent)
  *   Lease pipeline        10 pts  (renewals vs expiries)
+ *   Delinquency health    10 pts  (overdue payment count and severity)
  */
 
 export const dynamic = "force-dynamic";
@@ -78,10 +79,17 @@ export const GET = withRoleAndDB([
 
     const occupancyRate =
       totalUnits > 0 ? (activeLeases.length / totalUnits) * 100 : 0;
-    const occupancyScore = clamp((occupancyRate / 100) * 30);
+    const occupancyScore = clamp((occupancyRate / 100) * 25);
 
-    // ── 3. Collection rate (25 pts) ───────────────────────────────────────────
-    const [paidSum, totalSum] = await Promise.all([
+    // ── 3. Collection rate (20 pts) + Delinquency health (10 pts) ─────────────
+    const OVERDUE_STATUSES = [
+      PaymentStatus.OVERDUE,
+      PaymentStatus.LATE,
+      PaymentStatus.SEVERELY_OVERDUE,
+      PaymentStatus.GRACE_PERIOD,
+    ];
+
+    const [paidSum, totalSum, delinquencyData] = await Promise.all([
       Payment.aggregate([
         {
           $match: {
@@ -103,12 +111,41 @@ export const GET = withRoleAndDB([
         },
         { $group: { _id: null, total: { $sum: "$amount" } } },
       ]),
+      // Delinquency: count overdue payments + their total amount
+      Payment.aggregate([
+        {
+          $match: {
+            propertyId: { $in: propertyIds },
+            deletedAt: null,
+            status: { $in: OVERDUE_STATUSES },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+            totalOverdue: { $sum: "$amount" },
+            severeCount: {
+              $sum: {
+                $cond: [{ $eq: ["$status", PaymentStatus.SEVERELY_OVERDUE] }, 1, 0],
+              },
+            },
+          },
+        },
+      ]),
     ]);
 
     const collected = paidSum[0]?.total ?? 0;
     const expected = totalSum[0]?.total ?? 0;
     const collectionRate = expected > 0 ? (collected / expected) * 100 : 100;
-    const collectionScore = clamp((collectionRate / 100) * 25);
+    const collectionScore = clamp((collectionRate / 100) * 20);
+
+    // Delinquency health: 10 pts — penalize by delinquent count relative to unit count
+    const delinquentCount = delinquencyData[0]?.count ?? 0;
+    const severelyOverdueCount = delinquencyData[0]?.severeCount ?? 0;
+    const delinquencyRate = totalUnits > 0 ? (delinquentCount / totalUnits) : 0;
+    // 10 pts at 0% delinquency, 0 pts at ≥30% delinquency; severe pays double penalty
+    const delinquencyScore = clamp(10 - delinquencyRate * 33.3 - severelyOverdueCount * 2);
 
     // ── 4. Maintenance health (20 pts) ────────────────────────────────────────
     const [maintTotal, maintCompleted, maintAvgDays] = await Promise.all([
@@ -151,7 +188,18 @@ export const GET = withRoleAndDB([
     const avgResolutionDays = maintAvgDays[0]?.avgDays ?? 3;
     // Resolution score: excellent ≤3 days, poor ≥14 days
     const resolutionScore = clamp(100 - ((avgResolutionDays - 3) / 11) * 100);
-    const maintScore = clamp(((completionRate * 0.6 + resolutionScore * 0.4) / 100) * 20);
+
+    // Maintenance backlog age: count open requests older than 14 days (aged backlog)
+    const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+    const agedBacklogCount = await MaintenanceRequest.countDocuments({
+      propertyId: { $in: propertyIds },
+      deletedAt: null,
+      status: { $nin: [MaintenanceStatus.COMPLETED, MaintenanceStatus.CANCELLED] },
+      createdAt: { $lte: fourteenDaysAgo },
+    });
+    // Backlog age penalty: 0 pts deducted for 0 aged items; 20 pts at ≥10 aged items
+    const backlogAgePenalty = clamp(agedBacklogCount * 2, 0, 20);
+    const maintScore = clamp(((completionRate * 0.6 + resolutionScore * 0.4) / 100) * 20 - backlogAgePenalty * 0.2);
 
     // ── 5. Rent alignment (15 pts) ────────────────────────────────────────────
     // Market rent = average rentAmount across all portfolio units
@@ -206,9 +254,9 @@ export const GET = withRoleAndDB([
         ? 10
         : clamp((1 - expiringCount / Math.max(activeLeases.length, 1)) * 10 + renewedCount * 2, 0, 10);
 
-    // ── 7. Composite score ────────────────────────────────────────────────────
+    // ── 7. Composite score (25 + 20 + 20 + 15 + 10 + 10 = 100) ──────────────
     const totalScore = Math.round(
-      occupancyScore + collectionScore + maintScore + rentScore + pipelineScore
+      occupancyScore + collectionScore + maintScore + rentScore + pipelineScore + delinquencyScore
     );
 
     const grade =
@@ -250,6 +298,10 @@ export const GET = withRoleAndDB([
       insights.push(`Occupancy at ${occupancyRate.toFixed(1)}% — consider pricing adjustments to fill ${totalUnits - activeLeases.length} vacant unit(s).`);
     if (collectionRate < 90)
       insights.push(`Collection rate ${collectionRate.toFixed(1)}% — ${Math.round(expected - collected).toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 })} in outstanding balances need follow-up.`);
+    if (delinquentCount > 0)
+      insights.push(`${delinquentCount} overdue payment(s) — ${severelyOverdueCount > 0 ? `${severelyOverdueCount} severely overdue (30+ days). ` : ""}Review and initiate collections process.`);
+    if (agedBacklogCount > 0)
+      insights.push(`${agedBacklogCount} maintenance request(s) open for more than 14 days — aged backlog reduces score and tenant satisfaction.`);
     if (avgResolutionDays > 7)
       insights.push(`Average maintenance resolution is ${avgResolutionDays.toFixed(1)} days — aim for under 7 days to improve tenant satisfaction.`);
     if (below10pct > 0)
@@ -263,14 +315,14 @@ export const GET = withRoleAndDB([
       {
         label: "Occupancy",
         score: Math.round(occupancyScore),
-        maxScore: 30,
+        maxScore: 25,
         value: `${occupancyRate.toFixed(1)}%`,
         status: (occupancyRate >= 90 ? "good" : occupancyRate >= 75 ? "fair" : "poor") as "good" | "fair" | "poor",
       },
       {
         label: "Collections",
         score: Math.round(collectionScore),
-        maxScore: 25,
+        maxScore: 20,
         value: `${collectionRate.toFixed(1)}%`,
         status: (collectionRate >= 95 ? "good" : collectionRate >= 85 ? "fair" : "poor") as "good" | "fair" | "poor",
       },
@@ -279,7 +331,8 @@ export const GET = withRoleAndDB([
         score: Math.round(maintScore),
         maxScore: 20,
         value: `${completionRate.toFixed(0)}% resolved`,
-        status: (completionRate >= 90 ? "good" : completionRate >= 70 ? "fair" : "poor") as "good" | "fair" | "poor",
+        detail: `${agedBacklogCount} aged >14d`,
+        status: (completionRate >= 90 && agedBacklogCount === 0 ? "good" : completionRate >= 70 ? "fair" : "poor") as "good" | "fair" | "poor",
       },
       {
         label: "Rent Alignment",
@@ -294,6 +347,14 @@ export const GET = withRoleAndDB([
         maxScore: 10,
         value: `${expiringCount} expiring`,
         status: (expiringCount === 0 ? "good" : expiringCount <= 2 ? "fair" : "poor") as "good" | "fair" | "poor",
+      },
+      {
+        label: "Delinquency",
+        score: Math.round(delinquencyScore),
+        maxScore: 10,
+        value: `${delinquentCount} overdue`,
+        detail: severelyOverdueCount > 0 ? `${severelyOverdueCount} severely overdue` : undefined,
+        status: (delinquentCount === 0 ? "good" : delinquentCount <= 2 ? "fair" : "poor") as "good" | "fair" | "poor",
       },
     ];
 
@@ -319,6 +380,8 @@ export const GET = withRoleAndDB([
             occupancyRate,
             collectionRate,
             expiringIn60Days: expiringCount,
+            delinquentCount,
+            agedBacklogCount,
           },
         },
       },
@@ -358,6 +421,9 @@ export const GET = withRoleAndDB([
         marketRent,
         occupancyRate,
         collectionRate,
+        delinquentCount,
+        severelyOverdueCount,
+        agedBacklogCount,
       },
       calculatedAt: now,
     });
