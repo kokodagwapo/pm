@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
     if (preferredVendorId && mongoose.Types.ObjectId.isValid(preferredVendorId)) {
       const preferred = await Vendor.findOne({
         _id: preferredVendorId,
+        categories: category,
         isApproved: true,
         isAvailable: true,
         complianceHold: false,

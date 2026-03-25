@@ -124,6 +124,22 @@ export async function PATCH(
       );
     }
 
+    // State transition guards for vendor actions
+    const expectedStates: Record<string, string[]> = {
+      accept: ["dispatched"],
+      decline: ["dispatched"],
+      en_route: ["accepted"],
+      on_site: ["en_route"],
+      start_work: ["on_site"],
+      complete: ["on_site", "work_started"],
+    };
+    if (expectedStates[action] && !expectedStates[action].includes(job.status)) {
+      return NextResponse.json(
+        { error: `Cannot perform '${action}' when job is in '${job.status}' state. Expected: ${expectedStates[action].join(" or ")}` },
+        { status: 409 }
+      );
+    }
+
     if (action === "accept") {
       if (sessionVendor && (sessionVendor as { complianceHold?: boolean }).complianceHold) {
         return NextResponse.json(
