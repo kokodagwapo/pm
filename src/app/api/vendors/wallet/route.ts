@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";
 import Vendor from "@/models/Vendor";
 import VendorJob from "@/models/VendorJob";
+import ManagerWallet from "@/models/ManagerWallet";
 import mongoose from "mongoose";
 
 interface SessionUser {
@@ -122,6 +123,32 @@ export async function POST(request: NextRequest) {
       if (!amount || amount <= 0) {
         return NextResponse.json({ error: "Invalid fund amount" }, { status: 400 });
       }
+
+      // Deduct from manager wallet (auto-create with $0 balance if first use)
+      const managerWallet = await ManagerWallet.findOne({ managerId: new mongoose.Types.ObjectId(user.id) });
+      const managerBalance = managerWallet?.balance ?? 0;
+      if (managerBalance < amount) {
+        return NextResponse.json(
+          { error: `Insufficient manager wallet balance ($${managerBalance.toFixed(2)} available). Add funds via POST /api/manager/wallet before funding vendors.` },
+          { status: 409 }
+        );
+      }
+      await ManagerWallet.findOneAndUpdate(
+        { managerId: new mongoose.Types.ObjectId(user.id) },
+        {
+          $inc: { balance: -amount },
+          $push: {
+            transactions: {
+              type: "debit",
+              amount,
+              description: `Funded vendor wallet: ${vendor.name}`,
+              relatedVendorId: vendor._id,
+              createdAt: new Date(),
+            },
+          },
+        }
+      );
+
       const updated = await Vendor.findByIdAndUpdate(
         vendorId,
         [{ $set: { walletBalance: { $add: ["$walletBalance", amount] } } }],
