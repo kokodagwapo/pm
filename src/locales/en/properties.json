@@ -527,6 +527,12 @@
 
   "properties.images.toasts.addSuccess": "Successfully added {count} image(s).",
   "properties.images.toasts.addError": "Failed to add images.",
+  "properties.images.toasts.deleteSuccess": "Image removed successfully.",
+  "properties.images.toasts.deleteError": "Failed to remove image.",
+  "properties.images.toasts.replaceSuccess": "Image replaced successfully.",
+  "properties.images.toasts.replaceError": "Failed to replace image.",
+  "properties.images.toasts.reorderSuccess": "Image order updated.",
+  "properties.images.toasts.reorderError": "Failed to update image order.",
 
   "properties.images.empty.title": "No Images Available",
   "properties.images.empty.description": "No images have been uploaded for this property yet.",
@@ -534,12 +540,22 @@
 
   "properties.images.actions.add": "Add Image",
   "properties.images.actions.view": "View",
+  "properties.images.actions.delete": "Delete",
+  "properties.images.actions.replace": "Replace",
+  "properties.images.actions.moveEarlier": "Move earlier in gallery",
+  "properties.images.actions.moveLater": "Move later in gallery",
 
   "properties.images.dialog.addTitle": "Add New Images",
   "properties.images.dialog.addDescription": "Upload high-quality images to showcase your property. Multiple files supported.",
   "properties.images.dialog.helper": "Images will be automatically optimized for web display.",
   "properties.images.dialog.processing": "Processing...",
   "properties.images.dialog.done": "Done",
+  "properties.images.dialog.replaceTitle": "Replace image",
+  "properties.images.dialog.replaceDescription": "Upload a new image. It will replace this photo in the same position in the gallery.",
+  "properties.images.dialog.deleteTitle": "Remove image",
+  "properties.images.dialog.deleteDescription": "Remove this image from the property gallery? Stored copies on our servers will be deleted when applicable.",
+  "properties.images.dialog.deleteConfirm": "Remove image",
+  "properties.images.dialog.deleteProcessing": "Removing…",
 
   "properties.images.viewer.title": "Property Image",
   "properties.images.viewer.close": "Close",

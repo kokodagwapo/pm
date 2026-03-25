@@ -514,6 +514,12 @@
 
   "properties.images.toasts.addSuccess": "{count} image(s) ajoutée(s) avec succès.",
   "properties.images.toasts.addError": "Échec de l'ajout des images.",
+  "properties.images.toasts.deleteSuccess": "Image supprimée avec succès.",
+  "properties.images.toasts.deleteError": "Échec de la suppression de l'image.",
+  "properties.images.toasts.replaceSuccess": "Image remplacée avec succès.",
+  "properties.images.toasts.replaceError": "Échec du remplacement de l'image.",
+  "properties.images.toasts.reorderSuccess": "Ordre des images mis à jour.",
+  "properties.images.toasts.reorderError": "Échec de la mise à jour de l'ordre des images.",
 
   "properties.images.empty.title": "Aucune image disponible",
   "properties.images.empty.description": "Aucune image n'a encore été téléchargée pour cette propriété.",
@@ -521,12 +527,22 @@
 
   "properties.images.actions.add": "Ajouter une image",
   "properties.images.actions.view": "Voir",
+  "properties.images.actions.delete": "Supprimer",
+  "properties.images.actions.replace": "Remplacer",
+  "properties.images.actions.moveEarlier": "Déplacer plus tôt dans la galerie",
+  "properties.images.actions.moveLater": "Déplacer plus tard dans la galerie",
 
   "properties.images.dialog.addTitle": "Ajouter de nouvelles images",
   "properties.images.dialog.addDescription": "Téléchargez des images de haute qualité pour mettre en valeur votre propriété. Plusieurs fichiers sont pris en charge.",
   "properties.images.dialog.helper": "Les images seront automatiquement optimisées pour le web.",
   "properties.images.dialog.processing": "Traitement en cours...",
   "properties.images.dialog.done": "Terminé",
+  "properties.images.dialog.replaceTitle": "Remplacer l'image",
+  "properties.images.dialog.replaceDescription": "Téléchargez une nouvelle image. Elle remplacera cette photo à la même position dans la galerie.",
+  "properties.images.dialog.deleteTitle": "Retirer l'image",
+  "properties.images.dialog.deleteDescription": "Retirer cette image de la galerie ? Les copies stockées sur nos serveurs seront supprimées le cas échéant.",
+  "properties.images.dialog.deleteConfirm": "Retirer l'image",
+  "properties.images.dialog.deleteProcessing": "Suppression…",
 
   "properties.images.viewer.title": "Image de la propriété",
   "properties.images.viewer.close": "Fermer",

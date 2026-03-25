@@ -506,6 +506,12 @@
 
   "properties.images.toasts.addSuccess": "Se han añadido correctamente {count} imagen(es).",
   "properties.images.toasts.addError": "No se pudieron añadir las imágenes.",
+  "properties.images.toasts.deleteSuccess": "Imagen eliminada correctamente.",
+  "properties.images.toasts.deleteError": "No se pudo eliminar la imagen.",
+  "properties.images.toasts.replaceSuccess": "Imagen reemplazada correctamente.",
+  "properties.images.toasts.replaceError": "No se pudo reemplazar la imagen.",
+  "properties.images.toasts.reorderSuccess": "Orden de imágenes actualizado.",
+  "properties.images.toasts.reorderError": "No se pudo actualizar el orden de las imágenes.",
 
   "properties.images.empty.title": "No hay imágenes disponibles",
   "properties.images.empty.description": "Todavía no se han subido imágenes para esta propiedad.",
@@ -519,6 +525,12 @@
   "properties.images.dialog.helper": "Las imágenes se optimizarán automáticamente para la web.",
   "properties.images.dialog.processing": "Procesando...",
   "properties.images.dialog.done": "Listo",
+  "properties.images.dialog.replaceTitle": "Reemplazar imagen",
+  "properties.images.dialog.replaceDescription": "Sube una imagen nueva. Sustituirá esta foto en la misma posición de la galería.",
+  "properties.images.dialog.deleteTitle": "Quitar imagen",
+  "properties.images.dialog.deleteDescription": "¿Quitar esta imagen de la galería? Las copias almacenadas en nuestros servidores se eliminarán cuando corresponda.",
+  "properties.images.dialog.deleteConfirm": "Quitar imagen",
+  "properties.images.dialog.deleteProcessing": "Quitando…",
 
   "properties.images.viewer.title": "Imagen de la propiedad",
   "properties.images.viewer.close": "Cerrar",

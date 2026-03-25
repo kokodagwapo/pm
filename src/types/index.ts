@@ -331,6 +331,12 @@ export interface IProperty extends Document {
   images: string[];
   ownerId: Types.ObjectId;
   managerId?: Types.ObjectId;
+  /** Set when a listing was imported from an external PMS / site (e.g. vms-florida.com). */
+  importSource?: string;
+  /** External site’s listing id (string for portability). */
+  importExternalId?: string;
+  /** Canonical public URL on the listing site. */
+  importListingUrl?: string;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;

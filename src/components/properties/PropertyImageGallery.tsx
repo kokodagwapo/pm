@@ -1,6 +1,5 @@
 "use client";
 
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,12 +34,17 @@ import {
   AlertCircle,
   CheckCircle,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { propertyService } from "@/lib/services/property.service";
 import { ImageUpload, UploadedImage } from "@/components/ui/image-upload";
 import { ImageErrorBoundary } from "@/components/ui/error-boundary";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { cn } from "@/lib/utils";
 
 interface PropertyImageGalleryProps {
   images: string[];
@@ -51,18 +55,30 @@ interface PropertyImageGalleryProps {
 }
 
 const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
-  images,
+  images: imagesProp,
   propertyName,
   canEdit,
   onImagesUpdate,
   propertyId,
 }) => {
+  const images = imagesProp ?? [];
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
-  // const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  // const [imageToDelete, setImageToDelete] = useState<string | null>(null);
+  const [showReplaceDialog, setShowReplaceDialog] = useState(false);
+  const [imageToReplace, setImageToReplace] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [imageToDelete, setImageToDelete] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { t } = useLocalizationContext();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
+  const txHead = isLight ? "text-black" : "text-white";
+  const txSub = isLight ? "text-gray-600" : "text-white/80";
+  const thumbBg = isLight ? "bg-gray-100" : "bg-white/10";
+  const galleryCardClass = cn(
+    "overflow-hidden py-0 border shadow-sm hover:shadow-md transition-all duration-300 ease-out [transform:translateZ(0)]",
+    isLight ? "border-gray-100" : "border-white/14"
+  );
 
   const handleImagesUploaded = async (uploadedImages: UploadedImage[]) => {
     try {
@@ -73,11 +89,9 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
         imageUrls
       );
 
-      // Safe access to images with fallback
       const newImages = updatedProperty?.images || [];
 
       onImagesUpdate(newImages);
-      // Don't close modal automatically - let user review and close manually
       toast.success(
         t("properties.images.toasts.addSuccess", {
           values: { count: uploadedImages.length.toString() },
@@ -90,51 +104,100 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
     }
   };
 
-  // DISABLED: Delete functionality temporarily disabled
-  // const handleDeleteImage = async () => {
-  //   if (!imageToDelete) return;
+  const handleReplaceUploaded = async (uploadedImages: UploadedImage[]) => {
+    if (!imageToReplace) return;
+    const newUrl = uploadedImages[0]?.url;
+    if (!newUrl) {
+      toast.error(t("properties.images.toasts.replaceError"));
+      return;
+    }
+    try {
+      setLoading(true);
+      const updatedProperty = await propertyService.replacePropertyImage(
+        propertyId,
+        imageToReplace,
+        newUrl
+      );
+      const newImages = updatedProperty?.images || [];
+      onImagesUpdate(newImages);
+      setShowReplaceDialog(false);
+      setImageToReplace(null);
+      toast.success(t("properties.images.toasts.replaceSuccess"));
+    } catch (error: any) {
+      toast.error(
+        error.message || t("properties.images.toasts.replaceError")
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  //   try {
-  //     setLoading(true);
-  //     const updatedProperty = await propertyService.removePropertyImages(
-  //       propertyId,
-  //       [imageToDelete]
-  //     );
+  const openReplaceDialog = (imageUrl: string) => {
+    setImageToReplace(imageUrl);
+    setShowReplaceDialog(true);
+  };
 
-  //     // Safe access to images with fallback
-  //     const newImages = updatedProperty?.images || [];
+  const handleDeleteImage = async () => {
+    if (!imageToDelete) return;
 
-  //     onImagesUpdate(newImages);
-  //     setImageToDelete(null);
-  //     setShowDeleteDialog(false);
-  //     toast.success("Image removed successfully");
-  //   } catch (error: any) {
-  //     toast.error(error.message || "Failed to remove image");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+    try {
+      setLoading(true);
+      const updatedProperty = await propertyService.removePropertyImages(
+        propertyId,
+        [imageToDelete]
+      );
 
-  // const openDeleteDialog = (imageUrl: string) => {
-  //   setImageToDelete(imageUrl);
-  //   setShowDeleteDialog(true);
-  // };
+      const newImages = updatedProperty?.images || [];
 
-  // const handleDeleteCancel = () => {
-  //   setShowDeleteDialog(false);
-  //   setImageToDelete(null);
-  // };
+      onImagesUpdate(newImages);
+      setImageToDelete(null);
+      setShowDeleteDialog(false);
+      toast.success(t("properties.images.toasts.deleteSuccess"));
+    } catch (error: any) {
+      toast.error(
+        error.message || t("properties.images.toasts.deleteError")
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openDeleteDialog = (imageUrl: string) => {
+    setImageToDelete(imageUrl);
+    setShowDeleteDialog(true);
+  };
+
+  const moveImage = async (index: number, direction: -1 | 1) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= images.length) return;
+    const next = [...images];
+    [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+    try {
+      setLoading(true);
+      const updatedProperty = await propertyService.reorderPropertyImages(
+        propertyId,
+        next
+      );
+      onImagesUpdate(updatedProperty?.images || next);
+      toast.success(t("properties.images.toasts.reorderSuccess"));
+    } catch (error: any) {
+      toast.error(
+        error.message || t("properties.images.toasts.reorderError")
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ImageErrorBoundary>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className={cn("text-lg font-semibold", txHead)}>
               {t("properties.images.header.title")}
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className={cn("text-sm", txSub)}>
               {images?.length > 0
                 ? t("properties.images.header.summary", {
                     values: { count: images.length.toString() },
@@ -157,10 +220,10 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                       <Upload className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                      <DialogTitle className={cn("text-xl font-semibold", txHead)}>
                         {t("properties.images.dialog.addTitle")}
                       </DialogTitle>
-                      <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
+                      <DialogDescription className={cn("text-sm", txSub)}>
                         {t("properties.images.dialog.addDescription")}
                       </DialogDescription>
                     </div>
@@ -178,7 +241,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                 </div>
 
                 <DialogFooter className="flex items-center justify-between pt-4 border-t">
-                  <div className="flex items-center text-sm text-gray-500">
+                  <div className={cn("flex items-center text-sm", txSub)}>
                     <AlertCircle className="h-4 w-4 mr-2" />
                     <span>{t("properties.images.dialog.helper")}</span>
                   </div>
@@ -214,11 +277,10 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
           )}
         </div>
 
-        {/* Image Grid */}
         {images.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {images.map((imageUrl, index) => (
-              <Card key={index} className="overflow-hidden py-0">
+              <Card key={`${imageUrl}::${index}`} className="overflow-hidden py-0">
                 <div className="relative group">
                   <div className="relative w-full h-58 bg-gray-100 dark:bg-gray-800">
                     <img
@@ -231,49 +293,96 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                       })}
                       className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
                       loading="lazy"
+                      decoding="async"
                     />
                   </div>
-                  {/* Image Number Badge */}
                   <Badge className="absolute top-2 left-2 bg-black bg-opacity-70 text-white">
                     {index + 1}
                   </Badge>
 
-                  {/* Action Buttons - Show on hover */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 opacity-0 group-hover:opacity-100 flex-wrap px-2 py-2 content-center">
                     <Button
                       variant="secondary"
                       size="sm"
                       onClick={() => setSelectedImage(imageUrl)}
                       className="bg-white/90 hover:bg-white text-gray-900"
                     >
-                      <Eye className="h-4 w-4 mr-1" />
-                      {t("properties.images.actions.view")}
+                      <Eye className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">
+                        {t("properties.images.actions.view")}
+                      </span>
                     </Button>
-                    {/* DISABLED: Delete functionality temporarily disabled */}
-                    {/* {canEdit && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => openDeleteDialog(imageUrl)}
-                        className="bg-red-600 hover:bg-red-700"
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
-                      </Button>
-                    )} */}
+                    {canEdit && (
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => moveImage(index, -1)}
+                          disabled={loading || index === 0}
+                          className="bg-white/90 hover:bg-white text-gray-900"
+                          title={t("properties.images.actions.moveEarlier")}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => moveImage(index, 1)}
+                          disabled={loading || index === images.length - 1}
+                          className="bg-white/90 hover:bg-white text-gray-900"
+                          title={t("properties.images.actions.moveLater")}
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => openReplaceDialog(imageUrl)}
+                          disabled={loading}
+                          className="bg-white/90 hover:bg-white text-gray-900"
+                        >
+                          <RefreshCw className="h-4 w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">
+                            {t("properties.images.actions.replace")}
+                          </span>
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => openDeleteDialog(imageUrl)}
+                          disabled={loading}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          <Trash2 className="h-4 w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">
+                            {t("properties.images.actions.delete")}
+                          </span>
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </Card>
             ))}
           </div>
         ) : (
-          <Card>
+          <Card
+            className={cn(
+              "border shadow-sm transition-all duration-300",
+              isLight ? "border-gray-100" : "border-white/14 text-white"
+            )}
+          >
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <ImageIcon className="h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <ImageIcon
+                className={cn(
+                  "h-12 w-12 mb-4",
+                  isLight ? "text-gray-400" : "text-white/40"
+                )}
+              />
+              <h3 className={cn("text-lg font-semibold mb-2", txHead)}>
                 {t("properties.images.empty.title")}
               </h3>
-              <p className="text-gray-600 text-center mb-4">
+              <p className={cn("text-center mb-4", txSub)}>
                 {t("properties.images.empty.description")}
               </p>
               {canEdit && (
@@ -286,7 +395,6 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
           </Card>
         )}
 
-        {/* Image Viewer Dialog */}
         {selectedImage && (
           <Dialog
             open={!!selectedImage}
@@ -303,6 +411,8 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                     values: { name: propertyName },
                   })}
                   className="absolute inset-0 w-full h-full object-contain"
+                  loading="eager"
+                  decoding="async"
                 />
               </div>
               <DialogFooter>
@@ -321,33 +431,83 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
           </Dialog>
         )}
 
-        {/* DISABLED: Delete functionality temporarily disabled */}
-        {/* <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <Dialog
+          open={showReplaceDialog}
+          onOpenChange={(open) => {
+            setShowReplaceDialog(open);
+            if (!open) setImageToReplace(null);
+          }}
+        >
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {t("properties.images.dialog.replaceTitle")}
+              </DialogTitle>
+              <DialogDescription>
+                {t("properties.images.dialog.replaceDescription")}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-2">
+              <ImageUpload
+                onImagesUploaded={handleReplaceUploaded}
+                maxFiles={1}
+                folder="SmartStartPM/properties"
+                quality="auto"
+                disabled={loading}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowReplaceDialog(false);
+                  setImageToReplace(null);
+                }}
+                disabled={loading}
+              >
+                {t("common.cancel")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Remove Image</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t("properties.images.dialog.deleteTitle")}
+              </AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to remove this image from the property
-                gallery? This action cannot be undone.
+                {t("properties.images.dialog.deleteDescription")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel
-                onClick={handleDeleteCancel}
+                onClick={() => setImageToDelete(null)}
                 disabled={loading}
               >
-                Cancel
+                {t("common.cancel")}
               </AlertDialogCancel>
               <AlertDialogAction
-                onClick={handleDeleteImage}
+                onClick={(e) => {
+                  e.preventDefault();
+                  void handleDeleteImage();
+                }}
                 disabled={loading}
                 className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
               >
-                {loading ? "Removing..." : "Remove Image"}
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin inline" />
+                    {t("properties.images.dialog.deleteProcessing")}
+                  </>
+                ) : (
+                  t("properties.images.dialog.deleteConfirm")
+                )}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
-        </AlertDialog> */}
+        </AlertDialog>
       </div>
     </ImageErrorBoundary>
   );

@@ -515,6 +515,12 @@
 
   "properties.images.toasts.addSuccess": "{count} Bild(er) erfolgreich hinzugefügt.",
   "properties.images.toasts.addError": "Bilder konnten nicht hinzugefügt werden.",
+  "properties.images.toasts.deleteSuccess": "Bild wurde entfernt.",
+  "properties.images.toasts.deleteError": "Bild konnte nicht entfernt werden.",
+  "properties.images.toasts.replaceSuccess": "Bild wurde ersetzt.",
+  "properties.images.toasts.replaceError": "Bild konnte nicht ersetzt werden.",
+  "properties.images.toasts.reorderSuccess": "Bildreihenfolge aktualisiert.",
+  "properties.images.toasts.reorderError": "Reihenfolge konnte nicht aktualisiert werden.",
 
   "properties.images.empty.title": "Keine Bilder verfügbar",
   "properties.images.empty.description": "Für diese Immobilie wurden noch keine Bilder hochgeladen.",
@@ -522,12 +528,22 @@
 
   "properties.images.actions.add": "Bild hinzufügen",
   "properties.images.actions.view": "Anzeigen",
+  "properties.images.actions.delete": "Löschen",
+  "properties.images.actions.replace": "Ersetzen",
+  "properties.images.actions.moveEarlier": "Weiter nach vorne in der Galerie",
+  "properties.images.actions.moveLater": "Weiter nach hinten in der Galerie",
 
   "properties.images.dialog.addTitle": "Neue Bilder hinzufügen",
   "properties.images.dialog.addDescription": "Laden Sie hochwertige Bilder hoch, um Ihre Immobilie zu präsentieren. Mehrere Dateien werden unterstützt.",
   "properties.images.dialog.helper": "Bilder werden automatisch für die Webanzeige optimiert.",
   "properties.images.dialog.processing": "Wird verarbeitet...",
   "properties.images.dialog.done": "Fertig",
+  "properties.images.dialog.replaceTitle": "Bild ersetzen",
+  "properties.images.dialog.replaceDescription": "Laden Sie ein neues Bild hoch. Es ersetzt dieses Foto an derselben Position in der Galerie.",
+  "properties.images.dialog.deleteTitle": "Bild entfernen",
+  "properties.images.dialog.deleteDescription": "Dieses Bild aus der Galerie entfernen? Gespeicherte Kopien auf unseren Servern werden nach Möglichkeit gelöscht.",
+  "properties.images.dialog.deleteConfirm": "Bild entfernen",
+  "properties.images.dialog.deleteProcessing": "Wird entfernt…",
 
   "properties.images.viewer.title": "Immobilienbild",
   "properties.images.viewer.close": "Schließen",

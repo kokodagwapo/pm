@@ -516,6 +516,24 @@ const PropertySchema = new Schema<IProperty>(
       default: null,
       trim: true,
     },
+    importSource: {
+      type: String,
+      default: null,
+      trim: true,
+      maxlength: [120, "importSource cannot exceed 120 characters"],
+    },
+    importExternalId: {
+      type: String,
+      default: null,
+      trim: true,
+      maxlength: [64, "importExternalId cannot exceed 64 characters"],
+    },
+    importListingUrl: {
+      type: String,
+      default: null,
+      trim: true,
+      maxlength: [500, "importListingUrl cannot exceed 500 characters"],
+    },
     deletedAt: {
       type: Date,
       default: null,
@@ -548,6 +566,16 @@ try {
   PropertySchema.index({ "address.zipCode": 1 });
   PropertySchema.index({ deletedAt: 1 });
   PropertySchema.index({ createdAt: -1 });
+  PropertySchema.index(
+    { importSource: 1, importExternalId: 1 },
+    {
+      unique: true,
+      partialFilterExpression: {
+        importSource: { $type: "string" },
+        importExternalId: { $type: "string" },
+      },
+    }
+  );
 
   // Compound indexes for common queries
   PropertySchema.index({ status: 1, type: 1 });

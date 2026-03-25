@@ -30,6 +30,8 @@
     "seed:faq": "tsx src/scripts/seed-faq.ts",
     "seed:owners": "tsx src/scripts/seed-property-owners.ts",
     "migrate:vms": "tsx src/scripts/migrate-vms-florida-properties.ts",
+    "db:vms-only": "tsx src/scripts/replace-db-with-vms-florida-export.ts",
+    "import:vms-url": "tsx src/scripts/import-vms-property-url.ts",
     "seed:35": "tsx src/scripts/seed-35-properties.ts",
     "export:data": "tsx src/scripts/export-data.ts",
     "import:data": "tsx src/scripts/import-data.ts",

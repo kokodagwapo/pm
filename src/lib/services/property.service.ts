@@ -722,6 +722,78 @@ class PropertyService {
   }
 
   /**
+   * Replace one gallery image URL (same position); removes old file from storage when R2.
+   */
+  async replacePropertyImage(
+    id: string,
+    oldUrl: string,
+    newUrl: string
+  ): Promise<PropertyResponse> {
+    const response = await fetch(`${this.baseUrl}/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        action: "replaceImage",
+        oldUrl,
+        newUrl,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(
+        error.error || error.message || "Failed to replace image"
+      );
+    }
+
+    const result = await response.json();
+
+    if (!result || !result.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    return result.data;
+  }
+
+  /**
+   * Reorder property images (same multiset of URLs as currently stored).
+   */
+  async reorderPropertyImages(
+    id: string,
+    images: string[]
+  ): Promise<PropertyResponse> {
+    const response = await fetch(`${this.baseUrl}/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        action: "reorderImages",
+        images,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(
+        error.error || error.message || "Failed to reorder images"
+      );
+    }
+
+    const result = await response.json();
+
+    if (!result || !result.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    return result.data;
+  }
+
+  /**
    * Add amenities to property
    */
   async addPropertyAmenities(

@@ -406,6 +406,71 @@ export const PATCH = withRoleAndDB([UserRole.ADMIN, UserRole.MANAGER, UserRole.O
           );
           break;
 
+        case "replaceImage": {
+          const oldUrl = data.oldUrl;
+          const newUrl = data.newUrl;
+          if (typeof oldUrl !== "string" || typeof newUrl !== "string") {
+            return createErrorResponse("oldUrl and newUrl are required", 400);
+          }
+          const replaceIdx = property.images.indexOf(oldUrl);
+          if (replaceIdx === -1) {
+            return createErrorResponse("Image not found on property", 400);
+          }
+          const replaceDeletePromises = [oldUrl].map(async (imageUrl: string) => {
+            try {
+              let objectKey: string | null = imageUrl;
+              if (
+                imageUrl.startsWith("http://") ||
+                imageUrl.startsWith("https://")
+              ) {
+                if (isR2Url(imageUrl)) {
+                  objectKey = extractObjectKey(imageUrl);
+                } else {
+                  console.warn(`Skipping non-R2 URL: ${imageUrl}`);
+                  return;
+                }
+              }
+
+              if (!objectKey) {
+                console.warn(`Could not extract object key from: ${imageUrl}`);
+                return;
+              }
+
+              const deleted = await deleteFromR2(objectKey);
+              if (!deleted) {
+                console.warn(
+                  `Failed to delete image from storage: ${imageUrl}`
+                );
+              }
+            } catch (error) {
+              console.error(
+                `Error deleting image from storage: ${imageUrl}`,
+                error
+              );
+            }
+          });
+          await Promise.allSettled(replaceDeletePromises);
+          property.images[replaceIdx] = newUrl;
+          break;
+        }
+
+        case "reorderImages": {
+          if (!Array.isArray(data.images)) {
+            return createErrorResponse("Images array is required", 400);
+          }
+          const nextOrder = data.images as string[];
+          const current = [...property.images];
+          if (current.length !== nextOrder.length) {
+            return createErrorResponse("Invalid image order", 400);
+          }
+          const canon = (arr: string[]) => [...arr].sort().join("\0");
+          if (canon(current) !== canon(nextOrder)) {
+            return createErrorResponse("Invalid image order", 400);
+          }
+          property.images = nextOrder;
+          break;
+        }
+
         case "addAmenities":
           if (!Array.isArray(data.amenities)) {
             return createErrorResponse("Amenities array is required", 400);
