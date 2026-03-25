@@ -122,6 +122,7 @@ export const GET = withRoleAndDB([
         marketRentSource,
         gapPercent: Math.round(gap * 1000) / 10,
         potentialUplift: Math.max(0, Math.round(marketRentForProperty - rent)),
+        potentialAnnualUplift: Math.max(0, Math.round((marketRentForProperty - rent) * 12)),
         endDate: lease.endDate,
         daysUntilExpiry: Math.ceil(
           ((lease.endDate as Date).getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
@@ -134,6 +135,7 @@ export const GET = withRoleAndDB([
     belowMarket.sort((a, b) => b.gapPercent - a.gapPercent);
 
     const totalPotentialUplift = belowMarket.reduce((s, a) => s + a.potentialUplift, 0);
+    const totalPotentialAnnualUplift = belowMarket.reduce((s, a) => s + a.potentialAnnualUplift, 0);
 
     return createSuccessResponse({
       alerts: belowMarket,
@@ -143,6 +145,7 @@ export const GET = withRoleAndDB([
       alertCount: belowMarket.length,
       expiringCount: expiringLeases.length,
       totalPotentialUplift,
+      totalPotentialAnnualUplift,
     });
   } catch (error) {
     return handleApiError(error);

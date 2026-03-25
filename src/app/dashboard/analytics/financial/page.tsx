@@ -145,10 +145,11 @@ export default function FinancialAnalyticsPage() {
   const [vendorSpendLoading, setVendorSpendLoading] = useState(false);
 
   const [marketRentData, setMarketRentData] = useState<{
-    alerts: { leaseId: string; propertyName: string; tenantName: string; currentRent: number; marketRent: number; gapPercent: number; endDate: string; daysUntilExpiry: number }[];
+    alerts: { leaseId: string; propertyName: string; tenantName: string; currentRent: number; marketRent: number; gapPercent: number; endDate: string; daysUntilExpiry: number; potentialUplift?: number; potentialAnnualUplift?: number }[];
     marketRent: number;
     alertCount: number;
     expiringCount: number;
+    totalPotentialAnnualUplift?: number;
   } | null>(null);
   const [marketRentLoading, setMarketRentLoading] = useState(false);
 
@@ -1326,8 +1327,11 @@ export default function FinancialAnalyticsPage() {
                               <p className="text-xs text-muted-foreground">{alert.propertyName} · Expires in {alert.daysUntilExpiry} day{alert.daysUntilExpiry !== 1 ? "s" : ""}</p>
                             </div>
                             <div className="text-right shrink-0 ml-4">
-                              <p className="text-sm font-semibold">{formatCurrency(alert.currentRent)}</p>
+                              <p className="text-sm font-semibold">{formatCurrency(alert.currentRent)}/mo</p>
                               <p className="text-xs text-muted-foreground">vs {formatCurrency(alert.marketRent)} market</p>
+                              {alert.potentialAnnualUplift != null && alert.potentialAnnualUplift > 0 && (
+                                <p className="text-xs text-green-700 dark:text-green-400 font-medium">+{formatCurrency(alert.potentialAnnualUplift)}/yr uplift</p>
+                              )}
                             </div>
                           </div>
                         ))}

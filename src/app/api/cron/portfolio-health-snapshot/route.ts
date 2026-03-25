@@ -29,7 +29,7 @@ function clamp(v: number, min = 0, max = 100) {
   return Math.max(min, Math.min(max, v));
 }
 
-async function computeAndPersistSnapshot(managerId: string): Promise<{
+async function computeAndPersistSnapshot(managerId: string, role: string): Promise<{
   managerId: string;
   score: number;
   grade: string;
@@ -48,7 +48,11 @@ async function computeAndPersistSnapshot(managerId: string): Promise<{
   }).lean();
   if (existing) return { managerId, score: existing.score, grade: existing.grade, alreadyExists: true };
 
-  const propertyQuery = { deletedAt: null };
+  // Scope properties: admins see all; managers see only properties they are assigned to
+  const propertyQuery: Record<string, unknown> = { deletedAt: null };
+  if (role === UserRole.MANAGER) {
+    propertyQuery.managerId = new mongoose.Types.ObjectId(managerId);
+  }
   const properties = await Property.find(propertyQuery).lean();
   const propertyIds = properties.map((p) => p._id as mongoose.Types.ObjectId);
 
@@ -172,10 +176,13 @@ export async function GET(request: NextRequest) {
     const managers = await User.find({
       role: { $in: [UserRole.ADMIN, UserRole.MANAGER] },
       deletedAt: null,
-    }).select("_id").lean();
+    }).select("_id role").lean();
 
     const results = await Promise.allSettled(
-      managers.map((m) => computeAndPersistSnapshot(m._id.toString()))
+      managers.map((m) => computeAndPersistSnapshot(
+        m._id.toString(),
+        (m as { role: string }).role
+      ))
     );
 
     const succeeded = results.filter((r) => r.status === "fulfilled").length;
