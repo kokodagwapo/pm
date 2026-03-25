@@ -73,6 +73,25 @@ export async function PATCH(
     const managerRoles = ["admin", "super_admin", "manager"];
     const isManager = managerRoles.includes(user.role);
 
+    // Resolve the vendor profile for the current user (vendor-side auth checks)
+    const sessionVendor = isManager
+      ? null
+      : await Vendor.findOne({ userId: user.id }).select("_id complianceHold").lean();
+
+    const isAssignedVendor =
+      sessionVendor &&
+      job.assignedVendorId &&
+      job.assignedVendorId.toString() === (sessionVendor as { _id: { toString: () => string } })._id.toString();
+
+    // Actions only the assigned vendor may perform
+    const vendorOnlyActions = ["accept", "decline", "en_route", "on_site", "start_work", "complete"];
+    if (vendorOnlyActions.includes(action) && !isManager && !isAssignedVendor) {
+      return NextResponse.json(
+        { error: "Only the assigned vendor or a manager may perform this action" },
+        { status: 403 }
+      );
+    }
+
     if (action === "accept") {
       job.status = "accepted";
       if (job.dispatchLog.length > 0) {
@@ -108,14 +127,17 @@ export async function PATCH(
       if (rest.managerNotes) job.managerNotes = rest.managerNotes;
 
       if (job.assignedVendorId && job.finalCost) {
-        await Vendor.findByIdAndUpdate(job.assignedVendorId, {
-          $inc: {
-            walletBalance: job.finalCost,
-            pendingPayout: job.finalCost,
-            completedJobs: 1,
+        // Use update pipeline to safely decrement activeWorkOrders without going below 0
+        await Vendor.findByIdAndUpdate(job.assignedVendorId, [
+          {
+            $set: {
+              walletBalance: { $add: ["$walletBalance", job.finalCost] },
+              pendingPayout: { $add: ["$pendingPayout", job.finalCost] },
+              completedJobs: { $add: ["$completedJobs", 1] },
+              activeWorkOrders: { $max: [0, { $subtract: ["$activeWorkOrders", 1] }] },
+            },
           },
-          $set: { activeWorkOrders: { $max: [0, { $subtract: ["$activeWorkOrders", 1] }] } },
-        });
+        ]);
       }
     } else if (action === "request_revision" && isManager) {
       job.status = "revision_requested";
@@ -165,6 +187,13 @@ export async function PATCH(
       const vendor = await Vendor.findById(vendorId);
       if (!vendor) {
         return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
+      }
+      // Ensure the requester owns this vendor profile (or is a manager)
+      if (!isManager && vendor.userId?.toString() !== user.id) {
+        return NextResponse.json(
+          { error: "You can only submit bids as your own vendor profile" },
+          { status: 403 }
+        );
       }
       if (vendor.complianceHold) {
         return NextResponse.json(

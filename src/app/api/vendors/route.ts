@@ -22,6 +22,8 @@ export async function GET(request: NextRequest) {
     const isApproved = searchParams.get("isApproved");
     const complianceHold = searchParams.get("complianceHold");
     const search = searchParams.get("search");
+    const email = searchParams.get("email");
+    const userId = searchParams.get("userId");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
 
@@ -32,6 +34,8 @@ export async function GET(request: NextRequest) {
       query.isApproved = isApproved === "true";
     if (complianceHold !== null && complianceHold !== undefined && complianceHold !== "")
       query.complianceHold = complianceHold === "true";
+    if (email) query.email = email.toLowerCase();
+    if (userId) query.userId = userId;
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
