@@ -239,6 +239,19 @@ export async function PATCH(
           { status: 400 }
         );
       }
+      // Job must be open and public to allow bids from the marketplace
+      if (job.status !== "open") {
+        return NextResponse.json(
+          { error: "Bids can only be submitted on open jobs" },
+          { status: 409 }
+        );
+      }
+      if (!isManager && !job.isPublicToMarketplace) {
+        return NextResponse.json(
+          { error: "This job is not open to the marketplace" },
+          { status: 403 }
+        );
+      }
       const vendor = await Vendor.findById(vendorId);
       if (!vendor) {
         return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
