@@ -4,6 +4,7 @@ import connectDB from "@/lib/mongodb";
 import Vendor from "@/models/Vendor";
 import VendorJob from "@/models/VendorJob";
 import mongoose from "mongoose";
+import Lease from "@/models/Lease";
 
 interface SessionUser {
   id: string;
@@ -77,6 +78,21 @@ export async function POST(request: NextRequest) {
       job.vendorRating = rating;
       if (comment) job.vendorRatingComment = comment;
     } else {
+      // Tenant ratings: verify the rater has an active lease for the job's property
+      if (!job.propertyId) {
+        return NextResponse.json({ error: "Job has no associated property" }, { status: 409 });
+      }
+      const activeLease = await Lease.findOne({
+        tenantId: user.id,
+        propertyId: job.propertyId,
+        status: "active",
+      }).select("_id").lean();
+      if (!activeLease) {
+        return NextResponse.json(
+          { error: "You must be an active tenant of this property to rate the vendor" },
+          { status: 403 }
+        );
+      }
       job.tenantRating = rating;
       if (comment) job.tenantRatingComment = comment;
     }

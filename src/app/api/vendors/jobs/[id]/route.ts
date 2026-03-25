@@ -199,6 +199,12 @@ export async function PATCH(
         });
       }
     } else if (action === "rate_vendor" && isManager) {
+      if (!["approved", "payment_released"].includes(job.status)) {
+        return NextResponse.json(
+          { error: "Vendor can only be rated after the job is approved or paid" },
+          { status: 409 }
+        );
+      }
       const { rating, comment } = rest;
       if (!rating || rating < 1 || rating > 5) {
         return NextResponse.json({ error: "rating must be between 1 and 5" }, { status: 400 });
