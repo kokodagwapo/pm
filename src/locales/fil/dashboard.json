@@ -52,6 +52,12 @@
   "dashboard.cards.collectionRate.title": "Rate ng Koleksyon",
   "dashboard.cards.collectionRate.description": "Gaano kahusay na pumasok ang upa",
 
+  "dashboard.cards.pendingRentBalance.title": "Nakabinbing renta",
+  "dashboard.cards.pendingRentBalance.description": "Sa {count} nakatakdang singil na hindi pa nabayaran",
+
+  "dashboard.cards.overdueBalance.title": "Overdue na balanse",
+  "dashboard.cards.overdueBalance.description": "{count} invoice na overdue o lampas sa grace period",
+
   "dashboard.cards.activeTenants.title": "Mga Nangungupahan",
   "dashboard.cards.activeTenants.description": "{count} na bagong aplikasyon ang nakabinbin",
 

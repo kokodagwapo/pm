@@ -290,6 +290,7 @@
   "properties.newProperty.title": "Créer une nouvelle propriété",
   "properties.newProperty.subtitle": "Ajoutez une nouvelle propriété à votre portefeuille avec des informations détaillées et une gestion intégrée des unités.",
   "properties.newProperty.backToList": "Retour aux propriétés",
+  "properties.newProperty.hint": "Remplissez les sections ci-dessous—détails, unités, équipements et photos—puis enregistrez en bas de page.",
   "properties.newProperty.success.title": "Propriété créée avec succès",
   "properties.newProperty.success.description": "{name} a été ajoutée à votre portefeuille.",
   "properties.newProperty.error.title": "Impossible de créer la propriété",

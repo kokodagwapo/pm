@@ -33,7 +33,6 @@
   "nav.section.analytics": "Analytics",
   "nav.section.automation": "Automation",
   "nav.section.communication": "Communication",
-  "nav.section.events": "Schedule",
   "nav.section.settings": "Settings",
   "nav.section.administration": "Administration",
 
@@ -95,7 +94,7 @@
 
   "nav.messages": "Messages",
   "nav.announcements": "Announcements",
-  "nav.calendar": "Calendar",
+  "nav.calendar": "What's On",
   "nav.aiHelp": "Luna AI",
   "nav.aiHelp.luna": "AI Chat",
   "nav.aiHelp.faq": "Help Center",
@@ -109,6 +108,10 @@
   "nav.section.rentals": "Rentals",
 
   "nav.properties.calendar": "Property Calendar",
+  "nav.properties.stayFinder": "Stay finder",
+  "nav.properties.stayFinderHint": "Guest-style availability search (VMS Florida–style flow). Listing cards open each property’s dashboard calendar.",
+  "nav.properties.stayFinderPublicLink": "Open public guest page",
+  "nav.properties.stayFinderCalendarTeaser": "guest-style availability (VMS Florida–style flow)",
 
   "nav.rentalRequests": "Rental Requests",
   "nav.rentalRequests.all": "All Requests",

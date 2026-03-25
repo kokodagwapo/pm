@@ -137,17 +137,17 @@ export function LeaseCard({
 
   return (
     <>
-      <Card className="hover:shadow-xl transition-all duration-300 border-border/40 overflow-hidden group p-0 bg-card">
-        {/* Header with gradient background */}
-        <div className="relative bg-gradient-to-br from-primary/8 via-primary/4 to-transparent p-4 border-b border-border/50">
+      <Card className="group overflow-hidden border-border/40 p-0 transition-all duration-300 hover:border-slate-300/70 hover:shadow-lg">
+        {/* Header — readable on light dashboard glass + immersive dark */}
+        <div className="relative border-b border-slate-200/70 bg-gradient-to-br from-slate-50/95 via-white to-sky-50/20 p-4 dark:border-border/50 dark:from-primary/8 dark:via-primary/4 dark:to-transparent">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="p-2 rounded-xl bg-background shadow-sm border border-border/60 shrink-0">
+              <div className="shrink-0 rounded-xl border border-slate-200/80 bg-white/90 p-2 shadow-sm dark:border-border/60 dark:bg-background">
                 <Home className="h-4 w-4 text-primary" />
               </div>
-              <div className="space-y-0.5 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-semibold text-sm text-foreground truncate">
+              <div className="min-w-0 space-y-0.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="truncate text-sm font-semibold text-slate-900 dark:text-foreground">
                     {lease?.propertyId?.name}
                   </h3>
                   {lease.unit && (
@@ -156,7 +156,7 @@ export function LeaseCard({
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground line-clamp-1">
+                <p className="line-clamp-1 text-xs text-slate-600 dark:text-muted-foreground">
                   {lease?.propertyId?.address?.street},{" "}
                   {lease?.propertyId?.address?.city},{" "}
                   {lease?.propertyId?.address?.state}
@@ -276,7 +276,7 @@ export function LeaseCard({
           </div>
 
           {/* Tenant Info Badge */}
-          <div className="flex items-center gap-3 px-3 py-2.5 bg-background/80 backdrop-blur-sm rounded-xl border shadow-sm w-fit">
+          <div className="flex w-fit items-center gap-3 rounded-xl border border-slate-200/80 bg-white/90 px-3 py-2.5 shadow-sm backdrop-blur-sm dark:border-border dark:bg-background/80">
             <Avatar className="h-9 w-9 border-2 border-primary/20">
               <AvatarImage
                 src={lease.tenantId?.avatar}
@@ -288,12 +288,12 @@ export function LeaseCard({
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-foreground">
+              <span className="text-sm font-semibold text-slate-900 dark:text-foreground">
                 {lease.tenantId?.firstName && lease.tenantId?.lastName
                   ? `${lease.tenantId.firstName} ${lease.tenantId.lastName}`
                   : "Unknown Tenant"}
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-slate-600 dark:text-muted-foreground">
                 {lease.tenantId?.email || "No email"}
               </span>
             </div>
@@ -302,10 +302,12 @@ export function LeaseCard({
 
         <CardContent className="p-4 space-y-3">
           {/* Lease Period with visual timeline */}
-          <div className="flex items-center justify-between p-2.5 bg-muted/40 rounded-lg">
+          <div className="flex items-center justify-between rounded-lg bg-slate-100/90 p-2.5 dark:bg-muted/40">
             <div className="flex items-center gap-2">
-              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs font-medium text-muted-foreground">Lease Period</span>
+              <Calendar className="h-3.5 w-3.5 text-slate-500 dark:text-muted-foreground" />
+              <span className="text-xs font-medium text-slate-600 dark:text-muted-foreground">
+                Lease Period
+              </span>
             </div>
             <span
               className={`text-xs font-bold px-2 py-0.5 rounded-full ${
@@ -323,29 +325,29 @@ export function LeaseCard({
                 : "Expired"}
             </span>
           </div>
-          <div className="text-[11px] text-muted-foreground px-1">
+          <div className="px-1 text-[11px] text-slate-600 dark:text-muted-foreground">
             {formatDate(lease.startDate)} - {formatDate(lease.endDate)}
           </div>
 
           {/* Financial Summary */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="p-2.5 bg-muted/30 rounded-lg border border-border/40">
-              <div className="flex items-center gap-1 text-muted-foreground mb-1">
+            <div className="rounded-lg border border-slate-200/70 bg-slate-50/90 p-2.5 dark:border-border/40 dark:bg-muted/30">
+              <div className="mb-1 flex items-center gap-1 text-slate-600 dark:text-muted-foreground">
                 <DollarSign className="h-3 w-3" />
                 <span className="text-[10px] font-medium uppercase tracking-wide">Monthly Rent</span>
               </div>
-              <p className="text-sm font-bold text-foreground">
+              <p className="text-sm font-bold text-slate-900 dark:text-foreground">
                 {formatCurrency(
                   lease.unit?.rentAmount || lease.terms.rentAmount
                 )}
               </p>
             </div>
-            <div className="p-2.5 bg-muted/30 rounded-lg border border-border/40">
-              <div className="flex items-center gap-1 text-muted-foreground mb-1">
+            <div className="rounded-lg border border-slate-200/70 bg-slate-50/90 p-2.5 dark:border-border/40 dark:bg-muted/30">
+              <div className="mb-1 flex items-center gap-1 text-slate-600 dark:text-muted-foreground">
                 <DollarSign className="h-3 w-3" />
                 <span className="text-[10px] font-medium uppercase tracking-wide">Security</span>
               </div>
-              <p className="text-sm font-bold text-foreground">
+              <p className="text-sm font-bold text-slate-900 dark:text-foreground">
                 {formatCurrency(lease.terms.securityDeposit)}
               </p>
             </div>
@@ -403,7 +405,11 @@ export function LeaseCard({
           <LeaseInvoiceModal
             lease={lease}
             trigger={
-              <Button variant="ghost" size="sm" className="w-full h-7 text-xs text-muted-foreground hover:text-foreground">
+              <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-full text-xs text-slate-600 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
+            >
                 <Download className="mr-1.5 h-3.5 w-3.5" />
                 PDF
               </Button>

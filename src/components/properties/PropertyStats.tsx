@@ -183,6 +183,7 @@ export default function PropertyStats({
   return (
     <AnalyticsCardGrid>
       <AnalyticsCard
+        lightForegroundBlack
         title={t("properties.stats.totalProperties.title")}
         value={typeof totalCount === "number" ? totalCount : stats.total}
         description={t("properties.stats.totalProperties.description")}
@@ -191,6 +192,7 @@ export default function PropertyStats({
       />
 
       <AnalyticsCard
+        lightForegroundBlack
         title={t("properties.stats.availableProperties.title")}
         value={stats.available}
         description={t("properties.stats.availableProperties.description")}
@@ -199,6 +201,7 @@ export default function PropertyStats({
       />
 
       <AnalyticsCard
+        lightForegroundBlack
         title={t("properties.stats.occupiedProperties.title")}
         value={stats.occupied}
         description={t("properties.stats.occupiedProperties.description")}
@@ -207,6 +210,7 @@ export default function PropertyStats({
       />
 
       <AnalyticsCard
+        lightForegroundBlack
         title={t("properties.stats.averageRent.title")}
         value={
           stats.averageRent > 0
@@ -219,6 +223,7 @@ export default function PropertyStats({
       />
 
       <AnalyticsCard
+        lightForegroundBlack
         title={t("properties.stats.underMaintenance.title")}
         value={stats.maintenance}
         description={t("properties.stats.underMaintenance.description")}
@@ -227,6 +232,7 @@ export default function PropertyStats({
       />
 
       <AnalyticsCard
+        lightForegroundBlack
         title={t("properties.stats.totalRentValue.title")}
         value={
           stats.totalRentValue > 0
@@ -240,6 +246,7 @@ export default function PropertyStats({
 
       {/* Unit-based statistics */}
       <AnalyticsCard
+        lightForegroundBlack
         title={t("properties.stats.totalUnits.title")}
         value={stats.totalUnits}
         description={t("properties.stats.totalUnits.description")}
@@ -248,6 +255,7 @@ export default function PropertyStats({
       />
 
       <AnalyticsCard
+        lightForegroundBlack
         title={t("properties.stats.availableUnits.title")}
         value={stats.availableUnits}
         description={t("properties.stats.availableUnits.description")}
@@ -256,6 +264,7 @@ export default function PropertyStats({
       />
 
       <AnalyticsCard
+        lightForegroundBlack
         title={t("properties.stats.occupiedUnits.title")}
         value={stats.occupiedUnits}
         description={t("properties.stats.occupiedUnits.description")}
@@ -264,6 +273,7 @@ export default function PropertyStats({
       />
 
       <AnalyticsCard
+        lightForegroundBlack
         title={t("properties.stats.unitsInMaintenance.title")}
         value={stats.maintenanceUnits}
         description={t("properties.stats.unitsInMaintenance.description")}

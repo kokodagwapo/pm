@@ -341,7 +341,7 @@ const PropertyAmenities: React.FC<PropertyAmenitiesProps> = ({
               return (
                 <Card key={category}>
                   <CardHeader>
-                    <CardTitle className="flex items-center text-lg">
+                    <CardTitle className="flex items-center text-lg text-black dark:text-gray-100">
                       <IconComponent className="h-5 w-5 mr-2" />
                       {t(categoryLabelKeyMap[category] || category)}
                       <Badge variant="secondary" className="ml-2">
@@ -354,14 +354,14 @@ const PropertyAmenities: React.FC<PropertyAmenitiesProps> = ({
                       {categoryAmenities.map((amenity, index) => (
                         <div
                           key={index}
-                          className="flex items-start justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                          className="flex items-start justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-black dark:text-gray-100"
                         >
                           <div className="flex-1">
-                            <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                            <h4 className="font-medium text-black dark:text-gray-100">
                               {amenity.name}
                             </h4>
                             {amenity.description && (
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              <p className="text-sm text-black/85 dark:text-gray-400 mt-1">
                                 {amenity.description}
                               </p>
                             )}

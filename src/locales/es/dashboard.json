@@ -52,6 +52,12 @@
   "dashboard.cards.collectionRate.title": "Tasa de cobro",
   "dashboard.cards.collectionRate.description": "Eficiencia en el cobro de pagos",
 
+  "dashboard.cards.pendingRentBalance.title": "Alquiler pendiente",
+  "dashboard.cards.pendingRentBalance.description": "En {count} cargos programados aún sin liquidar",
+
+  "dashboard.cards.overdueBalance.title": "Saldo vencido",
+  "dashboard.cards.overdueBalance.description": "{count} facturas vencidas o fuera del período de gracia",
+
   "dashboard.cards.activeTenants.title": "Inquilinos activos",
   "dashboard.cards.activeTenants.description": "{count} solicitudes pendientes",
 

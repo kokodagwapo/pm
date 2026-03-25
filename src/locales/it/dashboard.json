@@ -52,6 +52,12 @@
   "dashboard.cards.collectionRate.title": "Tasso di Incasso",
   "dashboard.cards.collectionRate.description": "Efficienza di riscossione affitti",
 
+  "dashboard.cards.pendingRentBalance.title": "Affitto in sospeso",
+  "dashboard.cards.pendingRentBalance.description": "Su {count} addebiti programmati non ancora saldati",
+
+  "dashboard.cards.overdueBalance.title": "Saldo scaduto",
+  "dashboard.cards.overdueBalance.description": "{count} fatture scadute o oltre il periodo di grazia",
+
   "dashboard.cards.activeTenants.title": "Inquilini Attivi",
   "dashboard.cards.activeTenants.description": "{count} nuove candidature in attesa",
 

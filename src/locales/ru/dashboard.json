@@ -52,6 +52,12 @@
   "dashboard.cards.collectionRate.title": "Процент сбора",
   "dashboard.cards.collectionRate.description": "Эффективность сбора аренды",
 
+  "dashboard.cards.pendingRentBalance.title": "Ожидающая аренда",
+  "dashboard.cards.pendingRentBalance.description": "По {count} начислениям ещё не оплачено",
+
+  "dashboard.cards.overdueBalance.title": "Просроченный баланс",
+  "dashboard.cards.overdueBalance.description": "{count} счетов просрочено или после льготного периода",
+
   "dashboard.cards.activeTenants.title": "Активные арендаторы",
   "dashboard.cards.activeTenants.description": "{count} новых заявок в ожидании",
 

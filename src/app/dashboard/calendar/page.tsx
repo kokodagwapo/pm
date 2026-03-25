@@ -186,7 +186,7 @@ export default function CalendarPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="text-3xl font-bold text-black dark:text-gray-100">
             {t("calendar.header.title")}
             {isTenant && (
               <span className="ml-3 text-sm font-normal text-gray-500 dark:text-gray-400">
@@ -194,7 +194,7 @@ export default function CalendarPage() {
               </span>
             )}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-black dark:text-gray-200">
             {isTenant
               ? t("calendar.header.subtitleTenant")
               : t("calendar.header.subtitleAdmin")}
@@ -272,22 +272,22 @@ export default function CalendarPage() {
         onValueChange={setActiveTab}
         className="space-y-8"
       >
-        <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border-0">
+        <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border-0 text-black dark:text-gray-100">
           <TabsTrigger
             value="calendar"
-            className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm font-medium transition-all duration-200"
+            className="rounded-lg font-medium transition-all duration-200 !text-black dark:!text-gray-100"
           >
             {t("calendar.tabs.calendarView")}
           </TabsTrigger>
           <TabsTrigger
             value="events"
-            className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm font-medium transition-all duration-200"
+            className="rounded-lg font-medium transition-all duration-200 !text-black dark:!text-gray-100"
           >
             {t("calendar.tabs.eventList")}
           </TabsTrigger>
           <TabsTrigger
             value="analytics"
-            className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm font-medium transition-all duration-200"
+            className="rounded-lg font-medium transition-all duration-200 !text-black dark:!text-gray-100"
           >
             {t("calendar.tabs.analytics")}
           </TabsTrigger>

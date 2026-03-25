@@ -38,6 +38,7 @@ export const GET = withRoleAndDB([
     // Parse lease-specific filter parameters
     const status = searchParams.get("status") || undefined;
     const propertyId = searchParams.get("propertyId") || undefined;
+    const unitId = searchParams.get("unitId") || undefined;
     const tenantId = searchParams.get("tenantId") || undefined;
     const expiring = searchParams.get("expiring") || undefined;
 
@@ -61,8 +62,16 @@ export const GET = withRoleAndDB([
     // Admin and Manager can see all company leases - no filtering needed
 
     // Apply lease-specific filters
-    if (status) query.status = status;
+    if (status) {
+      const parts = status.split(",").map((s) => s.trim()).filter(Boolean);
+      if (parts.length > 1) {
+        query.status = { $in: parts };
+      } else {
+        query.status = parts[0];
+      }
+    }
     if (propertyId) query.propertyId = propertyId;
+    if (unitId) query.unitId = unitId;
     if (tenantId) query.tenantId = tenantId;
 
     // Handle expiring leases filter

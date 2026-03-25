@@ -58,6 +58,12 @@
   "dashboard.cards.collectionRate.title": "Collection Rate",
   "dashboard.cards.collectionRate.description": "How efficiently rent is coming in",
 
+  "dashboard.cards.pendingRentBalance.title": "Pending rent",
+  "dashboard.cards.pendingRentBalance.description": "Across {count} scheduled charges not yet settled",
+
+  "dashboard.cards.overdueBalance.title": "Overdue balance",
+  "dashboard.cards.overdueBalance.description": "{count} invoices past due or in grace breach",
+
   "dashboard.cards.activeTenants.title": "Happy Residents",
   "dashboard.cards.activeTenants.description": "{count} new applications pending",
 
@@ -201,5 +207,34 @@
   "dashboard.admin.demoLeads.col.name": "Name",
   "dashboard.admin.demoLeads.col.phone": "Phone",
   "dashboard.admin.demoLeads.col.email": "Email",
-  "dashboard.admin.demoLeads.col.submitted": "Submitted"
+  "dashboard.admin.demoLeads.col.submitted": "Submitted",
+
+  "dashboard.propertyCalendar.title": "Property calendar",
+  "dashboard.propertyCalendar.subtitle": "Search by name or address, pick a unit, then manage availability, blocks, and bookings from one place.",
+  "dashboard.propertyCalendar.cardTitle": "Availability & bookings",
+  "dashboard.propertyCalendar.cardDescription": "Blocked dates, active leases, and pricing show on the grid. Use the toolbar to block time, add pricing, or jump to leases and maintenance.",
+  "dashboard.propertyCalendar.searchPlaceholder": "Search property name or address…",
+  "dashboard.propertyCalendar.pickProperty": "Select a property…",
+  "dashboard.propertyCalendar.loading": "Searching…",
+  "dashboard.propertyCalendar.noResults": "No properties match.",
+  "dashboard.propertyCalendar.selectUnit": "Select unit",
+  "dashboard.propertyCalendar.unitLabel": "Unit {number} — {rent}/mo",
+  "dashboard.propertyCalendar.blockDates": "Block dates",
+  "dashboard.propertyCalendar.addPricing": "Add pricing",
+  "dashboard.propertyCalendar.moreActions": "More",
+  "dashboard.propertyCalendar.openFullCalendar": "Open full calendar page",
+  "dashboard.propertyCalendar.bookLease": "Book / new lease",
+  "dashboard.propertyCalendar.addMaintenance": "New maintenance request",
+  "dashboard.propertyCalendar.scheduleActivity": "Schedule activity (home watch, dog watch…)",
+  "dashboard.propertyCalendar.activityHintTitle": "Describe the activity",
+  "dashboard.propertyCalendar.activityHintBody": "Choose Hold or Personal and note home watch, dog watch, or any visit in the reason field.",
+  "dashboard.propertyCalendar.blockAllUnits": "Block all units",
+  "dashboard.propertyCalendar.emptyState": "Choose a property above to load its calendar.",
+  "dashboard.propertyCalendar.tabCalendar": "Calendar",
+  "dashboard.propertyCalendar.tabBlocks": "Blocks ({count})",
+  "dashboard.propertyCalendar.filterAllBlocks": "All block types",
+  "dashboard.propertyCalendar.noBlocks": "No date blocks for this unit.",
+  "dashboard.propertyCalendar.removeBlock": "Remove block",
+  "dashboard.propertyCalendar.noUnits": "This property has no units to show on the calendar.",
+  "dashboard.propertyCalendar.leaseHint": "Booked days reflect active or pending leases. Create or change leases under Leases; use Block dates for holds and maintenance windows."
 }

@@ -85,6 +85,10 @@ interface AvailabilityCalendarProps {
   showPricing?: boolean;
   showLegend?: boolean;
   className?: string;
+  /** 1 = one month (classic month view); 2 = two months side by side (default). */
+  monthsShown?: 1 | 2;
+  /** Taller day cells for single-month dashboard layouts. */
+  daySize?: "default" | "comfortable";
 }
 
 const BLOCK_TYPE_LABELS: Record<string, string> = {
@@ -167,6 +171,8 @@ export function AvailabilityCalendar({
   showPricing = true,
   showLegend = true,
   className,
+  monthsShown = 2,
+  daySize = "default",
 }: AvailabilityCalendarProps) {
   const dash = useOptionalDashboardAppearance();
   const isLight = dash?.isLight ?? false;
@@ -361,6 +367,9 @@ export function AvailabilityCalendar({
     [selectionStart, selectionEnd]
   );
 
+  const dayCellMin = daySize === "comfortable" ? "h-16 min-h-[4rem]" : "h-14";
+  const dayTextSize = daySize === "comfortable" ? "text-sm" : "text-xs";
+
   const renderMonth = (year: number, month: number) => {
     const daysInMonth = getDaysInMonth(year, month);
     const firstDay = getFirstDayOfMonth(year, month);
@@ -379,21 +388,33 @@ export function AvailabilityCalendar({
     }
 
     return (
-      <div className="flex-1 min-w-[280px]">
-        <h3
+      <div
+        className={cn(
+          "flex-1",
+          monthsShown === 1 ? "min-w-0 max-w-xl mx-auto w-full" : "min-w-[280px]"
+        )}
+      >
+        {monthsShown === 2 && (
+          <h3
+            className={cn(
+              "mb-3 text-center text-base font-semibold",
+              isLight ? "text-slate-900" : "text-white"
+            )}
+          >
+            {monthName}
+          </h3>
+        )}
+        <div
           className={cn(
-            "mb-3 text-center text-base font-semibold",
-            isLight ? "text-slate-900" : "text-white"
+            "grid grid-cols-7 mb-2",
+            monthsShown === 1 ? "gap-1.5" : "gap-0.5"
           )}
         >
-          {monthName}
-        </h3>
-        <div className="grid grid-cols-7 gap-0.5 mb-1">
           {WEEKDAY_HEADERS.map((header) => (
             <div
               key={header}
               className={cn(
-                "py-1 text-center text-xs font-medium",
+                "py-1 text-center text-[11px] font-semibold uppercase tracking-wider",
                 isLight ? "text-slate-500" : "text-muted-foreground"
               )}
             >
@@ -401,10 +422,15 @@ export function AvailabilityCalendar({
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-0.5">
+        <div
+          className={cn(
+            "grid grid-cols-7",
+            monthsShown === 1 ? "gap-1.5" : "gap-0.5"
+          )}
+        >
           {days.map((dayInfo, index) => {
             if (!dayInfo) {
-              return <div key={`empty-${index}`} className="h-14" />;
+              return <div key={`empty-${index}`} className={dayCellMin} />;
             }
             return renderDay(dayInfo);
           })}
@@ -427,7 +453,9 @@ export function AvailabilityCalendar({
             <button
               type="button"
               className={cn(
-                "relative h-14 w-full rounded-md text-xs transition-all duration-150 flex flex-col items-center justify-start pt-1 gap-0.5 select-none",
+                "relative w-full rounded-xl transition-all duration-150 flex flex-col items-center justify-start pt-1 gap-0.5 select-none",
+                dayCellMin,
+                dayTextSize,
                 !isCurrentMonth && "opacity-40",
                 statusColors[status],
                 selected && "ring-2 ring-primary ring-offset-1",
@@ -447,7 +475,8 @@ export function AvailabilityCalendar({
               {showPricing && status === "available" && dayInfo.pricePerNight !== undefined && (
                 <span
                   className={cn(
-                    "max-w-full truncate px-0.5 text-[10px] leading-none",
+                    "max-w-full truncate px-0.5 leading-none",
+                    daySize === "comfortable" ? "text-[11px]" : "text-[10px]",
                     isLight ? "text-slate-600" : "text-muted-foreground"
                   )}
                 >
@@ -585,103 +614,147 @@ export function AvailabilityCalendar({
   }, [currentDate, today]);
 
   const canGoForward = useMemo(() => {
+    if (monthsShown === 1) {
+      const nextFirst = new Date(month1Year, month1Month + 1, 1);
+      return nextFirst <= maxDate;
+    }
     const nextMonth = new Date(month2Year, month2Month + 1, 1);
     return nextMonth <= maxDate;
-  }, [month2Year, month2Month, maxDate]);
+  }, [monthsShown, month1Year, month1Month, month2Year, month2Month, maxDate]);
+
+  const centerMonthLabel = new Date(month1Year, month1Month, 1).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
 
   return (
     <div className={cn("space-y-4", className)} ref={calendarRef}>
-      <div className="flex items-center justify-between">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => navigateMonth(-1)}
-          disabled={!canGoBack}
-          aria-label="Previous month"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <Button
+            variant="outline"
+            size="icon"
+            className={cn(
+              "shrink-0 rounded-xl shadow-sm",
+              isLight && "border-slate-200 bg-white hover:bg-slate-50"
+            )}
+            onClick={() => navigateMonth(-1)}
+            disabled={!canGoBack}
+            aria-label="Previous month"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
 
-        <div className="flex items-center gap-2">
-          {selectionStart && selectionEnd && (
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
-                {new Date(
-                  Math.min(selectionStart.getTime(), selectionEnd.getTime())
-                ).toLocaleDateString()}{" "}
-                –{" "}
-                {new Date(
-                  Math.max(selectionStart.getTime(), selectionEnd.getTime())
-                ).toLocaleDateString()}
-              </Badge>
-              {!readOnly && onBlockCreate && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    const start = new Date(
-                      Math.min(selectionStart.getTime(), selectionEnd.getTime())
-                    );
-                    const end = new Date(
-                      Math.max(selectionStart.getTime(), selectionEnd.getTime())
-                    );
-                    end.setDate(end.getDate() + 1);
-                    onBlockCreate({ startDate: start, endDate: end });
-                    setSelectionStart(null);
-                    setSelectionEnd(null);
-                  }}
-                >
-                  Block Dates
-                </Button>
+          {monthsShown === 1 ? (
+            <h2
+              className={cn(
+                "min-w-0 flex-1 truncate text-center text-lg font-semibold tracking-tight sm:text-xl",
+                isLight ? "text-slate-900" : "text-white"
               )}
-              {!readOnly && onPricingCreate && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    const start = new Date(
-                      Math.min(selectionStart.getTime(), selectionEnd.getTime())
-                    );
-                    const end = new Date(
-                      Math.max(selectionStart.getTime(), selectionEnd.getTime())
-                    );
-                    end.setDate(end.getDate() + 1);
-                    onPricingCreate({ startDate: start, endDate: end });
-                    setSelectionStart(null);
-                    setSelectionEnd(null);
-                  }}
-                >
-                  Set Pricing
-                </Button>
-              )}
+            >
+              {centerMonthLabel}
+            </h2>
+          ) : (
+            <div className="flex-1" aria-hidden />
+          )}
+
+          <Button
+            variant="outline"
+            size="icon"
+            className={cn(
+              "shrink-0 rounded-xl shadow-sm",
+              isLight && "border-slate-200 bg-white hover:bg-slate-50"
+            )}
+            onClick={() => navigateMonth(1)}
+            disabled={!canGoForward}
+            aria-label="Next month"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {selectionStart && selectionEnd && (
+          <div
+            className={cn(
+              "flex flex-wrap items-center justify-center gap-2 rounded-xl border px-3 py-2.5",
+              isLight
+                ? "border-slate-200/90 bg-slate-50/90 shadow-inner"
+                : "border-white/10 bg-white/[0.06]"
+            )}
+          >
+            <Badge variant="outline" className="text-xs font-medium">
+              {new Date(
+                Math.min(selectionStart.getTime(), selectionEnd.getTime())
+              ).toLocaleDateString()}{" "}
+              –{" "}
+              {new Date(
+                Math.max(selectionStart.getTime(), selectionEnd.getTime())
+              ).toLocaleDateString()}
+            </Badge>
+            {!readOnly && onBlockCreate && (
               <Button
                 size="sm"
-                variant="ghost"
+                variant="outline"
+                className={cn(isLight && "border-slate-200 bg-white")}
                 onClick={() => {
+                  const start = new Date(
+                    Math.min(selectionStart.getTime(), selectionEnd.getTime())
+                  );
+                  const end = new Date(
+                    Math.max(selectionStart.getTime(), selectionEnd.getTime())
+                  );
+                  end.setDate(end.getDate() + 1);
+                  onBlockCreate({ startDate: start, endDate: end });
                   setSelectionStart(null);
                   setSelectionEnd(null);
                 }}
               >
-                Clear
+                Block Dates
               </Button>
-            </div>
-          )}
-        </div>
-
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => navigateMonth(1)}
-          disabled={!canGoForward}
-          aria-label="Next month"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+            )}
+            {!readOnly && onPricingCreate && (
+              <Button
+                size="sm"
+                variant="outline"
+                className={cn(isLight && "border-slate-200 bg-white")}
+                onClick={() => {
+                  const start = new Date(
+                    Math.min(selectionStart.getTime(), selectionEnd.getTime())
+                  );
+                  const end = new Date(
+                    Math.max(selectionStart.getTime(), selectionEnd.getTime())
+                  );
+                  end.setDate(end.getDate() + 1);
+                  onPricingCreate({ startDate: start, endDate: end });
+                  setSelectionStart(null);
+                  setSelectionEnd(null);
+                }}
+              >
+                Set Pricing
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setSelectionStart(null);
+                setSelectionEnd(null);
+              }}
+            >
+              Clear
+            </Button>
+          </div>
+        )}
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div
+        className={cn(
+          "flex flex-col gap-6",
+          monthsShown === 1 ? "" : "md:flex-row"
+        )}
+      >
         {renderMonth(month1Year, month1Month)}
-        {renderMonth(month2Year, month2Month)}
+        {monthsShown === 2 && renderMonth(month2Year, month2Month)}
       </div>
 
       {showLegend && (

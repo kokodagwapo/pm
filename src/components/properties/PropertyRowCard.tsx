@@ -168,7 +168,7 @@ export function PropertyRowCard({
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
-                <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 dark:text-gray-500" />
+                <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-black dark:text-gray-500" />
               </div>
             )}
 
@@ -196,7 +196,7 @@ export function PropertyRowCard({
 
             {/* Type Badge */}
             <div className="absolute top-1 right-1">
-              <span className="inline-flex items-center px-1 py-0.5 sm:px-1.5 rounded text-xs font-medium bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600">
+              <span className="inline-flex items-center px-1 py-0.5 sm:px-1.5 rounded text-xs font-medium bg-white/90 dark:bg-gray-800/90 text-black dark:text-gray-200 border border-gray-200 dark:border-gray-600">
                 {getTypeIcon(propertyType)}
               </span>
             </div>
@@ -208,7 +208,7 @@ export function PropertyRowCard({
             <div className="sm:hidden">
               <div className="flex justify-between items-start mb-2">
                 <div className="flex-1 min-w-0 mr-2">
-                  <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
+                  <h3 className="font-semibold text-sm text-black dark:text-gray-100 truncate">
                     {onView ? (
                       <button
                         onClick={() => onView(property)}
@@ -225,26 +225,26 @@ export function PropertyRowCard({
                       </Link>
                     )}
                   </h3>
-                  <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center text-xs text-black dark:text-gray-400">
                     <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
                     <span className="truncate">{displayAddress}</span>
                   </div>
                 </div>
                 <div className="flex flex-col items-end">
-                  <div className="flex items-center text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  <div className="flex items-center text-sm font-semibold text-black dark:text-gray-100">
                     <span>
                       {rentRange || t("properties.labels.unknown")}
                     </span>
                   </div>
                   {property?.isMultiUnit && unitStats.available > 0 ? (
-                    <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                    <span className="text-xs text-black dark:text-green-400 font-medium">
                       {t("properties.units.availableCount", {
                         values: { count: unitStats.available },
                       })}
                     </span>
                   ) : (
                     !property?.isMultiUnit && (
-                      <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                      <span className="text-xs text-black dark:text-green-400 font-medium">
                         {t("properties.labels.singleUnit")}
                       </span>
                     )
@@ -302,7 +302,7 @@ export function PropertyRowCard({
             <div className="hidden sm:flex items-center justify-between h-full">
               {/* Left Section - Name and Location */}
               <div className="flex-1 min-w-0 mr-4">
-                <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100 truncate mb-1">
+                <h3 className="font-semibold text-base text-black dark:text-gray-100 truncate mb-1">
                   {onView ? (
                     <button
                       onClick={() => onView(property)}
@@ -319,7 +319,7 @@ export function PropertyRowCard({
                     </Link>
                   )}
                 </h3>
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-center text-sm text-black dark:text-gray-400">
                   <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
                   <span className="truncate">{displayAddress}</span>
                 </div>
@@ -328,15 +328,15 @@ export function PropertyRowCard({
               {/* Right Section - Rent and Actions */}
               <div className="flex items-center space-x-4">
                 <div className="flex flex-col items-end">
-                  <div className="flex items-center text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  <div className="flex items-center text-lg font-semibold text-black dark:text-gray-100">
                     <span>
                       {rentRange || t("properties.labels.unknown")}
                     </span>
-                    <span className="text-sm font-normal text-gray-600 dark:text-gray-400 ml-1">
+                    <span className="text-sm font-normal text-black dark:text-gray-400 ml-1">
                       {t("properties.labels.perMonth")}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  <div className="flex items-center space-x-2 text-xs text-black dark:text-gray-400 mt-1">
                     {property?.isMultiUnit ? (
                       <>
                         <span>
@@ -344,7 +344,7 @@ export function PropertyRowCard({
                           {t("properties.labels.units")}
                         </span>
                         {unitStats.available > 0 && (
-                          <span className="text-green-600 dark:text-green-400 font-medium">
+                          <span className="text-black dark:text-green-400 font-medium">
                             {t("properties.units.availableCount", {
                               values: { count: unitStats.available },
                             })}
@@ -352,7 +352,7 @@ export function PropertyRowCard({
                         )}
                       </>
                     ) : (
-                      <span className="text-green-600 dark:text-green-400 font-medium">
+                      <span className="text-black dark:text-green-400 font-medium">
                         {t("properties.labels.singleUnit")}
                       </span>
                     )}

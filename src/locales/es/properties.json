@@ -282,6 +282,7 @@
   "properties.newProperty.title": "Crear nueva propiedad",
   "properties.newProperty.subtitle": "Agrega una nueva propiedad a tu cartera con información completa y gestión integrada de unidades.",
   "properties.newProperty.backToList": "Volver a propiedades",
+  "properties.newProperty.hint": "Completa las secciones siguientes—detalles, unidades, comodidades y fotos—y guarda al final.",
   "properties.newProperty.success.title": "Propiedad creada correctamente",
   "properties.newProperty.success.description": "{name} se ha agregado a tu cartera.",
   "properties.newProperty.error.title": "No se pudo crear la propiedad",

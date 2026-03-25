@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Building2, ArrowLeft } from "lucide-react";
 import { EnhancedPropertyForm } from "@/components/properties/PropertyForm";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { cn } from "@/lib/utils";
 import {
   showErrorToast,
   showSimpleError,
@@ -90,34 +91,72 @@ export default function EnhancedNewPropertyPage() {
   };
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="space-y-2 min-w-0 flex-1">
-          <div className="flex items-center gap-3">
-            <Building2 className="h-8 w-8 shrink-0" />
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight break-words">
-              {t("properties.newProperty.title")}
-            </h1>
-          </div>
-          <p className="text-muted-foreground text-sm md:text-base">
-            {t("properties.newProperty.subtitle")}
-          </p>
-        </div>
-        <div className="flex items-center gap-2 border rounded-lg shrink-0">
-          <Link href="/dashboard/properties">
-            <Button variant="ghost" size="sm" className="whitespace-nowrap">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+    <div className="mx-auto w-full max-w-full space-y-8 pb-10 pt-1 sm:pb-12 sm:pt-0">
+      <header
+        className={cn(
+          "overflow-hidden rounded-2xl border border-slate-200/90 bg-white",
+          "shadow-[0_1px_0_rgba(0,0,0,0.03),0_10px_28px_-14px_rgba(15,23,42,0.1)]",
+          "dark:border-white/[0.08] dark:bg-gray-950/70 dark:shadow-none"
+        )}
+      >
+        <div className="flex flex-col gap-3 border-b border-slate-100 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-white/[0.06]">
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className={cn(
+              "h-9 w-fit rounded-lg border-slate-200/90 bg-white px-3 text-black shadow-none",
+              "hover:border-slate-300 hover:bg-slate-50 hover:text-black",
+              "dark:border-white/15 dark:bg-white/[0.04] dark:text-gray-100 dark:hover:bg-white/10"
+            )}
+          >
+            <Link href="/dashboard/properties">
+              <ArrowLeft className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
               {t("properties.newProperty.backToList")}
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
+
+        <div className="px-4 py-6 sm:px-7 sm:py-8">
+          <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
+            <div
+              className={cn(
+                "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200/90",
+                "bg-slate-50 text-slate-800 dark:border-white/10 dark:bg-white/[0.04] dark:text-gray-100"
+              )}
+              aria-hidden
+            >
+              <Building2 className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1 space-y-3">
+              <h1 className="text-balance text-2xl font-semibold tracking-tight text-black sm:text-[1.65rem] dark:text-white">
+                {t("properties.newProperty.title")}
+              </h1>
+              <p className="max-w-2xl text-pretty text-sm leading-relaxed text-black/70 sm:text-[15px] dark:text-gray-400">
+                {t("properties.newProperty.subtitle")}
+              </p>
+              <div
+                className={cn(
+                  "max-w-2xl rounded-lg border border-slate-200/80 bg-slate-50/60 px-3.5 py-2.5",
+                  "dark:border-white/10 dark:bg-white/[0.03]"
+                )}
+              >
+                <p className="text-pretty text-xs leading-relaxed text-black/60 sm:text-[13px] dark:text-gray-500">
+                  {t("properties.newProperty.hint")}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="min-w-0">
+        <EnhancedPropertyForm
+          onSubmit={handlePropertySubmit}
+          isLoading={isLoading}
+          mode="create"
+        />
       </div>
-      <EnhancedPropertyForm
-        onSubmit={handlePropertySubmit}
-        isLoading={isLoading}
-        mode="create"
-      />
     </div>
   );
 }

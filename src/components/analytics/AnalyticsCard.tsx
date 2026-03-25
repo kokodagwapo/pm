@@ -27,6 +27,8 @@ export interface AnalyticsCardProps {
   children?: React.ReactNode;
   /** When set, the whole card navigates (drilldown KPI). */
   href?: string;
+  /** Light mode: use black body text (e.g. properties list page). */
+  lightForegroundBlack?: boolean;
 }
 
 export interface FinancialCardProps {
@@ -78,10 +80,14 @@ export function AnalyticsCard({
   className,
   children,
   href,
+  lightForegroundBlack = false,
 }: AnalyticsCardProps) {
   const TrendIcon = trend?.icon;
   const dash = useOptionalDashboardAppearance();
   const isLight = dash?.isLight ?? false;
+  const lightTitle = lightForegroundBlack ? "text-black" : "text-slate-500";
+  const lightValue = lightForegroundBlack ? "text-black" : "text-slate-900";
+  const lightDesc = lightForegroundBlack ? "text-black" : "text-slate-600";
 
   const card = (
     <Card
@@ -99,7 +105,7 @@ export function AnalyticsCard({
           <p
             className={cn(
               "pr-2 text-sm font-medium leading-none tracking-wide",
-              isLight ? "text-slate-500" : "text-white/90"
+              isLight ? lightTitle : "text-white/90"
             )}
           >
             {title}
@@ -112,7 +118,7 @@ export function AnalyticsCard({
         <div
           className={cn(
             "mb-1.5 text-3xl font-semibold leading-none tracking-tight",
-            isLight ? "text-slate-900" : "text-white"
+            isLight ? lightValue : "text-white"
           )}
         >
           {value}
@@ -122,7 +128,7 @@ export function AnalyticsCard({
           <p
             className={cn(
               "text-sm font-normal leading-snug",
-              isLight ? "text-slate-600" : "text-white/85"
+              isLight ? lightDesc : "text-white/85"
             )}
           >
             {description}
@@ -135,26 +141,30 @@ export function AnalyticsCard({
               <TrendIcon
                 className={cn(
                   "h-3 w-3",
-                  trend.isPositive
-                    ? isLight
-                      ? "text-emerald-600"
-                      : "text-emerald-200"
-                    : isLight
-                      ? "text-rose-600"
-                      : "text-rose-200"
+                  lightForegroundBlack && isLight
+                    ? "text-black"
+                    : trend.isPositive
+                      ? isLight
+                        ? "text-emerald-600"
+                        : "text-emerald-200"
+                      : isLight
+                        ? "text-rose-600"
+                        : "text-rose-200"
                 )}
               />
             )}
             <span
               className={cn(
                 "text-sm font-medium tracking-wide",
-                trend.isPositive
-                  ? isLight
-                    ? "text-emerald-600"
-                    : "text-emerald-200"
-                  : isLight
-                    ? "text-rose-600"
-                    : "text-rose-200"
+                lightForegroundBlack && isLight
+                  ? "text-black"
+                  : trend.isPositive
+                    ? isLight
+                      ? "text-emerald-600"
+                      : "text-emerald-200"
+                    : isLight
+                      ? "text-rose-600"
+                      : "text-rose-200"
               )}
             >
               {trend.value}

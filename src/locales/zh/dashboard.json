@@ -52,6 +52,12 @@
   "dashboard.cards.collectionRate.title": "收款率",
   "dashboard.cards.collectionRate.description": "租金收缴效率",
 
+  "dashboard.cards.pendingRentBalance.title": "待收租金",
+  "dashboard.cards.pendingRentBalance.description": "共 {count} 笔应收款项未结清",
+
+  "dashboard.cards.overdueBalance.title": "逾期余额",
+  "dashboard.cards.overdueBalance.description": "{count} 笔账单已逾期或超出宽限期",
+
   "dashboard.cards.activeTenants.title": "活跃租户",
   "dashboard.cards.activeTenants.description": "{count} 份新申请待处理",
 

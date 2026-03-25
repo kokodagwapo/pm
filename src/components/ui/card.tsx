@@ -74,7 +74,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-content"
-      className={cn("min-w-0 px-6 font-light", className)}
+      className={cn("min-w-0 px-6 font-normal", className)}
       {...props}
     />
   );

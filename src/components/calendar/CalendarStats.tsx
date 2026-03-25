@@ -54,10 +54,12 @@ export function CalendarStats() {
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">
+              <p className="text-sm font-medium text-black dark:text-gray-100">
                 Total Events
               </p>
-              <p className="text-2xl font-bold">{stats.totalEvents}</p>
+              <p className="text-2xl font-bold text-black dark:text-gray-100">
+                {stats.totalEvents}
+              </p>
             </div>
             <CalendarDays className="h-8 w-8 text-blue-500" />
           </div>
@@ -68,10 +70,12 @@ export function CalendarStats() {
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">
+              <p className="text-sm font-medium text-black dark:text-gray-100">
                 Upcoming
               </p>
-              <p className="text-2xl font-bold">{stats.upcomingEvents}</p>
+              <p className="text-2xl font-bold text-black dark:text-gray-100">
+                {stats.upcomingEvents}
+              </p>
             </div>
             <Clock className="h-8 w-8 text-green-500" />
           </div>
@@ -82,8 +86,12 @@ export function CalendarStats() {
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Today</p>
-              <p className="text-2xl font-bold">{stats.todayEvents}</p>
+              <p className="text-sm font-medium text-black dark:text-gray-100">
+                Today
+              </p>
+              <p className="text-2xl font-bold text-black dark:text-gray-100">
+                {stats.todayEvents}
+              </p>
             </div>
             <TrendingUp className="h-8 w-8 text-orange-500" />
           </div>
@@ -94,10 +102,12 @@ export function CalendarStats() {
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">
+              <p className="text-sm font-medium text-black dark:text-gray-100">
                 Pending RSVPs
               </p>
-              <p className="text-2xl font-bold">{stats.pendingRSVPs}</p>
+              <p className="text-2xl font-bold text-black dark:text-gray-100">
+                {stats.pendingRSVPs}
+              </p>
             </div>
             <Users className="h-8 w-8 text-purple-500" />
           </div>

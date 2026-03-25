@@ -38,6 +38,7 @@ import {
   HelpCircle,
   ChevronDown,
   CalendarDays,
+  CalendarRange,
   ClipboardList,
   Send,
   ListChecks,
@@ -112,7 +113,15 @@ const navigationSections: NavSection[] = [
           { title: "nav.properties.available", href: "/dashboard/properties/available", icon: Key, iconColor: "text-violet-200", roles: [UserRole.ADMIN, UserRole.MANAGER] },
           { title: "nav.properties.allUnits", href: "/dashboard/properties/units", icon: Grid3X3, iconColor: "text-violet-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
           { title: "nav.properties.calendar", href: "/dashboard/properties/calendar", icon: CalendarDays, iconColor: "text-violet-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
+          { title: "nav.properties.stayFinder", href: "/dashboard/properties/stay-finder", icon: CalendarRange, iconColor: "text-violet-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER] },
         ],
+      },
+      {
+        title: "nav.calendar",
+        href: "/dashboard/calendar",
+        icon: Calendar,
+        iconColor: "text-cyan-200",
+        roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT],
       },
       {
         title: "nav.tenants",
@@ -286,12 +295,6 @@ const navigationSections: NavSection[] = [
           { title: "nav.aiHelp.faq", href: "/dashboard/ai-help/faq", icon: HelpCircle, iconColor: "text-rose-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
         ],
       },
-    ],
-  },
-  {
-    title: "nav.section.events",
-    items: [
-      { title: "nav.calendar", href: "/dashboard/calendar", icon: Calendar, iconColor: "text-cyan-200", roles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER, UserRole.TENANT] },
     ],
   },
   {

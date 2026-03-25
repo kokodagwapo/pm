@@ -52,6 +52,12 @@
   "dashboard.cards.collectionRate.title": "回収率",
   "dashboard.cards.collectionRate.description": "家賃回収の効率",
 
+  "dashboard.cards.pendingRentBalance.title": "未収家賃",
+  "dashboard.cards.pendingRentBalance.description": "未決済の予定請求 {count} 件",
+
+  "dashboard.cards.overdueBalance.title": "延滞残高",
+  "dashboard.cards.overdueBalance.description": "支払期限超過または猶予終了 {count} 件",
+
   "dashboard.cards.activeTenants.title": "入居者数",
   "dashboard.cards.activeTenants.description": "{count} 件の新規申請が保留中",
 

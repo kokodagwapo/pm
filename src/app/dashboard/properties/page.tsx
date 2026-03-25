@@ -97,15 +97,15 @@ function PropertyCard({
     if (isLight) {
       switch (status) {
         case PropertyStatus.AVAILABLE:
-          return "border-emerald-200/90 bg-emerald-50/95 text-emerald-900";
+          return "border-emerald-200/90 bg-emerald-50/95 text-black";
         case PropertyStatus.OCCUPIED:
-          return "border-sky-200/90 bg-sky-50/95 text-sky-900";
+          return "border-sky-200/90 bg-sky-50/95 text-black";
         case PropertyStatus.MAINTENANCE:
-          return "border-amber-200/90 bg-amber-50/95 text-amber-950";
+          return "border-amber-200/90 bg-amber-50/95 text-black";
         case PropertyStatus.UNAVAILABLE:
-          return "border-rose-200/90 bg-rose-50/95 text-rose-900";
+          return "border-rose-200/90 bg-rose-50/95 text-black";
         default:
-          return "border-slate-200/90 bg-slate-100/95 text-slate-800";
+          return "border-slate-200/90 bg-slate-100/95 text-black";
       }
     }
     switch (status) {
@@ -222,7 +222,7 @@ function PropertyCard({
             <Building2
               className={cn(
                 "h-16 w-16",
-                isLight ? "text-slate-300" : "text-white/35"
+                isLight ? "text-black/35" : "text-white/35"
               )}
             />
           </div>
@@ -245,7 +245,7 @@ function PropertyCard({
             className={cn(
               "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium backdrop-blur-sm",
               isLight
-                ? "border-slate-200/90 bg-white/90 text-slate-800 shadow-sm"
+                ? "border-slate-200/90 bg-white/90 text-black shadow-sm"
                 : "border-white/25 bg-black/35 text-white"
             )}
           >
@@ -268,7 +268,7 @@ function PropertyCard({
               onClick={() => onView(property)}
               className={cn(
                 isLight
-                  ? "border-slate-200 bg-white text-slate-900 shadow-md hover:bg-slate-50 [&_svg]:shrink-0 [&_svg]:text-slate-800"
+                  ? "border-slate-200 bg-white text-black shadow-md hover:bg-slate-50 [&_svg]:shrink-0 [&_svg]:text-black"
                   : "border border-white/25 bg-white/15 text-white hover:bg-white/25 [&_svg]:text-white"
               )}
             >
@@ -280,7 +280,7 @@ function PropertyCard({
               onClick={() => onEdit(property)}
               className={cn(
                 isLight
-                  ? "border-slate-200 bg-white text-slate-900 shadow-md hover:bg-slate-50 [&_svg]:shrink-0 [&_svg]:text-slate-800"
+                  ? "border-slate-200 bg-white text-black shadow-md hover:bg-slate-50 [&_svg]:shrink-0 [&_svg]:text-black"
                   : "border border-white/25 bg-white/15 text-white hover:bg-white/25 [&_svg]:text-white"
               )}
             >
@@ -300,10 +300,10 @@ function PropertyCard({
                 "line-clamp-1 text-lg font-semibold",
                 property.deletedAt
                   ? isLight
-                    ? "text-slate-400 line-through"
+                    ? "text-black/50 line-through"
                     : "text-white/45 line-through"
                   : isLight
-                    ? "text-slate-900"
+                    ? "text-black"
                     : "text-white"
               )}
             >
@@ -319,7 +319,7 @@ function PropertyCard({
             <p
               className={cn(
                 "line-clamp-2 text-sm",
-                isLight ? "text-slate-600" : "text-white/85"
+                isLight ? "text-black" : "text-white/85"
               )}
             >
               {property.description}
@@ -338,13 +338,13 @@ function PropertyCard({
         <div
           className={cn(
             "mb-3 flex items-center text-sm",
-            isLight ? "text-slate-600" : "text-white/80"
+            isLight ? "text-black" : "text-white/80"
           )}
         >
           <MapPin
             className={cn(
               "mr-1 h-4 w-4 shrink-0",
-              isLight ? "text-slate-400" : "text-white/60"
+              isLight ? "text-black" : "text-white/60"
             )}
           />
           <span className="line-clamp-1">{displayAddress}</span>
@@ -363,7 +363,7 @@ function PropertyCard({
             <span
               className={cn(
                 "whitespace-nowrap text-xs font-medium",
-                isLight ? "text-slate-800" : "text-white/90"
+                isLight ? "text-black" : "text-white/90"
               )}
             >
               {property?.isMultiUnit && totalUnits > 1 ? (
@@ -383,7 +383,7 @@ function PropertyCard({
                       className={cn(
                         "inline-flex items-center whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-medium",
                         isLight
-                          ? "bg-emerald-100 text-emerald-900"
+                          ? "bg-emerald-100 text-black"
                           : "bg-emerald-400/15 text-white"
                       )}
                     >
@@ -395,7 +395,7 @@ function PropertyCard({
                       className={cn(
                         "inline-flex items-center whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-medium",
                         isLight
-                          ? "bg-sky-100 text-sky-900"
+                          ? "bg-sky-100 text-black"
                           : "bg-sky-400/15 text-sky-100"
                       )}
                     >
@@ -407,7 +407,7 @@ function PropertyCard({
                       className={cn(
                         "inline-flex items-center whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-medium",
                         isLight
-                          ? "bg-amber-100 text-amber-950"
+                          ? "bg-amber-100 text-black"
                           : "bg-amber-400/15 text-amber-100"
                       )}
                     >
@@ -420,7 +420,7 @@ function PropertyCard({
                   className={cn(
                     "inline-flex items-center whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-medium",
                     isLight
-                      ? "bg-emerald-100 text-emerald-900"
+                      ? "bg-emerald-100 text-black"
                       : "bg-emerald-400/15 text-white"
                   )}
                 >
@@ -433,7 +433,7 @@ function PropertyCard({
             <div
               className={cn(
                 "text-[10px]",
-                isLight ? "text-slate-500" : "text-white/75"
+                isLight ? "text-black" : "text-white/75"
               )}
             >
               {t("properties.labels.types")}:{" "}
@@ -447,7 +447,7 @@ function PropertyCard({
             <div
               className={cn(
                 "text-[10px]",
-                isLight ? "text-slate-500" : "text-white/75"
+                isLight ? "text-black" : "text-white/75"
               )}
             >
               {t("properties.labels.types")}: {getTypeLabel(propertyType)}
@@ -461,7 +461,7 @@ function PropertyCard({
             <div
               className={cn(
                 "flex items-center text-lg font-semibold",
-                isLight ? "text-slate-900" : "text-white"
+                isLight ? "text-black" : "text-white"
               )}
             >
               <span>
@@ -470,7 +470,7 @@ function PropertyCard({
               <span
                 className={cn(
                   "ml-1 text-sm font-normal",
-                  isLight ? "text-slate-500" : "text-white/80"
+                  isLight ? "text-black" : "text-white/80"
                 )}
               >
                 {t("properties.labels.perMonth")}
@@ -480,7 +480,7 @@ function PropertyCard({
               <span
                 className={cn(
                   "mt-1 text-xs font-medium",
-                  isLight ? "text-emerald-700" : "text-emerald-200"
+                  isLight ? "text-black" : "text-emerald-200"
                 )}
               >
                 {t("properties.units.availableCount", {
@@ -492,7 +492,7 @@ function PropertyCard({
                 <span
                   className={cn(
                     "mt-1 text-xs font-medium",
-                    isLight ? "text-emerald-700" : "text-emerald-200"
+                    isLight ? "text-black" : "text-emerald-200"
                   )}
                 >
                   {t("properties.labels.singleUnit")}
@@ -510,7 +510,7 @@ function PropertyCard({
                 className={cn(
                   "h-8 w-8 p-0",
                   isLight
-                    ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    ? "text-black hover:bg-slate-100 hover:text-black"
                     : "text-white hover:bg-white/10 hover:text-white"
                 )}
               >
@@ -645,7 +645,7 @@ export default function PropertiesPage() {
       "h-10",
       widthClass,
       isLight
-        ? "border-slate-200 bg-white text-slate-900 [&_svg]:text-slate-500"
+        ? "border-slate-200 bg-white text-black [&_svg]:text-black"
         : "border-white/20 bg-white/5 text-white [&_svg]:text-white/70"
     );
   const [properties, setProperties] = useState<PropertyResponse[]>([]);
@@ -946,7 +946,7 @@ export default function PropertiesPage() {
                 <Building2
                   className={cn(
                     "h-5 w-5",
-                    isLight ? "text-slate-300" : "text-white/40"
+                    isLight ? "text-black/40" : "text-white/40"
                   )}
                 />
               </div>
@@ -956,7 +956,7 @@ export default function PropertiesPage() {
             <div
               className={cn(
                 "font-medium",
-                isLight ? "text-slate-900" : "text-white"
+                isLight ? "text-black" : "text-white"
               )}
             >
               <Link
@@ -965,7 +965,7 @@ export default function PropertiesPage() {
                   "transition-colors",
                   isLight
                     ? property.deletedAt
-                      ? "text-slate-400 line-through hover:text-slate-500"
+                      ? "text-black/50 line-through hover:text-black/70"
                       : "hover:text-sky-600"
                     : property.deletedAt
                       ? "text-white/45 line-through"
@@ -990,7 +990,7 @@ export default function PropertiesPage() {
             <div
               className={cn(
                 "truncate text-sm",
-                isLight ? "text-slate-600" : "text-white/75"
+                isLight ? "text-black" : "text-white/75"
               )}
             >
               ID: {property._id.slice(-6)}
@@ -998,7 +998,7 @@ export default function PropertiesPage() {
                 <span
                   className={cn(
                     "ml-2",
-                    isLight ? "text-rose-700" : "text-rose-200"
+                    isLight ? "text-black" : "text-rose-200"
                   )}
                 >
                   (Deleted: {new Date(property.deletedAt).toLocaleDateString()})
@@ -1026,7 +1026,7 @@ export default function PropertiesPage() {
           <span
             className={cn(
               "text-xs",
-              isLight ? "text-slate-600" : "text-white/75"
+              isLight ? "text-black" : "text-white/75"
             )}
           >
             {property?.type
@@ -1045,13 +1045,13 @@ export default function PropertiesPage() {
           <div
             className={cn(
               "flex items-center text-sm",
-              isLight ? "text-slate-800" : "text-white"
+              isLight ? "text-black" : "text-white"
             )}
           >
             <MapPin
               className={cn(
                 "mr-1 h-3 w-3",
-                isLight ? "text-slate-400" : "text-white/55"
+                isLight ? "text-black" : "text-white/55"
               )}
             />
             {[property?.address?.city, property?.address?.state]
@@ -1061,7 +1061,7 @@ export default function PropertiesPage() {
           <div
             className={cn(
               "text-xs",
-              isLight ? "text-slate-600" : "text-white/75"
+              isLight ? "text-black" : "text-white/75"
             )}
           >
             {property?.address?.street ?? ""}
@@ -1078,7 +1078,7 @@ export default function PropertiesPage() {
           <div
             className={cn(
               "text-sm font-medium",
-              isLight ? "text-slate-900" : "text-white"
+              isLight ? "text-black" : "text-white"
             )}
           >
             {property.isMultiUnit && (property.totalUnits ?? 0) > 1
@@ -1094,14 +1094,14 @@ export default function PropertiesPage() {
                     {unitStats.available > 0 && (
                       <span
                         className={
-                          isLight ? "text-emerald-700" : "text-emerald-200"
+                          isLight ? "text-black" : "text-emerald-200"
                         }
                       >
                         {unitStats.available} available
                       </span>
                     )}
                     {unitStats.occupied > 0 && (
-                      <span className={isLight ? "text-sky-700" : "text-sky-200"}>
+                      <span className={isLight ? "text-black" : "text-sky-200"}>
                         {unitStats.occupied} occupied
                       </span>
                     )}
@@ -1109,7 +1109,7 @@ export default function PropertiesPage() {
                 );
               })()
             ) : (
-              <span className={isLight ? "text-emerald-700" : "text-emerald-200"}>
+              <span className={isLight ? "text-black" : "text-emerald-200"}>
                 {property?.status === PropertyStatus.AVAILABLE
                   ? "available"
                   : property?.status?.toLowerCase() || "unknown"}
@@ -1128,7 +1128,7 @@ export default function PropertiesPage() {
           <div
             className={cn(
               "font-medium",
-              isLight ? "text-slate-900" : "text-white"
+              isLight ? "text-black" : "text-white"
             )}
           >
             {getRentRange(property?.units, formatCurrency) ||
@@ -1137,7 +1137,7 @@ export default function PropertiesPage() {
           <div
             className={cn(
               "text-xs",
-              isLight ? "text-slate-600" : "text-white/75"
+              isLight ? "text-black" : "text-white/75"
             )}
           >
             {t("properties.labels.perMonth")}
@@ -1154,7 +1154,7 @@ export default function PropertiesPage() {
           <div
             className={cn(
               "text-sm",
-              isLight ? "text-slate-800" : "text-white"
+              isLight ? "text-black" : "text-white"
             )}
           >
             {property.ownerId?.firstName ?? ""}{" "}
@@ -1163,7 +1163,7 @@ export default function PropertiesPage() {
           <div
             className={cn(
               "text-xs",
-              isLight ? "text-slate-600" : "text-white/75"
+              isLight ? "text-black" : "text-white/75"
             )}
           >
             {t("properties.table.propertyOwner")}
@@ -1183,7 +1183,7 @@ export default function PropertiesPage() {
               className={cn(
                 "h-8 w-8 p-0 transition-colors",
                 isLight
-                  ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  ? "text-black hover:bg-slate-100 hover:text-black"
                   : "text-white hover:bg-white/10 hover:text-white"
               )}
             >
@@ -1279,7 +1279,7 @@ export default function PropertiesPage() {
           <h2 className="text-xl font-semibold mb-2">
             {t("properties.accessDenied.title")}
           </h2>
-          <p className="text-gray-600">
+          <p className="text-black">
             {t("properties.accessDenied.description")}
           </p>
         </div>
@@ -1295,7 +1295,7 @@ export default function PropertiesPage() {
           <h1
             className={cn(
               "text-2xl font-bold tracking-tight sm:text-3xl",
-              isLight ? "text-slate-900" : "text-white"
+              isLight ? "text-black" : "text-white"
             )}
           >
             {t("properties.header.title")}
@@ -1303,7 +1303,7 @@ export default function PropertiesPage() {
           <p
             className={cn(
               "text-sm sm:text-base",
-              isLight ? "text-slate-600" : "text-white"
+              isLight ? "text-black" : "text-white"
             )}
           >
             {t("properties.header.subtitle")}
@@ -1318,7 +1318,7 @@ export default function PropertiesPage() {
             className={cn(
               "flex-1 sm:flex-none",
               isLight
-                ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50 hover:text-slate-900 [&_svg]:text-slate-700"
+                ? "border-slate-200 bg-white text-black hover:bg-slate-50 hover:text-black [&_svg]:text-black"
                 : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
             )}
           >
@@ -1350,7 +1350,9 @@ export default function PropertiesPage() {
       <PropertyStats properties={properties} totalCount={pagination.total} />
 
       {/* Properties Display with Integrated Filters */}
-      <Card className="gap-2">
+      <Card
+        className={cn("gap-2", isLight && "text-black [&_.text-muted-foreground]:text-black")}
+      >
         <CardHeader>
           {/* Main Header */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-2">
@@ -1360,7 +1362,7 @@ export default function PropertiesPage() {
                 <h2
                   className={cn(
                     "text-lg font-semibold",
-                    isLight ? "text-slate-900" : "text-white"
+                    isLight ? "text-black" : "text-white"
                   )}
                 >
                   {t("properties.header.title")}
@@ -1368,7 +1370,7 @@ export default function PropertiesPage() {
                 <p
                   className={cn(
                     "text-sm",
-                    isLight ? "text-slate-600" : "text-white/85"
+                    isLight ? "text-black" : "text-white/85"
                   )}
                 >
                   {t("properties.header.subtitle")}
@@ -1390,7 +1392,7 @@ export default function PropertiesPage() {
                   <span
                     className={cn(
                       "text-sm font-medium",
-                      isLight ? "text-slate-900" : "text-white/90"
+                      isLight ? "text-black" : "text-white/90"
                     )}
                   >
                     {t("properties.bulk.selected", {
@@ -1415,7 +1417,7 @@ export default function PropertiesPage() {
                     className={cn(
                       "h-8",
                       isLight
-                        ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                        ? "border-slate-200 bg-white text-black hover:bg-slate-50"
                         : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
                     )}
                   >
@@ -1439,7 +1441,7 @@ export default function PropertiesPage() {
                     "h-8 flex-1 sm:flex-none sm:px-3",
                     viewMode !== "grid" &&
                       (isLight
-                        ? "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                        ? "text-black hover:bg-slate-200/80 hover:text-black"
                         : "text-white hover:bg-white/10 hover:text-white")
                   )}
                 >
@@ -1456,7 +1458,7 @@ export default function PropertiesPage() {
                     "h-8 flex-1 sm:flex-none sm:px-3",
                     viewMode !== "rows" &&
                       (isLight
-                        ? "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                        ? "text-black hover:bg-slate-200/80 hover:text-black"
                         : "text-white hover:bg-white/10 hover:text-white")
                   )}
                 >
@@ -1473,7 +1475,7 @@ export default function PropertiesPage() {
                     "h-8 flex-1 sm:flex-none sm:px-3",
                     viewMode !== "list" &&
                       (isLight
-                        ? "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                        ? "text-black hover:bg-slate-200/80 hover:text-black"
                         : "text-white hover:bg-white/10 hover:text-white")
                   )}
                 >
@@ -1664,7 +1666,7 @@ export default function PropertiesPage() {
                   className={cn(
                     "h-10 px-3",
                     isLight
-                      ? "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                      ? "text-black hover:bg-slate-200/80 hover:text-black"
                       : "text-white/80 hover:bg-white/10 hover:text-white"
                   )}
                 >
@@ -1758,7 +1760,7 @@ export default function PropertiesPage() {
                 )}
               />
               <span
-                className={cn("ml-2", isLight ? "text-slate-800" : "text-white")}
+                className={cn("ml-2", isLight ? "text-black" : "text-white")}
               >
                 {error}
               </span>
@@ -1769,7 +1771,7 @@ export default function PropertiesPage() {
                 className={cn(
                   "ml-4",
                   isLight
-                    ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                    ? "border-slate-200 bg-white text-black hover:bg-slate-50"
                     : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
                 )}
               >
@@ -1781,13 +1783,13 @@ export default function PropertiesPage() {
               <Building2
                 className={cn(
                   "h-8 w-8",
-                  isLight ? "text-slate-400" : "text-white/50"
+                  isLight ? "text-black" : "text-white/50"
                 )}
               />
               <span
                 className={cn(
                   "ml-2",
-                  isLight ? "text-slate-800" : "text-white"
+                  isLight ? "text-black" : "text-white"
                 )}
               >
                 {t("properties.empty.title")}
@@ -1799,7 +1801,7 @@ export default function PropertiesPage() {
                   className={cn(
                     "ml-4",
                     isLight
-                      ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                      ? "border-slate-200 bg-white text-black hover:bg-slate-50"
                       : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
                   )}
                 >
@@ -1889,7 +1891,7 @@ export default function PropertiesPage() {
                             <h3
                               className={cn(
                                 "line-clamp-1 font-semibold",
-                                isLight ? "text-slate-900" : "text-white"
+                                isLight ? "text-black" : "text-white"
                               )}
                             >
                               {property.name}
@@ -1897,7 +1899,7 @@ export default function PropertiesPage() {
                             <p
                               className={cn(
                                 "text-sm",
-                                isLight ? "text-slate-600" : "text-white/85"
+                                isLight ? "text-black" : "text-white/85"
                               )}
                             >
                               {property.address?.street}, {property.address?.city}
@@ -1923,7 +1925,7 @@ export default function PropertiesPage() {
                               variant="ghost"
                               className={cn(
                                 isLight
-                                  ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                  ? "text-black hover:bg-slate-100 hover:text-black"
                                   : "text-white hover:bg-white/10 hover:text-white"
                               )}
                               onClick={(e) => {
@@ -1938,7 +1940,7 @@ export default function PropertiesPage() {
                               variant="ghost"
                               className={cn(
                                 isLight
-                                  ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                  ? "text-black hover:bg-slate-100 hover:text-black"
                                   : "text-white hover:bg-white/10 hover:text-white"
                               )}
                               onClick={(e) => {
@@ -1955,7 +1957,7 @@ export default function PropertiesPage() {
                                   variant="ghost"
                                   className={cn(
                                     isLight
-                                      ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                      ? "text-black hover:bg-slate-100 hover:text-black"
                                       : "text-white hover:bg-white/10 hover:text-white"
                                   )}
                                 >
@@ -2029,7 +2031,7 @@ export default function PropertiesPage() {
                     }),
                 }}
                 emptyState={{
-                  icon: <Building2 className="h-8 w-8 text-gray-400" />,
+                  icon: <Building2 className="h-8 w-8 text-black" />,
                   title: t("properties.empty.title"),
                   action: (
                     <Link href="/dashboard/properties/new">

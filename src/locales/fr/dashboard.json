@@ -52,6 +52,12 @@
   "dashboard.cards.collectionRate.title": "Taux de recouvrement",
   "dashboard.cards.collectionRate.description": "Efficacité du recouvrement des paiements",
 
+  "dashboard.cards.pendingRentBalance.title": "Loyer en attente",
+  "dashboard.cards.pendingRentBalance.description": "Sur {count} échéances pas encore réglées",
+
+  "dashboard.cards.overdueBalance.title": "Solde en retard",
+  "dashboard.cards.overdueBalance.description": "{count} factures en retard ou hors délai de grâce",
+
   "dashboard.cards.activeTenants.title": "Locataires actifs",
   "dashboard.cards.activeTenants.description": "{count} demandes en attente",
 

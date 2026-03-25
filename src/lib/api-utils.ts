@@ -116,24 +116,23 @@ export async function paginateQuery(
   // Add search functionality
   // IMPORTANT: Don't overwrite $or if it already exists (e.g., from status filtering)
   if (search && model.schema.paths.name) {
+    const searchOr: Record<string, unknown>[] = [
+      { name: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } },
+    ];
+    if (model.modelName === "Property") {
+      searchOr.push(
+        { "address.street": { $regex: search, $options: "i" } },
+        { "address.city": { $regex: search, $options: "i" } },
+        { "address.state": { $regex: search, $options: "i" } },
+        { "address.zipCode": { $regex: search, $options: "i" } }
+      );
+    }
     if (query.$or) {
-      // If $or already exists, combine with $and to preserve both conditions
-      query.$and = [
-        { $or: query.$or }, // Keep existing $or (e.g., status filter)
-        {
-          $or: [
-            { name: { $regex: search, $options: "i" } },
-            { description: { $regex: search, $options: "i" } },
-          ],
-        },
-      ];
-      delete query.$or; // Remove the old $or since we're using $and now
+      query.$and = [{ $or: query.$or }, { $or: searchOr }];
+      delete query.$or;
     } else {
-      // No existing $or, safe to add search $or
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ];
+      query.$or = searchOr;
     }
   }
 

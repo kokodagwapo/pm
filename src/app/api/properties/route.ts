@@ -141,6 +141,10 @@ export const GET = withRoleAndDB([UserRole.ADMIN, UserRole.MANAGER, UserRole.OWN
           query.$or = [
             { name: { $regex: search, $options: "i" } },
             { description: { $regex: search, $options: "i" } },
+            { "address.street": { $regex: search, $options: "i" } },
+            { "address.city": { $regex: search, $options: "i" } },
+            { "address.state": { $regex: search, $options: "i" } },
+            { "address.zipCode": { $regex: search, $options: "i" } },
           ];
         }
 

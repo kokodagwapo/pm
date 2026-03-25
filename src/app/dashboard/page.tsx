@@ -44,6 +44,8 @@ import {
   UserCheck,
   ClipboardList,
   Key,
+  Clock,
+  AlertCircle,
 } from "lucide-react";
 import { UserRole } from "@/types";
 import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
@@ -52,6 +54,19 @@ import { useOptionalDashboardAppearance } from "@/components/providers/Dashboard
 const DashboardChartsSection = dynamic(
   () => import("@/components/dashboard/DashboardChartsSection").then((m) => ({ default: m.DashboardChartsSection })),
   { ssr: false, loading: () => <div className="lg:col-span-2 min-h-[400px] animate-pulse rounded-xl bg-white/5" /> }
+);
+
+const DashboardPropertyCalendarSection = dynamic(
+  () =>
+    import("@/components/dashboard/DashboardPropertyCalendarSection").then((m) => ({
+      default: m.DashboardPropertyCalendarSection,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-[280px] w-full animate-pulse rounded-2xl bg-white/5" />
+    ),
+  }
 );
 
 const TenantDashboard = dynamic(
@@ -720,6 +735,26 @@ export default function DashboardPage() {
           iconColor="info"
         />
         <AnalyticsCard
+          href="/dashboard/payments"
+          title={t("dashboard.cards.pendingRentBalance.title")}
+          value={formatCurrency(payments?.pending ?? 0)}
+          description={t("dashboard.cards.pendingRentBalance.description", {
+            values: { count: payments?.pendingCount ?? 0 },
+          })}
+          icon={Clock}
+          iconColor="warning"
+        />
+        <AnalyticsCard
+          href="/dashboard/payments/overdue"
+          title={t("dashboard.cards.overdueBalance.title")}
+          value={formatCurrency(payments?.overdue ?? 0)}
+          description={t("dashboard.cards.overdueBalance.description", {
+            values: { count: payments?.overdueCount ?? 0 },
+          })}
+          icon={AlertCircle}
+          iconColor="error"
+        />
+        <AnalyticsCard
           title={t("dashboard.cards.activeTenants.title")}
           value={overview?.activeTenants ?? 0}
           description={t("dashboard.cards.activeTenants.description", {
@@ -841,6 +876,9 @@ export default function DashboardPage() {
           })}
         </div>
       </div>
+
+      {/* Full-width property calendar — search, unit, availability & blocks */}
+      <DashboardPropertyCalendarSection />
 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">

@@ -52,6 +52,12 @@
   "dashboard.cards.collectionRate.title": "Einzugsrate",
   "dashboard.cards.collectionRate.description": "Effizienz der Zahlungseinziehung",
 
+  "dashboard.cards.pendingRentBalance.title": "Ausstehende Miete",
+  "dashboard.cards.pendingRentBalance.description": "Über {count} offene Forderungen noch nicht beglichen",
+
+  "dashboard.cards.overdueBalance.title": "Überfälliger Saldo",
+  "dashboard.cards.overdueBalance.description": "{count} Rechnungen überfällig oder nach Karenzfrist",
+
   "dashboard.cards.activeTenants.title": "Aktive Mieter",
   "dashboard.cards.activeTenants.description": "{count} ausstehende Bewerbungen",
 

@@ -52,6 +52,7 @@ export function VacationStayCard({
   adults,
   children,
   infants,
+  linkTarget = "public",
 }: {
   property: VacationStayCardProperty;
   checkIn?: string;
@@ -59,6 +60,8 @@ export function VacationStayCard({
   adults?: number;
   children?: number;
   infants?: number;
+  /** `dashboard` opens the property calendar in the app (manager view). */
+  linkTarget?: "public" | "dashboard";
 }) {
   const unit = property.units?.[0];
   const bedrooms = unit?.bedrooms ?? 0;
@@ -76,8 +79,13 @@ export function VacationStayCard({
     ...(infants && infants > 0 ? { infants: String(infants) } : {}),
   });
 
+  const href =
+    linkTarget === "dashboard"
+      ? `/dashboard/properties/${property._id}/calendar${qs}`
+      : `/properties/${property._id}${qs}`;
+
   return (
-    <Link href={`/properties/${property._id}${qs}`}>
+    <Link href={href}>
       <article className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-teal-300/60 hover:shadow-xl">
         <div className="relative aspect-[4/3] overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -38,7 +38,87 @@ import { DateBlockForm, DateBlockFormData } from "@/components/calendar/DateBloc
 import { PricingRuleForm, PricingRuleFormData } from "@/components/calendar/PricingRuleForm";
 import { DateBlockType } from "@/types";
 import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+
+const TIP = {
+  pageTitle:
+    "Per-property availability for the selected unit: see bookings, holds, and pricing. Admins and managers can block dates or add pricing rules from the calendar or these tabs.",
+  back: "Return to the property overview for this listing.",
+  refresh:
+    "Reload calendar data from the server: date blocks, pricing rules, active leases, and pending rental requests.",
+  blockDates:
+    "Open the form to mark date ranges as unavailable for the selected unit (maintenance, owner stay, hold, etc.).",
+  addPricingRule:
+    "Add a rule that changes nightly rates for specific dates (seasons, weekends, minimum stay, or fixed overrides).",
+  selectUnit:
+    "Each unit has its own calendar and rules. Choose a unit to view and edit its availability.",
+  viewUnitCalendar:
+    "Open the full-screen calendar page for only this unit (same data, focused layout).",
+  tabCalendar:
+    "Month grid showing availability. Colors reflect blocks, leases, pricing, and requests. Drag or click dates to act (if you have permission).",
+  tabBlocks:
+    "All date blocks for this unit: times the unit is not bookable. Use the filter to narrow by block type.",
+  tabPricing:
+    "Pricing rules that adjust the default nightly rate for date ranges. Active rules apply when guests book.",
+  cardAvailability:
+    "Interactive calendar for the unit selected above. Use the legend to read colors; select dates to create blocks or pricing when allowed.",
+  cardBlocks:
+    "Hard blocks usually prevent bookings entirely. Dates shown here match the Blocks tab and the calendar overlays.",
+  filterBlocks: "Show every block type or only one category (e.g. maintenance, owner stay).",
+  cardPricing:
+    "Rules are evaluated for stays that fall in their date range. Delete a rule from the trash icon if it no longer applies.",
+  addRule: "Create another pricing rule; you can pre-fill dates from a selection on the calendar.",
+  bulkTitle:
+    "Apply the same action to every unit in this property at once—useful for whole-building closures or holidays.",
+  blockAllUnits:
+    "Create one date block and apply it to all units in this property in a single step.",
+} as const;
+
+function TitleTip({
+  tip,
+  children,
+  className,
+}: {
+  tip: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className={cn("inline-flex cursor-help items-center gap-2 underline-offset-4", className)}>
+          {children}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent side="bottom" className="max-w-xs text-left leading-snug">
+        {tip}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+function ActionTip({
+  tip,
+  children,
+}: {
+  tip: string;
+  children: React.ReactElement;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent side="bottom" className="max-w-xs text-left leading-snug">
+        {tip}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 interface UnitOption {
   _id: string;
@@ -312,128 +392,167 @@ export default function PropertyCalendarPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-10 w-64 rounded bg-muted" />
-          <div className="h-96 rounded bg-muted" />
+      <TooltipProvider delayDuration={250}>
+        <div className="space-y-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-10 w-64 rounded bg-muted" />
+            <div className="h-96 rounded bg-muted" />
+          </div>
         </div>
-      </div>
+      </TooltipProvider>
     );
   }
 
   if (!property) {
     return (
-      <div className="space-y-6">
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <h3
-              className={cn(
-                "mb-2 text-lg font-semibold",
-                isLight ? "text-slate-900" : "text-foreground"
-              )}
-            >
-              Property not found
-            </h3>
-            <Button onClick={() => router.push("/dashboard/properties")}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Properties
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <TooltipProvider delayDuration={250}>
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <h3
+                    className={cn(
+                      "mb-2 cursor-help text-lg font-semibold underline decoration-dotted decoration-muted-foreground/50 underline-offset-4",
+                      isLight ? "text-slate-900" : "text-foreground"
+                    )}
+                  >
+                    Property not found
+                  </h3>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs text-left leading-snug" side="bottom">
+                  No listing matches this URL. It may have been deleted or the link is wrong—go
+                  back to your property list to pick a valid property.
+                </TooltipContent>
+              </Tooltip>
+              <ActionTip tip={TIP.back}>
+                <Button onClick={() => router.push("/dashboard/properties")}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Properties
+                </Button>
+              </ActionTip>
+            </CardContent>
+          </Card>
+        </div>
+      </TooltipProvider>
     );
   }
 
   return (
+    <TooltipProvider delayDuration={250}>
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push(`/dashboard/properties/${propertyId}`)}
-            className={cn(
-              "w-fit shrink-0",
-              isLight &&
-                "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
-            )}
-          >
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            Back
-          </Button>
+          <ActionTip tip={TIP.back}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push(`/dashboard/properties/${propertyId}`)}
+              className={cn(
+                "w-fit shrink-0",
+                isLight &&
+                  "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+              )}
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              Back
+            </Button>
+          </ActionTip>
           <div>
             <h1
               className={cn(
-                "flex items-center gap-2 text-2xl font-bold tracking-tight sm:text-3xl",
+                "text-2xl font-bold tracking-tight sm:text-3xl",
                 isLight ? "text-slate-900" : "text-white"
               )}
             >
-              <CalendarDays
+              <TitleTip
+                tip={TIP.pageTitle}
                 className={cn(
-                  "h-6 w-6 shrink-0",
-                  isLight ? "text-slate-800" : "text-white"
+                  "flex items-center gap-2",
+                  isLight ? "text-slate-900" : "text-white"
                 )}
-              />
-              {property.name} - Availability Calendar
+              >
+                <CalendarDays
+                  className={cn(
+                    "h-6 w-6 shrink-0",
+                    isLight ? "text-slate-800" : "text-white"
+                  )}
+                />
+                {property.name} - Availability Calendar
+              </TitleTip>
             </h1>
-            <p
-              className={cn(
-                "mt-1 text-sm sm:text-base",
-                isLight ? "text-slate-600" : "text-white/80"
-              )}
-            >
-              Manage date blocks, pricing rules, and view availability
-            </p>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p
+                  className={cn(
+                    "mt-1 cursor-help text-sm sm:text-base underline decoration-dotted decoration-current/30 underline-offset-4",
+                    isLight ? "text-slate-600" : "text-white/80"
+                  )}
+                >
+                  Manage date blocks, pricing rules, and view availability
+                </p>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs text-left leading-snug" side="bottom">
+                Blocks remove availability; pricing rules change nightly rates for date ranges. Use
+                the Calendar tab for the visual month view, or Blocks / Pricing for lists.
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              if (selectedUnitId) fetchUnitCalendarData(selectedUnitId);
-            }}
-            className={cn(
-              isLight &&
-                "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
-            )}
-          >
-            <RefreshCw className="mr-1 h-4 w-4" />
-            Refresh
-          </Button>
+          <ActionTip tip={TIP.refresh}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (selectedUnitId) fetchUnitCalendarData(selectedUnitId);
+              }}
+              className={cn(
+                isLight &&
+                  "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+              )}
+            >
+              <RefreshCw className="mr-1 h-4 w-4" />
+              Refresh
+            </Button>
+          </ActionTip>
           {(userRole === "admin" || userRole === "manager" || userRole === "owner") && (
             <>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setBlockFormDates({});
-                  setShowBlockForm(true);
-                }}
-                className={cn(
-                  isLight &&
-                    "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
-                )}
-              >
-                <Lock className="mr-1 h-4 w-4" />
-                Block Dates
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setPricingFormDates({});
-                  setShowPricingForm(true);
-                }}
-                className={cn(
-                  isLight &&
-                    "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
-                )}
-              >
-                <DollarSign className="mr-1 h-4 w-4" />
-                Add Pricing Rule
-              </Button>
+              <ActionTip tip={TIP.blockDates}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setBlockFormDates({});
+                    setShowBlockForm(true);
+                  }}
+                  className={cn(
+                    isLight &&
+                      "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                  )}
+                >
+                  <Lock className="mr-1 h-4 w-4" />
+                  Block Dates
+                </Button>
+              </ActionTip>
+              <ActionTip tip={TIP.addPricingRule}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setPricingFormDates({});
+                    setShowPricingForm(true);
+                  }}
+                  className={cn(
+                    isLight &&
+                      "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                  )}
+                >
+                  <DollarSign className="mr-1 h-4 w-4" />
+                  Add Pricing Rule
+                </Button>
+              </ActionTip>
             </>
           )}
         </div>
@@ -441,14 +560,21 @@ export default function PropertyCalendarPage() {
 
       {units.length > 1 && (
         <div className="flex flex-wrap items-center gap-3">
-          <label
-            className={cn(
-              "text-sm font-medium",
-              isLight ? "text-slate-800" : "text-foreground"
-            )}
-          >
-            Select Unit:
-          </label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <label
+                className={cn(
+                  "cursor-help text-sm font-medium underline decoration-dotted decoration-muted-foreground/50 underline-offset-4",
+                  isLight ? "text-slate-800" : "text-foreground"
+                )}
+              >
+                Select Unit:
+              </label>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs text-left leading-snug" side="bottom">
+              {TIP.selectUnit}
+            </TooltipContent>
+          </Tooltip>
           <Select value={selectedUnitId} onValueChange={setSelectedUnitId}>
             <SelectTrigger className={filterSelectTrigger("w-[250px]")}>
               <SelectValue placeholder="Select a unit" />
@@ -462,22 +588,24 @@ export default function PropertyCalendarPage() {
             </SelectContent>
           </Select>
           {selectedUnit && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                router.push(
-                  `/dashboard/properties/${propertyId}/units/${selectedUnitId}/calendar`
-                )
-              }
-              className={cn(
-                isLight
-                  ? "text-sky-700 hover:bg-sky-50 hover:text-sky-800"
-                  : undefined
-              )}
-            >
-              View Unit Calendar →
-            </Button>
+            <ActionTip tip={TIP.viewUnitCalendar}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  router.push(
+                    `/dashboard/properties/${propertyId}/units/${selectedUnitId}/calendar`
+                  )
+                }
+                className={cn(
+                  isLight
+                    ? "text-sky-700 hover:bg-sky-50 hover:text-sky-800"
+                    : undefined
+                )}
+              >
+                View Unit Calendar →
+              </Button>
+            </ActionTip>
           )}
         </div>
       )}
@@ -489,28 +617,54 @@ export default function PropertyCalendarPage() {
               "border border-slate-200/90 bg-slate-100/90 text-slate-900 [&_svg]:text-slate-800 shadow-sm"
           )}
         >
-          <TabsTrigger value="calendar">
-            <CalendarDays className="mr-1 h-4 w-4" />
-            Calendar
-          </TabsTrigger>
-          <TabsTrigger value="blocks">
-            <Lock className="mr-1 h-4 w-4" />
-            Blocks ({blocks.length})
-          </TabsTrigger>
-          <TabsTrigger value="pricing">
-            <DollarSign className="mr-1 h-4 w-4" />
-            Pricing Rules ({pricingRules.length})
-          </TabsTrigger>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <TabsTrigger value="calendar" className="cursor-help">
+                <CalendarDays className="mr-1 h-4 w-4" />
+                Calendar
+              </TabsTrigger>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs text-left leading-snug" side="bottom">
+              {TIP.tabCalendar}
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <TabsTrigger value="blocks" className="cursor-help">
+                <Lock className="mr-1 h-4 w-4" />
+                Blocks ({blocks.length})
+              </TabsTrigger>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs text-left leading-snug" side="bottom">
+              {TIP.tabBlocks}
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <TabsTrigger value="pricing" className="cursor-help">
+                <DollarSign className="mr-1 h-4 w-4" />
+                Pricing Rules ({pricingRules.length})
+              </TabsTrigger>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs text-left leading-snug" side="bottom">
+              {TIP.tabPricing}
+            </TooltipContent>
+          </Tooltip>
         </TabsList>
 
         <TabsContent value="calendar">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5" />
-                {selectedUnit
-                  ? `Unit ${selectedUnit.unitNumber} - Availability`
-                  : "Select a unit to view calendar"}
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <TitleTip
+                  tip={TIP.cardAvailability}
+                  className="flex items-center gap-2"
+                >
+                  <CalendarDays className="h-5 w-5 shrink-0" />
+                  {selectedUnit
+                    ? `Unit ${selectedUnit.unitNumber} - Availability`
+                    : "Select a unit to view calendar"}
+                </TitleTip>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -545,18 +699,30 @@ export default function PropertyCalendarPage() {
         <TabsContent value="blocks">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Lock className="h-5 w-5" />
-                  Active Date Blocks
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <TitleTip tip={TIP.cardBlocks} className="flex items-center gap-2">
+                    <Lock className="h-5 w-5 shrink-0" />
+                    Active Date Blocks
+                  </TitleTip>
                 </CardTitle>
                 <div className="flex items-center gap-2">
-                  <Filter
-                    className={cn(
-                      "h-4 w-4",
-                      isLight ? "text-slate-500" : "text-muted-foreground"
-                    )}
-                  />
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex cursor-help">
+                        <Filter
+                          className={cn(
+                            "h-4 w-4",
+                            isLight ? "text-slate-500" : "text-muted-foreground"
+                          )}
+                          aria-hidden
+                        />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs text-left leading-snug" side="bottom">
+                      {TIP.filterBlocks}
+                    </TooltipContent>
+                  </Tooltip>
                   <Select value={blockFilterType} onValueChange={setBlockFilterType}>
                     <SelectTrigger className={filterSelectTrigger("w-[180px]")}>
                       <SelectValue placeholder="Filter by type" />
@@ -646,27 +812,31 @@ export default function PropertyCalendarPage() {
         <TabsContent value="pricing">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5" />
-                  Pricing Rules
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <TitleTip tip={TIP.cardPricing} className="flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 shrink-0" />
+                    Pricing Rules
+                  </TitleTip>
                 </CardTitle>
                 {(userRole === "admin" || userRole === "manager" || userRole === "owner") && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setPricingFormDates({});
-                      setShowPricingForm(true);
-                    }}
-                    className={cn(
-                      isLight &&
-                        "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
-                    )}
-                  >
-                    <Plus className="mr-1 h-4 w-4" />
-                    Add Rule
-                  </Button>
+                  <ActionTip tip={TIP.addRule}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setPricingFormDates({});
+                        setShowPricingForm(true);
+                      }}
+                      className={cn(
+                        isLight &&
+                          "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                      )}
+                    >
+                      <Plus className="mr-1 h-4 w-4" />
+                      Add Rule
+                    </Button>
+                  </ActionTip>
                 )}
               </div>
             </CardHeader>
@@ -750,36 +920,47 @@ export default function PropertyCalendarPage() {
       {(userRole === "admin" || userRole === "manager" || userRole === "owner") && units.length > 1 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Bulk Operations
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <TitleTip tip={TIP.bulkTitle} className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 shrink-0" />
+                Bulk Operations
+              </TitleTip>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p
-              className={cn(
-                "mb-3 text-sm",
-                isLight ? "text-slate-600" : "text-muted-foreground"
-              )}
-            >
-              Apply operations to all units in this property at once.
-            </p>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p
+                  className={cn(
+                    "mb-3 cursor-help text-sm underline decoration-dotted decoration-muted-foreground/50 underline-offset-4",
+                    isLight ? "text-slate-600" : "text-muted-foreground"
+                  )}
+                >
+                  Apply operations to all units in this property at once.
+                </p>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs text-left leading-snug" side="top">
+                {TIP.bulkTitle}
+              </TooltipContent>
+            </Tooltip>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setBlockFormDates({});
-                  setShowBlockForm(true);
-                }}
-                className={cn(
-                  isLight &&
-                    "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
-                )}
-              >
-                <Lock className="mr-1 h-4 w-4" />
-                Block All Units
-              </Button>
+              <ActionTip tip={TIP.blockAllUnits}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setBlockFormDates({});
+                    setShowBlockForm(true);
+                  }}
+                  className={cn(
+                    isLight &&
+                      "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                  )}
+                >
+                  <Lock className="mr-1 h-4 w-4" />
+                  Block All Units
+                </Button>
+              </ActionTip>
             </div>
           </CardContent>
         </Card>
@@ -805,5 +986,6 @@ export default function PropertyCalendarPage() {
         isLoading={isSubmitting}
       />
     </div>
+    </TooltipProvider>
   );
 }

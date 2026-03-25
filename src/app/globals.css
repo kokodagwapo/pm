@@ -632,9 +632,13 @@
     font-weight: 400;
     line-height: 1.5;
     letter-spacing: 0.01em;
-    color: #ffffff;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Immersive (video) dashboard only — white copy; light shell uses .dashboard-light + rules below */
+  html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography {
+    color: #ffffff;
   }
 
   html.dashboard-layout main .dashboard-main-typography .text-xs {
@@ -681,21 +685,21 @@
     line-height: 1.25 !important;
   }
 
-  html.dashboard-layout main .dashboard-main-typography .text-muted-foreground {
+  html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography .text-muted-foreground {
     color: #ffffff !important;
   }
 
-  /* Semantic tokens + any stray grays: force copy to pure white in main column */
-  html.dashboard-layout main .dashboard-main-typography .text-foreground,
-  html.dashboard-layout main .dashboard-main-typography .text-card-foreground,
-  html.dashboard-layout main .dashboard-main-typography .text-accent-foreground,
-  html.dashboard-layout main .dashboard-main-typography .text-secondary-foreground,
-  html.dashboard-layout main .dashboard-main-typography .text-primary-foreground,
-  html.dashboard-layout main .dashboard-main-typography .text-popover-foreground {
+  /* Semantic tokens + any stray grays: force copy to pure white in immersive main column only */
+  html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography .text-foreground,
+  html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography .text-card-foreground,
+  html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography .text-accent-foreground,
+  html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography .text-secondary-foreground,
+  html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography .text-primary-foreground,
+  html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography .text-popover-foreground {
     color: #ffffff !important;
   }
 
-  html.dashboard-layout main .dashboard-main-typography .text-primary {
+  html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography .text-primary {
     color: #ffffff !important;
   }
 
@@ -711,6 +715,9 @@
     font-weight: 400 !important;
     line-height: 1.5 !important;
     letter-spacing: 0.01em !important;
+  }
+
+  html.dashboard-layout:not(.dashboard-light) [data-slot="card-description"] {
     color: #ffffff !important;
   }
 
@@ -1088,18 +1095,18 @@ body.dashboard-layout h2 {
  * Dashboard main column — unlayered so this beats Tailwind @layer utilities
  * (fixes CardTitle / CardDescription / ghost buttons still resolving to gray).
  */
-html.dashboard-layout main .dashboard-main-typography [data-slot="card-title"],
-html.dashboard-layout main .dashboard-main-typography [data-slot="card-description"],
-html.dashboard-layout main .dashboard-main-typography [data-slot="card-header"],
-html.dashboard-layout main .dashboard-main-typography [data-slot="card-footer"] {
+html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography [data-slot="card-title"],
+html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography [data-slot="card-description"],
+html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography [data-slot="card-header"],
+html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography [data-slot="card-footer"] {
   color: #ffffff !important;
 }
 
-html.dashboard-layout main .dashboard-main-typography [data-slot="card-content"] {
+html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography [data-slot="card-content"] {
   color: #ffffff !important;
 }
 
-html.dashboard-layout main .dashboard-main-typography [data-slot="button"] {
+html.dashboard-layout:not(.dashboard-light) main .dashboard-main-typography [data-slot="button"] {
   color: #ffffff !important;
 }
 
@@ -1473,6 +1480,22 @@ html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot
 html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card-footer"],
 html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card-content"] {
   color: #0f172a !important;
+}
+
+/* Nested lease/list cards: headings & body copy inherit slate (not covered by data-slot title) */
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card"] {
+  color: #0f172a !important;
+}
+
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card"] h1,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card"] h2,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card"] h3,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card"] h4,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card"] h5,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card"] h6,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card"] p,
+html.dashboard-layout.dashboard-light main .dashboard-main-typography [data-slot="card"] li {
+  color: inherit;
 }
 
 /*

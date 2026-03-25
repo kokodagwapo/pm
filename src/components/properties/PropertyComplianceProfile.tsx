@@ -112,10 +112,10 @@ export default function PropertyComplianceProfile({ propertyId, isLight }: Props
             <Shield className={cn("h-5 w-5", isLight ? "text-violet-600" : "text-violet-400")} />
           </div>
           <div>
-            <h3 className={cn("text-base font-semibold", isLight ? "text-slate-900" : "text-white")}>
+            <h3 className={cn("text-base font-semibold", isLight ? "text-black" : "text-white")}>
               Compliance Profile
             </h3>
-            <p className={cn("text-xs", isLight ? "text-slate-500" : "text-white/50")}>
+            <p className={cn("text-xs", isLight ? "text-black" : "text-white/50")}>
               Regulatory obligations for this property
             </p>
           </div>
@@ -135,14 +135,14 @@ export default function PropertyComplianceProfile({ propertyId, isLight }: Props
       {stats && (
         <div className="grid grid-cols-4 gap-3">
           {[
-            { label: "Total", value: stats.total, color: isLight ? "text-slate-700" : "text-white" },
+            { label: "Total", value: stats.total, color: isLight ? "text-black" : "text-white" },
             { label: "Active", value: activeObligations.length, color: "text-blue-500" },
             { label: "Overdue", value: stats.overdue, color: "text-red-500" },
             { label: "Critical", value: stats.critical, color: "text-red-500" },
           ].map((s) => (
             <div key={s.label} className={cn(cardBase, "text-center")}>
               <p className={cn("text-2xl font-bold", s.color)}>{s.value}</p>
-              <p className={cn("text-xs font-medium mt-0.5", isLight ? "text-slate-500" : "text-white/50")}>{s.label}</p>
+              <p className={cn("text-xs font-medium mt-0.5", isLight ? "text-black" : "text-white/50")}>{s.label}</p>
             </div>
           ))}
         </div>
@@ -175,10 +175,10 @@ export default function PropertyComplianceProfile({ propertyId, isLight }: Props
       {/* Obligations list */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h4 className={cn("text-xs font-semibold uppercase tracking-wider", isLight ? "text-slate-500" : "text-white/50")}>
+          <h4 className={cn("text-xs font-semibold uppercase tracking-wider", isLight ? "text-black" : "text-white/50")}>
             Active Obligations
           </h4>
-          <span className={cn("text-xs", isLight ? "text-slate-400" : "text-white/40")}>
+          <span className={cn("text-xs", isLight ? "text-black" : "text-white/40")}>
             {activeObligations.length} active
           </span>
         </div>
@@ -186,7 +186,7 @@ export default function PropertyComplianceProfile({ propertyId, isLight }: Props
         {activeObligations.length === 0 ? (
           <div className={cn("flex flex-col items-center justify-center rounded-xl border py-8 text-center", isLight ? "border-slate-200 bg-slate-50" : "border-white/[0.08] bg-white/[0.02]")}>
             <CheckCircle2 className={cn("h-8 w-8", isLight ? "text-emerald-400" : "text-emerald-500/50")} />
-            <p className={cn("mt-2 text-sm font-medium", isLight ? "text-slate-500" : "text-white/50")}>
+            <p className={cn("mt-2 text-sm font-medium", isLight ? "text-black" : "text-white/50")}>
               {obligations.length === 0 ? "No obligations yet" : "All obligations completed"}
             </p>
             <Button
@@ -217,13 +217,13 @@ export default function PropertyComplianceProfile({ propertyId, isLight }: Props
               >
                 <div className={cn("h-2.5 w-2.5 shrink-0 rounded-full", SEVERITY_DOT[o.severity] || "bg-slate-400")} />
                 <div className="min-w-0 flex-1">
-                  <p className={cn("text-sm font-medium truncate", isLight ? "text-slate-900" : "text-white")}>{o.title}</p>
+                  <p className={cn("text-sm font-medium truncate", isLight ? "text-black" : "text-white")}>{o.title}</p>
                   <div className="flex flex-wrap items-center gap-2 mt-0.5">
-                    <span className={cn("text-xs", isLight ? "text-slate-400" : "text-white/40")}>
+                    <span className={cn("text-xs", isLight ? "text-black" : "text-white/40")}>
                       {o.category.replace(/_/g, " ")}
                     </span>
                     {o.dueDate && (
-                      <span className={cn("flex items-center gap-1 text-xs", isOverdue ? "text-red-500" : isLight ? "text-slate-500" : "text-white/50")}>
+                      <span className={cn("flex items-center gap-1 text-xs", isOverdue ? "text-red-500" : isLight ? "text-black" : "text-white/50")}>
                         <Clock className="h-3 w-3" />
                         {isOverdue
                           ? `${Math.abs(daysUntilDue!)} days overdue`
@@ -241,7 +241,7 @@ export default function PropertyComplianceProfile({ propertyId, isLight }: Props
                   <Button
                     size="sm"
                     variant="ghost"
-                    className={cn("h-7 rounded-lg px-2 text-xs", isLight ? "text-slate-600 hover:bg-slate-100" : "text-white/70 hover:bg-white/10")}
+                    className={cn("h-7 rounded-lg px-2 text-xs", isLight ? "text-black hover:bg-slate-100" : "text-white/70 hover:bg-white/10")}
                     onClick={() => handleStatusChange(o._id, o.status === "pending" ? "in_progress" : "completed")}
                   >
                     {o.status === "pending" ? "Start" : "Complete"}

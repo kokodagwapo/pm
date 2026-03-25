@@ -56,12 +56,12 @@ export default function PropertyDetailsPage() {
   const { data: session } = useSession();
   const dash = useOptionalDashboardAppearance();
   const isLight = dash?.isLight ?? false;
-  const txTitle = isLight ? "text-slate-900" : "text-gray-900 dark:text-white";
-  const txBody = isLight ? "text-slate-600" : "text-gray-600 dark:text-gray-400";
-  const txMut = isLight ? "text-slate-700" : "text-gray-700 dark:text-gray-300";
+  const txTitle = isLight ? "text-black" : "text-gray-900 dark:text-white";
+  const txBody = isLight ? "text-black" : "text-gray-600 dark:text-gray-400";
+  const txMut = isLight ? "text-black" : "text-gray-700 dark:text-gray-300";
   const outlineActions = cn(
     isLight &&
-      "border-slate-200 bg-white text-slate-900 hover:bg-slate-50 [&_svg]:text-slate-700"
+      "border-slate-200 bg-white text-black hover:bg-slate-50 [&_svg]:text-black"
   );
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -384,7 +384,7 @@ export default function PropertyDetailsPage() {
     <div
       className={cn(
         "container mx-auto space-y-5 px-3 py-5 sm:space-y-6 sm:px-4 sm:py-6 md:py-8",
-        isLight && "text-slate-900"
+        isLight && "text-black"
       )}
     >
       {/* Header */}
@@ -408,7 +408,7 @@ export default function PropertyDetailsPage() {
             <h1
               className={cn(
                 "break-words text-base font-semibold sm:text-lg",
-                isLight ? "text-slate-900" : "text-foreground"
+                isLight ? "text-black" : "text-foreground"
               )}
             >
               {property?.name || t("properties.details.unknownProperty")}
@@ -490,7 +490,7 @@ export default function PropertyDetailsPage() {
           <TabsList
             className={cn(
               "grid h-auto w-full grid-cols-2 gap-1.5 rounded-lg bg-transparent sm:grid-cols-3 md:grid-cols-6 md:gap-2",
-              isLight && "text-slate-800"
+              isLight && "!text-black"
             )}
           >
             <TabsTrigger
@@ -498,7 +498,7 @@ export default function PropertyDetailsPage() {
               className={cn(
                 "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
-                  ? "text-slate-800 hover:bg-slate-100/90"
+                  ? "!text-black hover:bg-slate-100/90"
                   : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               )}
             >
@@ -510,7 +510,7 @@ export default function PropertyDetailsPage() {
               className={cn(
                 "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
-                  ? "text-slate-800 hover:bg-slate-100/90"
+                  ? "!text-black hover:bg-slate-100/90"
                   : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               )}
             >
@@ -522,7 +522,7 @@ export default function PropertyDetailsPage() {
               className={cn(
                 "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
-                  ? "text-slate-800 hover:bg-slate-100/90"
+                  ? "!text-black hover:bg-slate-100/90"
                   : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               )}
             >
@@ -534,7 +534,7 @@ export default function PropertyDetailsPage() {
               className={cn(
                 "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
-                  ? "text-slate-800 hover:bg-slate-100/90"
+                  ? "!text-black hover:bg-slate-100/90"
                   : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               )}
             >
@@ -546,7 +546,7 @@ export default function PropertyDetailsPage() {
               className={cn(
                 "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
-                  ? "text-slate-800 hover:bg-slate-100/90"
+                  ? "!text-black hover:bg-slate-100/90"
                   : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               )}
             >
@@ -558,7 +558,7 @@ export default function PropertyDetailsPage() {
               className={cn(
                 "flex flex-col items-center justify-center gap-1 rounded-lg bg-transparent px-2 py-2.5 text-center text-xs font-medium leading-tight transition-all duration-200 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-left sm:text-sm",
                 isLight
-                  ? "text-slate-800 hover:bg-slate-100/90"
+                  ? "!text-black hover:bg-slate-100/90"
                   : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               )}
             >

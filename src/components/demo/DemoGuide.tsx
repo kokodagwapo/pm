@@ -541,7 +541,7 @@ export function DemoGuide() {
               </span>
               <button
                 onClick={handleClose}
-                className="flex h-6 w-6 items-center justify-center rounded-lg text-white/80 transition-all hover:bg-white/10 hover:text-white"
+                className="flex h-6 w-6 items-center justify-center rounded-lg text-black/75 transition-all hover:bg-black/10 hover:text-black"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -605,8 +605,8 @@ export function DemoGuide() {
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-xl border transition-all",
                   isFirst
-                    ? "cursor-not-allowed border-white/5 bg-white/[0.03] text-white/25"
-                    : "border-sky-200/25 bg-white/5 text-white hover:border-sky-200/40 hover:bg-white/10 active:scale-95"
+                    ? "cursor-not-allowed border-black/10 bg-black/[0.04] text-black/25"
+                    : "border-sky-200/40 bg-white/60 text-black hover:border-sky-300/60 hover:bg-white/90 active:scale-95"
                 )}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -636,8 +636,8 @@ export function DemoGuide() {
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-xl border transition-all",
                   isLast
-                    ? "cursor-not-allowed border-white/5 bg-white/[0.03] text-white/25"
-                    : "border-sky-200/25 bg-white/5 text-white hover:border-sky-200/40 hover:bg-white/10 active:scale-95"
+                    ? "cursor-not-allowed border-black/10 bg-black/[0.04] text-black/25"
+                    : "border-sky-200/40 bg-white/60 text-black hover:border-sky-300/60 hover:bg-white/90 active:scale-95"
                 )}
               >
                 <ChevronRight className="h-4 w-4" />

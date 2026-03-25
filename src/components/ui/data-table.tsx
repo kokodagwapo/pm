@@ -215,7 +215,7 @@ function DataTable<T>({
               className={cn(
                 "mt-4",
                 isLight
-                  ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                  ? "border-slate-200 bg-white text-black hover:bg-slate-50"
                   : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
               )}
             >
@@ -239,7 +239,7 @@ function DataTable<T>({
           <span
             className={cn(
               "mt-2 font-medium",
-              isLight ? "text-slate-900" : "text-white"
+              isLight ? "text-black" : "text-white"
             )}
           >
             {emptyState?.title}
@@ -248,7 +248,7 @@ function DataTable<T>({
             <span
               className={cn(
                 "mt-1 text-sm",
-                isLight ? "text-slate-600" : "text-white/75"
+                isLight ? "text-black" : "text-white/75"
               )}
             >
               {emptyState.description}
@@ -359,7 +359,7 @@ function DataTable<T>({
                 <TableHead
                   className={cn(
                     "w-12 px-4 py-3 font-medium",
-                    isLight ? "text-slate-800" : "text-white/90"
+                    isLight ? "text-black" : "text-white/90"
                   )}
                 >
                   <Checkbox
@@ -374,7 +374,7 @@ function DataTable<T>({
                   key={column.id}
                   className={cn(
                     "px-4 py-3 font-medium",
-                    isLight ? "text-slate-800" : "text-white/90",
+                    isLight ? "text-black" : "text-white/90",
                     getVisibilityClass(column.visibility),
                     getAlignClass(column.align),
                     column.width,
@@ -404,7 +404,7 @@ function DataTable<T>({
           <div
             className={cn(
               "text-sm",
-              isLight ? "text-slate-600" : "text-white/70"
+              isLight ? "text-black" : "text-white/70"
             )}
           >
             {pagination.showingText}
@@ -419,7 +419,7 @@ function DataTable<T>({
               disabled={pagination.currentPage <= 1}
               className={cn(
                 isLight
-                  ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                  ? "border-slate-200 bg-white text-black hover:bg-slate-50"
                   : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
               )}
             >
@@ -429,7 +429,7 @@ function DataTable<T>({
             <span
               className={cn(
                 "text-sm",
-                isLight ? "text-slate-600" : "text-white/75"
+                isLight ? "text-black" : "text-white/75"
               )}
             >
               {pagination.currentPage} / {pagination.totalPages}
@@ -443,7 +443,7 @@ function DataTable<T>({
               disabled={pagination.currentPage >= pagination.totalPages}
               className={cn(
                 isLight
-                  ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                  ? "border-slate-200 bg-white text-black hover:bg-slate-50"
                   : "border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
               )}
             >

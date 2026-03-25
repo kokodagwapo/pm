@@ -290,6 +290,7 @@
   "properties.newProperty.title": "Neue Immobilie erstellen",
   "properties.newProperty.subtitle": "Fügen Sie eine neue Immobilie mit umfassenden Details und integrierter Einheitenverwaltung zu Ihrem Portfolio hinzu.",
   "properties.newProperty.backToList": "Zurück zu Immobilien",
+  "properties.newProperty.hint": "Bearbeiten Sie die Abschnitte unten—Details, Einheiten, Ausstattung und Fotos—und speichern Sie am Ende.",
   "properties.newProperty.success.title": "Immobilie erfolgreich erstellt",
   "properties.newProperty.success.description": "{name} wurde zu Ihrem Portfolio hinzugefügt.",
   "properties.newProperty.error.title": "Immobilie konnte nicht erstellt werden",
