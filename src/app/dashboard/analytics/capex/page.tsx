@@ -46,6 +46,20 @@ import {
   Cell,
 } from "recharts";
 
+interface SystemReplacementItem {
+  systemType: string;
+  installYear: number;
+  systemAge: number;
+  estimatedLifespanYears: number;
+  remainingLifeYears: number;
+  replacementYear: number;
+  replacementCost: number;
+  annualReserve: number;
+  agePercent: number;
+  urgency: "immediate" | "near-term" | "future";
+  notes?: string;
+}
+
 interface PropertyCapex {
   id: string;
   name: string;
@@ -56,7 +70,15 @@ interface PropertyCapex {
   annualBenchmark: number;
   annualHistorical: number;
   historicalCategories: string[];
-  projectedYears: { year: number; projected: number }[];
+  hasSystemData?: boolean;
+  systemReplacementSchedule?: SystemReplacementItem[];
+  totalAnnualReserve?: number;
+  projectedYears: { year: number; projected: number; systemReplacements?: { systemType: string; cost: number }[] }[];
+}
+
+interface UrgentSystem extends SystemReplacementItem {
+  propertyId: string;
+  propertyName: string;
 }
 
 interface SystemEntry {
@@ -91,6 +113,7 @@ interface CapexData {
   totalBudget: number;
   annualAvgBudget: number;
   highRiskCount: number;
+  urgentSystems?: UrgentSystem[];
   categoryBreakdown: CategorySpend[];
   currentYear: number;
 }
@@ -474,6 +497,53 @@ export default function CapexPlanningPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Urgent System Replacement Schedule */}
+        {data && data.urgentSystems && data.urgentSystems.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-red-500 inline-block" />
+                Urgent System Replacements
+              </CardTitle>
+              <CardDescription>
+                Systems approaching or past end of estimated lifespan — based on building system ages entered
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {data.urgentSystems.slice(0, 10).map((sys, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-sm">{sys.systemType}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          sys.urgency === "immediate"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-orange-100 text-orange-700"
+                        }`}>
+                          {sys.urgency === "immediate" ? "Immediate" : "Near-Term"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">{sys.propertyName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Age: {sys.systemAge}yr / {sys.estimatedLifespanYears}yr lifespan
+                        {sys.remainingLifeYears <= 0
+                          ? " — Past due for replacement"
+                          : ` — ${sys.remainingLifeYears}yr remaining`}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0 ml-4">
+                      <p className="font-bold text-sm">{formatCurrency(sys.replacementCost)}</p>
+                      <p className="text-xs text-muted-foreground">Replace by {sys.replacementYear}</p>
+                      <p className="text-xs text-muted-foreground">{formatCurrency(sys.annualReserve)}/yr reserve</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Category spend breakdown */}
         <Card>

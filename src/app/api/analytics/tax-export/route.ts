@@ -1,9 +1,9 @@
 /**
  * SmartStartPM — Tax Prep Export API
- * Generates a year-end income/expense summary as CSV or JSON.
+ * Generates a year-end income/expense summary as CSV, JSON, or PDF.
  * Query params:
  *   year       (number, defaults to current year)
- *   format     "csv" | "json"
+ *   format     "csv" | "json" | "pdf"
  *   propertyId (optional)
  */
 
@@ -20,6 +20,116 @@ import {
   withRoleAndDB,
 } from "@/lib/api-utils";
 import VendorJob from "@/models/VendorJob";
+
+/** Generate an HTML-based Schedule E report styled for printing/saving as PDF */
+function generateTaxHtmlReport(params: {
+  year: number;
+  properties: string[];
+  totalIncome: number;
+  totalExpenses: number;
+  netIncome: number;
+  scheduleESummary: { line: string; description: string; income: number; expenses: number }[];
+  income: { category: string; amount: number; scheduleELine: string; scheduleEDescription: string; monthName: string }[];
+  expenses: { category: string; amount: number; scheduleELine: string; scheduleEDescription: string; monthName: string }[];
+}): string {
+  const { year, properties, totalIncome, totalExpenses, netIncome, scheduleESummary, income, expenses } = params;
+  const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+  const today = new Date().toLocaleDateString("en-US", { dateStyle: "long" });
+  const netColor = netIncome >= 0 ? "#16a34a" : "#dc2626";
+
+  const scheduleERows = scheduleESummary
+    .map((s) => `
+      <tr>
+        <td>Line ${s.line}</td>
+        <td>${s.description}</td>
+        <td style="text-align:right;color:#16a34a">${s.income > 0 ? fmt(s.income) : "—"}</td>
+        <td style="text-align:right;color:#dc2626">${s.expenses > 0 ? fmt(s.expenses) : "—"}</td>
+      </tr>`).join("");
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tax Prep Report — Schedule E ${year}</title>
+  <style>
+    @media print { @page { margin: 1in; } .no-print { display: none; } }
+    body { font-family: Arial, sans-serif; font-size: 12px; color: #111; margin: 0; padding: 20px; }
+    h1 { font-size: 20px; border-bottom: 2px solid #1e40af; padding-bottom: 8px; }
+    h2 { font-size: 14px; margin-top: 24px; color: #1e40af; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th { background: #1e40af; color: white; padding: 6px 8px; text-align: left; }
+    td { padding: 5px 8px; border-bottom: 1px solid #eee; }
+    tr:nth-child(even) td { background: #f8fafc; }
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 16px 0; }
+    .kpi-box { border: 1px solid #ddd; padding: 12px; border-radius: 6px; text-align: center; }
+    .kpi-label { font-size: 11px; color: #666; text-transform: uppercase; }
+    .kpi-value { font-size: 18px; font-weight: bold; margin-top: 4px; }
+    .disclaimer { margin-top: 24px; padding: 12px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; font-size: 11px; color: #92400e; }
+    .no-print { margin-bottom: 16px; }
+    .print-btn { background: #1e40af; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+
+  <h1>IRS Schedule E Summary — Tax Year ${year}</h1>
+  <p><strong>Generated:</strong> ${today}</p>
+  <p><strong>Properties:</strong> ${properties.join(", ")}</p>
+
+  <h2>Financial Overview</h2>
+  <div class="summary-grid">
+    <div class="kpi-box">
+      <div class="kpi-label">Total Income (Line 3)</div>
+      <div class="kpi-value" style="color:#16a34a">${fmt(totalIncome)}</div>
+    </div>
+    <div class="kpi-box">
+      <div class="kpi-label">Total Expenses</div>
+      <div class="kpi-value" style="color:#dc2626">${fmt(totalExpenses)}</div>
+    </div>
+    <div class="kpi-box">
+      <div class="kpi-label">Net Income / (Loss)</div>
+      <div class="kpi-value" style="color:${netColor}">${fmt(netIncome)}</div>
+    </div>
+  </div>
+
+  <h2>Schedule E Line Summary (Form 1040, Part I)</h2>
+  <table>
+    <thead><tr><th>Line</th><th>Description</th><th style="text-align:right">Income</th><th style="text-align:right">Expenses</th></tr></thead>
+    <tbody>${scheduleERows}</tbody>
+  </table>
+
+  <h2>Income Detail</h2>
+  <table>
+    <thead><tr><th>Month</th><th>Category</th><th>Schedule E</th><th style="text-align:right">Amount</th></tr></thead>
+    <tbody>${income.map((r) => `<tr>
+      <td>${r.monthName}</td>
+      <td>${r.category}</td>
+      <td>Line ${r.scheduleELine} — ${r.scheduleEDescription}</td>
+      <td style="text-align:right;color:#16a34a">${fmt(r.amount)}</td>
+    </tr>`).join("")}</tbody>
+  </table>
+
+  <h2>Expense Detail</h2>
+  <table>
+    <thead><tr><th>Month</th><th>Category</th><th>Schedule E</th><th style="text-align:right">Amount</th></tr></thead>
+    <tbody>${expenses.map((r) => `<tr>
+      <td>${r.monthName}</td>
+      <td>${r.category}</td>
+      <td>Line ${r.scheduleELine} — ${r.scheduleEDescription}</td>
+      <td style="text-align:right;color:#dc2626">${fmt(r.amount)}</td>
+    </tr>`).join("")}</tbody>
+  </table>
+
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> This report is generated for informational purposes only and does not constitute tax advice.
+    Consult a licensed CPA or tax professional before filing. Depreciation, amortization, and other adjustments may require
+    additional documentation (Form 4562, Form 4797, etc.). Figures are based on recorded transactions in SmartStartPM.
+  </div>
+</body>
+</html>`;
+}
 
 /**
  * IRS Schedule E category mapping (Form 1040, Part I — Supplemental Income and Loss)
@@ -381,6 +491,25 @@ export const GET = withRoleAndDB([
         headers: {
           "Content-Type": "text/csv",
           "Content-Disposition": `attachment; filename="tax-prep-schedule-e-${year}.csv"`,
+        },
+      });
+    }
+
+    if (format === "pdf") {
+      const html = generateTaxHtmlReport({
+        year,
+        properties: properties.map((p) => p.name ?? "Property"),
+        totalIncome,
+        totalExpenses,
+        netIncome,
+        scheduleESummary,
+        income,
+        expenses,
+      });
+      return new NextResponse(html, {
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Content-Disposition": `inline; filename="schedule-e-${year}.html"`,
         },
       });
     }

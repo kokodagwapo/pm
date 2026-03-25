@@ -555,6 +555,12 @@ export default function FinancialAnalyticsPage() {
     window.open(`/api/analytics/tax-export?${params.toString()}`, "_blank");
   }, [taxYear, selectedProperty]);
 
+  const downloadTaxPdf = useCallback(async () => {
+    const params = new URLSearchParams({ year: String(taxYear), format: "pdf" });
+    if (selectedProperty !== "all") params.set("propertyId", selectedProperty);
+    window.open(`/api/analytics/tax-export?${params.toString()}`, "_blank");
+  }, [taxYear, selectedProperty]);
+
   const fetchUtilityAnomalies = useCallback(async () => {
     try {
       setUtilityAnomaliesLoading(true);
@@ -1237,12 +1243,18 @@ export default function FinancialAnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Market Rent Gap Alerts</h3>
-                <p className="text-sm text-muted-foreground">Active leases expiring in 60 days priced 10%+ below portfolio market rate</p>
+                <p className="text-sm text-muted-foreground">Active leases expiring in 60 days priced 10%+ below market rate. Falls back to portfolio average if no per-property override is set.</p>
               </div>
               <Button variant="outline" size="sm" onClick={fetchMarketRent} disabled={marketRentLoading}>
                 <RefreshCw className={`h-4 w-4 mr-2 ${marketRentLoading ? "animate-spin" : ""}`} />
                 Refresh
               </Button>
+            </div>
+            <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30 p-3 flex items-start gap-2 text-sm">
+              <span className="text-blue-600 mt-0.5">ℹ</span>
+              <p className="text-blue-800 dark:text-blue-200">
+                <strong>Configure per-property market rent:</strong> Go to <a href="/dashboard/analytics/capex" className="underline">CapEx Planner</a> → Building System Ages panel → enter a market rent override for each property. This is used to compare actual lease rents against a known market benchmark.
+              </p>
             </div>
 
             {marketRentLoading ? (
@@ -1355,6 +1367,10 @@ export default function FinancialAnalyticsPage() {
                 <Button variant="default" size="sm" onClick={downloadTaxCsv}>
                   <Download className="h-4 w-4 mr-2" />
                   Download CSV
+                </Button>
+                <Button variant="outline" size="sm" onClick={downloadTaxPdf}>
+                  <Download className="h-4 w-4 mr-2" />
+                  PDF Report
                 </Button>
               </div>
             </div>
