@@ -61,6 +61,7 @@ import type {
 } from "@/lib/services/admin-dashboard.service";
 import { UserRole } from "@/types";
 import { AdminTourWidget } from "@/components/dashboard/AdminTourWidget";
+import { PortfolioHealthWidget } from "@/components/dashboard/PortfolioHealthWidget";
 
 const alertColorMap: Record<AdminDashboardAlert["type"], string> = {
   error: "text-red-600",
@@ -506,6 +507,9 @@ export default function AdminPage() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
+          {/* Portfolio Health Score */}
+          <PortfolioHealthWidget compact />
+
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>

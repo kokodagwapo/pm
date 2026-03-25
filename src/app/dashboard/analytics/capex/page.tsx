@@ -1,0 +1,471 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  ArrowLeft,
+  Building2,
+  Calendar,
+  RefreshCw,
+  AlertTriangle,
+  TrendingUp,
+  Wrench,
+  DollarSign,
+} from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
+
+interface PropertyCapex {
+  id: string;
+  name: string;
+  yearBuilt: number | null;
+  age: number;
+  units: number;
+  riskLevel: "low" | "medium" | "high" | "critical";
+  annualBenchmark: number;
+  annualHistorical: number;
+  historicalCategories: string[];
+  projectedYears: { year: number; projected: number }[];
+}
+
+interface CategorySpend {
+  category: string;
+  total: number;
+  count: number;
+  annualAvg: number;
+}
+
+interface CapexData {
+  properties: PropertyCapex[];
+  projections: { year: number; amount: number }[];
+  totalBudget: number;
+  annualAvgBudget: number;
+  highRiskCount: number;
+  categoryBreakdown: CategorySpend[];
+  currentYear: number;
+}
+
+const RISK_BADGE: Record<PropertyCapex["riskLevel"], string> = {
+  low: "bg-green-100 text-green-800 border-green-200",
+  medium: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  high: "bg-orange-100 text-orange-800 border-orange-200",
+  critical: "bg-red-100 text-red-800 border-red-200",
+};
+
+const RISK_BAR_COLOR: Record<PropertyCapex["riskLevel"], string> = {
+  low: "#22c55e",
+  medium: "#eab308",
+  high: "#f97316",
+  critical: "#ef4444",
+};
+
+const formatCurrency = (n: number) =>
+  n.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+
+export default function CapexPlanningPage() {
+  const { data: session } = useSession();
+  const [data, setData] = useState<CapexData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [years, setYears] = useState("5");
+  const [selectedProperty, setSelectedProperty] = useState("all");
+  const [propertyOptions, setPropertyOptions] = useState<
+    { id: string; name: string }[]
+  >([]);
+
+  const fetchProperties = useCallback(async () => {
+    try {
+      const res = await fetch(
+        "/api/properties?limit=100&sortBy=name&sortOrder=asc",
+        { cache: "no-store" }
+      );
+      const json = await res.json();
+      if (!res.ok) return;
+      const raw = Array.isArray(json.data) ? json.data : [];
+      setPropertyOptions(
+        raw.map((p: { _id?: string; id?: string; name?: string }) => ({
+          id: p._id ?? p.id ?? "",
+          name: p.name ?? "Untitled",
+        }))
+      );
+    } catch {
+      /* silent */
+    }
+  }, []);
+
+  const fetchCapex = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({ years });
+      if (selectedProperty !== "all") params.set("propertyId", selectedProperty);
+      const res = await fetch(
+        `/api/analytics/capex?${params.toString()}`,
+        { cache: "no-store" }
+      );
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Failed");
+      setData(json.data as CapexData);
+    } catch (err) {
+      toast.error("Unable to load CapEx data");
+    } finally {
+      setLoading(false);
+    }
+  }, [years, selectedProperty]);
+
+  useEffect(() => {
+    if (!session) return;
+    fetchProperties();
+  }, [session, fetchProperties]);
+
+  useEffect(() => {
+    if (!session) return;
+    fetchCapex();
+  }, [session, fetchCapex]);
+
+  if (!session) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+            <Link href="/dashboard/analytics" className="hover:underline">
+              Analytics
+            </Link>
+            <span>/</span>
+            <span>CapEx Planning</span>
+          </div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Wrench className="h-8 w-8" />
+            Capital Expenditure Planner
+          </h1>
+          <p className="text-muted-foreground">
+            Property age-based maintenance projections and budget planning
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <Select value={years} onValueChange={setYears}>
+            <SelectTrigger className="w-[140px]">
+              <Calendar className="h-4 w-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="3">3-Year Plan</SelectItem>
+              <SelectItem value="5">5-Year Plan</SelectItem>
+              <SelectItem value="10">10-Year Plan</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+            <SelectTrigger className="w-[200px]">
+              <Building2 className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="All Properties" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Properties</SelectItem>
+              {propertyOptions.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={fetchCapex}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          </Button>
+        </div>
+      </div>
+
+      {/* KPI cards */}
+      {loading ? (
+        <div className="grid gap-4 md:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <Skeleton className="h-4 w-24 mb-2" />
+                <Skeleton className="h-8 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : data ? (
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                {years}-Year Budget
+              </CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatCurrency(data.totalBudget)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Projected total CapEx
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Annual Average
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatCurrency(data.annualAvgBudget)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Per year across portfolio
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Properties</CardTitle>
+              <Building2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {data.properties.length}
+              </div>
+              <p className="text-xs text-muted-foreground">In this analysis</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                High-Risk Properties
+              </CardTitle>
+              <AlertTriangle className="h-4 w-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div
+                className={`text-2xl font-bold ${
+                  data.highRiskCount > 0 ? "text-orange-600" : "text-green-600"
+                }`}
+              >
+                {data.highRiskCount}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Age 30+ years (high/critical risk)
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
+
+      {/* Projection chart */}
+      {!loading && data && data.projections.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{years}-Year CapEx Projection</CardTitle>
+            <CardDescription>
+              Annual capital expenditure forecast based on property age
+              benchmarks
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={data.projections}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="year" />
+                <YAxis
+                  tickFormatter={(v: number) =>
+                    v >= 1000 ? `$${(v / 1000).toFixed(0)}k` : `$${v}`
+                  }
+                />
+                <Tooltip
+                  formatter={(v: number) => [formatCurrency(v), "Projected CapEx"]}
+                />
+                <Bar dataKey="amount" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Property breakdown table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Property Risk Assessment</CardTitle>
+            <CardDescription>
+              Age-based capital expenditure risk per property
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="space-y-3">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            ) : data && data.properties.length > 0 ? (
+              <div className="space-y-3">
+                {data.properties
+                  .sort((a, b) => b.age - a.age)
+                  .map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-medium text-sm truncate">
+                            {p.name}
+                          </p>
+                          <Badge
+                            variant="outline"
+                            className={`text-xs shrink-0 ${RISK_BADGE[p.riskLevel]}`}
+                          >
+                            {p.riskLevel}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {p.yearBuilt ? `Built ${p.yearBuilt}` : "Year unknown"}{" "}
+                          · {p.age} yrs · {p.units} unit
+                          {p.units !== 1 ? "s" : ""}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0 ml-3">
+                        <p className="text-sm font-semibold">
+                          {formatCurrency(p.annualBenchmark)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          /yr estimate
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-8 text-sm">
+                No property data available
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Category spend breakdown */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Historical Spend by Category</CardTitle>
+            <CardDescription>
+              Maintenance and vendor costs over the last 3 years
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-8 w-full" />
+                ))}
+              </div>
+            ) : data && data.categoryBreakdown.length > 0 ? (
+              <div className="space-y-3">
+                {data.categoryBreakdown.map((cat) => {
+                  const max = data.categoryBreakdown[0].total;
+                  const pct = max > 0 ? (cat.total / max) * 100 : 0;
+                  return (
+                    <div key={cat.category}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm">{cat.category}</span>
+                        <div className="flex gap-3 text-xs text-muted-foreground">
+                          <span>{cat.count} jobs</span>
+                          <span className="font-medium text-foreground">
+                            {formatCurrency(cat.total)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary rounded-full transition-all duration-700"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-8 text-sm">
+                No maintenance history in the last 3 years
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Benchmark note */}
+      <Card className="border-dashed">
+        <CardContent className="p-4">
+          <div className="flex gap-3 items-start">
+            <AlertTriangle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">
+                CapEx Benchmark Reference
+              </p>
+              <p>
+                Projections use industry benchmarks: $300/unit/yr (0–10 yrs),
+                $700 (11–20 yrs), $1,200 (21–30 yrs), $2,000 (31–50 yrs),
+                $3,000+ (50+ yrs). Actual costs vary based on property
+                condition, region, and system upgrades.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

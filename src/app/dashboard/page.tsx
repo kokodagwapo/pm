@@ -50,6 +50,8 @@ import {
 import { UserRole } from "@/types";
 import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
 
+import { PortfolioHealthWidget } from "@/components/dashboard/PortfolioHealthWidget";
+
 /** Must be module-level — calling `dynamic()` inside render breaks React (blank / remount loop). */
 const DashboardChartsSection = dynamic(
   () => import("@/components/dashboard/DashboardChartsSection").then((m) => ({ default: m.DashboardChartsSection })),
@@ -902,6 +904,9 @@ export default function DashboardPage() {
         />
         {/* Right Column - Activities and Tasks */}
         <div className="space-y-6">
+          {/* Portfolio Health Score */}
+          <PortfolioHealthWidget />
+
           {/* Recent Activities */}
           <Card className="rounded-xl">
             <CardHeader className="pb-2">

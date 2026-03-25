@@ -24,7 +24,21 @@ import {
   Target,
   AlertCircle,
   Building2,
+  Wrench,
+  Store,
+  FileText,
+  Download,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   RevenueTrendsChart,
@@ -119,6 +133,33 @@ export default function FinancialAnalyticsPage() {
     useState<PropertyPerformanceReportResponse | null>(null);
   const [expenseAnalysisData, setExpenseAnalysisData] =
     useState<ExpenseAnalysisReportResponse | null>(null);
+
+  // Intelligence tabs
+  const [vendorSpendData, setVendorSpendData] = useState<{
+    totalSpend: number;
+    jobCount: number;
+    byCategory: { category: string; totalSpend: number; jobCount: number; avgCost: number }[];
+    byVendor: { vendorId?: string; vendorName: string; totalSpend: number; jobCount: number; avgRating: number | null }[];
+    byMonth: { month: string; year: number; totalSpend: number; jobCount: number }[];
+  } | null>(null);
+  const [vendorSpendLoading, setVendorSpendLoading] = useState(false);
+
+  const [marketRentData, setMarketRentData] = useState<{
+    alerts: { leaseId: string; propertyName: string; tenantName: string; currentRent: number; marketRent: number; gapPercent: number; endDate: string; daysUntilExpiry: number }[];
+    marketRent: number;
+    alertCount: number;
+    expiringCount: number;
+  } | null>(null);
+  const [marketRentLoading, setMarketRentLoading] = useState(false);
+
+  const [taxYear, setTaxYear] = useState<number>(new Date().getFullYear());
+  const [taxExportData, setTaxExportData] = useState<{
+    year: number;
+    income: { monthName: string; propertyName: string; category: string; amount: number; count: number }[];
+    expenses: { monthName: string; propertyName: string; category: string; amount: number; count: number }[];
+    summary: { totalIncome: number; totalExpenses: number; netIncome: number };
+  } | null>(null);
+  const [taxExportLoading, setTaxExportLoading] = useState(false);
 
   const currentDateRange = useMemo(() => {
     return {
@@ -464,6 +505,48 @@ export default function FinancialAnalyticsPage() {
   //   []
   // );
 
+  const fetchVendorSpend = useCallback(async () => {
+    try {
+      setVendorSpendLoading(true);
+      const params = new URLSearchParams({
+        startDate: getStartDate(dateRange).toISOString(),
+        endDate: new Date().toISOString(),
+      });
+      if (selectedProperty !== "all") params.set("propertyId", selectedProperty);
+      const res = await fetch(`/api/analytics/vendor-spend?${params.toString()}`, { cache: "no-store" });
+      const json = await res.json();
+      if (res.ok) setVendorSpendData(json.data);
+    } catch { /* silent */ } finally { setVendorSpendLoading(false); }
+  }, [dateRange, selectedProperty]);
+
+  const fetchMarketRent = useCallback(async () => {
+    try {
+      setMarketRentLoading(true);
+      const params = new URLSearchParams();
+      if (selectedProperty !== "all") params.set("propertyId", selectedProperty);
+      const res = await fetch(`/api/analytics/market-rent-gap?${params.toString()}`, { cache: "no-store" });
+      const json = await res.json();
+      if (res.ok) setMarketRentData(json.data);
+    } catch { /* silent */ } finally { setMarketRentLoading(false); }
+  }, [selectedProperty]);
+
+  const fetchTaxExport = useCallback(async () => {
+    try {
+      setTaxExportLoading(true);
+      const params = new URLSearchParams({ year: String(taxYear), format: "json" });
+      if (selectedProperty !== "all") params.set("propertyId", selectedProperty);
+      const res = await fetch(`/api/analytics/tax-export?${params.toString()}`, { cache: "no-store" });
+      const json = await res.json();
+      if (res.ok) setTaxExportData(json.data);
+    } catch { /* silent */ } finally { setTaxExportLoading(false); }
+  }, [taxYear, selectedProperty]);
+
+  const downloadTaxCsv = useCallback(async () => {
+    const params = new URLSearchParams({ year: String(taxYear), format: "csv" });
+    if (selectedProperty !== "all") params.set("propertyId", selectedProperty);
+    window.open(`/api/analytics/tax-export?${params.toString()}`, "_blank");
+  }, [taxYear, selectedProperty]);
+
   const { lastUpdate } = useRealTimePayments({
     propertyId: selectedProperty !== "all" ? selectedProperty : undefined,
     enabled: true,
@@ -498,6 +581,13 @@ export default function FinancialAnalyticsPage() {
     loadAllReports();
     loadFinancialActions();
   }, [session, lastUpdate, loadAllReports, loadFinancialActions]);
+
+  useEffect(() => {
+    if (!session) return;
+    if (activeTab === "vendor-spend") fetchVendorSpend();
+    if (activeTab === "market-rent") fetchMarketRent();
+    if (activeTab === "tax-export") fetchTaxExport();
+  }, [session, activeTab, fetchVendorSpend, fetchMarketRent, fetchTaxExport]);
 
   if (!session) {
     return (
@@ -729,7 +819,7 @@ export default function FinancialAnalyticsPage() {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="flex flex-wrap h-auto gap-1">
             <TabsTrigger value="overview">
               {t("analytics.financial.tabs.overview")}
             </TabsTrigger>
@@ -744,6 +834,18 @@ export default function FinancialAnalyticsPage() {
             </TabsTrigger>
             <TabsTrigger value="expenses">
               {t("analytics.financial.tabs.expenses")}
+            </TabsTrigger>
+            <TabsTrigger value="vendor-spend" className="flex items-center gap-1">
+              <Store className="h-3 w-3" />
+              Vendor Spend
+            </TabsTrigger>
+            <TabsTrigger value="market-rent" className="flex items-center gap-1">
+              <Wrench className="h-3 w-3" />
+              Rent Gaps
+            </TabsTrigger>
+            <TabsTrigger value="tax-export" className="flex items-center gap-1">
+              <FileText className="h-3 w-3" />
+              Tax Export
             </TabsTrigger>
           </TabsList>
 
@@ -949,6 +1051,374 @@ export default function FinancialAnalyticsPage() {
               </Card>
             )}
           </TabsContent>
+
+          {/* ── Vendor Spend Tab ─────────────────────────────────────────── */}
+          <TabsContent value="vendor-spend" className="space-y-6">
+            <div className="flex justify-end">
+              <Button variant="outline" size="sm" onClick={fetchVendorSpend} disabled={vendorSpendLoading}>
+                <RefreshCw className={`h-4 w-4 mr-2 ${vendorSpendLoading ? "animate-spin" : ""}`} />
+                Refresh
+              </Button>
+            </div>
+
+            {vendorSpendLoading ? (
+              <div className="grid gap-6 md:grid-cols-2">
+                {[...Array(2)].map((_, i) => (
+                  <Card key={i}><CardContent className="p-6"><Skeleton className="h-[300px] w-full" /></CardContent></Card>
+                ))}
+              </div>
+            ) : vendorSpendData ? (
+              <>
+                {/* KPI row */}
+                <div className="grid gap-4 md:grid-cols-3">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Vendor Spend</CardTitle>
+                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{formatCurrency(vendorSpendData.totalSpend)}</div>
+                      <p className="text-xs text-muted-foreground">{vendorSpendData.jobCount} completed job{vendorSpendData.jobCount !== 1 ? "s" : ""}</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Avg Cost Per Job</CardTitle>
+                      <Target className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {formatCurrency(vendorSpendData.jobCount > 0 ? vendorSpendData.totalSpend / vendorSpendData.jobCount : 0)}
+                      </div>
+                      <p className="text-xs text-muted-foreground">across all categories</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Categories</CardTitle>
+                      <Store className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{vendorSpendData.byCategory.length}</div>
+                      <p className="text-xs text-muted-foreground">distinct spend categories</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Monthly trend chart */}
+                {vendorSpendData.byMonth.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Monthly Vendor Spend</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={240}>
+                        <BarChart data={vendorSpendData.byMonth}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="month" />
+                          <YAxis tickFormatter={(v: number) => v >= 1000 ? `$${(v/1000).toFixed(0)}k` : `$${v}`} />
+                          <Tooltip formatter={(v: number) => [formatCurrency(v), "Spend"]} />
+                          <Bar dataKey="totalSpend" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                )}
+
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* By Category */}
+                  <Card>
+                    <CardHeader><CardTitle>Spend by Category</CardTitle></CardHeader>
+                    <CardContent>
+                      {vendorSpendData.byCategory.length === 0 ? (
+                        <p className="text-muted-foreground text-sm text-center py-8">No vendor spend data yet</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {vendorSpendData.byCategory.map((cat) => {
+                            const max = vendorSpendData.byCategory[0].totalSpend;
+                            const pct = max > 0 ? (cat.totalSpend / max) * 100 : 0;
+                            return (
+                              <div key={cat.category}>
+                                <div className="flex justify-between mb-1">
+                                  <span className="text-sm">{cat.category}</span>
+                                  <div className="flex gap-3 text-xs text-muted-foreground">
+                                    <span>{cat.jobCount} jobs</span>
+                                    <span className="font-medium text-foreground">{formatCurrency(cat.totalSpend)}</span>
+                                  </div>
+                                </div>
+                                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                  <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Top Vendors */}
+                  <Card>
+                    <CardHeader><CardTitle>Top Vendors by Spend</CardTitle></CardHeader>
+                    <CardContent>
+                      {vendorSpendData.byVendor.length === 0 ? (
+                        <p className="text-muted-foreground text-sm text-center py-8">No vendor data yet</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {vendorSpendData.byVendor.map((v, i) => (
+                            <div key={v.vendorId ?? i} className="flex items-center justify-between py-2 border-b last:border-0">
+                              <div>
+                                <p className="text-sm font-medium">{v.vendorName}</p>
+                                <p className="text-xs text-muted-foreground">{v.jobCount} job{v.jobCount !== 1 ? "s" : ""}{v.avgRating ? ` · ★${v.avgRating}` : ""}</p>
+                              </div>
+                              <span className="text-sm font-semibold">{formatCurrency(v.totalSpend)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            ) : (
+              <Card><CardContent className="p-6"><p className="text-center text-muted-foreground py-8">No vendor spend data for the selected period</p></CardContent></Card>
+            )}
+          </TabsContent>
+
+          {/* ── Market Rent Gap Tab ──────────────────────────────────────── */}
+          <TabsContent value="market-rent" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Market Rent Gap Alerts</h3>
+                <p className="text-sm text-muted-foreground">Active leases expiring in 60 days priced 10%+ below portfolio market rate</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={fetchMarketRent} disabled={marketRentLoading}>
+                <RefreshCw className={`h-4 w-4 mr-2 ${marketRentLoading ? "animate-spin" : ""}`} />
+                Refresh
+              </Button>
+            </div>
+
+            {marketRentLoading ? (
+              <div className="space-y-3">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>
+            ) : marketRentData ? (
+              <>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Market Rate</CardTitle>
+                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{formatCurrency(marketRentData.marketRent)}</div>
+                      <p className="text-xs text-muted-foreground">Portfolio average rent/unit</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Leases Expiring</CardTitle>
+                      <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{marketRentData.expiringCount}</div>
+                      <p className="text-xs text-muted-foreground">within 60 days</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Below-Market Alerts</CardTitle>
+                      <AlertCircle className="h-4 w-4 text-orange-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className={`text-2xl font-bold ${marketRentData.alertCount > 0 ? "text-orange-600" : "text-green-600"}`}>
+                        {marketRentData.alertCount}
+                      </div>
+                      <p className="text-xs text-muted-foreground">priced 10%+ below market</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {marketRentData.alerts.length === 0 ? (
+                  <Card>
+                    <CardContent className="p-6 text-center">
+                      <div className="py-8">
+                        <p className="text-green-600 font-medium">No rent gap alerts</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {marketRentData.expiringCount === 0
+                            ? "No leases expire within 60 days."
+                            : "All expiring leases are priced within 10% of market rate."}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card>
+                    <CardHeader><CardTitle>Leases Requiring Attention</CardTitle></CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {marketRentData.alerts.map((alert) => (
+                          <div key={alert.leaseId} className="flex items-center justify-between p-3 border rounded-lg border-orange-200 bg-orange-50 dark:bg-orange-950/10 dark:border-orange-800">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="text-sm font-medium">{alert.tenantName}</p>
+                                <Badge variant="outline" className="text-xs text-orange-700 border-orange-300">
+                                  {alert.gapPercent.toFixed(1)}% below market
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground">{alert.propertyName} · Expires in {alert.daysUntilExpiry} day{alert.daysUntilExpiry !== 1 ? "s" : ""}</p>
+                            </div>
+                            <div className="text-right shrink-0 ml-4">
+                              <p className="text-sm font-semibold">{formatCurrency(alert.currentRent)}</p>
+                              <p className="text-xs text-muted-foreground">vs {formatCurrency(alert.marketRent)} market</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            ) : (
+              <Card><CardContent className="p-6"><p className="text-center text-muted-foreground py-8">Click Refresh to load rent gap analysis</p></CardContent></Card>
+            )}
+          </TabsContent>
+
+          {/* ── Tax Export Tab ───────────────────────────────────────────── */}
+          <TabsContent value="tax-export" className="space-y-6">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h3 className="text-lg font-semibold">Tax Preparation Export</h3>
+                <p className="text-sm text-muted-foreground">Year-end income and expense summary for tax filing</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Select value={String(taxYear)} onValueChange={(v) => setTaxYear(parseInt(v, 10))}>
+                  <SelectTrigger className="w-[120px]">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((yr) => (
+                      <SelectItem key={yr} value={String(yr)}>{yr}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" size="sm" onClick={fetchTaxExport} disabled={taxExportLoading}>
+                  <RefreshCw className={`h-4 w-4 mr-2 ${taxExportLoading ? "animate-spin" : ""}`} />
+                  Load
+                </Button>
+                <Button variant="default" size="sm" onClick={downloadTaxCsv}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download CSV
+                </Button>
+              </div>
+            </div>
+
+            {taxExportLoading ? (
+              <div className="space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
+            ) : taxExportData ? (
+              <>
+                {/* Summary cards */}
+                <div className="grid gap-4 md:grid-cols-3">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+                      <TrendingUp className="h-4 w-4 text-green-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-green-600">{formatCurrency(taxExportData.summary.totalIncome)}</div>
+                      <p className="text-xs text-muted-foreground">FY {taxExportData.year}</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+                      <Wrench className="h-4 w-4 text-red-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-red-600">{formatCurrency(taxExportData.summary.totalExpenses)}</div>
+                      <p className="text-xs text-muted-foreground">Maintenance &amp; vendor costs</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Net Income</CardTitle>
+                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className={`text-2xl font-bold ${taxExportData.summary.netIncome >= 0 ? "text-green-600" : "text-red-600"}`}>
+                        {formatCurrency(taxExportData.summary.netIncome)}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Income minus expenses</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Income breakdown */}
+                  <Card>
+                    <CardHeader><CardTitle>Income by Category</CardTitle></CardHeader>
+                    <CardContent>
+                      {taxExportData.income.length === 0 ? (
+                        <p className="text-muted-foreground text-sm text-center py-8">No income recorded for {taxExportData.year}</p>
+                      ) : (
+                        <div className="space-y-2 max-h-80 overflow-y-auto">
+                          {Object.entries(
+                            taxExportData.income.reduce<Record<string, number>>((acc, r) => {
+                              acc[r.category] = (acc[r.category] ?? 0) + r.amount;
+                              return acc;
+                            }, {})
+                          ).sort(([, a], [, b]) => b - a).map(([cat, amt]) => (
+                            <div key={cat} className="flex justify-between text-sm py-1 border-b last:border-0">
+                              <span className="capitalize">{cat}</span>
+                              <span className="font-medium text-green-600">{formatCurrency(amt)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Expense breakdown */}
+                  <Card>
+                    <CardHeader><CardTitle>Expenses by Category</CardTitle></CardHeader>
+                    <CardContent>
+                      {taxExportData.expenses.length === 0 ? (
+                        <p className="text-muted-foreground text-sm text-center py-8">No expenses recorded for {taxExportData.year}</p>
+                      ) : (
+                        <div className="space-y-2 max-h-80 overflow-y-auto">
+                          {Object.entries(
+                            taxExportData.expenses.reduce<Record<string, number>>((acc, r) => {
+                              acc[r.category] = (acc[r.category] ?? 0) + r.amount;
+                              return acc;
+                            }, {})
+                          ).sort(([, a], [, b]) => b - a).map(([cat, amt]) => (
+                            <div key={cat} className="flex justify-between text-sm py-1 border-b last:border-0">
+                              <span>{cat}</span>
+                              <span className="font-medium text-red-600">{formatCurrency(amt)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card className="border-dashed">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                      <FileText className="h-5 w-5 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-foreground mb-1">CSV Export</p>
+                        <p>Click <strong>Download CSV</strong> above to export all income and expense line items as a spreadsheet for your accountant or tax software. The export includes property names, categories, and monthly totals.</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              <Card><CardContent className="p-6"><p className="text-center text-muted-foreground py-8">Select a year and click Load to generate your tax summary</p></CardContent></Card>
+            )}
+          </TabsContent>
+
         </Tabs>
 
         {/* Financial Action Items */}

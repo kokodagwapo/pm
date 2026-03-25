@@ -68,6 +68,20 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Automation**: Compliance deadline alerts integrated into `notification-automation.ts` — 14-day and 3-day pre-deadline notifications to property managers/owners/assigned users; held vendors excluded from Luna auto-dispatch
 - **Sidebar**: New "Legal & Compliance" section (admin/manager/owner roles) with Hub, Rent Calculator, Eviction Workflow, Fair Housing links
 
+## Financial Intelligence & Portfolio Health (Task #10)
+- **Portfolio Health Score API**: `GET /api/analytics/portfolio-health` — composites a 0-100 score from 5 weighted categories: Occupancy (30pts), Collection Rate (25pts), Maintenance Health (20pts), Rent Alignment (15pts), Lease Pipeline (10pts). Returns letter grade, per-category breakdown, actionable insights, and per-property breakdown.
+- **Vendor Spend Analytics API**: `GET /api/analytics/vendor-spend` — aggregates VendorJob spend by category, vendor, and month. Returns total spend, job count, top 10 vendors by spend, monthly trend. Filters by date range and property.
+- **Market Rent Gap API**: `GET /api/analytics/market-rent-gap` — identifies active leases expiring within 60 days priced >10% below portfolio market rate. Flags them as alerts sorted by gap %. Market rate = portfolio average unit rentAmount.
+- **Tax Prep Export API**: `GET /api/analytics/tax-export` — year-end income/expense summary. Supports `format=csv` for download or `format=json` for UI display. Groups income from paid payments and expenses from maintenance + vendor jobs by category and property.
+- **CapEx Planning API**: `GET /api/analytics/capex` — age-based capital expenditure projections using industry benchmarks ($300–$3000/unit/yr by property age). Returns per-property risk level (low/medium/high/critical), N-year projection, category spend breakdown, and aggregate budget.
+- **PortfolioHealthWidget**: `src/components/dashboard/PortfolioHealthWidget.tsx` — SVG ring gauge score display with color-coded grade, per-component progress bars, top insight, and lease expiry alert. Accepts `compact` and `propertyId` props. Added to admin overview tab and manager/owner main dashboard.
+- **CapEx Planning Page**: `src/app/dashboard/analytics/capex/page.tsx` — full-page CapEx planner with Recharts bar chart for N-year projections, property risk table, historical category spend bars, and benchmark reference card. Filterable by property and plan horizon (3/5/10 years).
+- **Financial Dashboard extended**: Added 3 new tabs to `/dashboard/analytics/financial`:
+  - **Vendor Spend** — monthly trend chart + category breakdown + top vendors table
+  - **Rent Gaps** — market rate KPIs + alert list for below-market expiring leases
+  - **Tax Export** — year selector, income/expense breakdown, CSV download button
+- **Sidebar nav**: Added "CapEx Planner" link under Analytics section (all 9 locales); translated key `nav.analytics.capex`.
+
 ## Vendor Marketplace & Smart Dispatch (Task #9)
 - **Models**: `src/models/Vendor.ts` extended with serviceArea, location, userId, walletBalance, isAvailable, complianceHold; `src/models/VendorJob.ts` with full status timeline, bids, photos, dispatch log
 - **API routes**:
