@@ -146,12 +146,17 @@ export async function POST(
 
     await vendor.save();
 
+    const warnings = issues.filter((i) => i.toLowerCase().includes("soon") || i.toLowerCase().includes("expires soon"));
+    const holdIssues = issues.filter((i) => !warnings.includes(i));
+
     return NextResponse.json(
       {
         document: doc,
         complianceResult: {
-          isCompliant: issues.length === 0,
+          isCompliant: !shouldHold,
           onHold: vendor.complianceHold,
+          holdIssues,
+          warnings,
           issues,
         },
       },

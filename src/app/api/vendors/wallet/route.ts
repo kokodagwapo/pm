@@ -122,16 +122,14 @@ export async function POST(request: NextRequest) {
       if (!amount || amount <= 0) {
         return NextResponse.json({ error: "Invalid fund amount" }, { status: 400 });
       }
-      await Vendor.findByIdAndUpdate(vendorId, [
-        {
-          $set: {
-            walletBalance: { $add: ["$walletBalance", amount] },
-          },
-        },
-      ]);
+      const updated = await Vendor.findByIdAndUpdate(
+        vendorId,
+        [{ $set: { walletBalance: { $add: ["$walletBalance", amount] } } }],
+        { new: true }
+      ).select("walletBalance").lean();
       return NextResponse.json({
         message: `Wallet funded with $${Number(amount).toFixed(2)}`,
-        newBalance: vendor.walletBalance + amount,
+        newBalance: (updated as { walletBalance?: number } | null)?.walletBalance ?? (vendor.walletBalance || 0) + amount,
       });
     }
 

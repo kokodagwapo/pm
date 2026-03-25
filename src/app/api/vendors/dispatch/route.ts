@@ -80,6 +80,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // If re-dispatching an already-dispatched job, decrement the previous vendor's work order count
+    if (job.status === "dispatched" && job.assignedVendorId) {
+      await Vendor.findByIdAndUpdate(job.assignedVendorId, {
+        $inc: { activeWorkOrders: -1 },
+      });
+    }
+
     const alreadyContacted = job.dispatchLog.map((d) => d.vendorId.toString());
 
     const geoQuery: Record<string, unknown> = {
