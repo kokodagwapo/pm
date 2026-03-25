@@ -23,6 +23,7 @@ import {
   withRoleAndDB,
 } from "@/lib/api-utils";
 import PortfolioHealthSnapshot from "@/models/PortfolioHealthSnapshot";
+import PropertySystems from "@/models/PropertySystems";
 
 const PAID_STATUSES = [PaymentStatus.PAID, PaymentStatus.COMPLETED];
 
@@ -202,33 +203,51 @@ export const GET = withRoleAndDB([
     const maintScore = clamp(((completionRate * 0.6 + resolutionScore * 0.4) / 100) * 20 - backlogAgePenalty * 0.2);
 
     // ── 5. Rent alignment (15 pts) ────────────────────────────────────────────
-    // Market rent = average rentAmount across all portfolio units
-    let marketRent = 0;
+    // Load per-property market rent overrides from PropertySystems
+    const propertySystems = await PropertySystems.find(
+      { propertyId: { $in: propertyIds } },
+      { propertyId: 1, marketRent: 1 }
+    ).lean();
+    const perPropertyMarketRent = new Map<string, number>(
+      propertySystems
+        .filter((ps) => ps.marketRent != null && ps.marketRent > 0)
+        .map((ps) => [ps.propertyId.toString(), ps.marketRent as number])
+    );
+
+    // Portfolio fallback: average rentAmount across all portfolio units
+    let portfolioAvgRent = 0;
     let unitCount = 0;
     for (const p of properties) {
-      if (Array.isArray(p.units) && p.units.length > 0) {
-        for (const u of p.units as { rentAmount?: number }[]) {
-          if (u.rentAmount && u.rentAmount > 0) {
-            marketRent += u.rentAmount;
+      const pid = (p._id as mongoose.Types.ObjectId).toString();
+      if (!perPropertyMarketRent.has(pid)) {
+        if (Array.isArray(p.units) && p.units.length > 0) {
+          for (const u of p.units as { rentAmount?: number }[]) {
+            if (u.rentAmount && u.rentAmount > 0) {
+              portfolioAvgRent += u.rentAmount;
+              unitCount++;
+            }
+          }
+        } else if (!p.isMultiUnit) {
+          const singleRent = (p as { rentAmount?: number }).rentAmount;
+          if (singleRent && singleRent > 0) {
+            portfolioAvgRent += singleRent;
             unitCount++;
           }
         }
-      } else if (!p.isMultiUnit) {
-        const singleRent = (p as { rentAmount?: number }).rentAmount;
-        if (singleRent && singleRent > 0) {
-          marketRent += singleRent;
-          unitCount++;
-        }
       }
     }
-    marketRent = unitCount > 0 ? marketRent / unitCount : 0;
+    portfolioAvgRent = unitCount > 0 ? portfolioAvgRent / unitCount : 0;
+    const marketRent = portfolioAvgRent; // for insights text below
 
+    // Compare each active lease against per-property override or portfolio average
     let atMarket = 0;
     let below10pct = 0;
     for (const lease of activeLeases) {
       const rent = (lease as { terms?: { rentAmount?: number } }).terms?.rentAmount ?? 0;
-      if (marketRent > 0) {
-        const gap = (marketRent - rent) / marketRent;
+      const pid = (lease as { propertyId?: mongoose.Types.ObjectId }).propertyId?.toString() ?? "";
+      const benchmark = perPropertyMarketRent.get(pid) ?? portfolioAvgRent;
+      if (benchmark > 0) {
+        const gap = (benchmark - rent) / benchmark;
         if (gap <= 0.1) atMarket++;
         else below10pct++;
       } else {

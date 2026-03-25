@@ -496,20 +496,177 @@ export const GET = withRoleAndDB([
     }
 
     if (format === "pdf") {
-      const html = generateTaxHtmlReport({
-        year,
-        properties: properties.map((p) => p.name ?? "Property"),
-        totalIncome,
-        totalExpenses,
-        netIncome,
-        scheduleESummary,
-        income,
-        expenses,
-      });
-      return new NextResponse(html, {
+      const { jsPDF } = await import("jspdf");
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
+
+      const fmt = (n: number) =>
+        n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
+
+      const L = 14;  // left margin
+      const W = 186; // usable width (215.9 - 2*14.95)
+
+      let y = 18;
+
+      // Header
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("IRS Schedule E Tax Summary", 105, y, { align: "center" });
+      y += 7;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Tax Year: ${year}`, 105, y, { align: "center" });
+      y += 4;
+      doc.text(
+        `Properties: ${properties.map((p) => p.name ?? "Property").join(", ")}`,
+        105, y, { align: "center", maxWidth: W }
+      );
+      y += 4;
+      doc.text(`Generated: ${new Date().toLocaleDateString("en-US")}`, 105, y, { align: "center" });
+      y += 8;
+
+      // KPI row
+      doc.setFillColor(240, 247, 255);
+      doc.rect(L, y, W, 18, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.text("TOTAL INCOME", L + 4, y + 5);
+      doc.text("TOTAL EXPENSES", L + W / 3 + 4, y + 5);
+      doc.text("NET INCOME", L + (W / 3) * 2 + 4, y + 5);
+      doc.setFontSize(12);
+      doc.setTextColor(22, 163, 74);
+      doc.text(fmt(totalIncome), L + 4, y + 13);
+      doc.setTextColor(220, 38, 38);
+      doc.text(fmt(totalExpenses), L + W / 3 + 4, y + 13);
+      doc.setTextColor(netIncome >= 0 ? 22 : 220, netIncome >= 0 ? 163 : 38, netIncome >= 0 ? 74 : 38);
+      doc.text(fmt(netIncome), L + (W / 3) * 2 + 4, y + 13);
+      doc.setTextColor(0, 0, 0);
+      y += 24;
+
+      // Schedule E Summary table
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("Schedule E Line Summary", L, y);
+      y += 5;
+
+      // Table header
+      doc.setFillColor(30, 64, 175);
+      doc.rect(L, y, W, 7, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.text("Line", L + 2, y + 4.5);
+      doc.text("Description", L + 18, y + 4.5);
+      doc.text("Income", L + W - 55, y + 4.5);
+      doc.text("Expenses", L + W - 25, y + 4.5);
+      doc.setTextColor(0, 0, 0);
+      y += 7;
+
+      let rowAlt = false;
+      for (const s of scheduleESummary) {
+        if (y > 240) {
+          doc.addPage();
+          y = 18;
+        }
+        if (rowAlt) {
+          doc.setFillColor(248, 250, 252);
+          doc.rect(L, y, W, 6, "F");
+        }
+        rowAlt = !rowAlt;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.text(`L${s.line}`, L + 2, y + 4);
+        doc.text(s.description, L + 18, y + 4, { maxWidth: W - 75 });
+        if (s.income > 0) doc.text(fmt(s.income), L + W - 55, y + 4);
+        doc.text(fmt(s.expenses), L + W - 25, y + 4);
+        y += 6;
+      }
+      y += 4;
+
+      // Income detail
+      if (income.length > 0) {
+        if (y > 220) { doc.addPage(); y = 18; }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text("Income Detail", L, y);
+        y += 4;
+        doc.setFillColor(22, 163, 74);
+        doc.rect(L, y, W, 6, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(7.5);
+        doc.text("Month", L + 2, y + 4);
+        doc.text("Property", L + 18, y + 4);
+        doc.text("Category", L + 70, y + 4);
+        doc.text("Amount", L + W - 25, y + 4);
+        doc.setTextColor(0, 0, 0);
+        y += 6;
+        rowAlt = false;
+        for (const r of income.slice(0, 60)) {
+          if (y > 255) { doc.addPage(); y = 18; }
+          if (rowAlt) { doc.setFillColor(240, 253, 244); doc.rect(L, y, W, 5, "F"); }
+          rowAlt = !rowAlt;
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(7.5);
+          doc.text(r.monthName, L + 2, y + 3.5);
+          doc.text(r.propertyName, L + 18, y + 3.5, { maxWidth: 50 });
+          doc.text(r.category, L + 70, y + 3.5, { maxWidth: 70 });
+          doc.text(fmt(r.amount), L + W - 25, y + 3.5);
+          y += 5;
+        }
+        y += 4;
+      }
+
+      // Expense detail
+      if (expenses.length > 0) {
+        if (y > 220) { doc.addPage(); y = 18; }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text("Expense Detail", L, y);
+        y += 4;
+        doc.setFillColor(220, 38, 38);
+        doc.rect(L, y, W, 6, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(7.5);
+        doc.text("Month", L + 2, y + 4);
+        doc.text("Property", L + 18, y + 4);
+        doc.text("Category", L + 70, y + 4);
+        doc.text("Line", L + W - 40, y + 4);
+        doc.text("Amount", L + W - 25, y + 4);
+        doc.setTextColor(0, 0, 0);
+        y += 6;
+        rowAlt = false;
+        for (const r of expenses.slice(0, 80)) {
+          if (y > 255) { doc.addPage(); y = 18; }
+          if (rowAlt) { doc.setFillColor(255, 242, 242); doc.rect(L, y, W, 5, "F"); }
+          rowAlt = !rowAlt;
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(7.5);
+          doc.text(r.monthName, L + 2, y + 3.5);
+          doc.text(r.propertyName, L + 18, y + 3.5, { maxWidth: 50 });
+          doc.text(r.category, L + 70, y + 3.5, { maxWidth: 65 });
+          doc.text(`L${r.scheduleELine}`, L + W - 40, y + 3.5);
+          doc.text(fmt(r.amount), L + W - 25, y + 3.5);
+          y += 5;
+        }
+      }
+
+      // Footer on each page
+      const totalPages = (doc.internal as { pages: unknown[] }).pages.length - 1;
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(7);
+        doc.setTextColor(120, 120, 120);
+        doc.text(
+          `SmartStartPM Tax Export — Tax Year ${year} — Page ${i} of ${totalPages} — This report is for informational purposes only. Consult a qualified tax professional.`,
+          105, 200, { align: "center", maxWidth: W }
+        );
+        doc.setTextColor(0, 0, 0);
+      }
+
+      const pdfBuffer = Buffer.from(doc.output("arraybuffer"));
+      return new NextResponse(pdfBuffer, {
         headers: {
-          "Content-Type": "text/html; charset=utf-8",
-          "Content-Disposition": `inline; filename="schedule-e-${year}.html"`,
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="schedule-e-${year}.pdf"`,
         },
       });
     }
