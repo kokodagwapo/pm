@@ -720,7 +720,11 @@ export default function CapexPlanningPage() {
                               max={currentYear}
                               placeholder="e.g. 2015"
                               value={sys.lastReplacedYear ?? ""}
-                              onChange={(e) => updateSystem(i, "lastReplacedYear", parseInt(e.target.value) || 0)}
+                              onChange={(e) => {
+                                const val = e.target.value.trim();
+                                const parsed = val ? parseInt(val, 10) : undefined;
+                                updateSystem(i, "lastReplacedYear", parsed as number);
+                              }}
                               className="w-28 h-8 text-sm"
                             />
                           </td>

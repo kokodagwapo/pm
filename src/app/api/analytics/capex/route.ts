@@ -172,7 +172,10 @@ export const GET = withRoleAndDB([
       // Per-system replacement schedule (if PropertySystems data exists)
       const ps = systemsMap.get(id);
       const systemReplacementSchedule = ps?.systems.map((sys) => {
-        const effectiveInstallYear = sys.lastReplacedYear ?? sys.installYear ?? (currentYear - Math.floor(sys.estimatedLifespanYears / 2));
+        // Sanitize: treat 0 or out-of-range lastReplacedYear as missing
+        const rawYear = sys.lastReplacedYear ?? sys.installYear;
+        const validYear = rawYear && rawYear > 1900 && rawYear <= currentYear ? rawYear : null;
+        const effectiveInstallYear = validYear ?? (currentYear - Math.floor(sys.estimatedLifespanYears / 2));
         const systemAge = currentYear - effectiveInstallYear;
         const remainingLife = Math.max(0, sys.estimatedLifespanYears - systemAge);
         const replacementYear = effectiveInstallYear + sys.estimatedLifespanYears;

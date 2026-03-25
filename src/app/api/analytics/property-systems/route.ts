@@ -67,9 +67,19 @@ export const PUT = withRoleAndDB([
     const property = await Property.findOne(propQuery).select("_id").lean();
     if (!property) return createErrorResponse("Property not found or access denied", 404);
 
+    const thisYear = new Date().getFullYear();
     const update: Record<string, unknown> = {};
-    if (Array.isArray(systems)) update.systems = systems;
-    if (marketRent !== undefined) update.marketRent = marketRent;
+    if (Array.isArray(systems)) {
+      // Sanitize: convert invalid/zero lastReplacedYear values to undefined
+      update.systems = systems.map((s: { systemType?: string; lastReplacedYear?: number; estimatedLifespanYears?: number; notes?: string }) => ({
+        ...s,
+        lastReplacedYear: s.lastReplacedYear && s.lastReplacedYear > 1900 && s.lastReplacedYear <= thisYear
+          ? s.lastReplacedYear
+          : undefined,
+        estimatedLifespanYears: s.estimatedLifespanYears && s.estimatedLifespanYears > 0 ? s.estimatedLifespanYears : 20,
+      }));
+    }
+    if (marketRent !== undefined) update.marketRent = marketRent && marketRent > 0 ? marketRent : null;
 
     const record = await PropertySystems.findOneAndUpdate(
       { propertyId: pid },
