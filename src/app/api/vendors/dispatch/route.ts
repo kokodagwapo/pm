@@ -93,11 +93,19 @@ export async function POST(request: NextRequest) {
     let propLat: number | null = null;
     let propLng: number | null = null;
 
+    // Resolve coordinates: request body > stored job coordinates
+    const storedCoords = (job as unknown as { propertyCoordinates?: { lat: number; lng: number } }).propertyCoordinates;
     if (
       Array.isArray(propertyCoordinates) &&
       propertyCoordinates.length === 2
     ) {
       [propLng, propLat] = propertyCoordinates as [number, number];
+    } else if (storedCoords?.lat && storedCoords?.lng) {
+      propLat = storedCoords.lat;
+      propLng = storedCoords.lng;
+    }
+
+    if (propLat !== null && propLng !== null) {
       geoQuery.location = {
         $geoWithin: {
           $centerSphere: [

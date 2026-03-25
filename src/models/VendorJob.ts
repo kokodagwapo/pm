@@ -44,6 +44,7 @@ export interface IVendorJob {
   status: VendorJobStatus;
   propertyId: mongoose.Types.ObjectId;
   propertyAddress?: string;
+  propertyCoordinates?: { lat: number; lng: number };
   maintenanceRequestId?: mongoose.Types.ObjectId;
   postedBy: mongoose.Types.ObjectId;
   assignedVendorId?: mongoose.Types.ObjectId;
@@ -166,6 +167,10 @@ const VendorJobSchema = new Schema<IVendorJob>(
       index: true,
     },
     propertyAddress: { type: String, trim: true, maxlength: 300 },
+    propertyCoordinates: {
+      lat: { type: Number },
+      lng: { type: Number },
+    },
     maintenanceRequestId: {
       type: Schema.Types.ObjectId,
       ref: "MaintenanceRequest",

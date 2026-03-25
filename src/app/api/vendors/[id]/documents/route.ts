@@ -4,7 +4,7 @@ import connectDB from "@/lib/mongodb";
 import Vendor from "@/models/Vendor";
 import mongoose from "mongoose";
 
-const ALLOWED_DOC_TYPES = ["license", "insurance", "background_check", "w9", "other"] as const;
+const ALLOWED_DOC_TYPES = ["license", "insurance", "background_check", "certification", "w9", "other"] as const;
 
 export async function GET(
   _request: NextRequest,

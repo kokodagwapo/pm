@@ -197,6 +197,9 @@ export default function VendorsPage() {
   const [jobStatusFilter, setJobStatusFilter] = useState("all");
   const [selectedVendor, setSelectedVendor] = useState<IVendor | null>(null);
   const [selectedJob, setSelectedJob] = useState<IVendorJob | null>(null);
+  const [ratingInput, setRatingInput] = useState(0);
+  const [ratingComment, setRatingComment] = useState("");
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
   const [showPostJob, setShowPostJob] = useState(false);
   const [showAddVendor, setShowAddVendor] = useState(false);
   const [jobForm, setJobForm] = useState({
@@ -351,6 +354,32 @@ export default function VendorsPage() {
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleRateVendor = async (jobId: string) => {
+    if (!ratingInput) return;
+    setRatingSubmitting(true);
+    try {
+      const res = await fetch(`/api/vendors/jobs/${jobId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "rate_vendor", rating: ratingInput, comment: ratingComment }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedJob(data.job);
+        setRatingInput(0);
+        setRatingComment("");
+        fetchJobs();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Rating failed");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRatingSubmitting(false);
     }
   };
 
@@ -1058,6 +1087,50 @@ export default function VendorsPage() {
                       Release Payment
                     </Button>
                   )}
+                </div>
+              )}
+
+              {/* Vendor Rating — show after approved or paid if no rating yet */}
+              {["approved", "payment_released"].includes(selectedJob.status) && !(selectedJob as unknown as { vendorRating?: number }).vendorRating && selectedJob.assignedVendorId && (
+                <div className={cn("mt-4 rounded-xl border p-4", isLight ? "border-slate-200 bg-slate-50" : "border-white/[0.08] bg-white/[0.03]")}>
+                  <p className={cn("mb-2 text-xs font-semibold uppercase tracking-wider", isLight ? "text-slate-400" : "text-white/40")}>Rate This Vendor</p>
+                  <div className="flex items-center gap-1 mb-3">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <button key={s} onClick={() => setRatingInput(s)} className="transition-transform hover:scale-110">
+                        <Star className={cn("h-5 w-5", s <= ratingInput ? "fill-amber-400 text-amber-400" : isLight ? "text-slate-300" : "text-white/20")} />
+                      </button>
+                    ))}
+                    {ratingInput > 0 && <span className={cn("ml-2 text-xs", isLight ? "text-slate-500" : "text-white/50")}>{ratingInput}/5</span>}
+                  </div>
+                  <input
+                    type="text"
+                    className={cn("mb-2 w-full rounded-lg border px-2.5 py-1.5 text-xs", isLight ? "border-slate-200 bg-white text-slate-900" : "border-white/10 bg-white/5 text-white")}
+                    placeholder="Optional comment..."
+                    value={ratingComment}
+                    onChange={(e) => setRatingComment(e.target.value)}
+                  />
+                  <Button
+                    size="sm"
+                    disabled={!ratingInput || ratingSubmitting}
+                    onClick={() => handleRateVendor(selectedJob._id)}
+                    className="w-full rounded-lg bg-amber-500 text-white hover:bg-amber-600 text-xs disabled:opacity-50"
+                  >
+                    <Star className="mr-1.5 h-3.5 w-3.5" />
+                    Submit Rating
+                  </Button>
+                </div>
+              )}
+
+              {/* Show submitted rating */}
+              {(selectedJob as unknown as { vendorRating?: number }).vendorRating && (
+                <div className={cn("mt-4 rounded-xl border p-3", isLight ? "border-slate-200 bg-slate-50" : "border-white/[0.08] bg-white/[0.03]")}>
+                  <p className={cn("mb-1 text-xs font-medium", isLight ? "text-slate-400" : "text-white/40")}>Vendor Rating Submitted</p>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} className={cn("h-4 w-4", s <= ((selectedJob as unknown as { vendorRating?: number }).vendorRating || 0) ? "fill-amber-400 text-amber-400" : isLight ? "text-slate-300" : "text-white/20")} />
+                    ))}
+                    <span className={cn("ml-2 text-xs", isLight ? "text-slate-500" : "text-white/50")}>{(selectedJob as unknown as { vendorRatingComment?: string }).vendorRatingComment}</span>
+                  </div>
                 </div>
               )}
             </div>

@@ -103,6 +103,10 @@ export default function VendorPortalPage() {
   const [bidNotes, setBidNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
+  const [completionForm, setCompletionForm] = useState({ beforePhotos: "", afterPhotos: "", vendorNotes: "", finalCost: "" });
+  const [docUploadForm, setDocUploadForm] = useState({ type: "license", url: "", notes: "" });
+  const [docUploading, setDocUploading] = useState(false);
+  const [docUploadMsg, setDocUploadMsg] = useState("");
 
   const fetchVendorData = useCallback(async () => {
     setLoading(true);
@@ -158,17 +162,18 @@ export default function VendorPortalPage() {
     if (tab === "marketplace") fetchMarketplace();
   }, [tab, fetchActiveJobs, fetchMarketplace]);
 
-  const handleStatusUpdate = async (jobId: string, action: string) => {
+  const handleStatusUpdate = async (jobId: string, action: string, extra?: Record<string, unknown>) => {
     setStatusUpdateLoading(true);
     try {
       const res = await fetch(`/api/vendors/jobs/${jobId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, ...extra }),
       });
       if (res.ok) {
         fetchActiveJobs();
         setSelectedJob(null);
+        setCompletionForm({ beforePhotos: "", afterPhotos: "", vendorNotes: "", finalCost: "" });
       } else {
         const data = await res.json();
         alert(data.error || "Action failed");
@@ -177,6 +182,35 @@ export default function VendorPortalPage() {
       console.error(e);
     } finally {
       setStatusUpdateLoading(false);
+    }
+  };
+
+  const handleDocUpload = async () => {
+    if (!vendor || !docUploadForm.url) return;
+    setDocUploading(true);
+    setDocUploadMsg("");
+    try {
+      const res = await fetch(`/api/vendors/${vendor._id}/documents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: docUploadForm.type,
+          url: docUploadForm.url,
+          notes: docUploadForm.notes,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setDocUploadMsg(data.complianceHold ? "Uploaded — compliance review pending" : "Document uploaded successfully");
+        setDocUploadForm({ type: "license", url: "", notes: "" });
+        fetchVendorData();
+      } else {
+        setDocUploadMsg(data.error || "Upload failed");
+      }
+    } catch {
+      setDocUploadMsg("Upload failed");
+    } finally {
+      setDocUploading(false);
     }
   };
 
@@ -527,9 +561,61 @@ export default function VendorPortalPage() {
             </div>
           </div>
 
+          <div className={cn("rounded-2xl border p-4", isLight ? "border-slate-200 bg-white" : "border-white/[0.08] bg-white/[0.04]")}>
+            <h3 className={cn("mb-3 text-xs font-semibold uppercase tracking-wider", isLight ? "text-slate-400" : "text-white/40")}>Upload Credentials</h3>
+            <div className="space-y-3">
+              <div>
+                <label className={cn("mb-1 block text-xs font-medium", isLight ? "text-slate-600" : "text-white/60")}>Document Type</label>
+                <select
+                  className={cn(inputClass, "appearance-none")}
+                  value={docUploadForm.type}
+                  onChange={(e) => setDocUploadForm((f) => ({ ...f, type: e.target.value }))}
+                >
+                  {["license", "insurance", "background_check", "certification", "w9", "other"].map((t) => (
+                    <option key={t} value={t}>{t.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={cn("mb-1 block text-xs font-medium", isLight ? "text-slate-600" : "text-white/60")}>Document URL *</label>
+                <input
+                  type="url"
+                  className={inputClass}
+                  placeholder="https://drive.google.com/..."
+                  value={docUploadForm.url}
+                  onChange={(e) => setDocUploadForm((f) => ({ ...f, url: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className={cn("mb-1 block text-xs font-medium", isLight ? "text-slate-600" : "text-white/60")}>Notes (optional)</label>
+                <input
+                  type="text"
+                  className={inputClass}
+                  placeholder="e.g. Expires Jan 2027"
+                  value={docUploadForm.notes}
+                  onChange={(e) => setDocUploadForm((f) => ({ ...f, notes: e.target.value }))}
+                />
+              </div>
+              {docUploadMsg && (
+                <p className={cn("text-xs", docUploadMsg.includes("success") || docUploadMsg.includes("Uploaded") ? "text-emerald-500" : "text-red-500")}>
+                  {docUploadMsg}
+                </p>
+              )}
+              <Button
+                size="sm"
+                disabled={docUploading || !docUploadForm.url}
+                onClick={handleDocUpload}
+                className="w-full rounded-xl bg-violet-600 text-white hover:bg-violet-700 text-xs disabled:opacity-50"
+              >
+                <FileText className="mr-1.5 h-3.5 w-3.5" />
+                {docUploading ? "Uploading..." : "Submit Document"}
+              </Button>
+            </div>
+          </div>
+
           <div className={cn("rounded-xl border p-3 text-xs", isLight ? "border-slate-200 bg-slate-50 text-slate-500" : "border-white/[0.08] bg-white/[0.03] text-white/40")}>
             <FileText className="mr-1.5 inline h-3.5 w-3.5" />
-            To update your profile, credentials, or bank account details, contact your property manager.
+            To update your profile or bank account details, contact your property manager.
           </div>
         </div>
       )}
@@ -578,9 +664,65 @@ export default function VendorPortalPage() {
                   </Button>
                 )}
                 {selectedJob.status === "work_started" && (
-                  <Button size="sm" disabled={statusUpdateLoading} onClick={() => handleStatusUpdate(selectedJob._id, "complete")} className="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs">
-                    Mark Complete
-                  </Button>
+                  <div className="w-full space-y-3">
+                    <p className={cn("text-xs font-semibold uppercase tracking-wider", isLight ? "text-slate-400" : "text-white/40")}>Complete Job</p>
+                    <div>
+                      <label className={cn("mb-1 block text-xs", isLight ? "text-slate-500" : "text-white/50")}>Before Photo URLs (comma-separated)</label>
+                      <input
+                        type="text"
+                        className={inputClass}
+                        placeholder="https://... , https://..."
+                        value={completionForm.beforePhotos}
+                        onChange={(e) => setCompletionForm((f) => ({ ...f, beforePhotos: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <label className={cn("mb-1 block text-xs", isLight ? "text-slate-500" : "text-white/50")}>After Photo URLs (comma-separated)</label>
+                      <input
+                        type="text"
+                        className={inputClass}
+                        placeholder="https://... , https://..."
+                        value={completionForm.afterPhotos}
+                        onChange={(e) => setCompletionForm((f) => ({ ...f, afterPhotos: e.target.value }))}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className={cn("mb-1 block text-xs", isLight ? "text-slate-500" : "text-white/50")}>Final Cost ($)</label>
+                        <input
+                          type="number"
+                          className={inputClass}
+                          placeholder="0.00"
+                          value={completionForm.finalCost}
+                          onChange={(e) => setCompletionForm((f) => ({ ...f, finalCost: e.target.value }))}
+                        />
+                      </div>
+                      <div>
+                        <label className={cn("mb-1 block text-xs", isLight ? "text-slate-500" : "text-white/50")}>Vendor Notes</label>
+                        <input
+                          type="text"
+                          className={inputClass}
+                          placeholder="Optional notes"
+                          value={completionForm.vendorNotes}
+                          onChange={(e) => setCompletionForm((f) => ({ ...f, vendorNotes: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      disabled={statusUpdateLoading}
+                      onClick={() => handleStatusUpdate(selectedJob._id, "complete", {
+                        beforePhotos: completionForm.beforePhotos.split(",").map((s) => s.trim()).filter(Boolean),
+                        afterPhotos: completionForm.afterPhotos.split(",").map((s) => s.trim()).filter(Boolean),
+                        vendorNotes: completionForm.vendorNotes || undefined,
+                        finalCost: completionForm.finalCost ? Number(completionForm.finalCost) : undefined,
+                      })}
+                      className="w-full rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs"
+                    >
+                      <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+                      Submit Completion
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>

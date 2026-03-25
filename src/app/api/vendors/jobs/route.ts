@@ -130,6 +130,35 @@ export async function POST(request: NextRequest) {
       ? `${addr.street || ""}, ${addr.city || ""}, ${addr.state || ""}`.trim().replace(/^,|,$/g, "")
       : "";
 
+    // Best-effort geocode to store coordinates for distance-based dispatch
+    let propertyCoordinates: { lat: number; lng: number } | undefined;
+    if (propertyAddress.length >= 10) {
+      try {
+        const geoUrl = new URL("https://nominatim.openstreetmap.org/search");
+        geoUrl.searchParams.set("format", "json");
+        geoUrl.searchParams.set("limit", "1");
+        geoUrl.searchParams.set("q", propertyAddress);
+        const geoRes = await fetch(geoUrl.toString(), {
+          headers: {
+            Accept: "application/json",
+            "User-Agent": "SmartStartPM/1.0 (property-management; contact@smartstart.us)",
+          },
+          signal: AbortSignal.timeout(4000),
+        });
+        if (geoRes.ok) {
+          const geoData = (await geoRes.json()) as Array<{ lat: string; lon: string }>;
+          if (geoData?.[0]) {
+            propertyCoordinates = {
+              lat: parseFloat(geoData[0].lat),
+              lng: parseFloat(geoData[0].lon),
+            };
+          }
+        }
+      } catch {
+        // non-fatal: dispatch falls back to rating-only scoring
+      }
+    }
+
     const job = new VendorJob({
       title,
       description,
@@ -137,6 +166,7 @@ export async function POST(request: NextRequest) {
       priority: priority || "medium",
       propertyId: new mongoose.Types.ObjectId(propertyId),
       propertyAddress,
+      propertyCoordinates,
       maintenanceRequestId: maintenanceRequestId
         ? new mongoose.Types.ObjectId(maintenanceRequestId)
         : undefined,

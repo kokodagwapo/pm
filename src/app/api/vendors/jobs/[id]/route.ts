@@ -185,6 +185,26 @@ export async function PATCH(
           $inc: { pendingPayout: -(job.finalCost || 0), totalEarnings: job.finalCost || 0 },
         });
       }
+    } else if (action === "rate_vendor" && isManager) {
+      const { rating, comment } = rest;
+      if (!rating || rating < 1 || rating > 5) {
+        return NextResponse.json({ error: "rating must be between 1 and 5" }, { status: 400 });
+      }
+      job.vendorRating = Math.round(rating);
+      if (comment) job.vendorRatingComment = comment;
+
+      // Recalculate vendor's aggregate rolling rating
+      if (job.assignedVendorId) {
+        const vendor = await Vendor.findById(job.assignedVendorId);
+        if (vendor) {
+          const prevTotal = vendor.totalRatings || 0;
+          const prevRating = vendor.rating || 0;
+          const newTotal = prevTotal + 1;
+          vendor.rating = Math.round(((prevRating * prevTotal + rating) / newTotal) * 10) / 10;
+          vendor.totalRatings = newTotal;
+          await vendor.save();
+        }
+      }
     } else if (action === "assign_vendor" && isManager) {
       const { vendorId } = rest;
       if (!vendorId || !mongoose.Types.ObjectId.isValid(vendorId)) {
