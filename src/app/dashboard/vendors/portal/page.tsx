@@ -194,14 +194,22 @@ export default function VendorPortalPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type: docUploadForm.type,
+          docType: docUploadForm.type,
           url: docUploadForm.url,
           notes: docUploadForm.notes,
         }),
       });
       const data = await res.json();
       if (res.ok) {
-        setDocUploadMsg(data.complianceHold ? "Uploaded — compliance review pending" : "Document uploaded successfully");
+        const isOnHold = data.complianceResult?.onHold;
+        const hasIssues = data.complianceResult?.issues?.length > 0;
+        setDocUploadMsg(
+          isOnHold
+            ? `Uploaded — compliance hold: ${data.complianceResult?.issues?.[0] || "credentials require review"}`
+            : hasIssues
+            ? `Uploaded — note: ${data.complianceResult.issues[0]}`
+            : "Document uploaded successfully"
+        );
         setDocUploadForm({ type: "license", url: "", notes: "" });
         fetchVendorData();
       } else {
