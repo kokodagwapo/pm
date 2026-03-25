@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     }
 
     const total = await VendorJob.countDocuments(query);
-    const jobs = await VendorJob.find(query)
+    const rawJobs = await VendorJob.find(query)
       .populate("propertyId", "name address")
       .populate("postedBy", "firstName lastName email")
       .populate("assignedVendorId", "name contactName email rating")
@@ -70,6 +70,24 @@ export async function GET(request: NextRequest) {
       .skip((page - 1) * limit)
       .limit(limit)
       .lean();
+
+    // For non-manager marketplace browsing, strip full street address to prevent data leakage
+    const jobs = isManager
+      ? rawJobs
+      : rawJobs.map((job) => {
+          const prop = job.propertyId as unknown as { name?: string; address?: { street?: string; city?: string; state?: string } } | null;
+          if (prop?.address) {
+            return {
+              ...job,
+              propertyId: {
+                ...(typeof prop === "object" ? prop : {}),
+                address: { city: prop.address.city, state: prop.address.state },
+              },
+              propertyAddress: undefined,
+            };
+          }
+          return job;
+        });
 
     return NextResponse.json({ jobs, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error) {

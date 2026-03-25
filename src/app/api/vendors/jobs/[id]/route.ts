@@ -157,6 +157,19 @@ export async function PATCH(
       if (rest.vendorNotes) job.vendorNotes = rest.vendorNotes;
       if (rest.finalCost !== undefined) job.finalCost = rest.finalCost;
     } else if (action === "approve" && isManager) {
+      if (!job.finalCost || job.finalCost <= 0) {
+        return NextResponse.json(
+          { error: "finalCost must be set on the job before approving — update the job with a final cost first" },
+          { status: 409 }
+        );
+      }
+      // Prevent approval when finalCost grossly exceeds budget (>2x) as a funding safeguard
+      if (job.budget && job.finalCost > job.budget * 2) {
+        return NextResponse.json(
+          { error: `Final cost $${job.finalCost} exceeds budget $${job.budget} by more than 2x — adjust cost or budget before approving` },
+          { status: 409 }
+        );
+      }
       job.status = "approved";
       job.approvedDate = new Date();
       if (rest.managerNotes) job.managerNotes = rest.managerNotes;
@@ -263,6 +276,18 @@ export async function PATCH(
           { status: 403 }
         );
       }
+      if (!vendor.isApproved) {
+        return NextResponse.json(
+          { error: "Vendor account is not approved yet and cannot submit bids" },
+          { status: 403 }
+        );
+      }
+      if (!vendor.isAvailable) {
+        return NextResponse.json(
+          { error: "Vendor is currently unavailable and cannot submit bids" },
+          { status: 409 }
+        );
+      }
       if (vendor.complianceHold) {
         return NextResponse.json(
           { error: "Vendor is on compliance hold and cannot submit bids" },
@@ -292,6 +317,19 @@ export async function PATCH(
       const bid = job.bids.id(bidId);
       if (!bid) {
         return NextResponse.json({ error: "Bid not found" }, { status: 404 });
+      }
+      // Verify vendor is still approved, available, and not on compliance hold
+      const bidVendor = await Vendor.findById(bid.vendorId).select("isApproved isAvailable complianceHold complianceHoldReason").lean();
+      if (bidVendor) {
+        if (!(bidVendor as { isApproved?: boolean }).isApproved) {
+          return NextResponse.json({ error: "Vendor is no longer approved" }, { status: 409 });
+        }
+        if (!(bidVendor as { isAvailable?: boolean }).isAvailable) {
+          return NextResponse.json({ error: "Vendor is currently unavailable" }, { status: 409 });
+        }
+        if ((bidVendor as { complianceHold?: boolean }).complianceHold) {
+          return NextResponse.json({ error: `Vendor is on compliance hold: ${(bidVendor as { complianceHoldReason?: string }).complianceHoldReason || "credentials require review"}` }, { status: 409 });
+        }
       }
       bid.status = "accepted";
       for (const b of job.bids) {
