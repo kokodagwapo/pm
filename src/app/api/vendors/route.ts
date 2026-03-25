@@ -45,8 +45,25 @@ export async function GET(request: NextRequest) {
       ];
     }
 
+    const user = session.user as SessionUser;
+    const isManager = ["admin", "super_admin", "manager"].includes(user.role);
+
+    const PUBLIC_FIELDS =
+      "name contactName categories rating totalRatings city state bio serviceRadius hourlyRate callOutFee responseTimeHours activeWorkOrders completedJobs isApproved isAvailable";
+    const PRIVATE_FIELDS =
+      PUBLIC_FIELDS +
+      " email phone address zipCode userId licenseNumber licenseExpiryDate insuranceProvider insuranceExpiryDate backgroundCheckDate backgroundCheckStatus complianceHold complianceHoldReason lastComplianceCheck walletBalance totalEarnings pendingPayout bankAccountLast4 bankAccountVerified documents payoutRequests preferredAreas createdAt updatedAt";
+
+    // Non-managers can only query for userId or email to find their own vendor profile
+    const isSelfLookup = !!(email || userId);
+    if (!isManager && !isSelfLookup) {
+      // Enforce public fields and disallow sensitive filters
+      delete query.complianceHold;
+    }
+
     const total = await Vendor.countDocuments(query);
     const vendors = await Vendor.find(query)
+      .select(isManager || isSelfLookup ? PRIVATE_FIELDS : PUBLIC_FIELDS)
       .sort({ rating: -1, completedJobs: -1 })
       .skip((page - 1) * limit)
       .limit(limit)

@@ -20,6 +20,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const user = session.user as SessionUser;
+    const isManager = ["admin", "super_admin", "manager"].includes(user.role);
+
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid job ID" }, { status: 400 });
@@ -34,6 +37,27 @@ export async function GET(
 
     if (!job) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    }
+
+    // Access control: manager sees all; vendor sees their own; anyone sees open marketplace jobs
+    if (!isManager) {
+      const isPublicOpen =
+        (job as { isPublicToMarketplace?: boolean; status?: string }).isPublicToMarketplace &&
+        (job as { status?: string }).status === "open";
+
+      if (!isPublicOpen) {
+        const ownVendor = await Vendor.findOne({ userId: user.id }).select("_id").lean();
+        const ownVendorId = (ownVendor as { _id: { toString: () => string } } | null)?._id?.toString();
+        const assignedId = (job as { assignedVendorId?: { toString: () => string } }).assignedVendorId?.toString();
+        const postedById = (job as { postedBy?: { _id?: { toString: () => string }; toString?: () => string } }).postedBy;
+        const posterId = typeof postedById === "object" && postedById !== null
+          ? (postedById as { _id?: { toString: () => string } })._id?.toString() ?? postedById.toString?.()
+          : String(postedById);
+
+        if (ownVendorId !== assignedId && posterId !== user.id) {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+      }
     }
 
     return NextResponse.json({ job });

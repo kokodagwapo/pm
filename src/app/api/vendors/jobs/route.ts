@@ -163,6 +163,7 @@ export async function POST(request: NextRequest) {
 
       if (topVendors.length > 0) {
         const topVendor = topVendors[0];
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
         await VendorJob.findByIdAndUpdate(job._id, {
           status: "dispatched",
           assignedVendorId: topVendor._id,
@@ -172,8 +173,12 @@ export async function POST(request: NextRequest) {
               vendorId: topVendor._id,
               vendorName: topVendor.name,
               dispatchedAt: new Date(),
+              expiresAt,
             },
           },
+        });
+        await Vendor.findByIdAndUpdate(topVendor._id, {
+          $inc: { activeWorkOrders: 1 },
         });
       }
     }

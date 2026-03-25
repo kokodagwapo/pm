@@ -16,6 +16,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const user = session.user as { id: string; role: string };
+    const isManager = ["admin", "super_admin", "manager"].includes(user.role);
+
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid vendor ID" }, { status: 400 });
@@ -24,11 +27,18 @@ export async function GET(
     await connectDB();
 
     const vendor = await Vendor.findById(id)
-      .select("documents complianceStatus lastComplianceCheck")
+      .select("userId documents complianceStatus lastComplianceCheck")
       .lean();
 
     if (!vendor) {
       return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
+    }
+
+    const isOwner =
+      (vendor as { userId?: { toString: () => string } }).userId?.toString() === user.id;
+
+    if (!isManager && !isOwner) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     return NextResponse.json({ documents: (vendor as { documents?: unknown }).documents || [] });
