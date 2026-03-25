@@ -159,6 +159,8 @@ export async function POST(request: NextRequest) {
 
       if (!vendor.payoutRequests) vendor.payoutRequests = [];
       vendor.payoutRequests.push(payoutReq as Parameters<typeof vendor.payoutRequests.push>[0]);
+      // Reserve funds immediately so subsequent requests see the correct available balance
+      vendor.walletBalance = Math.max(0, vendor.walletBalance - amount);
       vendor.pendingPayout = (vendor.pendingPayout || 0) + amount;
       await vendor.save();
 
@@ -191,16 +193,12 @@ export async function POST(request: NextRequest) {
       if (payoutReq.status !== "pending") {
         return NextResponse.json({ error: "Payout request is not pending" }, { status: 409 });
       }
-      if (vendor.walletBalance < payoutReq.amount) {
-        return NextResponse.json({ error: "Insufficient wallet balance for this payout" }, { status: 409 });
-      }
-
+      // walletBalance was already reserved at request_payout time — only clear pendingPayout
       payoutReq.status = "processing";
       payoutReq.approvedBy = new mongoose.Types.ObjectId(user.id);
       payoutReq.processedAt = new Date();
       payoutReq.referenceId = `ACH-${Date.now()}`;
 
-      vendor.walletBalance = Math.max(0, vendor.walletBalance - payoutReq.amount);
       vendor.pendingPayout = Math.max(0, (vendor.pendingPayout || 0) - payoutReq.amount);
       await vendor.save();
 

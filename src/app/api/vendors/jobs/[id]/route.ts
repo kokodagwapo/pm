@@ -343,6 +343,12 @@ export async function PATCH(
         status: "pending",
       });
     } else if (action === "accept_bid" && isManager) {
+      if (!["open", "bidding"].includes(job.status)) {
+        return NextResponse.json(
+          { error: `Cannot accept bids when job is in '${job.status}' state — job must be open` },
+          { status: 409 }
+        );
+      }
       const { bidId } = rest;
       const bid = job.bids.id(bidId);
       if (!bid) {
