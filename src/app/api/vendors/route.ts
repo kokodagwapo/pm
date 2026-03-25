@@ -56,6 +56,10 @@ export async function GET(request: NextRequest) {
 
     // Non-managers requesting private data must be doing a self-lookup (their own profile)
     if (!isManager) {
+      // Default to approved-only for non-managers unless they're doing a self-lookup
+      if (isApproved === null || isApproved === undefined || isApproved === "") {
+        query.isApproved = true;
+      }
       delete query.complianceHold;
 
       if (email || userId) {

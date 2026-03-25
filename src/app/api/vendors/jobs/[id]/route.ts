@@ -67,6 +67,8 @@ export async function GET(
       if (prop) {
         delete prop.address;
       }
+      // Also redact the denormalized propertyAddress field
+      delete (job as { propertyAddress?: string }).propertyAddress;
     }
 
     return NextResponse.json({ job });
