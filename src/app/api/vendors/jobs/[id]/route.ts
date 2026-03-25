@@ -175,12 +175,11 @@ export async function PATCH(
       if (rest.managerNotes) job.managerNotes = rest.managerNotes;
 
       if (job.assignedVendorId && job.finalCost) {
-        // Use update pipeline to safely decrement activeWorkOrders without going below 0
+        // Credit walletBalance only — pendingPayout is reserved for the ACH payout-request flow
         await Vendor.findByIdAndUpdate(job.assignedVendorId, [
           {
             $set: {
               walletBalance: { $add: ["$walletBalance", job.finalCost] },
-              pendingPayout: { $add: ["$pendingPayout", job.finalCost] },
               completedJobs: { $add: ["$completedJobs", 1] },
               activeWorkOrders: { $max: [0, { $subtract: ["$activeWorkOrders", 1] }] },
             },
@@ -193,9 +192,10 @@ export async function PATCH(
     } else if (action === "release_payment" && isManager) {
       job.status = "payment_released";
       job.paymentReleasedDate = new Date();
-      if (job.assignedVendorId) {
+      if (job.assignedVendorId && job.finalCost) {
+        // Payment is released: add to totalEarnings; walletBalance already credited on approve
         await Vendor.findByIdAndUpdate(job.assignedVendorId, {
-          $inc: { pendingPayout: -(job.finalCost || 0), totalEarnings: job.finalCost || 0 },
+          $inc: { totalEarnings: job.finalCost },
         });
       }
     } else if (action === "rate_vendor" && isManager) {

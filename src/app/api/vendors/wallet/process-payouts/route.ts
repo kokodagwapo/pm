@@ -40,7 +40,7 @@ export async function GET(_request: NextRequest) {
         if (msSinceProcessed < 60_000) continue;
 
         req.status = "paid";
-        vendor.totalEarnings = (vendor.totalEarnings || 0) + req.amount;
+        // totalEarnings is already incremented at job release_payment — only mark as paid here
         results.push({
           vendorId: vendor._id.toString(),
           referenceId: req.referenceId || "",
