@@ -107,6 +107,9 @@ export default function VendorPortalPage() {
   const [docUploadForm, setDocUploadForm] = useState({ type: "license", url: "", notes: "" });
   const [docUploading, setDocUploading] = useState(false);
   const [docUploadMsg, setDocUploadMsg] = useState("");
+  const [regForm, setRegForm] = useState({ name: "", contactName: "", phone: "", city: "", state: "", categories: [] as string[], bio: "", licenseNumber: "" });
+  const [regSubmitting, setRegSubmitting] = useState(false);
+  const [regError, setRegError] = useState("");
 
   const fetchVendorData = useCallback(async () => {
     setLoading(true);
@@ -252,6 +255,35 @@ export default function VendorPortalPage() {
     }
   };
 
+  const handleSelfRegister = async () => {
+    if (!regForm.name || !regForm.contactName || !regForm.categories.length) {
+      setRegError("Business name, contact name, and at least one service category are required.");
+      return;
+    }
+    setRegSubmitting(true);
+    setRegError("");
+    try {
+      const email = (session?.user as { email?: string })?.email || "";
+      const res = await fetch("/api/vendors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...regForm, email }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        fetchVendorData();
+      } else {
+        setRegError(data.error || "Registration failed");
+      }
+    } catch {
+      setRegError("Network error — please try again.");
+    } finally {
+      setRegSubmitting(false);
+    }
+  };
+
+  const ALL_CATEGORIES = ["Plumbing","Electrical","HVAC","Appliances","Flooring","Roofing","Painting","Landscaping","Pest Control","Cleaning","Security","General","Structural","Windows","Doors"];
+
   const inputClass = cn(
     "w-full rounded-xl border px-3 py-2.5 text-sm transition-all focus:outline-none focus:ring-2",
     isLight
@@ -261,14 +293,86 @@ export default function VendorPortalPage() {
 
   if (!vendor && !loading) {
     return (
-      <div className={cn("flex flex-col items-center justify-center rounded-2xl border py-24 text-center", isLight ? "border-slate-200 bg-slate-50" : "border-white/[0.08] bg-white/[0.02]")}>
-        <Wrench className={cn("h-16 w-16", isLight ? "text-slate-300" : "text-white/20")} />
-        <p className={cn("mt-4 text-base font-semibold", isLight ? "text-slate-500" : "text-white/50")}>
-          No Vendor Profile Found
-        </p>
-        <p className={cn("mt-2 max-w-sm text-sm", isLight ? "text-slate-400" : "text-white/40")}>
-          Contact your property manager to register you as a vendor in the system.
-        </p>
+      <div className="space-y-6">
+        <div>
+          <h1 className={cn("text-2xl font-semibold tracking-tight", isLight ? "text-slate-900" : "text-white")}>Register as a Vendor</h1>
+          <p className={cn("mt-1 text-sm", isLight ? "text-slate-500" : "text-white/50")}>
+            Create your vendor profile to start receiving job offers and bids from property managers.
+          </p>
+        </div>
+        <div className={cn("rounded-2xl border p-6 space-y-4", isLight ? "border-slate-200 bg-white" : "border-white/[0.08] bg-white/[0.04]")}>
+          {regError && (
+            <div className="rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-500">{regError}</div>
+          )}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className={cn("mb-1.5 block text-xs font-medium", isLight ? "text-slate-600" : "text-white/60")}>Business Name *</label>
+              <input className={inputClass} placeholder="ABC Plumbing LLC" value={regForm.name} onChange={(e) => setRegForm((f) => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div>
+              <label className={cn("mb-1.5 block text-xs font-medium", isLight ? "text-slate-600" : "text-white/60")}>Contact Name *</label>
+              <input className={inputClass} placeholder="John Smith" value={regForm.contactName} onChange={(e) => setRegForm((f) => ({ ...f, contactName: e.target.value }))} />
+            </div>
+            <div>
+              <label className={cn("mb-1.5 block text-xs font-medium", isLight ? "text-slate-600" : "text-white/60")}>Phone</label>
+              <input className={inputClass} placeholder="+1 (555) 000-0000" value={regForm.phone} onChange={(e) => setRegForm((f) => ({ ...f, phone: e.target.value }))} />
+            </div>
+            <div>
+              <label className={cn("mb-1.5 block text-xs font-medium", isLight ? "text-slate-600" : "text-white/60")}>License Number</label>
+              <input className={inputClass} placeholder="LIC-123456" value={regForm.licenseNumber} onChange={(e) => setRegForm((f) => ({ ...f, licenseNumber: e.target.value }))} />
+            </div>
+            <div>
+              <label className={cn("mb-1.5 block text-xs font-medium", isLight ? "text-slate-600" : "text-white/60")}>City</label>
+              <input className={inputClass} placeholder="Miami" value={regForm.city} onChange={(e) => setRegForm((f) => ({ ...f, city: e.target.value }))} />
+            </div>
+            <div>
+              <label className={cn("mb-1.5 block text-xs font-medium", isLight ? "text-slate-600" : "text-white/60")}>State</label>
+              <input className={inputClass} placeholder="FL" value={regForm.state} onChange={(e) => setRegForm((f) => ({ ...f, state: e.target.value }))} />
+            </div>
+          </div>
+          <div>
+            <label className={cn("mb-1.5 block text-xs font-medium", isLight ? "text-slate-600" : "text-white/60")}>Service Categories *</label>
+            <div className="flex flex-wrap gap-2">
+              {ALL_CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setRegForm((f) => ({
+                    ...f,
+                    categories: f.categories.includes(cat) ? f.categories.filter((c) => c !== cat) : [...f.categories, cat],
+                  }))}
+                  className={cn(
+                    "rounded-full px-3 py-1 text-xs font-medium transition-all",
+                    regForm.categories.includes(cat)
+                      ? "bg-violet-500 text-white"
+                      : isLight ? "bg-slate-100 text-slate-600 hover:bg-slate-200" : "bg-white/10 text-white/60 hover:bg-white/20"
+                  )}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className={cn("mb-1.5 block text-xs font-medium", isLight ? "text-slate-600" : "text-white/60")}>Bio / About Your Business</label>
+            <textarea
+              className={cn(inputClass, "min-h-[80px] resize-y")}
+              placeholder="Describe your services, experience, and what sets you apart…"
+              value={regForm.bio}
+              onChange={(e) => setRegForm((f) => ({ ...f, bio: e.target.value }))}
+            />
+          </div>
+          <Button
+            onClick={handleSelfRegister}
+            disabled={regSubmitting}
+            className="w-full bg-violet-600 text-white hover:bg-violet-700"
+          >
+            {regSubmitting ? "Registering…" : "Submit Registration"}
+          </Button>
+          <p className={cn("text-center text-xs", isLight ? "text-slate-400" : "text-white/40")}>
+            Your profile will be reviewed by a manager before you can start accepting jobs.
+          </p>
+        </div>
       </div>
     );
   }

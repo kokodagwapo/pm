@@ -22,6 +22,7 @@ import {
   Zap,
   Eye,
   Users,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -81,6 +82,7 @@ interface IVendor {
   licenseExpiryDate?: string;
   insuranceExpiryDate?: string;
   bio?: string;
+  preferredPropertyIds?: string[];
 }
 
 interface IVendorJob {
@@ -200,6 +202,9 @@ export default function VendorsPage() {
   const [ratingInput, setRatingInput] = useState(0);
   const [ratingComment, setRatingComment] = useState("");
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
+  const [preferredModal, setPreferredModal] = useState<{ vendor: IVendor; removing: boolean } | null>(null);
+  const [preferredPropertyId, setPreferredPropertyId] = useState("");
+  const [preferredSubmitting, setPreferredSubmitting] = useState(false);
   const [showPostJob, setShowPostJob] = useState(false);
   const [showAddVendor, setShowAddVendor] = useState(false);
   const [jobForm, setJobForm] = useState({
@@ -309,6 +314,27 @@ export default function VendorsPage() {
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleTogglePreferred = async () => {
+    if (!preferredModal || !preferredPropertyId) return;
+    setPreferredSubmitting(true);
+    try {
+      const res = await fetch(`/api/vendors/${preferredModal.vendor._id}/preferred`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId: preferredPropertyId, remove: preferredModal.removing }),
+      });
+      if (res.ok) {
+        fetchVendors();
+        setPreferredModal(null);
+        setPreferredPropertyId("");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setPreferredSubmitting(false);
     }
   };
 
@@ -841,6 +867,16 @@ export default function VendorsPage() {
                       >
                         {vendor.isApproved ? "Revoke" : "Approve"}
                       </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setPreferredModal({ vendor, removing: false })}
+                        title="Mark as preferred for a property"
+                        className={cn("h-7 rounded-lg px-2 text-xs text-rose-500 hover:bg-rose-50")}
+                      >
+                        <Heart className="mr-1 h-3 w-3" />
+                        Preferred
+                      </Button>
                       <button
                         onClick={() => setSelectedVendor(vendor)}
                         className={cn("rounded-lg p-1.5", isLight ? "text-slate-400 hover:bg-slate-100" : "text-white/40 hover:bg-white/10")}
@@ -853,6 +889,47 @@ export default function VendorsPage() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {preferredModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className={cn("w-full max-w-sm rounded-2xl p-6 shadow-2xl", isLight ? "bg-white" : "bg-slate-900 text-white")}>
+            <h3 className="mb-1 text-base font-semibold">
+              {preferredModal.removing ? "Remove Preferred Status" : "Mark as Preferred Vendor"}
+            </h3>
+            <p className={cn("mb-4 text-sm", isLight ? "text-slate-500" : "text-white/60")}>
+              Select a property to {preferredModal.removing ? "remove" : "add"} <span className="font-medium">{preferredModal.vendor.name}</span> {preferredModal.removing ? "from" : "as a preferred vendor for"}.
+            </p>
+            <select
+              value={preferredPropertyId}
+              onChange={(e) => setPreferredPropertyId(e.target.value)}
+              className={cn("mb-4 w-full rounded-lg border px-3 py-2 text-sm", isLight ? "border-slate-200 bg-white" : "border-white/10 bg-white/10 text-white")}
+            >
+              <option value="">Select a property…</option>
+              {properties.map((p) => (
+                <option key={p._id} value={p._id}>{p.name}</option>
+              ))}
+            </select>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => { setPreferredModal(null); setPreferredPropertyId(""); }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleTogglePreferred}
+                disabled={!preferredPropertyId || preferredSubmitting}
+                className={cn("flex-1", preferredModal.removing ? "bg-red-500 hover:bg-red-600 text-white" : "bg-rose-500 hover:bg-rose-600 text-white")}
+              >
+                {preferredSubmitting ? "Saving…" : preferredModal.removing ? "Remove" : "Mark Preferred"}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 

@@ -159,7 +159,9 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const scored = candidates.map((v) => {
+      type ScoredVendor = { vendor: (typeof candidates)[0]; score: number; distance: number | null };
+
+      const scoreCandidate = (v: (typeof candidates)[0]): ScoredVendor | null => {
         let distKm: number | null = null;
         if (
           propLat !== null &&
@@ -173,18 +175,37 @@ export async function POST(request: NextRequest) {
           distKm = distKmRaw;
         }
         return { vendor: v, score: vendorScore(v, distKm), distance: distKm };
-      }).filter(Boolean) as { vendor: (typeof candidates)[0]; score: number; distance: number | null }[];
+      };
 
-      if (scored.length === 0) {
+      // Separate preferred vendors for this property and give them first right of refusal
+      const jobPropertyId = (job as unknown as { propertyId?: mongoose.Types.ObjectId }).propertyId;
+      const preferred: ScoredVendor[] = [];
+      const regular: ScoredVendor[] = [];
+
+      for (const v of candidates) {
+        const scored = scoreCandidate(v);
+        if (!scored) continue;
+        const prefIds = ((v as unknown as { preferredPropertyIds?: mongoose.Types.ObjectId[] }).preferredPropertyIds ?? []);
+        const isPreferredForProperty = jobPropertyId && prefIds.some((pid) => pid.toString() === jobPropertyId.toString());
+        if (isPreferredForProperty) {
+          preferred.push(scored);
+        } else {
+          regular.push(scored);
+        }
+      }
+
+      const pool = preferred.length > 0 ? preferred : regular;
+
+      if (pool.length === 0) {
         return NextResponse.json(
           { error: "No vendors available within the service area for this job location." },
           { status: 404 }
         );
       }
 
-      scored.sort((a, b) => b.score - a.score);
-      vendorToDispatch = scored[0].vendor;
-      chosenDistance = scored[0].distance;
+      pool.sort((a, b) => b.score - a.score);
+      vendorToDispatch = pool[0].vendor;
+      chosenDistance = pool[0].distance;
     }
 
     const vendorId = vendorToDispatch._id as unknown as mongoose.Types.ObjectId;

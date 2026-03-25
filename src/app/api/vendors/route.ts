@@ -102,10 +102,8 @@ export async function POST(request: NextRequest) {
     }
 
     const user = session.user as SessionUser;
-    const allowedRoles = ["admin", "super_admin", "manager"];
-    if (!allowedRoles.includes(user.role)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const managerRoles = ["admin", "super_admin", "manager"];
+    const isManager = managerRoles.includes(user.role);
 
     await connectDB();
 
@@ -141,6 +139,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Non-managers may only self-register with their own email
+    if (!isManager) {
+      const User = (await import("@/models/User")).default;
+      const selfUser = await User.findById(user.id).select("email").lean() as { email?: string } | null;
+      if (!selfUser || selfUser.email?.toLowerCase() !== email.toLowerCase()) {
+        return NextResponse.json(
+          { error: "Self-registration requires your own account email" },
+          { status: 403 }
+        );
+      }
+      const alreadyLinked = await Vendor.findOne({ userId: user.id });
+      if (alreadyLinked) {
+        return NextResponse.json(
+          { error: "A vendor profile is already linked to your account" },
+          { status: 409 }
+        );
+      }
+    }
+
     const existing = await Vendor.findOne({ email: email.toLowerCase() });
     if (existing) {
       return NextResponse.json(
@@ -172,6 +189,7 @@ export async function POST(request: NextRequest) {
       backgroundCheckDate: backgroundCheckDate ? new Date(backgroundCheckDate) : undefined,
       isApproved: false,
       complianceHold: false,
+      userId: user.id,
     });
 
     await vendor.save();

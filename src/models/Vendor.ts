@@ -64,6 +64,7 @@ export interface IVendor {
   pendingPayout: number;
   payoutRequests?: IVendorPayoutRequest[];
   preferredAreas?: string[];
+  preferredPropertyIds?: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -172,6 +173,11 @@ const VendorSchema = new Schema<IVendor>(
       },
     ],
     preferredAreas: { type: [String], default: [] },
+    preferredPropertyIds: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Property" }],
+      default: [],
+      index: true,
+    },
   },
   {
     timestamps: true,
