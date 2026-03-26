@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Bed, Bath, MapPin, BadgeCheck } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface VacationStayCardProperty {
   _id: string;
@@ -53,6 +54,8 @@ export function VacationStayCard({
   children,
   infants,
   linkTarget = "public",
+  /** Translucent card + light text for dark page backgrounds (stay finder, dashboard dark). */
+  appearance = "default",
 }: {
   property: VacationStayCardProperty;
   checkIn?: string;
@@ -62,7 +65,9 @@ export function VacationStayCard({
   infants?: number;
   /** `dashboard` opens the property calendar in the app (manager view). */
   linkTarget?: "public" | "dashboard";
+  appearance?: "default" | "glass-dark";
 }) {
+  const glass = appearance === "glass-dark";
   const unit = property.units?.[0];
   const bedrooms = unit?.bedrooms ?? 0;
   const bathrooms = unit?.bathrooms ?? 0;
@@ -86,7 +91,14 @@ export function VacationStayCard({
 
   return (
     <Link href={href}>
-      <article className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-teal-300/60 hover:shadow-xl">
+      <article
+        className={cn(
+          "group relative overflow-hidden rounded-2xl border shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl",
+          glass
+            ? "border-white/20 bg-white/[0.07] shadow-black/25 backdrop-blur-xl hover:border-teal-300/45 hover:shadow-teal-950/25"
+            : "border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-sm hover:border-teal-300/60"
+        )}
+      >
         <div className="relative aspect-[4/3] overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -113,22 +125,38 @@ export function VacationStayCard({
           }}
         >
           <h3
-            className="mb-1.5 line-clamp-2 text-lg text-slate-900"
+            className={cn(
+              "mb-1.5 line-clamp-2 text-lg",
+              glass ? "text-white [text-shadow:0_1px_12px_rgba(0,0,0,0.45)]" : "text-slate-900"
+            )}
             style={{ fontWeight: 500 }}
           >
             {property.name}
           </h3>
           {property.address && (
             <p
-              className="mb-3 flex items-center gap-1.5 text-sm text-slate-600"
+              className={cn(
+                "mb-3 flex items-center gap-1.5 text-sm",
+                glass ? "text-white/85" : "text-slate-600"
+              )}
               style={{ fontWeight: 400 }}
             >
-              <MapPin className="h-3.5 w-3.5 shrink-0 text-teal-600" />
+              <MapPin
+                className={cn(
+                  "h-3.5 w-3.5 shrink-0",
+                  glass ? "text-teal-300" : "text-teal-600"
+                )}
+              />
               {property.address.city}
               {property.address.state && `, ${property.address.state}`}
             </p>
           )}
-          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+          <div
+            className={cn(
+              "flex flex-wrap items-center gap-3 text-sm",
+              glass ? "text-white/75" : "text-slate-500"
+            )}
+          >
             <span className="flex items-center gap-1">
               <Bed className="h-4 w-4" />
               {bedrooms} BR
@@ -138,7 +166,14 @@ export function VacationStayCard({
               {bathrooms} BA
             </span>
             {property.type && (
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs capitalize text-slate-600">
+              <span
+                className={cn(
+                  "rounded-full px-2 py-0.5 text-xs capitalize",
+                  glass
+                    ? "border border-white/15 bg-white/10 text-white/90"
+                    : "bg-slate-100 text-slate-600"
+                )}
+              >
                 {property.type.replace(/_/g, " ")}
               </span>
             )}

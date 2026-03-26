@@ -528,7 +528,7 @@ export function DemoGuide() {
             )}
           >
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-900">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/95">
                 {userRole === UserRole.ADMIN && "Super Admin Tour"}
                 {userRole === UserRole.MANAGER && "Manager Tour"}
                 {userRole === UserRole.OWNER && "Owner Tour"}
@@ -536,12 +536,12 @@ export function DemoGuide() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-slate-700 tabular-nums">
+              <span className="text-xs font-medium text-white/70 tabular-nums">
                 {currentStep + 1} / {steps.length}
               </span>
               <button
                 onClick={handleClose}
-                className="flex h-6 w-6 items-center justify-center rounded-lg text-black/75 transition-all hover:bg-black/10 hover:text-black"
+                className="flex h-6 w-6 items-center justify-center rounded-lg text-white/70 transition-all hover:bg-white/10 hover:text-white"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -562,16 +562,16 @@ export function DemoGuide() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-sm font-semibold leading-tight tracking-tight text-slate-900">
+                    <h3 className="text-sm font-semibold leading-tight tracking-tight text-white [text-shadow:0_1px_12px_rgba(0,0,0,0.35)]">
                       {step.title}
                     </h3>
                     {step.badge && (
-                      <span className="rounded-lg border border-sky-200/35 bg-sky-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-900 shadow-[0_0_20px_rgba(56,189,248,0.12)]">
+                      <span className="rounded-lg border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/95 shadow-[0_0_20px_rgba(56,189,248,0.12)]">
                         {step.badge}
                       </span>
                     )}
                   </div>
-                  <p className="mt-1.5 text-xs leading-relaxed text-slate-700">
+                  <p className="mt-1.5 text-xs leading-relaxed text-white/80">
                     {step.description}
                   </p>
                 </div>
@@ -605,8 +605,8 @@ export function DemoGuide() {
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-xl border transition-all",
                   isFirst
-                    ? "cursor-not-allowed border-black/10 bg-black/[0.04] text-black/25"
-                    : "border-sky-200/40 bg-white/60 text-black hover:border-sky-300/60 hover:bg-white/90 active:scale-95"
+                    ? "cursor-not-allowed border-white/10 bg-white/[0.04] text-white/25"
+                    : "border-white/25 bg-white/10 text-white hover:border-white/35 hover:bg-white/15 active:scale-95"
                 )}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -615,7 +615,7 @@ export function DemoGuide() {
               {step.href && !isLast && (
                 <button
                   onClick={handleNavigate}
-                  className="flex-1 rounded-lg border border-sky-200/30 bg-white/5 px-3 py-2 text-xs font-semibold text-black transition-all hover:border-sky-200/45 hover:bg-sky-400/10 active:scale-95"
+                  className="flex-1 rounded-lg border border-white/20 bg-white/[0.08] px-3 py-2 text-xs font-semibold text-white transition-all hover:border-sky-200/40 hover:bg-sky-400/15 active:scale-95"
                 >
                   Go there →
                 </button>
@@ -636,8 +636,8 @@ export function DemoGuide() {
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-xl border transition-all",
                   isLast
-                    ? "cursor-not-allowed border-black/10 bg-black/[0.04] text-black/25"
-                    : "border-sky-200/40 bg-white/60 text-black hover:border-sky-300/60 hover:bg-white/90 active:scale-95"
+                    ? "cursor-not-allowed border-white/10 bg-white/[0.04] text-white/25"
+                    : "border-white/25 bg-white/10 text-white hover:border-white/35 hover:bg-white/15 active:scale-95"
                 )}
               >
                 <ChevronRight className="h-4 w-4" />

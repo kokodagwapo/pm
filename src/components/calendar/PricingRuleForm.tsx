@@ -24,6 +24,15 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PricingRuleType } from "@/types";
+import { cn } from "@/lib/utils";
+import {
+  glassCard,
+  glassDialog,
+  glassField,
+  glassInsetRow,
+  glassOutlineButton,
+  glassSelectContent,
+} from "@/lib/glass-ui";
 
 const RULE_TYPE_OPTIONS: { value: PricingRuleType; label: string; description: string }[] = [
   { value: PricingRuleType.DAILY_OVERRIDE, label: "Daily Override", description: "Set a specific price for a date range" },
@@ -272,22 +281,30 @@ export function PricingRuleForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className={cn(
+          "max-h-[90vh] overflow-y-auto sm:max-w-[560px]",
+          glassDialog
+        )}
+      >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5" />
+          <DialogTitle className="flex items-center gap-2 text-foreground">
+            <DollarSign className="h-5 w-5 text-primary" />
             {editingRule ? "Edit Pricing Rule" : "Create Pricing Rule"}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-muted-foreground">
             Configure pricing rules for this unit.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="ruleName">Rule Name</Label>
+            <Label htmlFor="ruleName" className="text-foreground/90">
+              Rule Name
+            </Label>
             <Input
               id="ruleName"
+              className={glassField}
               value={formData.name}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, name: e.target.value }))
@@ -299,7 +316,9 @@ export function PricingRuleForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="ruleType">Rule Type</Label>
+            <Label htmlFor="ruleType" className="text-foreground/90">
+              Rule Type
+            </Label>
             <Select
               value={formData.ruleType}
               onValueChange={(value) =>
@@ -309,10 +328,10 @@ export function PricingRuleForm({
                 }))
               }
             >
-              <SelectTrigger id="ruleType">
+              <SelectTrigger id="ruleType" className={glassField}>
                 <SelectValue placeholder="Select rule type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={glassSelectContent}>
                 {RULE_TYPE_OPTIONS.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
                     <div>
@@ -330,10 +349,13 @@ export function PricingRuleForm({
           {needsDates && (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="ruleStartDate">Start Date</Label>
+                <Label htmlFor="ruleStartDate" className="text-foreground/90">
+                  Start Date
+                </Label>
                 <Input
                   id="ruleStartDate"
                   type="date"
+                  className={glassField}
                   value={formData.startDate || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, startDate: e.target.value }))
@@ -342,10 +364,13 @@ export function PricingRuleForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="ruleEndDate">End Date</Label>
+                <Label htmlFor="ruleEndDate" className="text-foreground/90">
+                  End Date
+                </Label>
                 <Input
                   id="ruleEndDate"
                   type="date"
+                  className={glassField}
                   value={formData.endDate || ""}
                   min={formData.startDate || ""}
                   onChange={(e) =>
@@ -359,7 +384,7 @@ export function PricingRuleForm({
 
           {needsDaysOfWeek && (
             <div className="space-y-2">
-              <Label>Days of Week</Label>
+              <Label className="text-foreground/90">Days of Week</Label>
               <div className="flex flex-wrap gap-2">
                 {DAY_OF_WEEK_OPTIONS.map((day) => (
                   <Button
@@ -372,7 +397,11 @@ export function PricingRuleForm({
                         : "outline"
                     }
                     onClick={() => toggleDayOfWeek(day.value)}
-                    className="w-12"
+                    className={cn(
+                      "w-12",
+                      !formData.daysOfWeek?.includes(day.value) &&
+                        glassOutlineButton
+                    )}
                   >
                     {day.label}
                   </Button>
@@ -384,13 +413,16 @@ export function PricingRuleForm({
           {!isDiscountType && !isLastMinute && (
             <>
               <div className="space-y-2">
-                <Label>Pricing Mode</Label>
+                <Label className="text-foreground/90">Pricing Mode</Label>
                 <div className="flex gap-2">
                   <Button
                     type="button"
                     size="sm"
                     variant={pricingMode === "fixed" ? "default" : "outline"}
                     onClick={() => setPricingMode("fixed")}
+                    className={
+                      pricingMode === "fixed" ? undefined : glassOutlineButton
+                    }
                   >
                     Fixed Price
                   </Button>
@@ -399,6 +431,9 @@ export function PricingRuleForm({
                     size="sm"
                     variant={pricingMode === "modifier" ? "default" : "outline"}
                     onClick={() => setPricingMode("modifier")}
+                    className={
+                      pricingMode === "modifier" ? undefined : glassOutlineButton
+                    }
                   >
                     Price Modifier
                   </Button>
@@ -407,12 +442,15 @@ export function PricingRuleForm({
 
               {pricingMode === "fixed" ? (
                 <div className="space-y-2">
-                  <Label htmlFor="pricePerNight">Price Per Night ($)</Label>
+                  <Label htmlFor="pricePerNight" className="text-foreground/90">
+                    Price Per Night ($)
+                  </Label>
                   <Input
                     id="pricePerNight"
                     type="number"
                     min="0"
                     step="0.01"
+                    className={glassField}
                     value={formData.pricePerNight ?? ""}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -426,13 +464,18 @@ export function PricingRuleForm({
               ) : (
                 <div className="space-y-3">
                   <div className="space-y-2">
-                    <Label>Modifier Type</Label>
+                    <Label className="text-foreground/90">Modifier Type</Label>
                     <div className="flex gap-2">
                       <Button
                         type="button"
                         size="sm"
                         variant={modifierType === "percentage" ? "default" : "outline"}
                         onClick={() => setModifierType("percentage")}
+                        className={
+                          modifierType === "percentage"
+                            ? undefined
+                            : glassOutlineButton
+                        }
                       >
                         Percentage (%)
                       </Button>
@@ -441,13 +484,16 @@ export function PricingRuleForm({
                         size="sm"
                         variant={modifierType === "fixed" ? "default" : "outline"}
                         onClick={() => setModifierType("fixed")}
+                        className={
+                          modifierType === "fixed" ? undefined : glassOutlineButton
+                        }
                       >
                         Fixed ($)
                       </Button>
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="modifierValue">
+                    <Label htmlFor="modifierValue" className="text-foreground/90">
                       {modifierType === "percentage"
                         ? "Percentage Adjustment (%)"
                         : "Fixed Adjustment ($)"}
@@ -456,6 +502,7 @@ export function PricingRuleForm({
                       id="modifierValue"
                       type="number"
                       step={modifierType === "percentage" ? "1" : "0.01"}
+                      className={glassField}
                       value={formData.priceModifier?.value ?? ""}
                       onChange={(e) =>
                         setFormData((prev) => ({
@@ -481,11 +528,14 @@ export function PricingRuleForm({
           {isLastMinute && (
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="daysBeforeCheckIn">Days Before Check-in</Label>
+                <Label htmlFor="daysBeforeCheckIn" className="text-foreground/90">
+                  Days Before Check-in
+                </Label>
                 <Input
                   id="daysBeforeCheckIn"
                   type="number"
                   min="1"
+                  className={glassField}
                   value={formData.lastMinutePricing?.daysBeforeCheckIn ?? ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
@@ -504,7 +554,7 @@ export function PricingRuleForm({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label>Modifier Type</Label>
+                  <Label className="text-foreground/90">Modifier Type</Label>
                   <Select
                     value={formData.lastMinutePricing?.modifier?.type || "percentage"}
                     onValueChange={(value) =>
@@ -521,21 +571,24 @@ export function PricingRuleForm({
                       }))
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className={glassField}>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className={glassSelectContent}>
                       <SelectItem value="percentage">Percentage (%)</SelectItem>
                       <SelectItem value="fixed">Fixed ($)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastMinuteValue">Value</Label>
+                  <Label htmlFor="lastMinuteValue" className="text-foreground/90">
+                    Value
+                  </Label>
                   <Input
                     id="lastMinuteValue"
                     type="number"
                     step="0.01"
+                    className={glassField}
                     value={formData.lastMinutePricing?.modifier?.value ?? ""}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -560,13 +613,16 @@ export function PricingRuleForm({
           {formData.ruleType === PricingRuleType.LONG_TERM_DISCOUNT && (
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="weeklyPercent">Weekly Discount (%)</Label>
+                <Label htmlFor="weeklyPercent" className="text-foreground/90">
+                  Weekly Discount (%)
+                </Label>
                 <Input
                   id="weeklyPercent"
                   type="number"
                   min="0"
                   max="100"
                   step="1"
+                  className={glassField}
                   value={formData.longTermDiscount?.weeklyPercent ?? ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
@@ -586,13 +642,16 @@ export function PricingRuleForm({
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="monthlyPercent">Monthly Discount (%)</Label>
+                <Label htmlFor="monthlyPercent" className="text-foreground/90">
+                  Monthly Discount (%)
+                </Label>
                 <Input
                   id="monthlyPercent"
                   type="number"
                   min="0"
                   max="100"
                   step="1"
+                  className={glassField}
                   value={formData.longTermDiscount?.monthlyPercent ?? ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
@@ -617,11 +676,14 @@ export function PricingRuleForm({
           {formData.ruleType === PricingRuleType.EARLY_BIRD_DISCOUNT && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>Advance Booking Discount Tiers</Label>
+                <Label className="text-foreground/90">
+                  Advance Booking Discount Tiers
+                </Label>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
+                  className={glassOutlineButton}
                   onClick={addAdvanceDiscount}
                 >
                   <Plus className="h-3 w-3 mr-1" /> Add Tier
@@ -630,13 +692,17 @@ export function PricingRuleForm({
               {(formData.advanceBookingDiscounts || []).map((discount, index) => (
                 <div
                   key={index}
-                  className="flex items-end gap-2 rounded-lg border p-3"
+                  className={cn(
+                    "flex items-end gap-2 p-3",
+                    glassInsetRow
+                  )}
                 >
                   <div className="flex-1 space-y-1">
-                    <Label className="text-xs">Days Ahead</Label>
+                    <Label className="text-xs text-foreground/90">Days Ahead</Label>
                     <Input
                       type="number"
                       min="1"
+                      className={glassField}
                       value={discount.daysAhead}
                       onChange={(e) =>
                         updateAdvanceDiscount(
@@ -648,12 +714,13 @@ export function PricingRuleForm({
                     />
                   </div>
                   <div className="flex-1 space-y-1">
-                    <Label className="text-xs">Discount (%)</Label>
+                    <Label className="text-xs text-foreground/90">Discount (%)</Label>
                     <Input
                       type="number"
                       min="0"
                       max="100"
                       step="1"
+                      className={glassField}
                       value={discount.discountPercent}
                       onChange={(e) =>
                         updateAdvanceDiscount(
@@ -686,11 +753,14 @@ export function PricingRuleForm({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="minimumStay">Minimum Stay (nights)</Label>
+              <Label htmlFor="minimumStay" className="text-foreground/90">
+                Minimum Stay (nights)
+              </Label>
               <Input
                 id="minimumStay"
                 type="number"
                 min="1"
+                className={glassField}
                 value={formData.minimumStay ?? ""}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -704,11 +774,14 @@ export function PricingRuleForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="maximumStay">Maximum Stay (nights)</Label>
+              <Label htmlFor="maximumStay" className="text-foreground/90">
+                Maximum Stay (nights)
+              </Label>
               <Input
                 id="maximumStay"
                 type="number"
                 min="1"
+                className={glassField}
                 value={formData.maximumStay ?? ""}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -725,12 +798,15 @@ export function PricingRuleForm({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="priority">Priority (0-100)</Label>
+              <Label htmlFor="priority" className="text-foreground/90">
+                Priority (0-100)
+              </Label>
               <Input
                 id="priority"
                 type="number"
                 min="0"
                 max="100"
+                className={glassField}
                 value={formData.priority}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -751,15 +827,15 @@ export function PricingRuleForm({
                   setFormData((prev) => ({ ...prev, isActive: checked }))
                 }
               />
-              <Label htmlFor="ruleActive" className="cursor-pointer">
+              <Label htmlFor="ruleActive" className="cursor-pointer text-foreground/90">
                 Active
               </Label>
             </div>
           </div>
 
           {previewPrice !== null && baseRentPerNight > 0 && (
-            <Card className="bg-muted/50">
-              <CardContent className="pt-4 pb-4 px-4">
+            <Card className={cn(glassCard, "shadow-none")}>
+              <CardContent className="px-4 pt-4 pb-4">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Price Preview</span>
                   <div className="flex items-center gap-2">
@@ -783,10 +859,11 @@ export function PricingRuleForm({
             <p className="text-sm text-destructive">{error}</p>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="gap-2 border-t border-border/40 pt-4 dark:border-white/10">
             <Button
               type="button"
               variant="outline"
+              className={glassOutlineButton}
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >

@@ -43,6 +43,32 @@ const DEFAULT_BRANDING: Branding = {
   companyName: "SmartStartPM",
 };
 
+/**
+ * After credentials sign-in, Auth may return only the site root when NEXTAUTH_URL disagrees
+ * with the browser host; "/" then redirects to sign-in again. Prefer the intended callback.
+ */
+function normalizePostLoginRedirectUrl(
+  rawUrl: string,
+  browserOrigin: string,
+  fallbackAbsoluteUrl: string
+): string {
+  try {
+    const u = new URL(rawUrl, browserOrigin);
+    if (u.origin !== browserOrigin) {
+      const o = new URL(browserOrigin);
+      u.protocol = o.protocol;
+      u.host = o.host;
+    }
+    const path = u.pathname || "/";
+    if (path === "/" && !u.search) {
+      return fallbackAbsoluteUrl;
+    }
+    return u.toString();
+  } catch {
+    return fallbackAbsoluteUrl;
+  }
+}
+
 /** Ensure callbackUrl is a safe relative path (prevent open redirects). */
 function safeCallbackUrl(input: string | null): string {
   if (!input || typeof input !== "string") return "/dashboard";
@@ -51,8 +77,10 @@ function safeCallbackUrl(input: string | null): string {
   return path.startsWith("/dashboard") ? path : "/dashboard";
 }
 
-/** Set `true` to show email/password sign-in again (e.g. production). Hidden during demo-first UX. */
-const SHOW_CREDENTIALS_SIGN_IN = false;
+/** Production: demo-first UX (quick login only, gated). Development: full credentials + unlocked quick login. */
+const SHOW_CREDENTIALS_SIGN_IN = process.env.NODE_ENV === "development";
+
+const IS_DEV = process.env.NODE_ENV === "development";
 
 function CredentialsSignInSection({
   t,
@@ -189,7 +217,8 @@ function SignInContent() {
   const [demoAccountsReady, setDemoAccountsReady] = useState(false);
   const [savedDemoLead, setSavedDemoLead] = useState<DemoLead | null>(null);
   const [demoLeadGatePassed, setDemoLeadGatePassed] = useState(false);
-  const quickLoginUnlocked = demoLeadGatePassed || isDemoQuick;
+  /** Local dev: skip the lead form so sign-in works at http://127.0.0.1:3000 and localhost without ?demo=1 */
+  const quickLoginUnlocked = demoLeadGatePassed || isDemoQuick || IS_DEV;
 
   useEffect(() => {
     const existing = getDemoLead();
@@ -257,20 +286,12 @@ function SignInContent() {
     });
 
     if (!result?.error && result?.ok) {
-      // Normalize the returned URL to the current origin so custom domains
-      // (e.g. pm.smarts.fi) are preserved instead of being swapped to the
-      // Replit deployment URL.
-      const rawUrl = result.url ?? callbackPath;
-      try {
-        const u = new URL(rawUrl, window.location.origin);
-        if (u.origin !== window.location.origin) {
-          u.protocol = window.location.protocol;
-          u.host = window.location.host;
-        }
-        return u.toString();
-      } catch {
-        return rawUrl;
-      }
+      const rawUrl = result.url ?? callbackUrl;
+      return normalizePostLoginRedirectUrl(
+        rawUrl,
+        window.location.origin,
+        callbackUrl
+      );
     }
 
     const csrfToken = await getCsrfToken();
@@ -316,7 +337,11 @@ function SignInContent() {
     }
 
     if (authError) return null;
-    return normalizedUrl;
+    return normalizePostLoginRedirectUrl(
+      normalizedUrl,
+      window.location.origin,
+      callbackUrl
+    );
   };
 
   const handleQuickLogin = async (demoEmail: string, demoPassword: string) => {

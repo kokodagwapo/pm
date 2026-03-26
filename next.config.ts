@@ -20,15 +20,19 @@ const replitDevOrigins: string[] = [
   "127.0.0.1",
 ];
 
-/** Baked into the client bundle for next-auth/react — must match the browser origin or CSRF/login breaks. */
+/**
+ * Baked into the client bundle for next-auth/react.
+ * In dev, do NOT default to localhost: NextAuth's reqWithEnvURL() rewrites the incoming
+ * request to this origin; if the browser uses http://127.0.0.1:3000 but this is localhost,
+ * redirects become wrong (often just "/") and "/" redirects back to sign-in → "can't log in".
+ * Leave unset unless you explicitly need it (custom port, tunnel, etc.).
+ */
 const isNonProd = process.env.NODE_ENV !== "production";
 const port = process.env.PORT;
+const explicitAuthUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL;
 const authUrlForClient =
-  isNonProd && port
-    ? `http://localhost:${port}`
-    : process.env.NEXTAUTH_URL ||
-      process.env.AUTH_URL ||
-      (port ? `http://localhost:${port}` : "");
+  explicitAuthUrl ||
+  (isNonProd ? "" : port ? `http://localhost:${port}` : "");
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,

@@ -69,6 +69,9 @@ export function AllInOneStayFinder({
   const searchParams = useSearchParams();
   const dash = useOptionalDashboardAppearance();
   const isLight = dash?.isLight ?? false;
+  /** Public stay finder sits on slate-950; dashboard may be dark — use glass + light text. */
+  const surfaceDark =
+    !showDashboardHeading || (showDashboardHeading && !isLight);
 
   const [checkIn, setCheckIn] = useState<Date | undefined>(() =>
     parseYmd(searchParams.get("checkIn"))
@@ -199,22 +202,22 @@ export function AllInOneStayFinder({
       >
         {!showDashboardHeading && (
           <div className="mb-10 text-center sm:mb-12">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700/90">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-300/95">
               SmartStart PM · Stay finder
             </p>
             <h1
-              className="mt-3 text-balance text-3xl font-light tracking-tight text-slate-900 sm:text-4xl md:text-5xl"
+              className="mt-3 text-balance text-3xl font-light tracking-tight text-white sm:text-4xl md:text-5xl [text-shadow:0_2px_24px_rgba(0,0,0,0.35)]"
               style={{
                 fontFamily: "var(--font-playfair), ui-serif, Georgia, serif",
               }}
             >
               Rentals &amp; availability in one place
             </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-pretty text-sm leading-relaxed text-slate-600 sm:text-base">
+            <p className="mx-auto mt-4 max-w-2xl text-pretty text-sm leading-relaxed text-slate-200/95 sm:text-base">
               Inspired by the guest-first flow on{" "}
               <a
                 href="https://vms-florida.com/all-in-one-calendar/"
-                className="font-medium text-teal-700 underline decoration-teal-700/30 underline-offset-2 hover:decoration-teal-700"
+                className="font-medium text-teal-300 underline decoration-teal-300/40 underline-offset-2 hover:text-teal-200 hover:decoration-teal-200"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -227,26 +230,42 @@ export function AllInOneStayFinder({
 
         <div
           className={cn(
-            "relative z-[1] mx-auto mb-12 max-w-4xl rounded-2xl border border-white/40 bg-white/80 p-3 shadow-lg shadow-teal-900/10 backdrop-blur-md",
-            "sm:p-4",
+            "relative z-[1] mx-auto mb-12 max-w-4xl rounded-2xl border p-3 shadow-lg backdrop-blur-xl sm:p-4",
+            surfaceDark
+              ? "border-white/20 bg-white/[0.08] shadow-black/30"
+              : "border-white/40 bg-white/80 shadow-teal-900/10",
             showDashboardHeading &&
-              (isLight
-                ? "border-slate-200/90 bg-white shadow-md shadow-slate-900/5"
-                : "border-white/10 bg-white/10 shadow-lg shadow-black/20")
+              isLight &&
+              "border-slate-200/90 bg-white shadow-md shadow-slate-900/5 backdrop-blur-md"
           )}
         >
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-12 lg:items-end lg:gap-3">
             <div className="lg:col-span-3">
-              <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              <label
+                className={cn(
+                  "mb-1 block text-[11px] font-semibold uppercase tracking-wide",
+                  surfaceDark ? "text-white/60" : "text-slate-500"
+                )}
+              >
                 Check-in
               </label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="h-11 w-full justify-start border-slate-200 bg-white text-left font-normal text-slate-900"
+                    className={cn(
+                      "h-11 w-full justify-start text-left font-normal",
+                      surfaceDark
+                        ? "border-white/25 bg-white/[0.12] text-white hover:bg-white/[0.18] hover:text-white"
+                        : "border-slate-200 bg-white text-slate-900"
+                    )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4 text-teal-600" />
+                    <CalendarIcon
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        surfaceDark ? "text-teal-300" : "text-teal-600"
+                      )}
+                    />
                     {checkIn ? format(checkIn, "MMM d, yyyy") : "Add date"}
                   </Button>
                 </PopoverTrigger>
@@ -264,16 +283,31 @@ export function AllInOneStayFinder({
               </Popover>
             </div>
             <div className="lg:col-span-3">
-              <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              <label
+                className={cn(
+                  "mb-1 block text-[11px] font-semibold uppercase tracking-wide",
+                  surfaceDark ? "text-white/60" : "text-slate-500"
+                )}
+              >
                 Check-out
               </label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="h-11 w-full justify-start border-slate-200 bg-white text-left font-normal text-slate-900"
+                    className={cn(
+                      "h-11 w-full justify-start text-left font-normal",
+                      surfaceDark
+                        ? "border-white/25 bg-white/[0.12] text-white hover:bg-white/[0.18] hover:text-white"
+                        : "border-slate-200 bg-white text-slate-900"
+                    )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4 text-teal-600" />
+                    <CalendarIcon
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        surfaceDark ? "text-teal-300" : "text-teal-600"
+                      )}
+                    />
                     {checkOut ? format(checkOut, "MMM d, yyyy") : "Add date"}
                   </Button>
                 </PopoverTrigger>
@@ -298,20 +332,40 @@ export function AllInOneStayFinder({
               </Popover>
             </div>
             <div className="lg:col-span-3">
-              <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              <label
+                className={cn(
+                  "mb-1 block text-[11px] font-semibold uppercase tracking-wide",
+                  surfaceDark ? "text-white/60" : "text-slate-500"
+                )}
+              >
                 Guests
               </label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="h-11 w-full justify-between border-slate-200 bg-white font-normal text-slate-900"
+                    className={cn(
+                      "h-11 w-full justify-between font-normal",
+                      surfaceDark
+                        ? "border-white/25 bg-white/[0.12] text-white hover:bg-white/[0.18] hover:text-white"
+                        : "border-slate-200 bg-white text-slate-900"
+                    )}
                   >
                     <span className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-teal-600" />
+                      <Users
+                        className={cn(
+                          "h-4 w-4",
+                          surfaceDark ? "text-teal-300" : "text-teal-600"
+                        )}
+                      />
                       {guestLabel}
                     </span>
-                    <ChevronDown className="h-4 w-4 opacity-50" />
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4",
+                        surfaceDark ? "text-white/45" : "opacity-50"
+                      )}
+                    />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-72 p-4" align="start">
@@ -350,7 +404,12 @@ export function AllInOneStayFinder({
               </Button>
             </div>
           </div>
-          <p className="mt-3 text-center text-[11px] text-slate-500">
+          <p
+            className={cn(
+              "mt-3 text-center text-[11px] leading-relaxed",
+              surfaceDark ? "text-white/55" : "text-slate-500"
+            )}
+          >
             Rates shown are estimates from unit rent fields. Taxes, fees, and
             final confirmation may apply — same idea as on public STR sites.
           </p>
@@ -360,11 +419,7 @@ export function AllInOneStayFinder({
           <h2
             className={cn(
               "text-lg font-medium sm:text-xl",
-              showDashboardHeading
-                ? isLight
-                  ? "text-slate-900"
-                  : "text-white"
-                : "text-slate-900"
+              surfaceDark ? "text-white" : "text-slate-900"
             )}
           >
             {filteredMode
@@ -372,11 +427,27 @@ export function AllInOneStayFinder({
               : "Available properties"}
           </h2>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className={cn(
+                surfaceDark &&
+                  "border-white/30 bg-white/[0.06] text-white hover:bg-white/12 hover:text-white"
+              )}
+            >
               <Link href={crossLinkHref}>{crossLinkLabel}</Link>
             </Button>
             {filteredMode && (
-              <Button variant="ghost" size="sm" onClick={loadBrowse}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={loadBrowse}
+                className={cn(
+                  surfaceDark &&
+                    "text-white/80 hover:bg-white/10 hover:text-white"
+                )}
+              >
                 Show all listings
               </Button>
             )}
@@ -388,16 +459,19 @@ export function AllInOneStayFinder({
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
-                className="h-80 animate-pulse rounded-2xl bg-slate-200/60"
+                className={cn(
+                  "h-80 animate-pulse rounded-2xl",
+                  surfaceDark ? "bg-white/[0.08]" : "bg-slate-200/60"
+                )}
               />
             ))}
           </div>
         ) : properties.length === 0 ? (
           <div
             className={cn(
-              "rounded-2xl border border-dashed p-10 text-center",
-              showDashboardHeading && !isLight
-                ? "border-white/25 bg-white/5 text-white/80"
+              "rounded-2xl border border-dashed p-10 text-center backdrop-blur-sm",
+              surfaceDark
+                ? "border-white/25 bg-white/[0.06] text-white/85"
                 : "border-slate-300 bg-white/60 text-slate-600"
             )}
           >
@@ -416,6 +490,7 @@ export function AllInOneStayFinder({
                 children={children}
                 infants={infants}
                 linkTarget={linkTarget}
+                appearance={surfaceDark ? "glass-dark" : "default"}
               />
             ))}
           </div>

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { CalendarDays, Lock, Shield } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +23,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  glassDialog,
+  glassField,
+  glassInsetRow,
+  glassOutlineButton,
+  glassSelectContent,
+} from "@/lib/glass-ui";
 import { DateBlockType } from "@/types";
 
 const BLOCK_TYPE_OPTIONS: { value: DateBlockType; label: string; adminOnly?: boolean }[] = [
@@ -140,13 +148,13 @@ export function DateBlockForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className={cn("sm:max-w-[480px]", glassDialog)}>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <CalendarDays className="h-5 w-5" />
+          <DialogTitle className="flex items-center gap-2 text-foreground">
+            <CalendarDays className="h-5 w-5 text-primary" />
             {editingBlock ? "Edit Date Block" : "Block Dates"}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-muted-foreground">
             Block dates to prevent bookings during this period.
           </DialogDescription>
         </DialogHeader>
@@ -154,10 +162,13 @@ export function DateBlockForm({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="startDate">Start Date</Label>
+              <Label htmlFor="startDate" className="text-foreground/90">
+                Start Date
+              </Label>
               <Input
                 id="startDate"
                 type="date"
+                className={glassField}
                 value={formData.startDate}
                 min={todayStr}
                 max={maxDateStr}
@@ -168,10 +179,13 @@ export function DateBlockForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="endDate">End Date</Label>
+              <Label htmlFor="endDate" className="text-foreground/90">
+                End Date
+              </Label>
               <Input
                 id="endDate"
                 type="date"
+                className={glassField}
                 value={formData.endDate}
                 min={formData.startDate || todayStr}
                 max={maxDateStr}
@@ -184,17 +198,19 @@ export function DateBlockForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="blockType">Block Type</Label>
+            <Label htmlFor="blockType" className="text-foreground/90">
+              Block Type
+            </Label>
             <Select
               value={formData.blockType}
               onValueChange={(value) =>
                 setFormData((prev) => ({ ...prev, blockType: value as DateBlockType }))
               }
             >
-              <SelectTrigger id="blockType">
+              <SelectTrigger id="blockType" className={glassField}>
                 <SelectValue placeholder="Select block type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={glassSelectContent}>
                 {availableBlockTypes.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
@@ -205,9 +221,12 @@ export function DateBlockForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="reason">Reason (Optional)</Label>
+            <Label htmlFor="reason" className="text-foreground/90">
+              Reason (Optional)
+            </Label>
             <Textarea
               id="reason"
+              className={glassField}
               value={formData.reason}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, reason: e.target.value }))
@@ -219,11 +238,19 @@ export function DateBlockForm({
           </div>
 
           {isAdmin && (
-            <div className="flex items-center justify-between rounded-lg border p-3">
+            <div
+              className={cn(
+                "flex items-center justify-between p-3",
+                glassInsetRow
+              )}
+            >
               <div className="flex items-center gap-2">
                 <Lock className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <Label htmlFor="isHardBlock" className="cursor-pointer">
+                  <Label
+                    htmlFor="isHardBlock"
+                    className="cursor-pointer text-foreground/90"
+                  >
                     Hard Block
                   </Label>
                   <p className="text-xs text-muted-foreground">
@@ -241,11 +268,19 @@ export function DateBlockForm({
             </div>
           )}
 
-          <div className="flex items-center justify-between rounded-lg border p-3">
+          <div
+            className={cn(
+              "flex items-center justify-between p-3",
+              glassInsetRow
+            )}
+          >
             <div className="flex items-center gap-2">
               <Shield className="h-4 w-4 text-muted-foreground" />
               <div>
-                <Label htmlFor="recurring" className="cursor-pointer">
+                <Label
+                  htmlFor="recurring"
+                  className="cursor-pointer text-foreground/90"
+                >
                   Recurring Yearly
                 </Label>
                 <p className="text-xs text-muted-foreground">
@@ -266,11 +301,14 @@ export function DateBlockForm({
           </div>
 
           {formData.recurring.enabled && (
-            <div className="space-y-2 pl-4 border-l-2 border-muted">
-              <Label htmlFor="endRecurrence">End Recurrence (Optional)</Label>
+            <div className="space-y-2 border-l-2 border-border/60 pl-4 dark:border-white/15">
+              <Label htmlFor="endRecurrence" className="text-foreground/90">
+                End Recurrence (Optional)
+              </Label>
               <Input
                 id="endRecurrence"
                 type="date"
+                className={glassField}
                 value={formData.recurring.endRecurrence || ""}
                 min={formData.endDate || todayStr}
                 max={maxDateStr}
@@ -291,10 +329,11 @@ export function DateBlockForm({
             <p className="text-sm text-destructive">{error}</p>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="gap-2 border-t border-border/40 pt-4 dark:border-white/10">
             <Button
               type="button"
               variant="outline"
+              className={glassOutlineButton}
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
