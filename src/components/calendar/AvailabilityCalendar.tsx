@@ -110,14 +110,17 @@ const STATUS_COLORS_LIGHT: Record<DayStatus, string> = {
   past: "bg-slate-100 text-slate-500",
 };
 
-const STATUS_COLORS_IMMERSIVE: Record<DayStatus, string> = {
+/** Immersive / video dashboard: translucent cells (do not rely on `dark:` — html may stay light). */
+const STATUS_COLORS_GLASS: Record<DayStatus, string> = {
   available:
-    "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-200 dark:hover:bg-emerald-900/50",
-  blocked: "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200",
-  booked: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200",
+    "border border-emerald-400/25 bg-emerald-500/[0.14] text-emerald-50 backdrop-blur-sm hover:border-emerald-300/35 hover:bg-emerald-500/[0.22]",
+  blocked:
+    "border border-red-400/30 bg-red-500/[0.16] text-red-100 backdrop-blur-sm",
+  booked:
+    "border border-sky-400/25 bg-sky-500/[0.14] text-sky-50 backdrop-blur-sm",
   pending:
-    "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200",
-  past: "bg-gray-100 dark:bg-gray-800/30 text-gray-400 dark:text-gray-600",
+    "border border-amber-400/28 bg-amber-500/[0.15] text-amber-50 backdrop-blur-sm",
+  past: "border border-white/[0.07] bg-white/[0.04] text-white/40 backdrop-blur-sm",
 };
 
 const WEEKDAY_HEADERS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -176,7 +179,12 @@ export function AvailabilityCalendar({
 }: AvailabilityCalendarProps) {
   const dash = useOptionalDashboardAppearance();
   const isLight = dash?.isLight ?? false;
-  const statusColors = isLight ? STATUS_COLORS_LIGHT : STATUS_COLORS_IMMERSIVE;
+  const statusColors = isLight ? STATUS_COLORS_LIGHT : STATUS_COLORS_GLASS;
+
+  const glassOutlineBtn =
+    "rounded-xl border border-white/18 bg-white/[0.08] shadow-none backdrop-blur-sm transition-[background-color,border-color] hover:bg-white/[0.12]";
+  const glassOutlineBtnLight =
+    "rounded-xl border border-slate-200/80 bg-white/75 shadow-sm backdrop-blur-sm hover:bg-white/90";
 
   const today = useMemo(() => {
     const d = new Date();
@@ -406,8 +414,11 @@ export function AvailabilityCalendar({
         )}
         <div
           className={cn(
-            "grid grid-cols-7 mb-2",
-            monthsShown === 1 ? "gap-1.5" : "gap-0.5"
+            "mb-2 grid grid-cols-7 rounded-xl border p-1.5 backdrop-blur-sm",
+            monthsShown === 1 ? "gap-1.5" : "gap-0.5",
+            isLight
+              ? "border-slate-200/70 bg-white/50"
+              : "border-white/[0.1] bg-white/[0.05]"
           )}
         >
           {WEEKDAY_HEADERS.map((header) => (
@@ -415,7 +426,7 @@ export function AvailabilityCalendar({
               key={header}
               className={cn(
                 "py-1 text-center text-[11px] font-semibold uppercase tracking-wider",
-                isLight ? "text-slate-500" : "text-muted-foreground"
+                isLight ? "text-slate-500" : "text-white/55"
               )}
             >
               {header}
@@ -424,13 +435,25 @@ export function AvailabilityCalendar({
         </div>
         <div
           className={cn(
-            "grid grid-cols-7",
-            monthsShown === 1 ? "gap-1.5" : "gap-0.5"
+            "grid grid-cols-7 rounded-2xl border p-2 backdrop-blur-md sm:p-2.5",
+            monthsShown === 1 ? "gap-1.5" : "gap-0.5",
+            isLight
+              ? "border-slate-200/70 bg-white/35 shadow-inner"
+              : "border-white/[0.1] bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
           )}
         >
           {days.map((dayInfo, index) => {
             if (!dayInfo) {
-              return <div key={`empty-${index}`} className={dayCellMin} />;
+              return (
+                <div
+                  key={`empty-${index}`}
+                  className={cn(
+                    dayCellMin,
+                    "rounded-xl",
+                    isLight ? "bg-slate-100/30" : "bg-white/[0.02]"
+                  )}
+                />
+              );
             }
             return renderDay(dayInfo);
           })}
@@ -453,13 +476,18 @@ export function AvailabilityCalendar({
             <button
               type="button"
               className={cn(
-                "relative w-full rounded-xl transition-all duration-150 flex flex-col items-center justify-start pt-1 gap-0.5 select-none",
+                "relative flex w-full select-none flex-col items-center justify-start gap-0.5 rounded-xl pt-1 transition-all duration-150",
                 dayCellMin,
                 dayTextSize,
-                !isCurrentMonth && "opacity-40",
+                !isCurrentMonth && "opacity-45",
                 statusColors[status],
-                selected && "ring-2 ring-primary ring-offset-1",
-                isToday && "ring-1 ring-primary/50",
+                selected &&
+                  (isLight
+                    ? "z-[1] ring-2 ring-sky-500 ring-offset-2 ring-offset-white"
+                    : "z-[1] ring-2 ring-cyan-300/70 ring-offset-2 ring-offset-transparent"),
+                isToday &&
+                  !selected &&
+                  (isLight ? "ring-1 ring-sky-400/60" : "ring-1 ring-white/35"),
                 status === "available" && !readOnly && "cursor-pointer",
                 (status === "past" || readOnly) && "cursor-default",
                 status !== "past" && status !== "available" && "cursor-default"
@@ -475,9 +503,9 @@ export function AvailabilityCalendar({
               {showPricing && status === "available" && dayInfo.pricePerNight !== undefined && (
                 <span
                   className={cn(
-                    "max-w-full truncate px-0.5 leading-none",
+                    "max-w-full truncate px-0.5 font-medium leading-none tabular-nums",
                     daySize === "comfortable" ? "text-[11px]" : "text-[10px]",
-                    isLight ? "text-slate-600" : "text-muted-foreground"
+                    isLight ? "text-slate-600" : "text-cyan-100/85"
                   )}
                 >
                   ${dayInfo.pricePerNight.toFixed(0)}
@@ -634,10 +662,7 @@ export function AvailabilityCalendar({
           <Button
             variant="outline"
             size="icon"
-            className={cn(
-              "shrink-0 rounded-xl shadow-sm",
-              isLight && "border-slate-200 bg-white hover:bg-slate-50"
-            )}
+            className={cn("shrink-0", isLight ? glassOutlineBtnLight : glassOutlineBtn)}
             onClick={() => navigateMonth(-1)}
             disabled={!canGoBack}
             aria-label="Previous month"
@@ -661,10 +686,7 @@ export function AvailabilityCalendar({
           <Button
             variant="outline"
             size="icon"
-            className={cn(
-              "shrink-0 rounded-xl shadow-sm",
-              isLight && "border-slate-200 bg-white hover:bg-slate-50"
-            )}
+            className={cn("shrink-0", isLight ? glassOutlineBtnLight : glassOutlineBtn)}
             onClick={() => navigateMonth(1)}
             disabled={!canGoForward}
             aria-label="Next month"
@@ -676,13 +698,21 @@ export function AvailabilityCalendar({
         {selectionStart && selectionEnd && (
           <div
             className={cn(
-              "flex flex-wrap items-center justify-center gap-2 rounded-xl border px-3 py-2.5",
+              "flex flex-wrap items-center justify-center gap-2 rounded-xl border px-3 py-2.5 backdrop-blur-md",
               isLight
-                ? "border-slate-200/90 bg-slate-50/90 shadow-inner"
-                : "border-white/10 bg-white/[0.06]"
+                ? "border-slate-200/90 bg-white/80 shadow-inner"
+                : "border-white/15 bg-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
             )}
           >
-            <Badge variant="outline" className="text-xs font-medium">
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-xs font-medium backdrop-blur-sm",
+                isLight
+                  ? "border-slate-200/80 bg-white/70"
+                  : "border-white/20 bg-white/[0.06] text-white"
+              )}
+            >
               {new Date(
                 Math.min(selectionStart.getTime(), selectionEnd.getTime())
               ).toLocaleDateString()}{" "}
@@ -695,7 +725,7 @@ export function AvailabilityCalendar({
               <Button
                 size="sm"
                 variant="outline"
-                className={cn(isLight && "border-slate-200 bg-white")}
+                className={isLight ? glassOutlineBtnLight : glassOutlineBtn}
                 onClick={() => {
                   const start = new Date(
                     Math.min(selectionStart.getTime(), selectionEnd.getTime())
@@ -716,7 +746,7 @@ export function AvailabilityCalendar({
               <Button
                 size="sm"
                 variant="outline"
-                className={cn(isLight && "border-slate-200 bg-white")}
+                className={isLight ? glassOutlineBtnLight : glassOutlineBtn}
                 onClick={() => {
                   const start = new Date(
                     Math.min(selectionStart.getTime(), selectionEnd.getTime())
@@ -760,17 +790,19 @@ export function AvailabilityCalendar({
       {showLegend && (
         <div
           className={cn(
-            "flex flex-wrap items-center gap-4 border-t pt-2 text-xs",
+            "flex flex-wrap items-center gap-3 rounded-xl border px-3 py-2.5 text-xs backdrop-blur-sm sm:gap-4",
             isLight
-              ? "border-slate-200 text-slate-600"
-              : "border-white/15 text-muted-foreground"
+              ? "border-slate-200/80 bg-white/50 text-slate-600"
+              : "border-white/[0.1] bg-white/[0.05] text-white/65"
           )}
         >
           <div className="flex items-center gap-1.5">
             <div
               className={cn(
-                "h-3 w-3 rounded-sm",
-                isLight ? "bg-emerald-200" : "bg-emerald-200 dark:bg-emerald-900/50"
+                "h-3 w-3 rounded-sm border backdrop-blur-sm",
+                isLight
+                  ? "border-emerald-300/50 bg-emerald-200"
+                  : "border-emerald-400/30 bg-emerald-500/25"
               )}
             />
             <span>Available</span>
@@ -778,8 +810,10 @@ export function AvailabilityCalendar({
           <div className="flex items-center gap-1.5">
             <div
               className={cn(
-                "h-3 w-3 rounded-sm",
-                isLight ? "bg-red-200" : "bg-red-200 dark:bg-red-900/50"
+                "h-3 w-3 rounded-sm border backdrop-blur-sm",
+                isLight
+                  ? "border-red-300/50 bg-red-200"
+                  : "border-red-400/35 bg-red-500/25"
               )}
             />
             <span>Blocked</span>
@@ -787,8 +821,10 @@ export function AvailabilityCalendar({
           <div className="flex items-center gap-1.5">
             <div
               className={cn(
-                "h-3 w-3 rounded-sm",
-                isLight ? "bg-sky-200" : "bg-blue-200 dark:bg-blue-900/50"
+                "h-3 w-3 rounded-sm border backdrop-blur-sm",
+                isLight
+                  ? "border-sky-300/50 bg-sky-200"
+                  : "border-sky-400/30 bg-sky-500/20"
               )}
             />
             <span>Booked</span>
@@ -796,8 +832,10 @@ export function AvailabilityCalendar({
           <div className="flex items-center gap-1.5">
             <div
               className={cn(
-                "h-3 w-3 rounded-sm",
-                isLight ? "bg-amber-200" : "bg-yellow-200 dark:bg-yellow-900/50"
+                "h-3 w-3 rounded-sm border backdrop-blur-sm",
+                isLight
+                  ? "border-amber-300/50 bg-amber-200"
+                  : "border-amber-400/30 bg-amber-500/22"
               )}
             />
             <span>Pending Request</span>

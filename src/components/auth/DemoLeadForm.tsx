@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { User, Phone, Mail } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   clearDemoLead,
   getDemoLeadFieldError,
   setDemoLead,
   type DemoLead,
 } from "@/lib/demo-lead-storage";
+import { heroGlassButtonPrimary, heroGlassInset, heroGlassInput } from "@/components/auth/hero-glass";
 
 type TFn = (key: string) => string;
 
@@ -88,7 +90,7 @@ export function DemoLeadForm({ t, savedLead, onSaved, onCleared }: DemoLeadFormP
 
   if (savedLead) {
     return (
-      <div className="mb-5 rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3">
+      <div className={cn("mb-5", heroGlassInset)}>
         <p className="text-[11px] tracking-wide text-white/50" style={{ fontWeight: 300 }}>
           {t("auth.signin.demoLead.savedAs")}
         </p>
@@ -116,7 +118,7 @@ export function DemoLeadForm({ t, savedLead, onSaved, onCleared }: DemoLeadFormP
         {t("auth.signin.demoLead.intro")}
       </p>
       {errorKey && (
-        <p className="rounded-lg border border-amber-400/25 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-100/90">
+        <p className="rounded-xl border border-amber-400/35 bg-amber-500/15 px-3 py-2 text-[11px] text-amber-100/95 backdrop-blur-md backdrop-saturate-125 [box-shadow:inset_0_1px_0_rgba(255,255,255,0.06)]">
           {t(errorKey)}
         </p>
       )}
@@ -133,7 +135,7 @@ export function DemoLeadForm({ t, savedLead, onSaved, onCleared }: DemoLeadFormP
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             placeholder={t("auth.signin.demoLead.namePlaceholder")}
-            className="w-full min-h-[40px] pl-10 pr-4 py-2.5 rounded-xl text-sm text-white placeholder:text-white/40 bg-white/5 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white/25 focus:bg-white/10 transition-all"
+            className={heroGlassInput}
             style={{ fontWeight: 300 }}
           />
         </div>
@@ -151,7 +153,7 @@ export function DemoLeadForm({ t, savedLead, onSaved, onCleared }: DemoLeadFormP
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder={t("auth.signin.demoLead.phonePlaceholder")}
-            className="w-full min-h-[40px] pl-10 pr-4 py-2.5 rounded-xl text-sm text-white placeholder:text-white/40 bg-white/5 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white/25 focus:bg-white/10 transition-all"
+            className={heroGlassInput}
             style={{ fontWeight: 300 }}
           />
         </div>
@@ -169,7 +171,7 @@ export function DemoLeadForm({ t, savedLead, onSaved, onCleared }: DemoLeadFormP
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t("auth.signin.demoLead.emailPlaceholder")}
-            className="w-full min-h-[40px] pl-10 pr-4 py-2.5 rounded-xl text-sm text-white placeholder:text-white/40 bg-white/5 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white/25 focus:bg-white/10 transition-all"
+            className={heroGlassInput}
             style={{ fontWeight: 300 }}
           />
         </div>
@@ -177,7 +179,7 @@ export function DemoLeadForm({ t, savedLead, onSaved, onCleared }: DemoLeadFormP
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full min-h-[42px] rounded-xl border border-white/25 bg-white/10 py-2.5 text-sm tracking-wide text-white hover:bg-white/18 transition-all touch-manipulation disabled:opacity-60 disabled:pointer-events-none"
+        className={cn(heroGlassButtonPrimary, "touch-manipulation")}
         style={{ fontWeight: 400 }}
       >
         {isSubmitting ? t("auth.signin.demoLead.saving") : t("auth.signin.demoLead.continue")}

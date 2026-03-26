@@ -8,6 +8,8 @@ import { HeroVideo } from "@/components/landing/HeroVideo";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { DemoLeadForm } from "@/components/auth/DemoLeadForm";
+import { heroGlassButtonPrimary, heroGlassInput, heroGlassPanel } from "@/components/auth/hero-glass";
+import { cn } from "@/lib/utils";
 import { getDemoLead, type DemoLead } from "@/lib/demo-lead-storage";
 import {
   Loader2,
@@ -116,7 +118,7 @@ function CredentialsSignInSection({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t("auth.signin.emailPlaceholder")}
-              className="w-full min-h-[40px] pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-white/40 bg-white/5 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white/25 focus:bg-white/10 transition-all touch-manipulation"
+              className={heroGlassInput}
               style={{ fontWeight: 300 }}
               required
             />
@@ -139,7 +141,7 @@ function CredentialsSignInSection({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={t("auth.signin.passwordPlaceholder")}
-              className="w-full min-h-[40px] pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-white/40 bg-white/5 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white/25 focus:bg-white/10 transition-all touch-manipulation"
+              className={heroGlassInput}
               style={{ fontWeight: 300 }}
               required
             />
@@ -149,7 +151,10 @@ function CredentialsSignInSection({
         <button
           type="submit"
           disabled={isLoading || !demoAccountsReady}
-          className="w-full min-h-[46px] py-3 rounded-xl text-sm tracking-wide text-white bg-white/12 hover:bg-white/20 border border-white/20 hover:border-white/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all touch-manipulation mt-2"
+          className={cn(
+            heroGlassButtonPrimary,
+            "mt-2 min-h-[46px] py-3 disabled:cursor-not-allowed disabled:opacity-40"
+          )}
           style={{ fontWeight: 300 }}
         >
           {isLoading ? (
@@ -349,7 +354,7 @@ function SignInContent() {
         className="fixed inset-0 z-[1] pointer-events-none"
         style={{
           background:
-            "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.48) 40%, rgba(0,0,0,0.82) 100%)",
+            "linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.38) 42%, rgba(0,0,0,0.72) 100%)",
         }}
         aria-hidden
       />
@@ -405,9 +410,9 @@ function SignInContent() {
           </div>
 
           {/* Match LanguageSwitcher (dark) trigger: outline only at rest, hover:bg-white/10 */}
-          <div className="rounded-xl border border-white/20 bg-transparent p-6 sm:p-8 text-white/80 transition-all duration-300 hover:bg-white/10">
+          <div className={cn(heroGlassPanel, "sm:p-8")}>
             {error && (
-              <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-400/30 bg-red-500/20 p-3 text-xs text-red-200">
+              <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-400/35 bg-red-500/15 p-3 text-xs text-red-100 backdrop-blur-md backdrop-saturate-125 [box-shadow:inset_0_1px_0_rgba(255,255,255,0.06)]">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 {error}
               </div>
@@ -463,7 +468,7 @@ function SignInContent() {
                     type="button"
                     onClick={() => handleQuickLogin(account.email, account.password)}
                     disabled={isLoading || !demoAccountsReady || !quickLoginUnlocked}
-                    className={`flex flex-col items-center justify-center gap-1.5 min-h-[52px] py-3 rounded-xl text-white text-[11px] tracking-wide transition-all touch-manipulation disabled:opacity-40 disabled:cursor-not-allowed ${account.color}`}
+                    className={`flex flex-col items-center justify-center gap-1.5 min-h-[52px] py-3 rounded-xl text-white text-[11px] tracking-wide transition-all touch-manipulation disabled:opacity-40 disabled:cursor-not-allowed border border-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-sm ${account.color}`}
                     style={{ fontWeight: 300 }}
                   >
                     <account.icon className="h-3.5 w-3.5" />

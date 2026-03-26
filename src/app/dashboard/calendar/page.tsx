@@ -44,11 +44,15 @@ import { EventDetailsDialog } from "@/components/calendar/EventDetailsDialog";
 import { GoogleCalendarSync } from "@/components/calendar/GoogleCalendarSync";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { cn } from "@/lib/utils";
 
 export default function CalendarPage() {
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const { t } = useLocalizationContext();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
 
   const [selectedEvent, setSelectedEvent] = useState<IEvent | null>(null);
   const [showEventForm, setShowEventForm] = useState(false);
@@ -181,78 +185,63 @@ export default function CalendarPage() {
     }
   };
 
+  const tabTriggerClass = cn(
+    "rounded-lg font-medium transition-all duration-200",
+    "data-[state=inactive]:text-muted-foreground data-[state=active]:text-foreground",
+    isLight
+      ? "hover:bg-slate-200/45 data-[state=active]:bg-white/85 data-[state=active]:shadow-sm"
+      : "hover:bg-white/10 data-[state=active]:!bg-white/12 data-[state=active]:!shadow-none data-[state=active]:backdrop-blur-sm"
+  );
+
   return (
-    <div className="space-y-6 p-6 bg-gray-50/30 dark:bg-gray-900/30 min-h-screen">
+    <div className="mx-auto w-full max-w-full space-y-8 pb-6 pt-1 sm:pb-8 sm:pt-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-black dark:text-gray-100">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             {t("calendar.header.title")}
             {isTenant && (
-              <span className="ml-3 text-sm font-normal text-gray-500 dark:text-gray-400">
+              <span className="ml-3 text-sm font-normal text-muted-foreground">
                 {t("calendar.header.viewOnly")}
               </span>
             )}
           </h1>
-          <p className="text-black dark:text-gray-200">
+          <p className="text-sm text-muted-foreground sm:text-base">
             {isTenant
               ? t("calendar.header.subtitleTenant")
               : t("calendar.header.subtitleAdmin")}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Only show New Event button for admin and manager */}
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {canCreateEvents && (
-            <Button
-              size="sm"
-              onClick={() => handleCreateEvent()}
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0"
-            >
-              <Calendar className="h-4 w-4 mr-2" />
+            <Button size="sm" onClick={() => handleCreateEvent()}>
+              <Calendar className="mr-2 h-4 w-4" />
               {t("calendar.header.newEvent")}
             </Button>
           )}
-          {/* Only show action menu for admin and manager */}
           {canCreateEvents && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                >
+                <Button variant="outline" size="sm" className="h-9">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="border-gray-200 dark:border-gray-700"
-              >
-                <DropdownMenuLabel className="text-gray-900 dark:text-gray-100">
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>
                   {t("calendar.header.calendarOptions")}
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
-                <DropdownMenuItem
-                  onClick={() => setShowSettingsDialog(true)}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                >
-                  <Settings className="h-4 w-4 mr-2" />
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setShowSettingsDialog(true)}>
+                  <Settings className="mr-2 h-4 w-4" />
                   {t("calendar.header.settings")}
                 </DropdownMenuItem>
-                {/* <DropdownMenuItem
-                onClick={() => setShowGoogleSync(true)}
-                className="hover:bg-gray-50 dark:hover:bg-gray-800"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Google Calendar
-              </DropdownMenuItem> */}
-                <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
-                <DropdownMenuItem className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <Download className="h-4 w-4 mr-2" />
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Download className="mr-2 h-4 w-4" />
                   {t("calendar.header.export")}
                 </DropdownMenuItem>
-                <DropdownMenuItem className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <Upload className="h-4 w-4 mr-2" />
+                <DropdownMenuItem>
+                  <Upload className="mr-2 h-4 w-4" />
                   {t("calendar.header.import")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -272,23 +261,21 @@ export default function CalendarPage() {
         onValueChange={setActiveTab}
         className="space-y-8"
       >
-        <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border-0 text-black dark:text-gray-100">
-          <TabsTrigger
-            value="calendar"
-            className="rounded-lg font-medium transition-all duration-200 !text-black dark:!text-gray-100"
-          >
+        <TabsList
+          className={cn(
+            "grid h-10 w-full grid-cols-3 gap-1 rounded-xl border p-1 backdrop-blur-md",
+            isLight
+              ? "border-slate-200/60 bg-white/50 shadow-[0_4px_24px_rgba(15,23,42,0.05)]"
+              : "border-white/12 bg-white/[0.06]"
+          )}
+        >
+          <TabsTrigger value="calendar" className={tabTriggerClass}>
             {t("calendar.tabs.calendarView")}
           </TabsTrigger>
-          <TabsTrigger
-            value="events"
-            className="rounded-lg font-medium transition-all duration-200 !text-black dark:!text-gray-100"
-          >
+          <TabsTrigger value="events" className={tabTriggerClass}>
             {t("calendar.tabs.eventList")}
           </TabsTrigger>
-          <TabsTrigger
-            value="analytics"
-            className="rounded-lg font-medium transition-all duration-200 !text-black dark:!text-gray-100"
-          >
+          <TabsTrigger value="analytics" className={tabTriggerClass}>
             {t("calendar.tabs.analytics")}
           </TabsTrigger>
         </TabsList>
@@ -317,7 +304,7 @@ export default function CalendarPage() {
           <Suspense
             fallback={
               <div className="flex items-center justify-center py-12">
-                <div className="text-gray-500">
+                <div className="text-muted-foreground">
                   {t("calendar.loading.analytics")}
                 </div>
               </div>
@@ -330,15 +317,20 @@ export default function CalendarPage() {
 
       {/* Event Form Modal */}
       {showEventForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-4xl h-[90vh] border-0 shadow-2xl bg-white dark:bg-gray-900 flex flex-col">
-            <CardHeader className="border-b border-gray-100 dark:border-gray-800">
-              <CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <Card className="dashboard-ui-surface flex h-[90vh] w-full max-w-4xl flex-col overflow-hidden border-0 shadow-2xl">
+            <CardHeader
+              className={cn(
+                "shrink-0 border-b",
+                isLight ? "border-slate-200/70" : "border-white/10"
+              )}
+            >
+              <CardTitle className="text-xl font-semibold text-foreground">
                 {eventToEdit?._id
                   ? t("calendar.eventForm.editTitle")
                   : t("calendar.eventForm.createTitle")}
               </CardTitle>
-              <CardDescription className="text-gray-600 dark:text-gray-400">
+              <CardDescription className="text-muted-foreground">
                 {eventToEdit?._id
                   ? t("calendar.eventForm.editDescription")
                   : t("calendar.eventForm.createDescription")}

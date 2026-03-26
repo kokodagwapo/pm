@@ -134,7 +134,10 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
           </Alert>
 
           {/* Action Suggestion */}
-          <div className="bg-muted/50 border border-border rounded-lg p-4">
+          <div
+            data-slot="dashboard-inset-panel"
+            className="bg-muted/50 border border-border rounded-lg p-4"
+          >
             <p className="text-sm font-medium mb-2 flex items-center gap-2">
               <Settings className="size-4" />
               Suggested Action
@@ -155,7 +158,10 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
                   Technical Details (Development)
                 </div>
               </summary>
-              <div className="mt-3 p-4 bg-muted/50 rounded-lg border border-border space-y-3">
+              <div
+                data-slot="dashboard-inset-panel"
+                className="mt-3 p-4 bg-muted/50 rounded-lg border border-border space-y-3"
+              >
                 <div>
                   <div className="text-xs font-semibold text-muted-foreground mb-1">
                     Error Type

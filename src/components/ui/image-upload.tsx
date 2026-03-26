@@ -193,14 +193,16 @@ export function ImageUpload({
       {/* Upload Area */}
       <div className="relative">
         <div
+          data-slot="image-upload-zone"
+          data-state={disabled ? "disabled" : dragActive ? "dragging" : "idle"}
           className={cn(
-            "rounded-xl border-2 border-dashed text-center transition-colors duration-200",
+            "rounded-xl border-2 border-dashed text-center backdrop-blur-md transition-[border-color,background-color,opacity] duration-200",
             compact ? "p-4" : "p-7 sm:p-8",
             disabled
-              ? "cursor-not-allowed border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/[0.03]"
+              ? "cursor-not-allowed border-muted-foreground/20 bg-muted/15 opacity-70 dark:border-white/10 dark:bg-white/[0.03]"
               : dragActive
-                ? "cursor-pointer border-slate-500 bg-slate-100/70 dark:border-white/40 dark:bg-white/[0.06]"
-                : "cursor-pointer border-slate-200/90 bg-white hover:border-slate-400 hover:bg-slate-50/80 dark:border-white/12 dark:bg-transparent dark:hover:border-white/25 dark:hover:bg-white/[0.04]"
+                ? "cursor-pointer border-primary/45 bg-primary/10 dark:border-white/35 dark:bg-white/[0.1]"
+                : "cursor-pointer border-border/55 bg-white/40 hover:border-border hover:bg-white/55 dark:border-white/14 dark:bg-white/[0.05] dark:hover:border-white/26 dark:hover:bg-white/[0.09]"
           )}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -213,13 +215,13 @@ export function ImageUpload({
               <div className="relative">
                 <div
                   className={cn(
-                    "mx-auto flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10",
+                    "mx-auto flex items-center justify-center rounded-full bg-muted/40 ring-1 ring-border/40 dark:bg-white/[0.08] dark:ring-white/10",
                     compact ? "h-10 w-10" : "h-16 w-16"
                   )}
                 >
                   <Loader2
                     className={cn(
-                      "animate-spin text-slate-600 dark:text-gray-300",
+                      "animate-spin text-muted-foreground",
                       compact ? "h-5 w-5" : "h-8 w-8"
                     )}
                   />
@@ -228,21 +230,21 @@ export function ImageUpload({
               <div className={compact ? "space-y-1" : "space-y-2"}>
                 <p
                   className={cn(
-                    "font-semibold text-black dark:text-white",
+                    "font-semibold text-foreground",
                     compact ? "text-sm" : "text-lg"
                   )}
                 >
                   {t("common.upload.uploading")}
                 </p>
                 {!compact && (
-                  <p className="text-sm text-black/65 dark:text-gray-400">
+                  <p className="text-sm text-muted-foreground">
                     {t("common.upload.uploadingDescription")}
                   </p>
                 )}
               </div>
               <div className="w-full max-w-sm mx-auto">
                 <Progress value={uploadProgress} className="h-2" />
-                <p className="mt-1 text-xs text-black/55 dark:text-gray-500">
+                <p className="mt-1 text-xs text-muted-foreground">
                   {t("common.upload.progress", {
                     values: { progress: uploadProgress },
                   })}
@@ -254,13 +256,13 @@ export function ImageUpload({
               <div className="relative">
                 <div
                   className={cn(
-                    "mx-auto flex items-center justify-center rounded-full bg-gradient-to-br from-slate-100 to-slate-200/90 dark:from-white/10 dark:to-white/5",
+                    "mx-auto flex items-center justify-center rounded-full bg-gradient-to-br from-muted/50 to-muted/25 ring-1 ring-border/35 dark:from-white/[0.12] dark:to-white/[0.05] dark:ring-white/12",
                     compact ? "h-10 w-10" : "h-16 w-16"
                   )}
                 >
                   <Upload
                     className={cn(
-                      "text-slate-700 dark:text-gray-200",
+                      "text-muted-foreground dark:text-foreground/90",
                       compact ? "h-5 w-5" : "h-8 w-8"
                     )}
                   />
@@ -268,7 +270,7 @@ export function ImageUpload({
                 {dragActive && (
                   <div
                     className={cn(
-                      "absolute inset-0 mx-auto animate-ping rounded-full bg-slate-300/60 opacity-60 dark:bg-white/20",
+                      "absolute inset-0 mx-auto animate-ping rounded-full bg-primary/20 opacity-50 dark:bg-white/15",
                       compact ? "h-10 w-10" : "h-16 w-16"
                     )}
                   />
@@ -277,7 +279,7 @@ export function ImageUpload({
               <div className={compact ? "space-y-1" : "space-y-2"}>
                 <p
                   className={cn(
-                    "font-semibold text-black dark:text-white",
+                    "font-semibold text-foreground",
                     compact ? "text-sm" : "text-lg"
                   )}
                 >
@@ -288,7 +290,7 @@ export function ImageUpload({
                     : label || t("common.upload.title")}
                 </p>
                 {!compact && (
-                  <p className="text-sm text-black/65 dark:text-gray-400">
+                  <p className="text-sm text-muted-foreground">
                     {disabled
                       ? t("common.upload.descriptionDisabled")
                       : t("common.upload.description")}
@@ -297,7 +299,7 @@ export function ImageUpload({
               </div>
               <div
                 className={cn(
-                  "flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-black/55 dark:text-gray-500",
+                  "flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground",
                   compact && "gap-x-3"
                 )}
               >
@@ -321,7 +323,7 @@ export function ImageUpload({
                   type="button"
                   variant="outline"
                   size={compact ? "sm" : "default"}
-                  className="border-slate-200 bg-white text-black hover:border-slate-300 hover:bg-slate-50 dark:border-white/15 dark:bg-white/[0.04] dark:text-gray-100 dark:hover:border-white/25 dark:hover:bg-white/10"
+                  className="border-border/60 bg-white/30 backdrop-blur-sm hover:bg-white/45 dark:border-white/15 dark:bg-white/[0.06] dark:hover:bg-white/[0.1]"
                 >
                   <ImageIcon className="h-4 w-4 mr-2" />
                   {t("common.upload.chooseFiles")}
@@ -346,8 +348,8 @@ export function ImageUpload({
       {images.length > 0 && (
         <div className="mt-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="flex items-center text-sm font-semibold text-black dark:text-white">
-              <ImageIcon className="mr-2 h-4 w-4 text-slate-600 dark:text-gray-400" />
+            <h4 className="flex items-center text-sm font-semibold text-foreground">
+              <ImageIcon className="mr-2 h-4 w-4 text-muted-foreground" />
               {t("common.upload.uploadedImages", {
                 values: { count: images.length },
               })}
@@ -376,7 +378,7 @@ export function ImageUpload({
               <div key={image.publicId || index} className="relative group">
                 <div
                   className={cn(
-                    "relative aspect-[4/3] overflow-hidden rounded-lg border border-slate-200/90 bg-slate-50 transition-colors hover:border-slate-300 dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-white/20",
+                    "relative aspect-[4/3] overflow-hidden rounded-lg border border-border/50 bg-muted/20 backdrop-blur-sm transition-colors hover:border-border dark:border-white/12 dark:bg-white/[0.06] dark:hover:border-white/22",
                     compact ? "h-20" : "h-32"
                   )}
                 >
@@ -430,19 +432,19 @@ export function ImageUpload({
                 {!compact && (
                   <div className="mt-2 space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-600 dark:text-gray-400 font-medium">
+                      <span className="font-medium text-muted-foreground">
                         {t("common.upload.imageNumber", {
                           values: { number: index + 1 },
                         })}
                       </span>
                       {image.bytes && (
-                        <span className="text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">
+                        <span className="rounded bg-muted/50 px-2 py-0.5 text-muted-foreground backdrop-blur-sm dark:bg-white/[0.08]">
                           {(image.bytes / 1024 / 1024).toFixed(1)} MB
                         </span>
                       )}
                     </div>
                     {image.width && image.height && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-muted-foreground">
                         {image.width} × {image.height} px
                       </p>
                     )}
@@ -455,13 +457,13 @@ export function ImageUpload({
           {/* Upload Summary */}
           <div
             className={cn(
-              "rounded-lg border border-emerald-200/80 bg-emerald-50/50 dark:border-emerald-500/20 dark:bg-emerald-950/25",
+              "rounded-xl border border-emerald-500/25 bg-emerald-500/[0.08] backdrop-blur-md dark:border-emerald-400/20 dark:bg-emerald-500/[0.1]",
               compact ? "p-2" : "p-3"
             )}
           >
             <div
               className={cn(
-                "flex items-center text-emerald-900 dark:text-emerald-200/95",
+                "flex items-center text-emerald-800 dark:text-emerald-200/95",
                 compact ? "text-xs" : "text-sm"
               )}
             >
@@ -480,7 +482,7 @@ export function ImageUpload({
                 })}
               </span>
             </div>
-            <p className="mt-1 text-xs text-emerald-800/90 dark:text-emerald-300/80">
+            <p className="mt-1 text-xs text-emerald-700/90 dark:text-emerald-300/85">
               {t("common.upload.reviewDescription")}
             </p>
           </div>

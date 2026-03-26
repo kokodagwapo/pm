@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { Button } from "@/components/ui/button";
 
 interface PropertyROI {
   id: string;
@@ -64,10 +67,22 @@ const yieldColor = (y: number | null) => {
 };
 
 export default function OwnerROIPage() {
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? true;
   const [data, setData] = useState<ROIData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<string>("");
+
+  const surfaceCard = cn(
+    "dashboard-ui-surface text-card-foreground rounded-xl border p-4 transition-[box-shadow,border-color,background-color] duration-200"
+  );
+  const surfaceCardLg = cn(
+    "dashboard-ui-surface text-card-foreground rounded-xl border p-5 transition-[box-shadow,border-color,background-color] duration-200"
+  );
+  const tableShell = cn(
+    "dashboard-ui-surface text-card-foreground rounded-xl border overflow-hidden transition-[box-shadow,border-color,background-color] duration-200"
+  );
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -91,44 +106,74 @@ export default function OwnerROIPage() {
   const portfolio = data?.portfolio;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6 lg:p-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-1">
-            <Link href="/dashboard/analytics" className="hover:text-indigo-600 dark:hover:text-indigo-400">
+          <div
+            className={cn(
+              "mb-1 flex items-center gap-2 text-sm",
+              isLight ? "text-muted-foreground" : "text-white/60"
+            )}
+          >
+            <Link
+              href="/dashboard/analytics"
+              className={cn(
+                "transition-colors",
+                isLight ? "hover:text-primary" : "hover:text-cyan-300"
+              )}
+            >
               Analytics
             </Link>
             <span>/</span>
             <span>Owner ROI Report</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1
+            className={cn(
+              "text-2xl font-bold tracking-tight",
+              isLight ? "text-foreground" : "text-white"
+            )}
+          >
             Owner ROI Report
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p
+            className={cn(
+              "mt-1 text-sm",
+              isLight ? "text-muted-foreground" : "text-white/65"
+            )}
+          >
             Return on investment metrics across your portfolio
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={fetchData}
-            className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
-          >
+          <Button type="button" variant="outline" size="sm" onClick={() => void fetchData()}>
             Refresh
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Loading */}
       {loading && (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600" />
+        <div className="flex h-64 items-center justify-center">
+          <div
+            className={cn(
+              "h-10 w-10 animate-spin rounded-full border-2 border-transparent border-t-current",
+              isLight ? "text-primary" : "text-cyan-400"
+            )}
+          />
         </div>
       )}
 
       {/* Error */}
       {error && !loading && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4 text-red-700 dark:text-red-300">
+        <div
+          className={cn(
+            "rounded-lg border p-4 text-sm backdrop-blur-md",
+            isLight
+              ? "border-red-200 bg-red-50/90 text-red-800 dark:border-red-800 dark:bg-red-950/30 dark:text-red-200"
+              : "border-red-400/35 bg-red-500/10 text-red-100"
+          )}
+        >
           {error}
         </div>
       )}
@@ -138,7 +183,12 @@ export default function OwnerROIPage() {
         <div className="space-y-6">
           {/* YTD period note */}
           {data.ytdPeriod && (
-            <div className="text-xs text-gray-500 dark:text-gray-400">
+            <div
+              className={cn(
+                "text-xs",
+                isLight ? "text-muted-foreground" : "text-white/55"
+              )}
+            >
               YTD period: {new Date(data.ytdPeriod.start).toLocaleDateString()} –{" "}
               {new Date(data.ytdPeriod.end).toLocaleDateString()}
             </div>
@@ -146,28 +196,48 @@ export default function OwnerROIPage() {
 
           {/* Portfolio summary cards */}
           {portfolio && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-                <p className="text-xs text-gray-500 dark:text-gray-400">YTD Revenue</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <div className={surfaceCard}>
+                <p className={cn("text-xs", isLight ? "text-muted-foreground" : "text-white/60")}>
+                  YTD Revenue
+                </p>
+                <p
+                  className={cn(
+                    "mt-1 text-xl font-bold",
+                    isLight ? "text-foreground" : "text-white"
+                  )}
+                >
                   {fmt(portfolio.totalYtdRevenue)}
                 </p>
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-                <p className="text-xs text-gray-500 dark:text-gray-400">YTD Expenses</p>
-                <p className="text-xl font-bold text-red-600 dark:text-red-400 mt-1">
+              <div className={surfaceCard}>
+                <p className={cn("text-xs", isLight ? "text-muted-foreground" : "text-white/60")}>
+                  YTD Expenses
+                </p>
+                <p className="mt-1 text-xl font-bold text-red-600 dark:text-red-400">
                   {fmt(portfolio.totalYtdExpenses)}
                 </p>
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-                <p className="text-xs text-gray-500 dark:text-gray-400">YTD NOI</p>
-                <p className={`text-xl font-bold mt-1 ${portfolio.totalYtdNOI >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+              <div className={surfaceCard}>
+                <p className={cn("text-xs", isLight ? "text-muted-foreground" : "text-white/60")}>
+                  YTD NOI
+                </p>
+                <p
+                  className={cn(
+                    "mt-1 text-xl font-bold",
+                    portfolio.totalYtdNOI >= 0
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-red-600 dark:text-red-400"
+                  )}
+                >
                   {fmt(portfolio.totalYtdNOI)}
                 </p>
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Est. Appreciation</p>
-                <p className="text-xl font-bold text-blue-600 dark:text-blue-400 mt-1">
+              <div className={surfaceCard}>
+                <p className={cn("text-xs", isLight ? "text-muted-foreground" : "text-white/60")}>
+                  Est. Appreciation
+                </p>
+                <p className="mt-1 text-xl font-bold text-blue-600 dark:text-blue-400">
                   {fmt(portfolio.totalAppreciationEstimate)}
                 </p>
               </div>
@@ -176,71 +246,250 @@ export default function OwnerROIPage() {
 
           {/* Yield summary */}
           {portfolio && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Avg Gross Yield</p>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className={surfaceCardLg}>
+                <p
+                  className={cn(
+                    "mb-1 text-sm",
+                    isLight ? "text-muted-foreground" : "text-white/60"
+                  )}
+                >
+                  Avg Gross Yield
+                </p>
                 <p className={`text-3xl font-bold ${yieldColor(portfolio.avgGrossYield)}`}>
                   {pct(portfolio.avgGrossYield)}
                 </p>
-                <p className="text-xs text-gray-400 mt-1">Annual rent ÷ purchase price</p>
+                <p
+                  className={cn(
+                    "mt-1 text-xs",
+                    isLight ? "text-muted-foreground" : "text-white/50"
+                  )}
+                >
+                  Annual rent ÷ purchase price
+                </p>
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Avg Net Yield</p>
+              <div className={surfaceCardLg}>
+                <p
+                  className={cn(
+                    "mb-1 text-sm",
+                    isLight ? "text-muted-foreground" : "text-white/60"
+                  )}
+                >
+                  Avg Net Yield
+                </p>
                 <p className={`text-3xl font-bold ${yieldColor(portfolio.avgNetYield)}`}>
                   {pct(portfolio.avgNetYield)}
                 </p>
-                <p className="text-xs text-gray-400 mt-1">NOI ÷ purchase price (annualised)</p>
+                <p
+                  className={cn(
+                    "mt-1 text-xs",
+                    isLight ? "text-muted-foreground" : "text-white/50"
+                  )}
+                >
+                  NOI ÷ purchase price (annualised)
+                </p>
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Expense Ratio</p>
-                <p className={`text-3xl font-bold ${portfolio.portfolioExpenseRatio !== null && portfolio.portfolioExpenseRatio <= 40 ? "text-green-600 dark:text-green-400" : portfolio.portfolioExpenseRatio !== null && portfolio.portfolioExpenseRatio <= 60 ? "text-yellow-600 dark:text-yellow-400" : "text-red-600 dark:text-red-400"}`}>
+              <div className={surfaceCardLg}>
+                <p
+                  className={cn(
+                    "mb-1 text-sm",
+                    isLight ? "text-muted-foreground" : "text-white/60"
+                  )}
+                >
+                  Expense Ratio
+                </p>
+                <p
+                  className={`text-3xl font-bold ${
+                    portfolio.portfolioExpenseRatio !== null && portfolio.portfolioExpenseRatio <= 40
+                      ? "text-green-600 dark:text-green-400"
+                      : portfolio.portfolioExpenseRatio !== null && portfolio.portfolioExpenseRatio <= 60
+                        ? "text-yellow-600 dark:text-yellow-400"
+                        : "text-red-600 dark:text-red-400"
+                  }`}
+                >
                   {pct(portfolio.portfolioExpenseRatio)}
                 </p>
-                <p className="text-xs text-gray-400 mt-1">YTD expenses ÷ revenue</p>
+                <p
+                  className={cn(
+                    "mt-1 text-xs",
+                    isLight ? "text-muted-foreground" : "text-white/50"
+                  )}
+                >
+                  YTD expenses ÷ revenue
+                </p>
               </div>
             </div>
           )}
 
           {/* Per-property table */}
           {data.properties.length > 0 ? (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+            <div className={tableShell}>
+              <div
+                className={cn(
+                  "border-b p-4",
+                  isLight ? "border-border" : "border-white/10"
+                )}
+              >
+                <h2
+                  className={cn(
+                    "text-base font-semibold",
+                    isLight ? "text-foreground" : "text-white"
+                  )}
+                >
                   Property-Level ROI
                 </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <p
+                  className={cn(
+                    "mt-0.5 text-xs",
+                    isLight ? "text-muted-foreground" : "text-white/55"
+                  )}
+                >
                   Sorted by net yield (highest first)
                 </p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600">
-                      <th className="text-left px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Property</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Units</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Purchase Price</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-700 dark:text-gray-300">YTD Revenue</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-700 dark:text-gray-300">YTD NOI</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Gross Yield</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Net Yield</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Est. Appreciation</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Total Return</th>
+                    <tr
+                      className={cn(
+                        "border-b",
+                        isLight
+                          ? "border-border bg-muted/40"
+                          : "border-white/10 bg-white/[0.06]"
+                      )}
+                    >
+                      <th
+                        className={cn(
+                          "px-4 py-3 text-left font-medium",
+                          isLight ? "text-foreground" : "text-white/85"
+                        )}
+                      >
+                        Property
+                      </th>
+                      <th
+                        className={cn(
+                          "px-4 py-3 text-right font-medium",
+                          isLight ? "text-foreground" : "text-white/85"
+                        )}
+                      >
+                        Units
+                      </th>
+                      <th
+                        className={cn(
+                          "px-4 py-3 text-right font-medium",
+                          isLight ? "text-foreground" : "text-white/85"
+                        )}
+                      >
+                        Purchase Price
+                      </th>
+                      <th
+                        className={cn(
+                          "px-4 py-3 text-right font-medium",
+                          isLight ? "text-foreground" : "text-white/85"
+                        )}
+                      >
+                        YTD Revenue
+                      </th>
+                      <th
+                        className={cn(
+                          "px-4 py-3 text-right font-medium",
+                          isLight ? "text-foreground" : "text-white/85"
+                        )}
+                      >
+                        YTD NOI
+                      </th>
+                      <th
+                        className={cn(
+                          "px-4 py-3 text-right font-medium",
+                          isLight ? "text-foreground" : "text-white/85"
+                        )}
+                      >
+                        Gross Yield
+                      </th>
+                      <th
+                        className={cn(
+                          "px-4 py-3 text-right font-medium",
+                          isLight ? "text-foreground" : "text-white/85"
+                        )}
+                      >
+                        Net Yield
+                      </th>
+                      <th
+                        className={cn(
+                          "px-4 py-3 text-right font-medium",
+                          isLight ? "text-foreground" : "text-white/85"
+                        )}
+                      >
+                        Est. Appreciation
+                      </th>
+                      <th
+                        className={cn(
+                          "px-4 py-3 text-right font-medium",
+                          isLight ? "text-foreground" : "text-white/85"
+                        )}
+                      >
+                        Total Return
+                      </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                  <tbody
+                    className={cn(
+                      "divide-y",
+                      isLight ? "divide-border" : "divide-white/10"
+                    )}
+                  >
                     {data.properties.map((p) => (
-                      <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                      <tr
+                        key={p.id}
+                        className={cn(
+                          "transition-colors",
+                          isLight
+                            ? "hover:bg-muted/30"
+                            : "hover:bg-white/[0.07]"
+                        )}
+                      >
                         <td className="px-4 py-3">
-                          <div className="font-medium text-gray-900 dark:text-white">{p.name}</div>
+                          <div
+                            className={cn(
+                              "font-medium",
+                              isLight ? "text-foreground" : "text-white"
+                            )}
+                          >
+                            {p.name}
+                          </div>
                           {p.yearBuilt && (
-                            <div className="text-xs text-gray-400">Built {p.yearBuilt}</div>
+                            <div
+                              className={cn(
+                                "text-xs",
+                                isLight ? "text-muted-foreground" : "text-white/50"
+                              )}
+                            >
+                              Built {p.yearBuilt}
+                            </div>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{p.units}</td>
-                        <td className="px-4 py-3 text-right text-gray-900 dark:text-white font-mono">
+                        <td
+                          className={cn(
+                            "px-4 py-3 text-right",
+                            isLight ? "text-muted-foreground" : "text-white/70"
+                          )}
+                        >
+                          {p.units}
+                        </td>
+                        <td
+                          className={cn(
+                            "px-4 py-3 text-right font-mono",
+                            isLight ? "text-foreground" : "text-white"
+                          )}
+                        >
                           {p.purchasePrice > 0 ? fmt(p.purchasePrice) : "—"}
                         </td>
-                        <td className="px-4 py-3 text-right text-gray-900 dark:text-white font-mono">
+                        <td
+                          className={cn(
+                            "px-4 py-3 text-right font-mono",
+                            isLight ? "text-foreground" : "text-white"
+                          )}
+                        >
                           {fmt(p.ytdRevenue)}
                         </td>
                         <td className="px-4 py-3 text-right font-mono">
@@ -267,14 +516,25 @@ export default function OwnerROIPage() {
               </div>
             </div>
           ) : (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
-              <p className="text-gray-500 dark:text-gray-400">No properties found.</p>
+            <div className={cn(surfaceCard, "p-12 text-center")}>
+              <p className={isLight ? "text-muted-foreground" : "text-white/60"}>
+                No properties found.
+              </p>
             </div>
           )}
 
           {/* Disclaimer */}
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4 text-xs text-amber-700 dark:text-amber-300">
-            <strong>Disclaimer:</strong> {data.note} Yields and returns shown are estimates based on recorded data and should not be considered tax or investment advice. Consult a qualified financial advisor.
+          <div
+            className={cn(
+              "rounded-lg border p-4 text-xs backdrop-blur-md",
+              isLight
+                ? "border-amber-200/80 bg-amber-50/90 text-amber-900 dark:border-amber-800 dark:bg-amber-950/25 dark:text-amber-200"
+                : "border-amber-400/35 bg-amber-500/10 text-amber-100"
+            )}
+          >
+            <strong>Disclaimer:</strong> {data.note} Yields and returns shown are estimates based on
+            recorded data and should not be considered tax or investment advice. Consult a qualified
+            financial advisor.
           </div>
         </div>
       )}

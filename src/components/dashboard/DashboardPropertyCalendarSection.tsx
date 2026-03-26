@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import {
   Building2,
   CalendarDays,
   Check,
-  ChevronsUpDown,
+  ChevronLeft,
+  ChevronRight,
   DollarSign,
   ExternalLink,
   Filter,
@@ -31,7 +32,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -72,6 +72,8 @@ interface UnitOption {
   status: string;
 }
 
+const SIDEBAR_PAGE_SIZE = 5;
+
 const BLOCK_TYPE_LABELS: Record<string, string> = {
   owner_stay: "Owner Stay",
   maintenance: "Maintenance",
@@ -104,19 +106,23 @@ export function DashboardPropertyCalendarSection() {
 
   const filterSelectTrigger = (widthClass: string) =>
     cn(
-      "h-10",
+      "h-10 shrink-0 backdrop-blur-sm transition-[background-color,border-color] duration-200",
       widthClass,
       isLight
-        ? "border-slate-200 bg-white text-slate-900 [&_svg]:text-slate-500"
-        : "border-white/20 bg-white/5 text-white [&_svg]:text-white/70"
+        ? "border-slate-200/80 bg-white/75 text-slate-900 shadow-sm hover:bg-white/90 [&_svg]:text-slate-500"
+        : "border-white/18 bg-white/[0.08] text-white shadow-none hover:bg-white/[0.11] [&_svg]:text-white/65"
     );
 
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const [searchInput, setSearchInput] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [pickerLoading, setPickerLoading] = useState(false);
-  const [pickerResults, setPickerResults] = useState<PropertyListItem[]>([]);
+  const toolbarOutlineClass = cn(
+    isLight
+      ? "border-slate-200/80 bg-white/75 backdrop-blur-sm shadow-sm hover:bg-white/90"
+      : "border-white/18 bg-white/[0.08] backdrop-blur-sm shadow-none hover:bg-white/[0.12]"
+  );
+
+  const [sidebarSearch, setSidebarSearch] = useState("");
+  const [sidebarPage, setSidebarPage] = useState(0);
+  const [sidebarListLoading, setSidebarListLoading] = useState(true);
+  const [sidebarProperties, setSidebarProperties] = useState<PropertyListItem[]>([]);
 
   const [propertyId, setPropertyId] = useState<string | null>(null);
   const [property, setProperty] = useState<PropertyListItem | null>(null);
@@ -139,42 +145,68 @@ export function DashboardPropertyCalendarSection() {
   const [activeTab, setActiveTab] = useState("calendar");
 
   useEffect(() => {
-    const id = window.setTimeout(() => setDebouncedSearch(searchInput), 320);
-    return () => window.clearTimeout(id);
-  }, [searchInput]);
-
-  useEffect(() => {
-    if (!pickerOpen) return;
     let cancelled = false;
     (async () => {
-      setPickerLoading(true);
+      setSidebarListLoading(true);
       try {
-        const q = debouncedSearch.trim();
-        const url = q
-          ? `/api/properties?limit=40&search=${encodeURIComponent(q)}`
-          : `/api/properties?limit=40`;
-        const res = await fetch(url);
+        const res = await fetch("/api/properties?limit=200");
         const body = await res.json();
-        const list = Array.isArray(body.data) ? body.data : [];
-        if (!cancelled) setPickerResults(list as PropertyListItem[]);
+        const raw = body.data;
+        const list = Array.isArray(raw)
+          ? raw
+          : raw && typeof raw === "object" && Array.isArray((raw as { properties?: unknown }).properties)
+            ? (raw as { properties: PropertyListItem[] }).properties
+            : [];
+        if (!cancelled) setSidebarProperties(list);
       } catch {
-        if (!cancelled) setPickerResults([]);
+        if (!cancelled) setSidebarProperties([]);
       } finally {
-        if (!cancelled) setPickerLoading(false);
+        if (!cancelled) setSidebarListLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [pickerOpen, debouncedSearch]);
+  }, []);
+
+  const filteredSidebarProperties = useMemo(() => {
+    const q = sidebarSearch.trim().toLowerCase();
+    if (!q) return sidebarProperties;
+    return sidebarProperties.filter((p) => {
+      const addr = formatAddress(p.address).toLowerCase();
+      return (
+        p.name.toLowerCase().includes(q) ||
+        addr.includes(q) ||
+        p.address?.city?.toLowerCase().includes(q) ||
+        p.address?.street?.toLowerCase().includes(q)
+      );
+    });
+  }, [sidebarProperties, sidebarSearch]);
+
+  const sidebarTotalPages = Math.max(
+    1,
+    Math.ceil(filteredSidebarProperties.length / SIDEBAR_PAGE_SIZE)
+  );
+
+  const paginatedSidebarProperties = useMemo(() => {
+    const start = sidebarPage * SIDEBAR_PAGE_SIZE;
+    return filteredSidebarProperties.slice(start, start + SIDEBAR_PAGE_SIZE);
+  }, [filteredSidebarProperties, sidebarPage]);
 
   useEffect(() => {
-    if (!pickerOpen) return;
-    const id = window.requestAnimationFrame(() => {
-      searchInputRef.current?.focus();
-    });
-    return () => window.cancelAnimationFrame(id);
-  }, [pickerOpen]);
+    if (filteredSidebarProperties.length === 0) {
+      setSidebarPage(0);
+      return;
+    }
+    if (propertyId) {
+      const idx = filteredSidebarProperties.findIndex((p) => p._id === propertyId);
+      if (idx >= 0) {
+        setSidebarPage(Math.floor(idx / SIDEBAR_PAGE_SIZE));
+        return;
+      }
+    }
+    setSidebarPage((p) => Math.min(p, Math.max(0, sidebarTotalPages - 1)));
+  }, [sidebarSearch, propertyId, filteredSidebarProperties, sidebarTotalPages]);
 
   const loadProperty = useCallback(async (id: string) => {
     setPropertyLoading(true);
@@ -401,10 +433,6 @@ export function DashboardPropertyCalendarSection() {
     [blocks, blockFilterType]
   );
 
-  const selectedLabel = property
-    ? `${property.name}${formatAddress(property.address) ? ` — ${formatAddress(property.address)}` : ""}`
-    : t("dashboard.propertyCalendar.pickProperty");
-
   return (
     <div className="w-full space-y-3">
       <div>
@@ -428,158 +456,251 @@ export function DashboardPropertyCalendarSection() {
 
       <Card
         className={cn(
-          "w-full overflow-hidden rounded-3xl border shadow-xl backdrop-blur-sm transition-shadow",
+          "w-full overflow-hidden rounded-3xl border shadow-xl backdrop-blur-xl transition-shadow duration-300",
           isLight
-            ? "border-slate-200/90 bg-gradient-to-br from-white via-white to-sky-50/50 shadow-slate-900/[0.08]"
-            : "border-white/10 bg-gradient-to-br from-slate-950/50 via-slate-900/40 to-cyan-950/25 shadow-black/30"
+            ? "border-slate-200/90 bg-gradient-to-br from-white via-white to-sky-50/40 shadow-slate-900/[0.06]"
+            : "border-white/10 bg-gradient-to-br from-slate-950/55 via-slate-900/35 to-cyan-950/20 shadow-black/25"
         )}
       >
-        <CardHeader className="space-y-4 pb-4">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-            <div className="min-w-0 flex-1 space-y-2">
-              <CardTitle
+        <div className="flex min-h-0 flex-col lg:min-h-[520px] lg:flex-row lg:items-stretch">
+          {/* Property rail — replaces combobox */}
+          <aside
+            className={cn(
+              "flex max-h-[min(340px,46vh)] shrink-0 flex-col border-b lg:max-h-none lg:w-[min(100%,288px)] lg:border-b-0 lg:border-r",
+              isLight
+                ? "border-slate-200/70 bg-slate-50/40"
+                : "border-white/[0.08] bg-black/15"
+            )}
+            aria-label={t("dashboard.propertyCalendar.sidebarTitle")}
+          >
+            <div
+              className={cn(
+                "shrink-0 border-b px-4 pb-3 pt-4",
+                isLight ? "border-slate-200/60" : "border-white/[0.08]"
+              )}
+            >
+              <p
                 className={cn(
-                  "flex items-center gap-2 text-base font-semibold",
-                  isLight ? "text-slate-900" : undefined
+                  "text-[0.65rem] font-semibold uppercase tracking-[0.2em]",
+                  isLight ? "text-slate-500" : "text-white/45"
                 )}
               >
-                <CalendarDays className="h-5 w-5 shrink-0 opacity-90" />
-                {t("dashboard.propertyCalendar.cardTitle")}
-              </CardTitle>
-              <CardDescription>{t("dashboard.propertyCalendar.cardDescription")}</CardDescription>
-              <Popover
-                modal={false}
-                open={pickerOpen}
-                onOpenChange={(o) => {
-                  setPickerOpen(o);
-                  if (o) {
-                    setSearchInput("");
-                    setDebouncedSearch("");
-                  }
-                }}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={pickerOpen}
-                    className={cn(
-                      "h-12 w-full max-w-full justify-between rounded-2xl border px-4 text-left font-normal shadow-sm transition-all hover:shadow-md xl:max-w-xl",
-                      isLight
-                        ? "border-slate-200/90 bg-white/90 hover:bg-white"
-                        : "border-white/15 bg-white/5 hover:bg-white/10"
-                    )}
-                  >
-                    <span className="flex min-w-0 items-center gap-2">
-                      <Building2 className="h-4 w-4 shrink-0 opacity-60" />
-                      <span className="truncate">{selectedLabel}</span>
-                    </span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
+                {t("dashboard.propertyCalendar.sidebarTitle")}
+              </p>
+              <div className="relative mt-3">
+                <Search
                   className={cn(
-                    "w-[min(100vw-2rem,440px)] p-0 shadow-2xl",
-                    isLight
-                      ? "border-slate-200/90 bg-white/95 backdrop-blur-xl"
-                      : "border-white/10 bg-slate-950/95 backdrop-blur-xl"
+                    "pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2",
+                    isLight ? "text-slate-400" : "text-white/35"
                   )}
-                  align="start"
-                  sideOffset={6}
-                  onOpenAutoFocus={(e) => e.preventDefault()}
-                >
-                  <div className="flex flex-col">
-                    <div
-                      className={cn(
-                        "flex items-center gap-2 border-b px-3 py-2.5",
-                        isLight ? "border-slate-200/80 bg-slate-50/50" : "border-white/10 bg-white/5"
-                      )}
-                    >
-                      <Search className="h-4 w-4 shrink-0 opacity-50" aria-hidden />
-                      <input
-                        ref={searchInputRef}
-                        type="search"
-                        autoComplete="off"
-                        spellCheck={false}
-                        placeholder={t("dashboard.propertyCalendar.searchPlaceholder")}
-                        value={searchInput}
-                        onChange={(e) => setSearchInput(e.target.value)}
+                  aria-hidden
+                />
+                <input
+                  type="search"
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder={t("dashboard.propertyCalendar.searchPlaceholder")}
+                  value={sidebarSearch}
+                  onChange={(e) => setSidebarSearch(e.target.value)}
+                  className={cn(
+                    "h-9 w-full rounded-xl border pl-9 pr-3 text-sm outline-none transition-[border-color,box-shadow]",
+                    isLight
+                      ? "border-slate-200/90 bg-white/80 text-slate-900 placeholder:text-slate-400 focus:border-sky-300/80 focus:ring-2 focus:ring-sky-200/50"
+                      : "border-white/12 bg-white/[0.06] text-white placeholder:text-white/35 focus:border-white/25 focus:ring-2 focus:ring-white/10"
+                  )}
+                />
+              </div>
+            </div>
+            <div className="flex min-h-0 flex-1 flex-col">
+              <div
+                className="shrink-0 px-2 py-2 lg:py-3"
+                role="listbox"
+                aria-label={t("dashboard.propertyCalendar.pickProperty")}
+              >
+                {sidebarListLoading ? (
+                  <div className="space-y-2 px-2 py-1">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div
+                        key={i}
                         className={cn(
-                          "h-10 w-full min-w-0 border-0 bg-transparent text-sm outline-none ring-0 focus:ring-0",
-                          isLight
-                            ? "text-slate-900 placeholder:text-slate-400"
-                            : "text-white placeholder:text-white/40"
+                          "h-[3.25rem] animate-pulse rounded-xl",
+                          isLight ? "bg-slate-200/40" : "bg-white/[0.06]"
                         )}
                       />
-                    </div>
-                    <div
-                      className="max-h-[min(50vh,320px)] overflow-y-auto overscroll-contain p-2"
-                      role="listbox"
-                      aria-label={t("dashboard.propertyCalendar.pickProperty")}
-                    >
-                      {pickerLoading && pickerResults.length === 0 ? (
-                        <p className="py-8 text-center text-sm text-muted-foreground">
-                          {t("dashboard.propertyCalendar.loading")}
-                        </p>
-                      ) : pickerResults.length === 0 ? (
-                        <p className="py-8 text-center text-sm text-muted-foreground">
-                          {t("dashboard.propertyCalendar.noResults")}
-                        </p>
-                      ) : (
-                        <ul className="space-y-1">
-                          {pickerResults.map((p) => {
-                            const selected = propertyId === p._id;
-                            const addr = formatAddress(p.address);
-                            return (
-                              <li key={p._id}>
-                                <button
-                                  type="button"
-                                  role="option"
-                                  aria-selected={selected}
-                                  className={cn(
-                                    "flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors",
-                                    selected
-                                      ? isLight
-                                        ? "bg-sky-100/90 text-sky-950"
-                                        : "bg-sky-500/20 text-white"
-                                      : isLight
-                                        ? "hover:bg-slate-100/90"
-                                        : "hover:bg-white/10"
-                                  )}
-                                  onClick={() => {
-                                    void loadProperty(p._id);
-                                    setPickerOpen(false);
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mt-0.5 h-4 w-4 shrink-0",
-                                      selected ? "opacity-100" : "opacity-0"
-                                    )}
-                                    aria-hidden
-                                  />
-                                  <div className="min-w-0 flex-1">
-                                    <p className="font-semibold leading-snug">{p.name}</p>
-                                    {addr ? (
-                                      <p className="mt-0.5 flex items-start gap-1.5 text-xs text-muted-foreground">
-                                        <MapPin className="mt-0.5 h-3 w-3 shrink-0 opacity-70" />
-                                        <span className="leading-snug">{addr}</span>
-                                      </p>
-                                    ) : null}
-                                  </div>
-                                </button>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      )}
-                    </div>
+                    ))}
                   </div>
-                </PopoverContent>
-              </Popover>
-            </div>
+                ) : filteredSidebarProperties.length === 0 ? (
+                  <p className="px-3 py-10 text-center text-sm text-muted-foreground">
+                    {sidebarSearch.trim()
+                      ? t("dashboard.propertyCalendar.noResults")
+                      : t("dashboard.propertyCalendar.noPropertiesInList")}
+                  </p>
+                ) : (
+                  <ul className="space-y-1 pb-1">
+                    {paginatedSidebarProperties.map((p) => {
+                    const selected = propertyId === p._id;
+                    const addr = formatAddress(p.address);
+                    return (
+                      <li key={p._id}>
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={selected}
+                          className={cn(
+                            "group flex w-full items-start gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm transition-all duration-200",
+                            selected
+                              ? isLight
+                                ? "bg-white shadow-sm ring-1 ring-sky-200/80"
+                                : "bg-white/[0.12] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.14)]"
+                              : isLight
+                                ? "hover:bg-white/70"
+                                : "hover:bg-white/[0.07]"
+                          )}
+                          onClick={() => void loadProperty(p._id)}
+                        >
+                          <span
+                            className={cn(
+                              "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors",
+                              selected
+                                ? isLight
+                                  ? "border-sky-500 bg-sky-500 text-white"
+                                  : "border-cyan-400/60 bg-cyan-500/25 text-cyan-100"
+                                : isLight
+                                  ? "border-slate-200 bg-transparent"
+                                  : "border-white/15 bg-transparent"
+                            )}
+                            aria-hidden
+                          >
+                            {selected ? <Check className="h-2.5 w-2.5" strokeWidth={3} /> : null}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p
+                              className={cn(
+                                "truncate font-medium leading-snug tracking-tight",
+                                isLight ? "text-slate-900" : "text-white/95"
+                              )}
+                            >
+                              {p.name}
+                            </p>
+                            {addr ? (
+                              <p className="mt-0.5 flex items-start gap-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                                <MapPin className="mt-0.5 h-3 w-3 shrink-0 opacity-60" aria-hidden />
+                                <span>{addr}</span>
+                              </p>
+                            ) : null}
+                          </div>
+                        </button>
+                      </li>
+                    );
+                  })}
+                  </ul>
+                )}
+              </div>
 
-            <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center xl:w-auto xl:justify-end">
+              {!sidebarListLoading &&
+                filteredSidebarProperties.length > SIDEBAR_PAGE_SIZE && (
+                  <div
+                    className={cn(
+                      "mt-auto flex shrink-0 items-center justify-between gap-2 border-t px-2 py-2.5",
+                      isLight ? "border-slate-200/60" : "border-white/[0.08]"
+                    )}
+                  >
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "h-8 w-8 shrink-0 rounded-lg",
+                        isLight ? "hover:bg-slate-200/60" : "hover:bg-white/10"
+                      )}
+                      disabled={sidebarPage <= 0}
+                      aria-label={t("dashboard.propertyCalendar.sidebarPrevPage")}
+                      onClick={() => setSidebarPage((p) => Math.max(0, p - 1))}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span
+                      className={cn(
+                        "min-w-0 flex-1 text-center text-[0.7rem] tabular-nums leading-tight",
+                        isLight ? "text-slate-600" : "text-white/55"
+                      )}
+                    >
+                      {t("dashboard.propertyCalendar.sidebarPagination", {
+                        values: {
+                          start:
+                            filteredSidebarProperties.length === 0
+                              ? 0
+                              : sidebarPage * SIDEBAR_PAGE_SIZE + 1,
+                          end: Math.min(
+                            (sidebarPage + 1) * SIDEBAR_PAGE_SIZE,
+                            filteredSidebarProperties.length
+                          ),
+                          total: filteredSidebarProperties.length,
+                        },
+                      })}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "h-8 w-8 shrink-0 rounded-lg",
+                        isLight ? "hover:bg-slate-200/60" : "hover:bg-white/10"
+                      )}
+                      disabled={sidebarPage >= sidebarTotalPages - 1}
+                      aria-label={t("dashboard.propertyCalendar.sidebarNextPage")}
+                      onClick={() =>
+                        setSidebarPage((p) => Math.min(sidebarTotalPages - 1, p + 1))
+                      }
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+            </div>
+          </aside>
+
+          <div className="flex min-w-0 flex-1 flex-col">
+            <CardHeader className="min-w-0 w-full space-y-4 pb-4 pt-5 sm:pt-6">
+              <div className="flex min-w-0 w-full flex-col gap-4">
+                <div className="min-w-0 w-full max-w-full space-y-2">
+                  <CardTitle
+                    className={cn(
+                      "flex w-full min-w-0 max-w-full flex-row flex-wrap items-center gap-x-2 gap-y-1 text-lg font-semibold tracking-tight sm:text-xl",
+                      isLight ? "text-slate-900" : undefined
+                    )}
+                  >
+                    <span className="inline-flex min-w-0 max-w-full items-center gap-2">
+                      <CalendarDays className="h-5 w-5 shrink-0 opacity-90" />
+                      <span className="min-w-0 whitespace-normal">
+                        {t("dashboard.propertyCalendar.cardTitle")}
+                      </span>
+                    </span>
+                    {property && (
+                      <span
+                        className={cn(
+                          "min-w-0 max-w-full text-sm font-normal leading-snug sm:max-w-[min(100%,42rem)]",
+                          isLight ? "text-slate-600" : "text-white/75"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "mr-1.5 inline",
+                            isLight ? "text-slate-400" : "text-white/45"
+                          )}
+                        >
+                          ·
+                        </span>
+                        <span className="break-words">{property.name}</span>
+                      </span>
+                    )}
+                  </CardTitle>
+                  <CardDescription className="max-w-full text-pretty leading-relaxed">
+                    {t("dashboard.propertyCalendar.cardDescription")}
+                  </CardDescription>
+                </div>
+
+                <div className="flex w-full min-w-0 max-w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-stretch">
               {units.length > 0 && (
                 <Select value={selectedUnitId} onValueChange={setSelectedUnitId}>
                   <SelectTrigger className={cn(filterSelectTrigger("w-full sm:w-[240px]"))}>
@@ -608,7 +729,7 @@ export function DashboardPropertyCalendarSection() {
                   if (propertyId && selectedUnitId)
                     fetchUnitCalendarData(propertyId, selectedUnitId);
                 }}
-                className={cn(isLight && "border-slate-200 bg-white")}
+                className={toolbarOutlineClass}
               >
                 <RefreshCw className="mr-1 h-4 w-4" />
                 {t("dashboard.actions.refresh")}
@@ -625,7 +746,7 @@ export function DashboardPropertyCalendarSection() {
                       setBlockFormDates({});
                       setShowBlockForm(true);
                     }}
-                    className={cn(isLight && "border-slate-200 bg-white")}
+                    className={toolbarOutlineClass}
                   >
                     <Lock className="mr-1 h-4 w-4" />
                     {t("dashboard.propertyCalendar.blockDates")}
@@ -639,7 +760,7 @@ export function DashboardPropertyCalendarSection() {
                       setPricingFormDates({});
                       setShowPricingForm(true);
                     }}
-                    className={cn(isLight && "border-slate-200 bg-white")}
+                    className={toolbarOutlineClass}
                   >
                     <DollarSign className="mr-1 h-4 w-4" />
                     {t("dashboard.propertyCalendar.addPricing")}
@@ -651,7 +772,7 @@ export function DashboardPropertyCalendarSection() {
                         variant="outline"
                         size="sm"
                         disabled={!propertyId}
-                        className={cn(isLight && "border-slate-200 bg-white")}
+                        className={toolbarOutlineClass}
                       >
                         <MoreHorizontal className="mr-1 h-4 w-4" />
                         {t("dashboard.propertyCalendar.moreActions")}
@@ -717,11 +838,27 @@ export function DashboardPropertyCalendarSection() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 pt-0">
+        <CardContent className="space-y-4 px-4 pb-6 pt-0 sm:px-6">
           {!propertyId && !propertyLoading && (
-            <p className="py-10 text-center text-sm text-muted-foreground">
-              {t("dashboard.propertyCalendar.emptyState")}
-            </p>
+            <div
+              className={cn(
+                "flex min-h-[min(320px,50vh)] flex-col items-center justify-center rounded-2xl border border-dashed px-6 py-14 text-center",
+                isLight
+                  ? "border-slate-200/80 bg-white/30"
+                  : "border-white/[0.12] bg-white/[0.02]"
+              )}
+            >
+              <Building2
+                className={cn(
+                  "mb-4 h-12 w-12",
+                  isLight ? "text-slate-300" : "text-white/25"
+                )}
+                aria-hidden
+              />
+              <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+                {t("dashboard.propertyCalendar.emptyState")}
+              </p>
+            </div>
           )}
           {propertyLoading && (
             <div className="space-y-3 py-6">
@@ -734,16 +871,16 @@ export function DashboardPropertyCalendarSection() {
                 className={cn(
                   "grid h-11 w-full grid-cols-2 rounded-2xl p-1 sm:inline-flex sm:w-auto",
                   isLight
-                    ? "border border-slate-200/90 bg-slate-100/90 text-slate-900 [&_svg]:text-slate-800"
-                    : "border border-white/10 bg-white/5"
+                    ? "border border-slate-200/80 text-slate-900 [&_svg]:text-slate-700"
+                    : "border border-white/12"
                 )}
               >
-                <TabsTrigger value="calendar" className="gap-1.5">
-                  <CalendarDays className="h-4 w-4" />
+                <TabsTrigger value="calendar" className="gap-1.5 rounded-xl">
+                  <CalendarDays className="h-4 w-4 shrink-0" />
                   {t("dashboard.propertyCalendar.tabCalendar")}
                 </TabsTrigger>
-                <TabsTrigger value="blocks" className="gap-1.5">
-                  <Lock className="h-4 w-4" />
+                <TabsTrigger value="blocks" className="gap-1.5 rounded-xl">
+                  <Lock className="h-4 w-4 shrink-0" />
                   {t("dashboard.propertyCalendar.tabBlocks", { values: { count: blocks.length } })}
                 </TabsTrigger>
               </TabsList>
@@ -849,6 +986,8 @@ export function DashboardPropertyCalendarSection() {
             </p>
           )}
         </CardContent>
+          </div>
+        </div>
       </Card>
 
       <DateBlockForm

@@ -58,6 +58,8 @@ import {
 } from "lucide-react";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { cn } from "@/lib/utils";
 
 // Create tenant schema factory function to use translations
 const createTenantSchema = (t: (key: string) => string) =>
@@ -179,8 +181,13 @@ const createTenantSchema = (t: (key: string) => string) =>
       path: ["confirmPassword"],
     });
 
+const tenantFormCardClass =
+  "overflow-hidden rounded-2xl shadow-sm transition-[box-shadow,border-color] duration-300 ease-out [transform:translateZ(0)]";
+
 export default function NewTenantPage() {
   const { t } = useLocalizationContext();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
@@ -465,37 +472,59 @@ export default function NewTenantPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-4 md:p-6">
-      <div className="mx-auto max-w-7xl space-y-8">
-        {/* Enhanced Header */}
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-bold tracking-tight bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              {t("tenants.form.header.title")}
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              {t("tenants.form.header.subtitle")}
-            </p>
-          </div>
-          <Link href="/dashboard/tenants">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:bg-accent/50 transition-colors border-2"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+    <div className="mx-auto w-full max-w-7xl space-y-8 pb-10 pt-1 sm:pb-12 sm:pt-0">
+      <header
+        className={cn(
+          "dashboard-ui-surface overflow-hidden rounded-2xl shadow-sm transition-[box-shadow,border-color,background-color] duration-300 ease-out [transform:translateZ(0)]"
+        )}
+      >
+        <div
+          className={cn(
+            "flex flex-col gap-3 border-b px-4 py-3.5 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between sm:px-6",
+            isLight
+              ? "border-slate-200/50 bg-slate-50/25"
+              : "border-white/10 bg-white/[0.04]"
+          )}
+        >
+          <Button variant="outline" size="sm" asChild className="h-9 w-fit rounded-lg">
+            <Link href="/dashboard/tenants">
+              <ArrowLeft className="mr-2 h-4 w-4 shrink-0 opacity-70" aria-hidden />
               {t("tenants.form.actions.backToTenants")}
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
+        <div className="px-4 py-6 sm:px-7 sm:py-8">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:gap-6">
+            <div
+              className={cn(
+                "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border backdrop-blur-sm",
+                isLight
+                  ? "border-slate-200/80 bg-white/50 text-foreground"
+                  : "border-white/15 bg-white/[0.06] text-foreground"
+              )}
+              aria-hidden
+            >
+              <User className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1 space-y-2">
+              <h1 className="text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-[1.65rem]">
+                {t("tenants.form.header.title")}
+              </h1>
+              <p className="max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
+                {t("tenants.form.header.subtitle")}
+              </p>
+            </div>
+          </div>
+        </div>
+      </header>
 
-        <Form {...form}>
+      <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             {/* Modern Grid Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Avatar Upload - Enhanced Card */}
               <div className="lg:col-span-4">
-                <Card className="h-fit border-2 border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/95 backdrop-blur-sm">
+                <Card className={cn("h-fit", tenantFormCardClass)}>
                   <CardHeader className="text-center pb-4">
                     <CardTitle className="flex items-center justify-center gap-2 text-xl">
                       <User className="h-6 w-6 text-primary" />
@@ -523,7 +552,7 @@ export default function NewTenantPage() {
 
               {/* Personal Information - Enhanced Large Card */}
               <div className="lg:col-span-8">
-                <Card className="h-fit border-2 border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/95 backdrop-blur-sm">
+                <Card className={cn("h-fit", tenantFormCardClass)}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-3 text-xl">
                       <User className="h-6 w-6 text-primary" />
@@ -548,7 +577,7 @@ export default function NewTenantPage() {
                                 placeholder={t(
                                   "tenants.form.fields.firstName.placeholder"
                                 )}
-                                className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                className="h-11"
                                 {...field}
                               />
                             </FormControl>
@@ -569,7 +598,7 @@ export default function NewTenantPage() {
                                 placeholder={t(
                                   "tenants.form.fields.lastName.placeholder"
                                 )}
-                                className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                className="h-11"
                                 {...field}
                               />
                             </FormControl>
@@ -591,7 +620,7 @@ export default function NewTenantPage() {
                                 placeholder={t(
                                   "tenants.form.fields.email.placeholder"
                                 )}
-                                className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                className="h-11"
                                 {...field}
                               />
                             </FormControl>
@@ -612,7 +641,7 @@ export default function NewTenantPage() {
                                 placeholder={t(
                                   "tenants.form.fields.phone.placeholder"
                                 )}
-                                className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                className="h-11"
                                 {...field}
                               />
                             </FormControl>
@@ -633,7 +662,7 @@ export default function NewTenantPage() {
                                 <FormControl>
                                   <Button
                                     variant="outline"
-                                    className="h-11 w-full justify-start text-left font-normal border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                    className="h-11 w-full justify-start text-left font-normal"
                                   >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
                                     {field.value ? (
@@ -682,7 +711,7 @@ export default function NewTenantPage() {
                                 placeholder={t(
                                   "tenants.form.fields.ssn.placeholder"
                                 )}
-                                className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                className="h-11"
                                 {...field}
                               />
                             </FormControl>
@@ -697,7 +726,7 @@ export default function NewTenantPage() {
 
               {/* Account Setup - Enhanced Medium Card */}
               <div className="lg:col-span-6">
-                <Card className="h-fit border-2 border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/95 backdrop-blur-sm">
+                <Card className={cn("h-fit", tenantFormCardClass)}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-3 text-xl">
                       <Key className="h-6 w-6 text-primary" />
@@ -723,7 +752,7 @@ export default function NewTenantPage() {
                                 placeholder={t(
                                   "tenants.form.fields.password.placeholder"
                                 )}
-                                className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                className="h-11"
                                 {...field}
                               />
                             </FormControl>
@@ -745,7 +774,7 @@ export default function NewTenantPage() {
                                 placeholder={t(
                                   "tenants.form.fields.confirmPassword.placeholder"
                                 )}
-                                className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                className="h-11"
                                 {...field}
                               />
                             </FormControl>
@@ -766,7 +795,7 @@ export default function NewTenantPage() {
                               value={field.value}
                             >
                               <FormControl>
-                                <SelectTrigger className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200">
+                                <SelectTrigger className="h-11">
                                   <SelectValue
                                     placeholder={t(
                                       "tenants.form.fields.tenantStatus.placeholder"
@@ -809,7 +838,7 @@ export default function NewTenantPage() {
 
               {/* Employment Information - Enhanced Medium Card */}
               <div className="lg:col-span-6">
-                <Card className="h-fit border-2 border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/95 backdrop-blur-sm">
+                <Card className={cn("h-fit", tenantFormCardClass)}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-3 text-xl">
                       <Briefcase className="h-6 w-6 text-primary" />
@@ -834,7 +863,7 @@ export default function NewTenantPage() {
                                 placeholder={t(
                                   "tenants.form.fields.employer.placeholder"
                                 )}
-                                className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                className="h-11"
                                 {...field}
                               />
                             </FormControl>
@@ -855,7 +884,7 @@ export default function NewTenantPage() {
                                 placeholder={t(
                                   "tenants.form.fields.position.placeholder"
                                 )}
-                                className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                className="h-11"
                                 {...field}
                               />
                             </FormControl>
@@ -878,7 +907,7 @@ export default function NewTenantPage() {
                                   placeholder={t(
                                     "tenants.form.fields.income.placeholder"
                                   )}
-                                  className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                  className="h-11"
                                   {...field}
                                   onChange={(e) =>
                                     field.onChange(
@@ -933,7 +962,7 @@ export default function NewTenantPage() {
 
               {/* Emergency Contact - Enhanced Medium Card */}
               <div className="lg:col-span-7">
-                <Card className="h-fit border-2 border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/95 backdrop-blur-sm">
+                <Card className={cn("h-fit", tenantFormCardClass)}>
                   <CardHeader className="">
                     <CardTitle className="flex items-center gap-3 text-xl">
                       <Phone className="h-6 w-6 text-primary" />
@@ -960,7 +989,7 @@ export default function NewTenantPage() {
                                 placeholder={t(
                                   "tenants.form.fields.emergencyContactName.placeholder"
                                 )}
-                                className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                className="h-11"
                                 {...field}
                               />
                             </FormControl>
@@ -983,7 +1012,7 @@ export default function NewTenantPage() {
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
                               >
-                                <SelectTrigger className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200">
+                                <SelectTrigger className="h-11">
                                   <SelectValue
                                     placeholder={t(
                                       "tenants.form.fields.emergencyContactRelationship.placeholder"
@@ -1043,7 +1072,7 @@ export default function NewTenantPage() {
                                 placeholder={t(
                                   "tenants.form.fields.emergencyContactPhone.placeholder"
                                 )}
-                                className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                className="h-11"
                                 {...field}
                               />
                             </FormControl>
@@ -1067,7 +1096,7 @@ export default function NewTenantPage() {
                                 placeholder={t(
                                   "tenants.form.fields.emergencyContactEmail.placeholder"
                                 )}
-                                className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                                className="h-11"
                                 {...field}
                               />
                             </FormControl>
@@ -1082,7 +1111,7 @@ export default function NewTenantPage() {
 
               {/* Additional Information - Enhanced Small Card */}
               <div className="lg:col-span-5">
-                <Card className="h-fit border-2 border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/95 backdrop-blur-sm">
+                <Card className={cn("h-fit", tenantFormCardClass)}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-3 text-xl">
                       <FileText className="h-6 w-6 text-primary" />
@@ -1109,7 +1138,7 @@ export default function NewTenantPage() {
                               )}
                               min="300"
                               max="850"
-                              className="h-11 border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200"
+                              className="h-11"
                               {...field}
                               onChange={(e) =>
                                 field.onChange(
@@ -1169,7 +1198,7 @@ export default function NewTenantPage() {
               </div>
 
               <div className="lg:col-span-12">
-                <Card className="h-fit border-2 border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/95 backdrop-blur-sm">
+                <Card className={cn("h-fit", tenantFormCardClass)}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-3 text-xl">
                       <FileText className="h-6 w-6 text-primary" />
@@ -1186,11 +1215,14 @@ export default function NewTenantPage() {
                       onDragOver={handleDragOver}
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
-                      className={`relative border-2 border-dashed rounded-lg transition-all duration-300 ${
+                      className={cn(
+                        "relative rounded-xl border-2 border-dashed backdrop-blur-md transition-[border-color,background-color,transform] duration-300",
                         isDragging
-                          ? "border-primary bg-primary/5 scale-[1.02]"
-                          : "border-border/60 hover:border-primary/50 bg-background/50"
-                      }`}
+                          ? "scale-[1.02] border-primary/55 bg-primary/10"
+                          : isLight
+                            ? "border-slate-300/80 bg-white/45 hover:border-primary/40"
+                            : "border-white/18 bg-white/[0.05] hover:border-white/30"
+                      )}
                     >
                       <input
                         type="file"
@@ -1206,11 +1238,14 @@ export default function NewTenantPage() {
                         className="flex flex-col items-center justify-center py-12 px-6 cursor-pointer"
                       >
                         <div
-                          className={`rounded-full p-4 mb-4 transition-all duration-300 ${
+                          className={cn(
+                            "mb-4 rounded-full p-4 transition-all duration-300",
                             isDragging
-                              ? "bg-primary/20 scale-110"
-                              : "bg-primary/10"
-                          }`}
+                              ? "scale-110 bg-primary/20"
+                              : isLight
+                                ? "bg-primary/10"
+                                : "bg-white/[0.08]"
+                          )}
                         >
                           <Upload
                             className={`h-10 w-10 transition-colors duration-300 ${
@@ -1265,10 +1300,15 @@ export default function NewTenantPage() {
                             return (
                               <div
                                 key={`${file.name}-${file.size}-${index}`}
-                                className="group relative rounded-lg border-2 border-border/60 bg-background/50 overflow-hidden hover:border-primary/50 hover:shadow-md transition-all duration-300"
+                                className={cn(
+                                  "group relative overflow-hidden rounded-xl border transition-all duration-300",
+                                  isLight
+                                    ? "border-slate-200/75 bg-white/50 hover:border-primary/35"
+                                    : "border-white/12 bg-white/[0.04] hover:border-white/22"
+                                )}
                               >
                                 {/* Preview Area */}
-                                <div className="aspect-square bg-muted/30 flex items-center justify-center p-4">
+                                <div className="flex aspect-square items-center justify-center bg-muted/20 p-4 backdrop-blur-sm dark:bg-white/[0.04]">
                                   {isImage && preview ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img
@@ -1292,7 +1332,7 @@ export default function NewTenantPage() {
                                 </div>
 
                                 {/* File Info */}
-                                <div className="p-3 bg-background/80 backdrop-blur-sm">
+                                <div className="border-t border-border/40 bg-white/30 p-3 backdrop-blur-md dark:border-white/10 dark:bg-white/[0.06]">
                                   <div className="truncate text-sm font-medium text-foreground mb-1">
                                     {file.name}
                                   </div>
@@ -1324,7 +1364,7 @@ export default function NewTenantPage() {
 
               {/* Notes - Enhanced Full Width Card */}
               <div className="lg:col-span-12">
-                <Card className="h-fit border-2 border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/95 backdrop-blur-sm">
+                <Card className={cn("h-fit", tenantFormCardClass)}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-3 text-xl">
                       <FileText className="h-6 w-6 text-primary" />
@@ -1348,7 +1388,7 @@ export default function NewTenantPage() {
                               placeholder={t(
                                 "tenants.form.fields.notes.placeholder"
                               )}
-                              className="min-h-[120px] border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200 resize-none"
+                              className="min-h-[120px] resize-none"
                               {...field}
                             />
                           </FormControl>
@@ -1361,25 +1401,27 @@ export default function NewTenantPage() {
               </div>
             </div>
 
-            {/* Enhanced Form Actions */}
-            <div className="flex items-center justify-between">
+            <div
+              className={cn(
+                "flex flex-col-reverse gap-3 rounded-xl border p-4 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-4",
+                isLight
+                  ? "border-slate-200/55 bg-white/50 shadow-[0_8px_32px_rgba(15,23,42,0.06)]"
+                  : "border-white/12 bg-white/[0.06]"
+              )}
+            >
               <div className="text-sm text-muted-foreground">
                 {t("tenants.form.actions.requiredFields")}
               </div>
-              <div className="flex items-center gap-4">
-                <Link href="/dashboard/tenants">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="border-2 hover:bg-accent/50 transition-all duration-200"
-                  >
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+                <Link href="/dashboard/tenants" className="w-full sm:w-auto">
+                  <Button type="button" variant="outline" className="w-full sm:w-auto">
                     {t("tenants.form.actions.cancel")}
                   </Button>
                 </Link>
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="bg-linear-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="w-full sm:w-auto"
                 >
                   {isLoading ? (
                     <>
@@ -1394,7 +1436,6 @@ export default function NewTenantPage() {
             </div>
           </form>
         </Form>
-      </div>
     </div>
   );
 }

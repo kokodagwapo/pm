@@ -43,6 +43,7 @@ import { GoogleCalendarSync } from "./GoogleCalendarSync";
 import { IEvent, EventType, EventStatus, EventPriority } from "@/types";
 import { useViewPreferencesStore } from "@/stores/view-preferences.store";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { cn } from "@/lib/utils";
 
 interface CalendarViewProps {
   userId?: string;
@@ -679,21 +680,21 @@ export default function CalendarView({
         {showToolbar && (
           <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
             <div className="space-y-1">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <h2 className="text-2xl font-bold text-foreground">
                 {t("calendar.header.title")}
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-muted-foreground">
                 {t("calendar.header.subtitleAdmin")}
               </p>
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex flex-wrap items-center gap-3">
               {/* View Selector */}
               <Select value={currentView} onValueChange={changeView}>
-                <SelectTrigger className="w-40 border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500/20 bg-white dark:bg-gray-800">
+                <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="border-gray-200 dark:border-gray-700">
+                <SelectContent>
                   <SelectItem value="dayGridMonth">
                     {t("calendar.settings.display.viewMonth")}
                   </SelectItem>
@@ -710,12 +711,17 @@ export default function CalendarView({
               </Select>
 
               {/* Navigation */}
-              <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800 rounded-lg p-1">
+              <div
+                className={cn(
+                  "flex items-center gap-1 rounded-lg border p-1 backdrop-blur-md",
+                  "border-border/50 bg-muted/25 dark:border-white/12 dark:bg-white/[0.06]"
+                )}
+              >
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigateCalendar("prev")}
-                  className="h-8 w-8 p-0 hover:bg-white dark:hover:bg-gray-700 rounded-md"
+                  className="h-8 w-8 rounded-md p-0 hover:bg-white/55 dark:hover:bg-white/10"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -723,7 +729,7 @@ export default function CalendarView({
                   variant="ghost"
                   size="sm"
                   onClick={() => navigateCalendar("today")}
-                  className="h-8 px-3 hover:bg-white dark:hover:bg-gray-700 rounded-md font-medium"
+                  className="h-8 rounded-md px-3 font-medium hover:bg-white/55 dark:hover:bg-white/10"
                 >
                   {t("calendar.nav.today")}
                 </Button>
@@ -731,7 +737,7 @@ export default function CalendarView({
                   variant="ghost"
                   size="sm"
                   onClick={() => navigateCalendar("next")}
-                  className="h-8 w-8 p-0 hover:bg-white dark:hover:bg-gray-700 rounded-md"
+                  className="h-8 w-8 rounded-md p-0 hover:bg-white/55 dark:hover:bg-white/10"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -741,8 +747,13 @@ export default function CalendarView({
         )}
         {/* Main Calendar */}
 
-        <CardContent>
-          <div className="calendar-container bg-white dark:bg-gray-900">
+        <CardContent className="pt-0">
+          <div
+            className={cn(
+              "calendar-container overflow-hidden rounded-lg border backdrop-blur-md",
+              "border-border/40 bg-white/25 dark:border-white/10 dark:bg-white/[0.04]"
+            )}
+          >
             <FullCalendar
               ref={calendarRef}
               plugins={[
@@ -897,13 +908,15 @@ export default function CalendarView({
 const calendarStyles = `
   .calendar-container .fc {
     font-family: inherit;
-    --fc-border-color: #e5e7eb;
-    --fc-today-bg-color: #eff6ff;
+    --fc-border-color: rgb(226 232 240 / 0.9);
+    --fc-page-bg-color: transparent;
+    --fc-today-bg-color: rgb(224 242 254 / 0.85);
   }
 
   .dark .calendar-container .fc {
-    --fc-border-color: #374151;
-    --fc-today-bg-color: #1e3a8a;
+    --fc-border-color: rgb(255 255 255 / 0.14);
+    --fc-page-bg-color: transparent;
+    --fc-today-bg-color: rgb(14 165 233 / 0.18);
   }
 
   .calendar-container .fc-toolbar {
@@ -963,29 +976,36 @@ const calendarStyles = `
 
   .calendar-container .fc-day-today {
     background: var(--fc-today-bg-color) !important;
-    border-color: #3b82f6 !important;
+    border-color: rgb(14 165 233 / 0.4) !important;
+  }
+
+  .dark .calendar-container .fc-day-today {
+    border-color: rgb(14 165 233 / 0.35) !important;
   }
 
   .calendar-container .fc-col-header-cell {
-    background: #f8fafc;
-    border-color: #e2e8f0;
+    background: rgb(248 250 252 / 0.85);
+    border-color: var(--fc-border-color);
     font-weight: 600;
     color: #475569;
     padding: 0.75rem 0.5rem;
     font-size: 0.875rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   .dark .calendar-container .fc-col-header-cell {
-    background: #1e293b;
-    color: #cbd5e1;
-    border-color: #334155;
+    background: rgb(255 255 255 / 0.06);
+    color: rgb(255 255 255 / 0.88);
+    border-color: var(--fc-border-color);
   }
 
   .calendar-container .fc-scrollgrid {
     border-color: var(--fc-border-color);
     border-radius: 0.75rem;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background: transparent;
+    box-shadow: none;
   }
 
   .calendar-container .fc-scrollgrid td,
@@ -994,20 +1014,20 @@ const calendarStyles = `
   }
 
   .calendar-container .fc-daygrid-day {
-    background: white;
+    background: rgb(255 255 255 / 0.45);
     transition: background-color 0.2s ease;
   }
 
   .dark .calendar-container .fc-daygrid-day {
-    background: #111827;
+    background: rgb(255 255 255 / 0.04);
   }
 
   .calendar-container .fc-daygrid-day:hover {
-    background: #f8fafc;
+    background: rgb(255 255 255 / 0.72);
   }
 
   .dark .calendar-container .fc-daygrid-day:hover {
-    background: #1f2937;
+    background: rgb(255 255 255 / 0.08);
   }
 
   .calendar-container .fc-daygrid-day-number {

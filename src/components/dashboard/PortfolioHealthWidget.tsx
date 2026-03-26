@@ -20,6 +20,8 @@ import {
   Activity,
   ExternalLink,
 } from "lucide-react";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { cn } from "@/lib/utils";
 
 interface HealthComponent {
   label: string;
@@ -66,6 +68,12 @@ const STATUS_TEXT: Record<HealthComponent["status"], string> = {
   poor: "text-red-700",
 };
 
+const STATUS_TEXT_GLASS: Record<HealthComponent["status"], string> = {
+  good: "text-emerald-200",
+  fair: "text-amber-200",
+  poor: "text-red-200",
+};
+
 const GRADE_COLOR: Record<string, string> = {
   A: "text-green-600",
   B: "text-blue-600",
@@ -75,7 +83,24 @@ const GRADE_COLOR: Record<string, string> = {
   "N/A": "text-muted-foreground",
 };
 
-function ScoreRing({ score, grade }: { score: number; grade: string }) {
+const GRADE_COLOR_GLASS: Record<string, string> = {
+  A: "text-emerald-200",
+  B: "text-sky-200",
+  C: "text-amber-200",
+  D: "text-orange-200",
+  F: "text-red-200",
+  "N/A": "text-white/50",
+};
+
+function ScoreRing({
+  score,
+  grade,
+  isLight,
+}: {
+  score: number;
+  grade: string;
+  isLight: boolean;
+}) {
   const radius = 54;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
@@ -99,7 +124,7 @@ function ScoreRing({ score, grade }: { score: number; grade: string }) {
           stroke="currentColor"
           strokeWidth="10"
           fill="none"
-          className="text-muted-foreground/20"
+          className={isLight ? "text-muted-foreground/25" : "text-white/12"}
         />
         <circle
           cx="64"
@@ -115,8 +140,15 @@ function ScoreRing({ score, grade }: { score: number; grade: string }) {
         />
       </svg>
       <div className="absolute flex flex-col items-center">
-        <span className="text-3xl font-bold">{score}</span>
-        <span className={`text-lg font-semibold ${GRADE_COLOR[grade] ?? "text-foreground"}`}>
+        <span className={cn("text-3xl font-bold", !isLight && "text-white")}>{score}</span>
+        <span
+          className={cn(
+            "text-lg font-semibold",
+            isLight
+              ? GRADE_COLOR[grade] ?? "text-foreground"
+              : GRADE_COLOR_GLASS[grade] ?? "text-white/80"
+          )}
+        >
           {grade}
         </span>
       </div>
@@ -130,6 +162,8 @@ interface Props {
 }
 
 export function PortfolioHealthWidget({ compact = false, propertyId }: Props) {
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
   const [data, setData] = useState<PortfolioHealthData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -240,8 +274,13 @@ export function PortfolioHealthWidget({ compact = false, propertyId }: Props) {
       <CardContent className="space-y-6">
         {/* Score ring */}
         <div className="flex flex-col items-center gap-2">
-          <ScoreRing score={data.score} grade={data.grade} />
-          <p className="text-xs text-muted-foreground">
+          <ScoreRing score={data.score} grade={data.grade} isLight={isLight} />
+          <p
+            className={cn(
+              "text-xs",
+              isLight ? "text-muted-foreground" : "text-white/60"
+            )}
+          >
             {data.score >= 80
               ? "Excellent portfolio performance"
               : data.score >= 65
@@ -254,7 +293,18 @@ export function PortfolioHealthWidget({ compact = false, propertyId }: Props) {
 
         {/* Trend indicator */}
         {data.trend !== undefined && data.trend !== 0 && (
-          <div className={`flex items-center justify-center gap-1 text-xs font-medium ${data.trend > 0 ? "text-green-600" : "text-red-600"}`}>
+          <div
+            className={cn(
+              "flex items-center justify-center gap-1 text-xs font-medium",
+              data.trend > 0
+                ? isLight
+                  ? "text-green-600"
+                  : "text-emerald-300"
+                : isLight
+                  ? "text-red-600"
+                  : "text-red-300"
+            )}
+          >
             {data.trend > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
             {data.trend > 0 ? "+" : ""}{data.trend} pts vs. yesterday
           </div>
@@ -263,7 +313,14 @@ export function PortfolioHealthWidget({ compact = false, propertyId }: Props) {
         {/* 30-day history sparkline */}
         {data.history && data.history.length > 1 && !compact && (
           <div>
-            <p className="text-xs text-muted-foreground mb-1">30-Day Score History</p>
+            <p
+              className={cn(
+                "mb-1 text-xs",
+                isLight ? "text-muted-foreground" : "text-white/55"
+              )}
+            >
+              30-Day Score History
+            </p>
             <div className="flex items-end gap-0.5 h-10">
               {data.history.map((h, i) => {
                 const maxScore = Math.max(...data.history.map((x) => x.score));
@@ -274,9 +331,20 @@ export function PortfolioHealthWidget({ compact = false, propertyId }: Props) {
                   <div
                     key={i}
                     title={`${new Date(h.date).toLocaleDateString()}: ${h.score} (${h.grade})`}
-                    className={`flex-1 rounded-sm min-w-[2px] cursor-default transition-colors ${
-                      h.score >= 80 ? "bg-green-400" : h.score >= 65 ? "bg-yellow-400" : "bg-red-400"
-                    }`}
+                    className={cn(
+                      "min-w-[2px] flex-1 cursor-default rounded-sm transition-colors",
+                      h.score >= 80
+                        ? isLight
+                          ? "bg-green-400"
+                          : "bg-emerald-400/70"
+                        : h.score >= 65
+                          ? isLight
+                            ? "bg-yellow-400"
+                            : "bg-amber-400/70"
+                          : isLight
+                            ? "bg-red-400"
+                            : "bg-red-400/70"
+                    )}
                     style={{ height: `${heightPct}%` }}
                   />
                 );
@@ -289,20 +357,48 @@ export function PortfolioHealthWidget({ compact = false, propertyId }: Props) {
         <div className="space-y-3">
           {data.components.map((c) => (
             <div key={c.label}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium">{c.label}</span>
+              <div className="mb-1 flex items-center justify-between">
+                <span
+                  className={cn(
+                    "text-sm font-medium",
+                    isLight ? "text-slate-900" : "text-white/90"
+                  )}
+                >
+                  {c.label}
+                </span>
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs ${STATUS_TEXT[c.status]}`}>
+                  <span
+                    className={cn(
+                      "text-xs",
+                      isLight ? STATUS_TEXT[c.status] : STATUS_TEXT_GLASS[c.status]
+                    )}
+                  >
                     {c.value}
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span
+                    className={cn(
+                      "text-xs",
+                      isLight ? "text-muted-foreground" : "text-white/50"
+                    )}
+                  >
                     {c.score}/{c.maxScore} pts
                   </span>
                 </div>
               </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div
+                className={cn(
+                  "h-2 overflow-hidden rounded-full border backdrop-blur-sm",
+                  isLight
+                    ? "border-slate-200/80 bg-slate-100/90"
+                    : "border-white/14 bg-white/[0.08]"
+                )}
+              >
                 <div
-                  className={`h-full rounded-full transition-all duration-700 ${STATUS_COLOR[c.status]}`}
+                  className={cn(
+                    "h-full rounded-full transition-all duration-700",
+                    STATUS_COLOR[c.status],
+                    !isLight && "opacity-90 shadow-[0_0_10px_rgba(255,255,255,0.12)]"
+                  )}
                   style={{ width: `${(c.score / c.maxScore) * 100}%` }}
                 />
               </div>
@@ -312,19 +408,60 @@ export function PortfolioHealthWidget({ compact = false, propertyId }: Props) {
 
         {/* Top insight */}
         {!compact && data.insights.length > 0 && (
-          <div className="rounded-lg bg-muted/50 p-3">
-            <p className="text-xs font-medium mb-1">Top Insight</p>
-            <p className="text-xs text-muted-foreground">{data.insights[0]}</p>
+          <div
+            className={cn(
+              "rounded-xl border p-3 backdrop-blur-md",
+              isLight
+                ? "border-slate-200/80 bg-white/65"
+                : "border-white/12 bg-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+            )}
+          >
+            <p
+              className={cn(
+                "mb-1 text-xs font-medium",
+                isLight ? "text-slate-800" : "text-white/90"
+              )}
+            >
+              Top Insight
+            </p>
+            <p
+              className={cn(
+                "text-xs leading-relaxed",
+                isLight ? "text-slate-600" : "text-white/65"
+              )}
+            >
+              {data.insights[0]}
+            </p>
           </div>
         )}
 
         {/* Alerts */}
         {data.meta.expiringIn60Days > 0 && (
-          <div className="flex items-center gap-2 p-2 rounded bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
-            <Badge variant="outline" className="text-orange-700 border-orange-300 text-xs">
+          <div
+            className={cn(
+              "flex items-center gap-2 rounded-xl border p-2 backdrop-blur-sm",
+              isLight
+                ? "border-orange-200 bg-orange-50/90"
+                : "border-amber-400/25 bg-amber-500/[0.12]"
+            )}
+          >
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-xs",
+                isLight
+                  ? "border-orange-300 text-orange-700"
+                  : "border-amber-400/40 bg-white/[0.06] text-amber-100"
+              )}
+            >
               Expiring
             </Badge>
-            <span className="text-xs text-orange-700 dark:text-orange-400">
+            <span
+              className={cn(
+                "text-xs",
+                isLight ? "text-orange-700" : "text-amber-100/90"
+              )}
+            >
               {data.meta.expiringIn60Days} lease
               {data.meta.expiringIn60Days === 1 ? "" : "s"} expire within 60
               days
@@ -333,7 +470,16 @@ export function PortfolioHealthWidget({ compact = false, propertyId }: Props) {
         )}
 
         <Link href="/dashboard/analytics/financial">
-          <Button variant="outline" size="sm" className="w-full">
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(
+              "w-full",
+              isLight
+                ? "border-slate-200/80 bg-white/75 backdrop-blur-sm hover:bg-white/90"
+                : "border-white/18 bg-white/[0.08] backdrop-blur-sm hover:bg-white/[0.12]"
+            )}
+          >
             <ExternalLink className="h-4 w-4 mr-2" />
             View Financial Dashboard
           </Button>

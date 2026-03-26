@@ -140,8 +140,9 @@ const OwnerListItem = memo(function OwnerListItem({
       role="link"
       tabIndex={0}
       aria-label={`${owner.firstName} ${owner.lastName}, view details`}
+      data-slot="dashboard-list-row"
       className={cn(
-        "flex cursor-pointer items-center gap-3 rounded-xl border border-border/80 bg-card p-3 transition-all",
+        "flex cursor-pointer items-center gap-3 rounded-xl border border-border/80 bg-card p-3 transition-all backdrop-blur-sm",
         "hover:border-primary/20 hover:bg-accent/40 hover:shadow-sm",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       )}
@@ -216,8 +217,9 @@ const OwnerGridCard = memo(function OwnerGridCard({
       role="link"
       tabIndex={0}
       aria-label={`${owner.firstName} ${owner.lastName}, view details`}
+      data-slot="dashboard-list-row"
       className={cn(
-        "group relative flex min-h-[200px] cursor-pointer flex-col rounded-xl border border-border/80 bg-card p-4 pt-5 transition-all",
+        "group relative flex min-h-[200px] cursor-pointer flex-col rounded-xl border border-border/80 bg-card p-4 pt-5 transition-all backdrop-blur-sm",
         "hover:border-primary/25 hover:shadow-md",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       )}

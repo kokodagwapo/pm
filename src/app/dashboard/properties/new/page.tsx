@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Building2, ArrowLeft } from "lucide-react";
 import { EnhancedPropertyForm } from "@/components/properties/PropertyForm";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
 import { cn } from "@/lib/utils";
 import {
   showErrorToast,
@@ -18,6 +19,8 @@ import {
 export default function EnhancedNewPropertyPage() {
   const router = useRouter();
   const { t } = useLocalizationContext();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
   const [isLoading, setIsLoading] = useState(false);
 
   const handlePropertySubmit = async (data: any) => {
@@ -94,22 +97,18 @@ export default function EnhancedNewPropertyPage() {
     <div className="mx-auto w-full max-w-full space-y-8 pb-10 pt-1 sm:pb-12 sm:pt-0">
       <header
         className={cn(
-          "overflow-hidden rounded-2xl border border-slate-200/90 bg-white",
-          "shadow-[0_1px_0_rgba(0,0,0,0.03),0_10px_28px_-14px_rgba(15,23,42,0.1)]",
-          "dark:border-white/[0.08] dark:bg-gray-950/70 dark:shadow-none"
+          "dashboard-ui-surface overflow-hidden rounded-2xl shadow-sm transition-[box-shadow,border-color,background-color] duration-300 ease-out [transform:translateZ(0)]"
         )}
       >
-        <div className="flex flex-col gap-3 border-b border-slate-100 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-white/[0.06]">
-          <Button
-            variant="outline"
-            size="sm"
-            asChild
-            className={cn(
-              "h-9 w-fit rounded-lg border-slate-200/90 bg-white px-3 text-black shadow-none",
-              "hover:border-slate-300 hover:bg-slate-50 hover:text-black",
-              "dark:border-white/15 dark:bg-white/[0.04] dark:text-gray-100 dark:hover:bg-white/10"
-            )}
-          >
+        <div
+          className={cn(
+            "flex flex-col gap-3 border-b px-4 py-3.5 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between sm:px-6",
+            isLight
+              ? "border-slate-200/50 bg-slate-50/25"
+              : "border-white/10 bg-white/[0.04]"
+          )}
+        >
+          <Button variant="outline" size="sm" asChild className="h-9 w-fit rounded-lg">
             <Link href="/dashboard/properties">
               <ArrowLeft className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
               {t("properties.newProperty.backToList")}
@@ -121,29 +120,31 @@ export default function EnhancedNewPropertyPage() {
           <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
             <div
               className={cn(
-                "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200/90",
-                "bg-slate-50 text-slate-800 dark:border-white/10 dark:bg-white/[0.04] dark:text-gray-100"
+                "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border backdrop-blur-sm",
+                isLight
+                  ? "border-slate-200/80 bg-white/50 text-foreground"
+                  : "border-white/15 bg-white/[0.06] text-foreground"
               )}
               aria-hidden
             >
               <Building2 className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1 space-y-3">
-              <h1 className="text-balance text-2xl font-semibold tracking-tight text-black sm:text-[1.65rem] dark:text-white">
+              <h1 className="text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-[1.65rem]">
                 {t("properties.newProperty.title")}
               </h1>
-              <p className="max-w-2xl text-pretty text-sm leading-relaxed text-black/70 sm:text-[15px] dark:text-gray-400">
+              <p className="max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
                 {t("properties.newProperty.subtitle")}
               </p>
               <div
                 className={cn(
-                  "max-w-2xl rounded-lg border border-slate-200/80 bg-slate-50/60 px-3.5 py-2.5",
-                  "dark:border-white/10 dark:bg-white/[0.03]"
+                  "max-w-2xl rounded-xl border px-3.5 py-2.5 text-pretty text-xs leading-relaxed backdrop-blur-md sm:text-[13px]",
+                  isLight
+                    ? "border-slate-200/60 bg-white/45 text-muted-foreground"
+                    : "border-white/12 bg-white/[0.04] text-muted-foreground"
                 )}
               >
-                <p className="text-pretty text-xs leading-relaxed text-black/60 sm:text-[13px] dark:text-gray-500">
-                  {t("properties.newProperty.hint")}
-                </p>
+                {t("properties.newProperty.hint")}
               </div>
             </div>
           </div>

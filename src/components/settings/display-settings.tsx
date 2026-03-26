@@ -42,6 +42,8 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import { cn } from "@/lib/utils";
 import { BrandingSection } from "./branding-section";
 import { useBranding } from "@/components/providers/BrandingProvider";
 import { logClientError, logClientInfo, logClientWarn } from "@/utils/logger";
@@ -135,6 +137,8 @@ export function DisplaySettings({
 
   const { setTheme } = useTheme();
   const { updateBranding } = useBranding();
+  const dashAppearance = useOptionalDashboardAppearance();
+  const isDashboardLight = dashAppearance?.isLight ?? true;
   const localization = useLocalizationContext();
   const {
     currentCurrency,
@@ -415,11 +419,17 @@ export function DisplaySettings({
                         themeOption as "light" | "dark" | "system"
                       )
                     }
-                    className={`flex items-center gap-2 p-3 rounded-lg border transition-colors ${
+                    className={cn(
+                      "flex items-center gap-2 rounded-lg border p-3 text-left text-foreground transition-[border-color,background-color,box-shadow]",
                       watchedValues.theme === themeOption
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:bg-accent"
-                    }`}
+                        ? "border-primary bg-primary/10 shadow-sm"
+                        : cn(
+                            "border-border/80 bg-transparent hover:border-primary/45 hover:shadow-none",
+                            isDashboardLight
+                              ? "hover:bg-muted/35"
+                              : "hover:bg-white/[0.06]"
+                          )
+                    )}
                   >
                     {getThemeIcon(themeOption)}
                     <span className="capitalize">{themeOption}</span>
@@ -543,12 +553,15 @@ export function DisplaySettings({
                     updateState({ hasUnsavedChanges: true });
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger
+                    id="currency"
+                    className="h-11 min-h-11 rounded-xl shadow-none transition-[border-color,box-shadow]"
+                  >
                     <SelectValue
                       placeholder={t("settings.display.currency.placeholder")}
                     />
                   </SelectTrigger>
-                  <SelectContent className="max-h-60">
+                  <SelectContent className="max-h-60 rounded-xl">
                     {/* Group currencies by region for better organization */}
                     {localization.allCurrencies
                       .sort((a, b) => {
@@ -634,32 +647,74 @@ export function DisplaySettings({
               </div>
 
               {/* Currency Preview */}
-              <div className="p-4 bg-muted rounded-lg">
-                <div className="text-sm text-muted-foreground mb-2">
+              <div
+                className={cn(
+                  "rounded-xl border p-4 backdrop-blur-md",
+                  isDashboardLight
+                    ? "border-slate-200/85 bg-white/65 shadow-sm dark:border-slate-600/70 dark:bg-slate-900/45"
+                    : "border-white/12 bg-white/[0.05] [box-shadow:inset_0_1px_0_rgba(255,255,255,0.06)]"
+                )}
+              >
+                <div
+                  className={cn(
+                    "mb-2 text-sm",
+                    isDashboardLight ? "text-muted-foreground" : "text-white/58"
+                  )}
+                >
                   {t("settings.display.currency.previewLabel")}
                 </div>
                 <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm">
+                  <div className="flex justify-between gap-4">
+                    <span
+                      className={cn(
+                        "text-sm",
+                        isDashboardLight ? "text-foreground/80" : "text-white/75"
+                      )}
+                    >
                       {t("settings.display.currency.preview.rent")}
                     </span>
-                    <span className="font-medium">
+                    <span
+                      className={cn(
+                        "font-medium tabular-nums",
+                        isDashboardLight ? "text-foreground" : "text-white"
+                      )}
+                    >
                       {localization.formatCurrency(1500)}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">
+                  <div className="flex justify-between gap-4">
+                    <span
+                      className={cn(
+                        "text-sm",
+                        isDashboardLight ? "text-foreground/80" : "text-white/75"
+                      )}
+                    >
                       {t("settings.display.currency.preview.deposit")}
                     </span>
-                    <span className="font-medium">
+                    <span
+                      className={cn(
+                        "font-medium tabular-nums",
+                        isDashboardLight ? "text-foreground" : "text-white"
+                      )}
+                    >
                       {localization.formatCurrency(3000)}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">
+                  <div className="flex justify-between gap-4">
+                    <span
+                      className={cn(
+                        "text-sm",
+                        isDashboardLight ? "text-foreground/80" : "text-white/75"
+                      )}
+                    >
                       {t("settings.display.currency.preview.maintenance")}
                     </span>
-                    <span className="font-medium">
+                    <span
+                      className={cn(
+                        "font-medium tabular-nums",
+                        isDashboardLight ? "text-foreground" : "text-white"
+                      )}
+                    >
                       {localization.formatCurrency(250)}
                     </span>
                   </div>
@@ -668,12 +723,33 @@ export function DisplaySettings({
 
               {/* Currency Info */}
               {localization.currency && (
-                <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div
+                  className={cn(
+                    "rounded-xl border p-3 backdrop-blur-md",
+                    isDashboardLight
+                      ? "border-sky-200/75 bg-sky-50/65 shadow-sm dark:border-sky-800/55 dark:bg-sky-950/35"
+                      : "border-sky-400/28 bg-sky-500/[0.12] [box-shadow:inset_0_1px_0_rgba(255,255,255,0.06)]"
+                  )}
+                >
                   <div className="text-sm">
-                    <div className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                    <div
+                      className={cn(
+                        "mb-1 font-medium",
+                        isDashboardLight
+                          ? "text-sky-950 dark:text-sky-50"
+                          : "text-sky-50"
+                      )}
+                    >
                       {t("settings.display.currency.details.title")}
                     </div>
-                    <div className="text-blue-700 dark:text-blue-300 space-y-1">
+                    <div
+                      className={cn(
+                        "space-y-1",
+                        isDashboardLight
+                          ? "text-sky-900/90 dark:text-sky-200/95"
+                          : "text-sky-100/88"
+                      )}
+                    >
                       <div>
                         {t("settings.display.currency.details.symbol")}{" "}
                         <span className="font-mono">

@@ -65,40 +65,8 @@ import {
 import { PropertyType, PropertyStatus } from "@/types";
 import { ImageUpload, type UploadedImage } from "@/components/ui/image-upload";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
+import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
 import { cn } from "@/lib/utils";
-
-/** Create/edit property — section surfaces and black-forward type in light mode */
-const propertyFormSectionCard = cn(
-  "gap-0 overflow-hidden rounded-2xl border border-slate-200/90 bg-white py-0",
-  "shadow-[0_1px_0_rgba(0,0,0,0.04),0_14px_36px_-12px_rgba(15,23,42,0.12)]",
-  "dark:border-white/[0.08] dark:bg-gray-950/60 dark:shadow-none"
-);
-
-const propertyFormSectionHeader = cn(
-  "space-y-1 border-b border-slate-100 bg-slate-50/40 px-4 py-4 sm:px-5 sm:py-4",
-  "dark:border-white/[0.06] dark:bg-white/[0.02]"
-);
-
-const propertyFormSectionTitle = cn(
-  "flex items-center gap-3 text-base font-semibold tracking-tight text-black sm:text-lg dark:text-white"
-);
-
-const propertyFormSectionDesc = cn(
-  "text-xs font-normal leading-snug text-black/65 sm:text-sm dark:text-gray-400"
-);
-
-const propertyFormCardBody = cn(
-  "space-y-4 px-4 pb-6 pt-4 text-black sm:px-5 sm:pb-6 sm:pt-5 dark:text-gray-100",
-  "[&_label]:text-black [&_label]:font-medium [&_label]:dark:text-gray-100",
-  "[&_.text-muted-foreground]:text-black/60 [&_.text-muted-foreground]:dark:text-gray-500",
-  "[&_input]:text-black [&_textarea]:text-black dark:[&_input]:text-gray-100 dark:[&_textarea]:text-gray-100",
-  "[&_[data-slot=select-trigger]]:text-black dark:[&_[data-slot=select-trigger]]:text-gray-100"
-);
-
-const propertyFormNestedCard = cn(
-  "rounded-lg border border-slate-200/70 bg-white p-4 shadow-sm",
-  "dark:border-white/10 dark:bg-white/[0.03]"
-);
 
 // Enhanced form schema
 const enhancedPropertySchema = (t: (key: string, options?: any) => string) =>
@@ -554,6 +522,41 @@ export function EnhancedPropertyForm({
   });
 
   const { t } = useLocalizationContext();
+  const dash = useOptionalDashboardAppearance();
+  const isLight = dash?.isLight ?? false;
+
+  const sectionCardClass = cn(
+    "gap-0 overflow-hidden rounded-2xl py-0 shadow-sm transition-shadow duration-300 ease-out [transform:translateZ(0)]"
+  );
+  const sectionHeaderClass = cn(
+    "space-y-1 border-b px-4 py-4 backdrop-blur-md sm:px-5 sm:py-4",
+    isLight
+      ? "border-slate-200/55 bg-slate-50/30"
+      : "border-white/10 bg-white/[0.05]"
+  );
+  const sectionTitleClass =
+    "flex items-center gap-3 text-base font-semibold tracking-tight text-foreground sm:text-lg";
+  const sectionDescClass =
+    "text-xs font-normal leading-snug text-muted-foreground sm:text-sm";
+  const cardBodyClass = cn(
+    "space-y-4 px-4 pb-6 pt-4 text-foreground sm:px-5 sm:pb-6 sm:pt-5"
+  );
+  const nestedUnitClass = cn(
+    "gap-0 overflow-hidden rounded-xl !px-4 !py-4 shadow-none ring-1 ring-inset backdrop-blur-md",
+    isLight ? "ring-slate-900/[0.06]" : "ring-white/[0.09]"
+  );
+  const insetCalloutClass = cn(
+    "rounded-xl border p-4 text-sm text-foreground backdrop-blur-md",
+    isLight
+      ? "border-slate-200/65 bg-white/45"
+      : "border-white/12 bg-white/[0.04]"
+  );
+  const insetSubtleClass = cn(
+    "rounded-xl border p-3 backdrop-blur-md sm:p-4",
+    isLight
+      ? "border-slate-200/65 bg-white/40"
+      : "border-white/12 bg-white/[0.04]"
+  );
 
   const form = useForm({
     resolver: zodResolver(enhancedPropertySchema(t)),
@@ -687,19 +690,19 @@ export function EnhancedPropertyForm({
   return (
     <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* General Information */}
-      <Card className={propertyFormSectionCard}>
-        <CardHeader className={propertyFormSectionHeader}>
-          <CardTitle className={propertyFormSectionTitle}>
+      <Card className={sectionCardClass}>
+        <CardHeader className={sectionHeaderClass}>
+          <CardTitle className={sectionTitleClass}>
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-violet-200/70 bg-violet-50/90 text-violet-700 dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-300">
               <Building2 className="h-[18px] w-[18px]" />
             </div>
             {t("properties.form.general.title")}
           </CardTitle>
-          <CardDescription className={propertyFormSectionDesc}>
+          <CardDescription className={sectionDescClass}>
             {t("properties.form.general.description")}
           </CardDescription>
         </CardHeader>
-        <CardContent className={propertyFormCardBody}>
+        <CardContent className={cardBodyClass}>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">
@@ -836,8 +839,8 @@ export function EnhancedPropertyForm({
           {/* Address */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-black dark:text-gray-300" />
-              <Label className="text-base font-semibold text-black dark:text-gray-100">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <Label className="text-base font-semibold text-foreground">
                 {t("properties.form.address.title")}
               </Label>
             </div>
@@ -919,35 +922,35 @@ export function EnhancedPropertyForm({
       </Card>
 
       {/* Property Units */}
-      <Card className={propertyFormSectionCard}>
-        <CardHeader className={propertyFormSectionHeader}>
-          <CardTitle className={propertyFormSectionTitle}>
+      <Card className={sectionCardClass}>
+        <CardHeader className={sectionHeaderClass}>
+          <CardTitle className={sectionTitleClass}>
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sky-200/70 bg-sky-50/90 text-sky-700 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-300">
               <Home className="h-[18px] w-[18px]" />
             </div>
             {t("properties.form.units.title")}
           </CardTitle>
-          <CardDescription className={propertyFormSectionDesc}>
+          <CardDescription className={sectionDescClass}>
             {t("properties.form.units.description")}
           </CardDescription>
         </CardHeader>
-        <CardContent className={cn(propertyFormCardBody, "space-y-4")}>
+        <CardContent className={cn(cardBodyClass, "space-y-4")}>
           {/* Smart Unit Management Info */}
-          <div className="rounded-lg border border-slate-200/80 bg-slate-50/70 p-4 text-sm text-black/80 dark:border-white/10 dark:bg-white/[0.03] dark:text-gray-300">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-black/55 dark:text-gray-400">
+          <div className={insetCalloutClass}>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Smart Unit Management
             </p>
-            <p className="leading-relaxed text-black/75 dark:text-gray-300">
+            <p className="leading-relaxed text-muted-foreground">
               Your property will automatically be configured as single or
               multi-unit based on the number of units you add. Start with one
               unit and add more using the &quot;Add New Unit&quot; button.
             </p>
           </div>
           {units.map((unit, index) => (
-            <Card key={unit.id} className={propertyFormNestedCard}>
+            <Card key={unit.id} className={nestedUnitClass}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-black dark:text-white">
+                  <h3 className="font-semibold text-foreground">
                     {t("properties.form.units.unitTitle", {
                       values: { index: index + 1 },
                     })}
@@ -1124,8 +1127,13 @@ export function EnhancedPropertyForm({
                 </div>
 
                 {/* Unit Images */}
-                <div className="space-y-2 border-t border-slate-200 pt-3 dark:border-white/10">
-                  <Label className="flex items-center gap-2 text-sm text-black dark:text-gray-100">
+                <div
+                  className={cn(
+                    "space-y-2 border-t pt-3",
+                    isLight ? "border-slate-200/70" : "border-white/10"
+                  )}
+                >
+                  <Label className="flex items-center gap-2 text-sm text-foreground">
                     <ImageIcon className="h-4 w-4" />
                     {t("properties.form.units.fields.images")}
                   </Label>
@@ -1185,7 +1193,7 @@ export function EnhancedPropertyForm({
               };
               setUnits([...units, newUnit]);
             }}
-            className="w-full border-slate-300 text-black hover:bg-slate-50 dark:border-white/20 dark:text-gray-100 dark:hover:bg-white/5"
+            className="w-full"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Unit
@@ -1196,19 +1204,19 @@ export function EnhancedPropertyForm({
       {/* Note: Unit information is now handled by IntegratedUnitManagement component above */}
 
       {/* Amenities & Features */}
-      <Card className={propertyFormSectionCard}>
-        <CardHeader className={propertyFormSectionHeader}>
-          <CardTitle className={propertyFormSectionTitle}>
+      <Card className={sectionCardClass}>
+        <CardHeader className={sectionHeaderClass}>
+          <CardTitle className={sectionTitleClass}>
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-amber-200/70 bg-amber-50/90 text-amber-900 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
               <Star className="h-[18px] w-[18px]" />
             </div>
             {t("properties.form.amenities.title")}
           </CardTitle>
-          <CardDescription className={propertyFormSectionDesc}>
+          <CardDescription className={sectionDescClass}>
             {t("properties.form.amenities.description")}
           </CardDescription>
         </CardHeader>
-        <CardContent className={cn(propertyFormCardBody, "space-y-4")}>
+        <CardContent className={cn(cardBodyClass, "space-y-4")}>
           {/* Essential Amenities — compact tiles with pastel icons */}
           <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8">
             {ESSENTIAL_AMENITIES_AND_FEATURES.map((item) => {
@@ -1220,12 +1228,18 @@ export function EnhancedPropertyForm({
                 <div
                   key={item}
                   className={cn(
-                    "grid min-h-0 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 rounded-md border px-1.5 py-1 transition-colors duration-150",
-                    "hover:border-slate-300 hover:bg-slate-50/90 active:scale-[0.99] dark:hover:border-white/20 dark:hover:bg-white/[0.04]",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/80 focus-visible:ring-offset-1 dark:focus-visible:ring-white/40",
+                    "grid min-h-0 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 rounded-md border px-1.5 py-1 backdrop-blur-sm transition-colors duration-150",
+                    "active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent",
+                    isLight
+                      ? "hover:border-slate-300/90 hover:bg-white/70"
+                      : "hover:border-white/22 hover:bg-white/[0.07]",
                     selected
-                      ? "border-slate-700/90 bg-slate-100/90 shadow-sm dark:border-white/70 dark:bg-white/12 dark:text-white"
-                      : "border-slate-200/80 bg-white dark:border-white/10 dark:bg-white/[0.02] dark:text-gray-100"
+                      ? isLight
+                        ? "border-slate-500/50 bg-slate-200/55 shadow-sm"
+                        : "border-white/45 bg-white/14 shadow-sm"
+                      : isLight
+                        ? "border-slate-200/75 bg-white/55"
+                        : "border-white/12 bg-white/[0.04]"
                   )}
                   onClick={() => handleAmenityToggle(item)}
                   tabIndex={0}
@@ -1246,7 +1260,7 @@ export function EnhancedPropertyForm({
                   >
                     <Icon className="h-3.5 w-3.5" strokeWidth={2} />
                   </div>
-                  <span className="min-w-0 text-left text-[10px] font-medium leading-tight text-black line-clamp-2 sm:text-[11px] dark:text-gray-100">
+                  <span className="min-w-0 text-left text-[10px] font-medium leading-tight text-foreground line-clamp-2 sm:text-[11px]">
                     {t(labelKey)}
                   </span>
                   <Checkbox
@@ -1264,8 +1278,8 @@ export function EnhancedPropertyForm({
           </div>
 
           {/* Custom Amenity Input - Modern Design */}
-          <div className="rounded-lg border border-slate-200/90 bg-slate-50/50 p-3 sm:p-4 dark:border-white/10 dark:bg-white/[0.03]">
-            <Label className="mb-2 block text-xs font-semibold text-black sm:text-sm dark:text-gray-100">
+          <div className={insetSubtleClass}>
+            <Label className="mb-2 block text-xs font-semibold text-foreground sm:text-sm">
               {t("properties.form.amenities.custom.label")}
             </Label>
             <div className="flex gap-3">
@@ -1279,14 +1293,14 @@ export function EnhancedPropertyForm({
                     handleAddCustomAmenity();
                   }
                 }}
-                className="flex-1 border-slate-200 text-black focus-visible:border-slate-400 dark:border-white/15 dark:text-gray-100"
+                className="flex-1"
               />
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleAddCustomAmenity}
                 disabled={!customAmenity.trim()}
-                className="border-slate-300 px-4 text-black hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/20 dark:text-gray-100 dark:hover:bg-white/10"
+                className="shrink-0 px-4 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -1295,8 +1309,8 @@ export function EnhancedPropertyForm({
 
           {/* Selected Items Display - Enhanced */}
           {selectedAmenities.length > 0 && (
-            <div className="rounded-lg border border-slate-200/90 bg-slate-50/60 p-3 sm:p-4 dark:border-white/10 dark:bg-white/[0.04]">
-              <Label className="mb-2 block text-xs font-semibold text-black sm:text-sm dark:text-gray-100">
+            <div className={insetSubtleClass}>
+              <Label className="mb-2 block text-xs font-semibold text-foreground sm:text-sm">
                 {t("properties.form.amenities.selected.label", {
                   values: { count: selectedAmenities.length },
                 })}
@@ -1306,12 +1320,20 @@ export function EnhancedPropertyForm({
                   <Badge
                     key={item}
                     variant="secondary"
-                    className="flex items-center gap-2 border border-slate-200 bg-white px-3 py-1.5 font-medium text-black transition-colors hover:bg-slate-50 dark:border-white/15 dark:bg-white/10 dark:text-gray-100 dark:hover:bg-white/15"
+                    className={cn(
+                      "flex items-center gap-2 border px-3 py-1.5 font-medium backdrop-blur-sm transition-colors",
+                      isLight
+                        ? "border-slate-200/80 bg-white/70 text-foreground hover:bg-white/90"
+                        : "border-white/15 bg-white/10 text-foreground hover:bg-white/14"
+                    )}
                   >
                     <span className="font-medium">{item}</span>
                     <button
                       type="button"
-                      className="ml-1 rounded-full p-0.5 transition-colors hover:bg-slate-200 dark:hover:bg-white/15"
+                      className={cn(
+                        "ml-1 rounded-full p-0.5 transition-colors",
+                        isLight ? "hover:bg-slate-200/80" : "hover:bg-white/15"
+                      )}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -1324,7 +1346,7 @@ export function EnhancedPropertyForm({
                         }
                       )}
                     >
-                      <X className="h-3.5 w-3.5 text-black/70 hover:text-black dark:text-gray-300 dark:hover:text-white" />
+                      <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
                     </button>
                   </Badge>
                 ))}
@@ -1335,19 +1357,19 @@ export function EnhancedPropertyForm({
       </Card>
 
       {/* Property Images */}
-      <Card className={propertyFormSectionCard}>
-        <CardHeader className={propertyFormSectionHeader}>
-          <CardTitle className={propertyFormSectionTitle}>
+      <Card className={sectionCardClass}>
+        <CardHeader className={sectionHeaderClass}>
+          <CardTitle className={sectionTitleClass}>
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-200/70 bg-emerald-50/90 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
               <ImageIcon className="h-[18px] w-[18px]" />
             </div>
             {t("properties.form.images.title")}
           </CardTitle>
-          <CardDescription className={propertyFormSectionDesc}>
+          <CardDescription className={sectionDescClass}>
             {t("properties.form.images.description")}
           </CardDescription>
         </CardHeader>
-        <CardContent className={cn(propertyFormCardBody, "space-y-5")}>
+        <CardContent className={cn(cardBodyClass, "space-y-5")}>
           <ImageUpload
             onImagesUploaded={handleImagesUploaded}
             // DISABLED: Delete functionality temporarily disabled
@@ -1365,8 +1387,13 @@ export function EnhancedPropertyForm({
 
           {/* Image count display */}
           {propertyImages.length > 0 && (
-            <div className="rounded-lg border border-slate-200/90 bg-slate-50/80 p-3 text-sm text-black/80 dark:border-white/10 dark:bg-white/[0.03] dark:text-gray-300">
-              <span className="font-semibold text-black dark:text-white">
+            <div
+              className={cn(
+                insetCalloutClass,
+                "p-3 text-sm text-muted-foreground"
+              )}
+            >
+              <span className="font-semibold text-foreground">
                 {propertyImages.length}
               </span>{" "}
               {t("properties.form.images.count", {
@@ -1380,15 +1407,13 @@ export function EnhancedPropertyForm({
       {/* Form Actions */}
       <div
         className={cn(
-          "flex flex-col-reverse gap-2 rounded-xl border border-slate-200/90 bg-slate-50/40 p-3 sm:flex-row sm:items-center sm:justify-end sm:gap-3 sm:p-4",
-          "dark:border-white/10 dark:bg-white/[0.03]"
+          "flex flex-col-reverse gap-2 rounded-xl border p-3 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-end sm:gap-3 sm:p-4",
+          isLight
+            ? "border-slate-200/55 bg-white/50 shadow-[0_8px_32px_rgba(15,23,42,0.06)]"
+            : "border-white/12 bg-white/[0.06]"
         )}
       >
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full border-slate-300 text-black hover:bg-white sm:w-auto dark:border-white/20 dark:text-gray-100 dark:hover:bg-white/10"
-        >
+        <Button type="button" variant="outline" className="w-full sm:w-auto">
           {t("common.cancel")}
         </Button>
         <Button

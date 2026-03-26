@@ -167,7 +167,7 @@ export function HeroVideo({ tone = "dark" }: { tone?: "dark" | "light" }) {
         className={
           tone === "light"
             ? "absolute inset-0 bg-gradient-to-b from-white/92 via-slate-50/88 to-slate-100/90 transition-opacity duration-500"
-            : "absolute inset-0 bg-gradient-to-b from-slate-900/95 to-slate-950 transition-opacity duration-500"
+            : "absolute inset-0 bg-gradient-to-b from-slate-900/88 via-slate-950/92 to-slate-950 transition-opacity duration-500"
         }
         style={{ opacity: isVisible ? 0 : 1 }}
         aria-hidden

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Building2, ArrowLeft, AlertCircle, Loader2 } from "lucide-react";
@@ -105,48 +104,43 @@ export default function EditPropertyPage() {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Error Loading Property
-            </h3>
-            <p className="text-gray-600 text-center mb-6">{error}</p>
-            <Button onClick={() => router.push("/dashboard/properties")}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Properties
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="dashboard-ui-surface flex flex-col items-center justify-center rounded-2xl px-6 py-12">
+          <h3 className="mb-2 text-lg font-semibold text-foreground">
+            Error Loading Property
+          </h3>
+          <p className="mb-6 text-center text-muted-foreground">{error}</p>
+          <Button onClick={() => router.push("/dashboard/properties")}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Properties
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <Building2 className="h-8 w-8" />
+    <div className="mx-auto w-full max-w-full space-y-8 pb-10 pt-1 sm:pb-12 sm:pt-0">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 space-y-2">
+          <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            <Building2 className="h-7 w-7 shrink-0 text-primary sm:h-8 sm:w-8" />
             Edit Property
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground sm:text-base">
             Update property information and integrated unit management
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push(`/dashboard/properties/${propertyId}`)}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Property
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-9 w-full shrink-0 sm:w-auto"
+          onClick={() => router.push(`/dashboard/properties/${propertyId}`)}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Property
+        </Button>
       </div>
 
-      {/* Error Alert */}
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -154,17 +148,15 @@ export default function EditPropertyPage() {
         </Alert>
       )}
 
-      <Card>
-        <CardContent className="p-6">
-          <EnhancedPropertyForm
-            initialData={propertyData}
-            onSubmit={handlePropertySubmit}
-            isLoading={saving}
-            mode="edit"
-            propertyId={propertyId}
-          />
-        </CardContent>
-      </Card>
+      <div className="min-w-0">
+        <EnhancedPropertyForm
+          initialData={propertyData}
+          onSubmit={handlePropertySubmit}
+          isLoading={saving}
+          mode="edit"
+          propertyId={propertyId}
+        />
+      </div>
     </div>
   );
 }

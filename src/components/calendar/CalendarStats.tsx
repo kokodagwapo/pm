@@ -54,10 +54,10 @@ export function CalendarStats() {
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-black dark:text-gray-100">
+              <p className="text-sm font-medium text-muted-foreground">
                 Total Events
               </p>
-              <p className="text-2xl font-bold text-black dark:text-gray-100">
+              <p className="text-2xl font-bold text-foreground">
                 {stats.totalEvents}
               </p>
             </div>
@@ -70,10 +70,10 @@ export function CalendarStats() {
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-black dark:text-gray-100">
+              <p className="text-sm font-medium text-muted-foreground">
                 Upcoming
               </p>
-              <p className="text-2xl font-bold text-black dark:text-gray-100">
+              <p className="text-2xl font-bold text-foreground">
                 {stats.upcomingEvents}
               </p>
             </div>
@@ -86,10 +86,10 @@ export function CalendarStats() {
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-black dark:text-gray-100">
+              <p className="text-sm font-medium text-muted-foreground">
                 Today
               </p>
-              <p className="text-2xl font-bold text-black dark:text-gray-100">
+              <p className="text-2xl font-bold text-foreground">
                 {stats.todayEvents}
               </p>
             </div>
@@ -102,10 +102,10 @@ export function CalendarStats() {
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-black dark:text-gray-100">
+              <p className="text-sm font-medium text-muted-foreground">
                 Pending RSVPs
               </p>
-              <p className="text-2xl font-bold text-black dark:text-gray-100">
+              <p className="text-2xl font-bold text-foreground">
                 {stats.pendingRSVPs}
               </p>
             </div>

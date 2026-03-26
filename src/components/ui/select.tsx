@@ -38,12 +38,10 @@ function SelectTrigger({
       data-size={size}
       className={cn(
         "data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground",
-        "flex w-full items-center justify-between gap-2 rounded-md border-2 border-gray-200 bg-white px-3 py-2 text-sm",
-        "shadow-sm transition-all duration-200 outline-none whitespace-nowrap",
-        "hover:border-gray-300 hover:shadow-md",
-        "focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:shadow-lg",
-        "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50",
-        "dark:border-gray-700 dark:bg-gray-800/50 dark:hover:border-gray-600 dark:focus:border-blue-400 dark:focus:ring-blue-400/20",
+        "flex w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm",
+        "shadow-sm transition-[color,box-shadow,border-color] outline-none whitespace-nowrap",
+        "focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
+        "disabled:cursor-not-allowed disabled:opacity-50",
         "data-[size=default]:h-10 data-[size=sm]:h-8",
         "*:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",

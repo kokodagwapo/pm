@@ -115,7 +115,14 @@ function StatCard({
           </p>
           <p className={cn("mt-1 text-3xl font-semibold tracking-tight", colorClass)}>{value}</p>
         </div>
-        <div className={cn("rounded-xl p-2.5", colorClass.replace("text-", "bg-").replace("400", "400/10").replace("500", "500/10"))}>
+        <div
+          className={cn(
+            "rounded-xl border p-2.5 backdrop-blur-sm",
+            isLight
+              ? "border-slate-200/70 bg-white/90"
+              : "border-white/15 bg-white/10"
+          )}
+        >
           <Icon className={cn("h-5 w-5", colorClass)} />
         </div>
       </div>
