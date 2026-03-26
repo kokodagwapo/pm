@@ -806,7 +806,7 @@ export function DashboardPropertyCalendarSection() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         disabled={!propertyId || !selectedUnitId}
-                        onClick={() => {
+                        onSelect={() => {
                           setBlockFormTarget("unit");
                           setBlockFormDates({});
                           setShowBlockForm(true);
@@ -821,7 +821,7 @@ export function DashboardPropertyCalendarSection() {
                       {units.length > 1 && (
                         <DropdownMenuItem
                           disabled={!propertyId}
-                          onClick={() => {
+                          onSelect={() => {
                             setBlockFormTarget("all");
                             setBlockFormDates({});
                             setShowBlockForm(true);

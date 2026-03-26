@@ -21,7 +21,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PricingRuleType } from "@/types";
 import { cn } from "@/lib/utils";
@@ -283,7 +282,7 @@ export function PricingRuleForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          "max-h-[90vh] overflow-y-auto sm:max-w-[560px]",
+          "max-h-[90vh] overflow-y-auto sm:!max-w-[560px]",
           glassDialog
         )}
       >
@@ -834,25 +833,26 @@ export function PricingRuleForm({
           </div>
 
           {previewPrice !== null && baseRentPerNight > 0 && (
-            <Card className={cn(glassCard, "shadow-none")}>
-              <CardContent className="px-4 pt-4 pb-4">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Price Preview</span>
-                  <div className="flex items-center gap-2">
-                    <span className="line-through text-muted-foreground">
-                      ${baseRentPerNight.toFixed(2)}
-                    </span>
-                    <Badge
-                      variant={
-                        previewPrice > baseRentPerNight ? "destructive" : "default"
-                      }
-                    >
-                      ${previewPrice.toFixed(2)}/night
-                    </Badge>
-                  </div>
+            <div
+              role="status"
+              className={cn(glassCard, "px-4 py-3.5 text-card-foreground shadow-none")}
+            >
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Price Preview</span>
+                <div className="flex items-center gap-2">
+                  <span className="line-through text-muted-foreground">
+                    ${baseRentPerNight.toFixed(2)}
+                  </span>
+                  <Badge
+                    variant={
+                      previewPrice > baseRentPerNight ? "destructive" : "default"
+                    }
+                  >
+                    ${previewPrice.toFixed(2)}/night
+                  </Badge>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {error && (
