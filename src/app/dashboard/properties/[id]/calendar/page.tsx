@@ -34,6 +34,7 @@ import {
   CalendarRentalRequest,
   DateSelection,
 } from "@/components/calendar/AvailabilityCalendar";
+import { StackedPropertyUnitCalendars } from "@/components/calendar/StackedPropertyUnitCalendars";
 import { DateBlockForm, DateBlockFormData } from "@/components/calendar/DateBlockForm";
 import { PricingRuleForm, PricingRuleFormData } from "@/components/calendar/PricingRuleForm";
 import { DateBlockType } from "@/types";
@@ -610,6 +611,15 @@ export default function PropertyCalendarPage() {
         </div>
       )}
 
+      {units.length > 0 && propertyId && (
+        <StackedPropertyUnitCalendars
+          propertyId={propertyId}
+          units={units}
+          baseRentPerNight={baseRentPerNight}
+          defaultExpanded
+        />
+      )}
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList
           className={cn(
@@ -681,6 +691,7 @@ export default function PropertyCalendarPage() {
                   readOnly={userRole === "tenant"}
                   showPricing={true}
                   showLegend={true}
+                  selectionMode="two-click"
                 />
               ) : (
                 <p

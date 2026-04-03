@@ -372,6 +372,7 @@ export default function UnitCalendarPage() {
                 readOnly={userRole === "tenant"}
                 showPricing={true}
                 showLegend={true}
+                selectionMode="two-click"
               />
             </CardContent>
           </Card>

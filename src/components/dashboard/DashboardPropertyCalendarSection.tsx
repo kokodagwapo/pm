@@ -908,6 +908,7 @@ export function DashboardPropertyCalendarSection() {
                     showLegend
                     monthsShown={1}
                     daySize="comfortable"
+                    selectionMode="two-click"
                     className="w-full"
                   />
                 </div>

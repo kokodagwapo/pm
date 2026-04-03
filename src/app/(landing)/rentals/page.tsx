@@ -27,7 +27,25 @@ import {
   Check,
   Grid3X3,
   RotateCcw,
+  Car,
+  CalendarIcon,
+  Users,
+  Plus,
+  Minus,
 } from "lucide-react";
+import { format } from "date-fns";
+import type { DateRange } from "react-day-picker";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  usePublicStaySearch,
+  parseStayParamDate,
+} from "@/components/stay-finder/usePublicStaySearch";
 
 const NEIGHBORHOODS = [
   { label: "All Properties", value: "" },
@@ -54,6 +72,14 @@ const BEDROOMS_OPTIONS = [
   { value: "2", label: "2+ Beds" },
   { value: "3", label: "3+ Beds" },
   { value: "4", label: "4+ Beds" },
+];
+
+const PARKING_OPTIONS = [
+  { value: "", label: "Any" },
+  { value: "garage", label: "Garage" },
+  { value: "covered", label: "Covered" },
+  { value: "open", label: "Open" },
+  { value: "street", label: "Street" },
 ];
 
 function formatPrice(amount: number): string {
@@ -411,13 +437,55 @@ function PropertyListCard({
   );
 }
 
+function RentalsGuestRow({
+  label,
+  sub,
+  value,
+  min,
+  onChange,
+}: {
+  label: string;
+  sub: string;
+  value: number;
+  min: number;
+  onChange: (n: number) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-slate-100 py-2 last:border-0">
+      <div>
+        <div className="text-sm font-medium text-slate-900">{label}</div>
+        <div className="text-xs text-slate-500">{sub}</div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="h-8 w-8"
+          disabled={value <= min}
+          onClick={() => onChange(Math.max(min, value - 1))}
+        >
+          <Minus className="h-3.5 w-3.5" />
+        </Button>
+        <span className="w-6 text-center text-sm tabular-nums">{value}</span>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => onChange(value + 1)}
+        >
+          <Plus className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function RentalsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { t } = useLocalizationContext();
-  const [properties, setProperties] = useState<any[]>([]);
-  const [pagination, setPagination] = useState({ page: 1, total: 0, pages: 0 });
-  const [loading, setLoading] = useState(true);
   const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
@@ -425,13 +493,85 @@ function RentalsContent() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
+  const [listDrawerOpen, setListDrawerOpen] = useState(false);
+  const [stayCalMonths, setStayCalMonths] = useState(1);
+  const [isLg, setIsLg] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(min-width: 1024px)").matches
+      : false
+  );
 
   const activeType = searchParams.get("type") || "";
   const activeBedrooms = searchParams.get("bedrooms") || "";
+  const activeParkingType = searchParams.get("parkingType") || "";
   const activeMinPrice = searchParams.get("minRent") || "";
   const activeMaxPrice = searchParams.get("maxRent") || "";
   const activeSearch = searchParams.get("search") || "";
   const activeNeighborhood = searchParams.get("neighborhood") || "";
+
+  const getBrowseQueryString = useCallback(() => {
+    const p = new URLSearchParams(searchParams.toString());
+    p.delete("checkIn");
+    p.delete("checkOut");
+    p.delete("adults");
+    p.delete("children");
+    p.delete("infants");
+    if (!p.get("page")) p.set("page", "1");
+    p.set("limit", "50");
+    return p.toString();
+  }, [searchParams]);
+
+  const getAvailabilityExtraParams = useCallback(() => {
+    const o: Record<string, string> = {};
+    if (activeBedrooms) o.bedrooms = activeBedrooms;
+    if (activeType) o.type = activeType;
+    if (activeNeighborhood) o.neighborhood = activeNeighborhood;
+    if (activeSearch) o.search = activeSearch;
+    if (activeMinPrice) o.minRent = activeMinPrice;
+    if (activeMaxPrice) o.maxRent = activeMaxPrice;
+    return o;
+  }, [
+    activeBedrooms,
+    activeType,
+    activeNeighborhood,
+    activeSearch,
+    activeMinPrice,
+    activeMaxPrice,
+  ]);
+
+  const stay = usePublicStaySearch({
+    pathnameBase: "/rentals",
+    mergeUrl: true,
+    getBrowseQueryString,
+    getAvailabilityExtraParams,
+  });
+
+  const {
+    checkIn,
+    setCheckIn,
+    checkOut,
+    setCheckOut,
+    adults,
+    setAdults,
+    children,
+    setChildren,
+    infants,
+    setInfants,
+    guestLabel,
+    properties,
+    loading: stayLoading,
+    searching,
+    filteredMode,
+    zeroResultHints,
+    runAvailabilitySearch,
+    clearStayDatesFromUrl,
+    browsePagination,
+  } = stay;
+
+  const mapLoading = stayLoading || searching;
+  const pagination = filteredMode
+    ? { page: 1, total: properties.length, pages: 1 }
+    : browsePagination;
 
   const [searchText, setSearchText] = useState(activeSearch);
   const [minPrice, setMinPrice] = useState(activeMinPrice);
@@ -471,22 +611,29 @@ function RentalsContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("limit", "50");
-    if (!params.get("page")) params.set("page", "1");
-    setLoading(true);
-    setSelectedPropertyId(null);
-    fetch(`/api/properties/public?${params.toString()}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.data) {
-          setProperties(data.data.properties || []);
-          setPagination(data.data.pagination || { page: 1, total: 0, pages: 0 });
-        }
-      })
-      .catch(() => setProperties([]))
-      .finally(() => setLoading(false));
-  }, [searchParams]);
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const fn = () => setIsLg(mq.matches);
+    fn();
+    mq.addEventListener("change", fn);
+    return () => mq.removeEventListener("change", fn);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const fn = () => setStayCalMonths(mq.matches ? 2 : 1);
+    fn();
+    mq.addEventListener("change", fn);
+    return () => mq.removeEventListener("change", fn);
+  }, []);
+
+  const rangeSelected = useMemo<DateRange | undefined>(
+    () =>
+      checkIn || checkOut ? { from: checkIn, to: checkOut } : undefined,
+    [checkIn, checkOut]
+  );
+
+  const activeCheckIn = searchParams.get("checkIn") || "";
+  const activeCheckOut = searchParams.get("checkOut") || "";
 
   const buildParams = useCallback((patch: Record<string, string | undefined> = {}) => {
     const resolved = {
@@ -496,6 +643,7 @@ function RentalsContent() {
       minRent: "minRent" in patch ? patch.minRent : minPrice,
       maxRent: "maxRent" in patch ? patch.maxRent : maxPrice,
       neighborhood: "neighborhood" in patch ? patch.neighborhood : activeNeighborhood,
+      parkingType: "parkingType" in patch ? patch.parkingType : activeParkingType,
     };
     const params = new URLSearchParams();
     if (resolved.search) params.set("search", resolved.search);
@@ -504,8 +652,19 @@ function RentalsContent() {
     if (resolved.minRent) params.set("minRent", resolved.minRent);
     if (resolved.maxRent) params.set("maxRent", resolved.maxRent);
     if (resolved.neighborhood) params.set("neighborhood", resolved.neighborhood);
+    if (resolved.parkingType) params.set("parkingType", resolved.parkingType);
+    const ci = searchParams.get("checkIn");
+    const co = searchParams.get("checkOut");
+    if (ci) params.set("checkIn", ci);
+    if (co) params.set("checkOut", co);
+    const a = searchParams.get("adults");
+    const ch = searchParams.get("children");
+    const inf = searchParams.get("infants");
+    if (a) params.set("adults", a);
+    if (ch) params.set("children", ch);
+    if (inf) params.set("infants", inf);
     return params;
-  }, [activeSearch, activeType, activeBedrooms, minPrice, maxPrice, activeNeighborhood]);
+  }, [activeSearch, activeType, activeBedrooms, minPrice, maxPrice, activeNeighborhood, activeParkingType, searchParams]);
 
   const pushFilters = useCallback((patch: Record<string, string | undefined> = {}) => {
     router.push(`/rentals?${buildParams(patch).toString()}`);
@@ -515,6 +674,7 @@ function RentalsContent() {
     setSearchText("");
     setMinPrice("");
     setMaxPrice("");
+    setListDrawerOpen(false);
     router.push("/rentals");
   }, [router]);
 
@@ -545,7 +705,165 @@ function RentalsContent() {
     [searchParams, router]
   );
 
-  const hasActiveFilters = !!(activeType || activeBedrooms || activeMinPrice || activeMaxPrice || activeSearch || activeNeighborhood);
+  const hasActiveFilters = !!(
+    activeType ||
+    activeBedrooms ||
+    activeMinPrice ||
+    activeMaxPrice ||
+    activeSearch ||
+    activeNeighborhood ||
+    activeParkingType ||
+    activeCheckIn ||
+    activeCheckOut
+  );
+
+  const showFullPropertyCardList =
+    (!isLg && mobileView === "list") || (isLg && listDrawerOpen);
+
+  const selectedUnavailableOnMap =
+    filteredMode &&
+    selectedPropertyId &&
+    !properties.some((p) => p._id === selectedPropertyId);
+
+  const rentalsListBody = (opts: { showFeaturedCard: boolean }) => (
+    <>
+      {opts.showFeaturedCard && selectedProperty && (
+        <PropertyFeaturedCard
+          property={selectedProperty}
+          onClose={() => setSelectedPropertyId(null)}
+        />
+      )}
+      {opts.showFeaturedCard && selectedProperty && !mapLoading && showFullPropertyCardList && (
+        <div className="flex items-center gap-3 py-2">
+          <div className="flex-1 h-px bg-slate-200" />
+          <span className="text-xs text-slate-500 font-medium whitespace-nowrap">
+            {t("rentals.results.all").replace("{count}", String(pagination.total))}
+          </span>
+          <div className="flex-1 h-px bg-slate-200" />
+        </div>
+      )}
+      {mapLoading && showFullPropertyCardList ? (
+        <>
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={i}
+              className="h-[155px] sm:h-[140px] rounded-xl bg-white/80 border border-slate-200/80 animate-pulse"
+            />
+          ))}
+        </>
+      ) : null}
+      {!mapLoading && properties.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-5">
+            <Home className="w-8 h-8 text-slate-400" />
+          </div>
+          <p className="text-slate-800 font-semibold text-lg mb-1.5">{t("rentals.noResults.title")}</p>
+          <p className="text-slate-500 text-sm mb-5 max-w-sm">{t("rentals.noResults.subtitle")}</p>
+          {filteredMode && zeroResultHints.length > 0 && (
+            <div className="flex flex-col gap-2 mb-5 w-full max-w-sm">
+              {zeroResultHints.map((h, idx) => {
+                const cin = parseStayParamDate(h.suggestedCheckIn);
+                const cout = parseStayParamDate(h.suggestedCheckOut);
+                if (!cin || !cout) return null;
+                return (
+                  <button
+                    key={`zr-${idx}`}
+                    type="button"
+                    onClick={() => runAvailabilitySearch({ checkIn: cin, checkOut: cout })}
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800 hover:bg-slate-50"
+                  >
+                    {h.label || `${h.suggestedCheckIn} → ${h.suggestedCheckOut}`}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          <button
+            onClick={clearFilters}
+            className="px-5 py-2.5 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors"
+          >
+            {t("rentals.noResults.clearFilters")}
+          </button>
+        </div>
+      ) : null}
+      {showFullPropertyCardList && !mapLoading && properties.length > 0
+        ? (() => {
+            const displayed = showFavoritesOnly
+              ? properties.filter((p) => favoriteIds.includes(p._id))
+              : properties;
+            if (displayed.length === 0 && showFavoritesOnly) {
+              return (
+                <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+                  <Heart className="w-12 h-12 text-slate-200 mb-4" />
+                  <p className="text-slate-800 font-semibold mb-1.5">{t("rentals.noSaved.title")}</p>
+                  <p className="text-slate-500 text-sm mb-5">{t("rentals.noSaved.subtitle")}</p>
+                  <button
+                    onClick={() => setShowFavoritesOnly(false)}
+                    className="px-5 py-2.5 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors"
+                  >
+                    {t("rentals.noSaved.browseAll")}
+                  </button>
+                </div>
+              );
+            }
+            return (
+              <>
+                {displayed.map((property) => (
+                  <div key={property._id} id={`property-${property._id}`}>
+                    <PropertyListCard
+                      property={property}
+                      onHover={setHoveredPropertyId}
+                      isHovered={hoveredPropertyId === property._id}
+                      isSelected={selectedPropertyId === property._id}
+                      isFavorited={favoriteIds.includes(property._id)}
+                      onToggleFavorite={toggleFavorite}
+                      isInCompare={compareIds.includes(property._id)}
+                      onToggleCompare={toggleCompare}
+                      canAddToCompare={compareIds.length < 3}
+                    />
+                  </div>
+                ))}
+                {pagination.pages > 1 && (
+                  <div className="flex items-center justify-center gap-2 py-6">
+                    <button
+                      type="button"
+                      onClick={() => handlePageChange(pagination.page - 1)}
+                      disabled={pagination.page <= 1}
+                      className="p-2.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4 text-slate-600" />
+                    </button>
+                    {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() => handlePageChange(page)}
+                        className={`min-w-[2.25rem] h-9 px-2 rounded-lg text-sm font-medium transition-all ${
+                          page === pagination.page
+                            ? "bg-slate-900 text-white"
+                            : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => handlePageChange(pagination.page + 1)}
+                      disabled={pagination.page >= pagination.pages}
+                      className="p-2.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4 text-slate-600" />
+                    </button>
+                  </div>
+                )}
+              </>
+            );
+          })()
+        : null}
+      <div className="h-4" />
+    </>
+  );
 
   return (
     <div className="min-h-screen bg-[#f8f7f4] flex flex-col overflow-x-hidden w-full">
@@ -603,6 +921,20 @@ function RentalsContent() {
                   <span className="hidden sm:inline">{t("rentals.view.map")}</span>
                 </button>
               </div>
+              <div className="hidden lg:flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setListDrawerOpen((v) => !v)}
+                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border transition-all ${
+                    listDrawerOpen
+                      ? "bg-slate-900 text-white border-slate-900"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  <LayoutList className="w-4 h-4" />
+                  {listDrawerOpen ? "Close list" : "Browse list"}
+                </button>
+              </div>
             </div>
 
             {/* Row 2: Filters — grouped, labeled, organized */}
@@ -637,6 +969,28 @@ function RentalsContent() {
                         onClick={() => pushFilters({ bedrooms: opt.value || undefined })}
                         className={`px-2.5 py-1.5 text-xs font-medium transition-all whitespace-nowrap ${
                           activeBedrooms === opt.value
+                            ? "bg-slate-900 text-white"
+                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="h-4 w-px bg-slate-200 hidden sm:block" aria-hidden />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold hidden sm:inline shrink-0">
+                    <Car className="inline h-3 w-3 -mt-0.5 mr-0.5 opacity-60" aria-hidden />
+                    Park
+                  </span>
+                  <div className="flex items-center rounded-lg border border-slate-200/80 overflow-hidden bg-slate-50/50 max-w-[min(100vw-8rem,520px)] overflow-x-auto scrollbar-hide">
+                    {PARKING_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value || "any-park"}
+                        onClick={() => pushFilters({ parkingType: opt.value || undefined })}
+                        className={`px-2 py-1.5 text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
+                          activeParkingType === opt.value
                             ? "bg-slate-900 text-white"
                             : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
                         }`}
@@ -691,7 +1045,7 @@ function RentalsContent() {
                     </span>
                   )}
                 </button>
-                {loading ? (
+                {mapLoading ? (
                   <span className="flex items-center gap-2 text-xs text-slate-400">
                     <span className="w-3 h-3 rounded-full border-2 border-slate-300 border-t-transparent animate-spin" />
                   </span>
@@ -723,6 +1077,116 @@ function RentalsContent() {
                 );
               })}
             </div>
+
+            {/* Stay search (Stayfinder) */}
+            <div className="flex flex-col gap-3 pt-1 border-t border-slate-200/60">
+              <div className="flex flex-wrap items-end gap-2 sm:gap-3">
+                <div className="min-w-[200px] flex-1 sm:flex-none sm:min-w-[240px]">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block mb-1">
+                    Stay dates
+                  </span>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="h-10 w-full justify-start text-left font-normal border-slate-200 bg-white text-slate-900"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4 shrink-0 text-teal-600" />
+                        <span className="truncate text-sm">
+                          {checkIn && checkOut
+                            ? `${format(checkIn, "MMM d")} – ${format(checkOut, "MMM d, y")}`
+                            : checkIn
+                              ? `${format(checkIn, "MMM d, y")} → …`
+                              : "Select check-in / check-out"}
+                        </span>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="range"
+                        numberOfMonths={stayCalMonths}
+                        selected={rangeSelected}
+                        onSelect={(r) => {
+                          setCheckIn(r?.from);
+                          setCheckOut(r?.to);
+                        }}
+                        disabled={(d) =>
+                          d < new Date(new Date().setHours(0, 0, 0, 0))
+                        }
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="w-full min-w-[140px] sm:w-40">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block mb-1">
+                    Guests
+                  </span>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="h-10 w-full justify-between font-normal border-slate-200 bg-white text-slate-900"
+                      >
+                        <span className="flex items-center gap-2 text-sm">
+                          <Users className="h-4 w-4 text-teal-600" />
+                          {guestLabel}
+                        </span>
+                        <ChevronDown className="h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-4" align="start">
+                      <RentalsGuestRow
+                        label="Adults"
+                        sub="Ages 13+"
+                        value={adults}
+                        min={1}
+                        onChange={setAdults}
+                      />
+                      <RentalsGuestRow
+                        label="Children"
+                        sub="Ages 2–12"
+                        value={children}
+                        min={0}
+                        onChange={setChildren}
+                      />
+                      <RentalsGuestRow
+                        label="Infants"
+                        sub="Under 2"
+                        value={infants}
+                        min={0}
+                        onChange={setInfants}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    className="h-10 rounded-xl bg-slate-900 text-white hover:bg-slate-800 px-4"
+                    disabled={searching || !checkIn || !checkOut}
+                    onClick={() => runAvailabilitySearch()}
+                  >
+                    {searching ? "Searching…" : "Check availability"}
+                  </Button>
+                  {(activeCheckIn || activeCheckOut) && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-10 border-slate-200"
+                      onClick={() => clearStayDatesFromUrl()}
+                    >
+                      Clear dates
+                    </Button>
+                  )}
+                </div>
+              </div>
+              {filteredMode && (
+                <p className="text-[11px] text-slate-500">
+                  Showing properties with at least one unit available for your dates (parking filter
+                  above applies).
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -739,6 +1203,16 @@ function RentalsContent() {
                   onMarkerHover={setHoveredPropertyId}
                   hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
                 />
+                {selectedProperty && (
+                  <div className="absolute bottom-3 left-3 right-3 z-[1000] max-w-md pointer-events-none">
+                    <div className="pointer-events-auto shadow-xl">
+                      <PropertyFeaturedCard
+                        property={selectedProperty}
+                        onClose={() => setSelectedPropertyId(null)}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="px-4 py-6 border-t border-slate-200">
                 <NaplesAreaGuide />
@@ -746,8 +1220,8 @@ function RentalsContent() {
             </div>
           )}
 
-          {/* Map + Area Guide — desktop/large tablet left column (lg+) */}
-          <div className="hidden lg:flex flex-col w-full lg:w-[55%] overflow-y-auto bg-[#f8f7f4]">
+          {/* Map + Area Guide — desktop (full width; list opens in drawer) */}
+          <div className="hidden lg:flex flex-col w-full flex-1 overflow-y-auto bg-[#f8f7f4] min-w-0">
             <div className="relative w-full flex-shrink-0" style={{ height: "calc(100vh - 200px)", minHeight: 400, isolation: "isolate" }}>
               <PropertyMap
                 properties={properties}
@@ -758,125 +1232,118 @@ function RentalsContent() {
                 activeNeighborhood={activeNeighborhood}
                 onNeighborhoodChange={handleNeighborhood}
               />
+              {selectedProperty && (
+                <div className="absolute bottom-3 left-3 right-3 z-[1000] max-w-md pointer-events-none">
+                  <div className="pointer-events-auto shadow-xl">
+                    <PropertyFeaturedCard
+                      property={selectedProperty}
+                      onClose={() => setSelectedPropertyId(null)}
+                    />
+                  </div>
+                </div>
+              )}
+              {selectedUnavailableOnMap && (
+                <div className="absolute top-3 left-3 right-3 z-[1000] max-w-lg pointer-events-none">
+                  <div className="pointer-events-auto rounded-xl border border-amber-200 bg-amber-50/95 px-4 py-3 text-sm text-amber-900 shadow-lg backdrop-blur-sm">
+                    This property is not available for your selected dates. Adjust dates or pick
+                    another pin.
+                    {zeroResultHints.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {zeroResultHints.slice(0, 2).map((h, idx) => {
+                          const cin = parseStayParamDate(h.suggestedCheckIn);
+                          const cout = parseStayParamDate(h.suggestedCheckOut);
+                          if (!cin || !cout) return null;
+                          return (
+                            <button
+                              key={`hint-${idx}`}
+                              type="button"
+                              className="rounded-lg border border-amber-300 bg-white px-2 py-1 text-xs font-medium text-amber-900 hover:bg-amber-100"
+                              onClick={() =>
+                                runAvailabilitySearch({ checkIn: cin, checkOut: cout })
+                              }
+                            >
+                              {h.label || "Try suggested dates"}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
+            {pagination.pages > 1 && isLg && !listDrawerOpen && (
+              <div className="flex flex-shrink-0 items-center justify-center gap-2 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur-sm">
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.page <= 1}
+                  className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4 text-slate-600" />
+                </button>
+                <span className="text-xs font-medium text-slate-600 tabular-nums">
+                  Page {pagination.page} / {pagination.pages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={pagination.page >= pagination.pages}
+                  className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4 text-slate-600" />
+                </button>
+              </div>
+            )}
             <div className="px-5 lg:px-8 py-8 border-t border-slate-200">
               <NaplesAreaGuide />
             </div>
           </div>
 
-          {/* Listings — phone/tablet list view + lg+ right column */}
-          <div className={`${mobileView === "list" ? "flex" : "hidden"} lg:flex flex-col w-full lg:w-[45%] overflow-y-auto overflow-x-hidden bg-[#f8f7f4] border-l border-slate-200/60`} style={{ isolation: "isolate" }}>
-            <div className="p-4 sm:p-5 space-y-3 w-full overflow-x-hidden max-w-2xl mx-auto lg:mx-0 lg:max-w-none">
-
-              {/* Featured selected property card */}
-              {selectedProperty && (
-                <PropertyFeaturedCard
-                  property={selectedProperty}
-                  onClose={() => setSelectedPropertyId(null)}
-                />
-              )}
-
-              {/* Divider when a property is selected */}
-              {selectedProperty && !loading && (
-                <div className="flex items-center gap-3 py-2">
-                  <div className="flex-1 h-px bg-slate-200" />
-                  <span className="text-xs text-slate-500 font-medium whitespace-nowrap">
-                    {t("rentals.results.all").replace("{count}", String(pagination.total))}
-                  </span>
-                  <div className="flex-1 h-px bg-slate-200" />
-                </div>
-              )}
-
-              {loading ? (
-                <>
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="h-[155px] sm:h-[140px] rounded-xl bg-white/80 border border-slate-200/80 animate-pulse" />
-                  ))}
-                </>
-              ) : properties.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-                  <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-5">
-                    <Home className="w-8 h-8 text-slate-400" />
-                  </div>
-                  <p className="text-slate-800 font-semibold text-lg mb-1.5">{t("rentals.noResults.title")}</p>
-                  <p className="text-slate-500 text-sm mb-5 max-w-sm">{t("rentals.noResults.subtitle")}</p>
-                  <button
-                    onClick={clearFilters}
-                    className="px-5 py-2.5 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors"
-                  >
-                    {t("rentals.noResults.clearFilters")}
-                  </button>
-                </div>
-              ) : (
-                (() => {
-                  const displayed = showFavoritesOnly ? properties.filter((p) => favoriteIds.includes(p._id)) : properties;
-                  if (displayed.length === 0 && showFavoritesOnly) {
-                    return (
-                      <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-                        <Heart className="w-12 h-12 text-slate-200 mb-4" />
-                        <p className="text-slate-800 font-semibold mb-1.5">{t("rentals.noSaved.title")}</p>
-                        <p className="text-slate-500 text-sm mb-5">{t("rentals.noSaved.subtitle")}</p>
-                        <button onClick={() => setShowFavoritesOnly(false)} className="px-5 py-2.5 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
-                          {t("rentals.noSaved.browseAll")}
-                        </button>
-                      </div>
-                    );
-                  }
-                  return displayed.map((property) => (
-                    <div key={property._id} id={`property-${property._id}`}>
-                      <PropertyListCard
-                        property={property}
-                        onHover={setHoveredPropertyId}
-                        isHovered={hoveredPropertyId === property._id}
-                        isSelected={selectedPropertyId === property._id}
-                        isFavorited={favoriteIds.includes(property._id)}
-                        onToggleFavorite={toggleFavorite}
-                        isInCompare={compareIds.includes(property._id)}
-                        onToggleCompare={toggleCompare}
-                        canAddToCompare={compareIds.length < 3}
-                      />
-                    </div>
-                  ));
-                })()
-              )}
-
-              {/* Pagination */}
-              {pagination.pages > 1 && (
-                <div className="flex items-center justify-center gap-2 py-6">
-                  <button
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={pagination.page <= 1}
-                    className="p-2.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4 text-slate-600" />
-                  </button>
-                  {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`min-w-[2.25rem] h-9 px-2 rounded-lg text-sm font-medium transition-all ${
-                        page === pagination.page
-                          ? "bg-slate-900 text-white"
-                          : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={pagination.page >= pagination.pages}
-                    className="p-2.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronRight className="w-4 h-4 text-slate-600" />
-                  </button>
-                </div>
-              )}
-
-              <div className="h-4" />
+          {/* Listings — phone/tablet; desktop uses drawer */}
+          <div
+            className={`${
+              mobileView === "list" ? "flex" : "hidden"
+            } lg:hidden flex-col w-full overflow-y-auto overflow-x-hidden bg-[#f8f7f4] border-t border-slate-200/60`}
+            style={{ isolation: "isolate" }}
+          >
+            <div className="p-4 sm:p-5 space-y-3 w-full overflow-x-hidden max-w-2xl mx-auto">
+              {rentalsListBody({ showFeaturedCard: true })}
             </div>
           </div>
         </div>
+
+        {/* Desktop listing drawer */}
+        {isLg && listDrawerOpen && (
+          <>
+            <button
+              type="button"
+              className="fixed inset-0 z-[400] hidden bg-black/25 lg:block"
+              aria-label="Close list"
+              onClick={() => setListDrawerOpen(false)}
+            />
+            <aside className="fixed bottom-0 right-0 top-[200px] z-[401] hidden w-full max-w-md flex-col border-l border-slate-200 bg-[#f8f7f4] shadow-2xl lg:flex">
+              <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-sm">
+                <span className="text-sm font-semibold text-slate-900">
+                  {pagination.total}{" "}
+                  {pagination.total === 1
+                    ? t("rentals.results.property")
+                    : t("rentals.results.properties")}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setListDrawerOpen(false)}
+                  className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto p-4">
+                {rentalsListBody({ showFeaturedCard: false })}
+              </div>
+            </aside>
+          </>
+        )}
       </div>
 
       {/* Floating comparison bar */}

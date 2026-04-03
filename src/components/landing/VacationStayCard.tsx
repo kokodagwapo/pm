@@ -16,6 +16,8 @@ export interface VacationStayCardProperty {
     bathrooms?: number;
     rentAmount?: number;
   }>;
+  /** From stay availability API: units free for the searched window */
+  availableUnits?: Array<{ unitId: string; unitNumber?: string }>;
 }
 
 function formatUsd(amount: number): string {
@@ -51,7 +53,7 @@ export function VacationStayCard({
   checkIn,
   checkOut,
   adults,
-  children,
+  childGuests,
   infants,
   linkTarget = "public",
   /** Translucent card + light text for dark page backgrounds (stay finder, dashboard dark). */
@@ -61,7 +63,7 @@ export function VacationStayCard({
   checkIn?: string;
   checkOut?: string;
   adults?: number;
-  children?: number;
+  childGuests?: number;
   infants?: number;
   /** `dashboard` opens the property calendar in the app (manager view). */
   linkTarget?: "public" | "dashboard";
@@ -80,7 +82,7 @@ export function VacationStayCard({
     checkIn: checkIn || undefined,
     checkOut: checkOut || undefined,
     ...(adults && adults > 0 ? { adults: String(adults) } : {}),
-    ...(children && children > 0 ? { children: String(children) } : {}),
+    ...(childGuests && childGuests > 0 ? { children: String(childGuests) } : {}),
     ...(infants && infants > 0 ? { infants: String(infants) } : {}),
   });
 
@@ -133,6 +135,20 @@ export function VacationStayCard({
           >
             {property.name}
           </h3>
+          {property.availableUnits && property.availableUnits.length > 0 && (
+            <p
+              className={cn(
+                "mb-2 text-xs font-medium",
+                glass ? "text-teal-200/95" : "text-teal-700"
+              )}
+            >
+              Available:{" "}
+              {property.availableUnits
+                .map((u) => u.unitNumber || u.unitId)
+                .filter(Boolean)
+                .join(", ")}
+            </p>
+          )}
           {property.address && (
             <p
               className={cn(

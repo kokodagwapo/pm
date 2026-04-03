@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import type { DateRange } from "react-day-picker";
 import { format } from "date-fns";
-import { CalendarIcon, ChevronDown, Minus, Plus, Users } from "lucide-react";
+import { CalendarIcon, ChevronDown, Minus, Plus, Users, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -15,43 +15,24 @@ import {
 import { cn } from "@/lib/utils";
 import {
   VacationStayCard,
-  VacationStayCardProperty,
 } from "@/components/landing/VacationStayCard";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { useOptionalDashboardAppearance } from "@/components/providers/DashboardAppearanceProvider";
+import {
+  parseStayParamDate,
+  usePublicStaySearch,
+  toYmd,
+} from "./usePublicStaySearch";
 
 export type StayFinderLinkTarget = "public" | "dashboard";
 
-function toYmd(d: Date | undefined): string {
-  if (!d) return "";
-  return format(d, "yyyy-MM-dd");
-}
-
-function parseYmd(s: string | null): Date | undefined {
-  if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return undefined;
-  const [y, m, d] = s.split("-").map(Number);
-  const dt = new Date(y, m - 1, d);
-  if (
-    dt.getFullYear() !== y ||
-    dt.getMonth() !== m - 1 ||
-    dt.getDate() !== d
-  ) {
-    return undefined;
-  }
-  return dt;
-}
-
 export interface AllInOneStayFinderProps {
-  /** Path without query for URL sync */
   pathnameBase: string;
   linkTarget: StayFinderLinkTarget;
-  /** Landing: link to sign-in. Dashboard: link to public guest page. */
   crossLinkHref: string;
   crossLinkLabel: string;
-  /** Optional wrapper classes around inner content */
   className?: string;
   contentClassName?: string;
-  /** When true, show dashboard-themed page title (uses appearance provider) */
   showDashboardHeading?: boolean;
 }
 
@@ -65,111 +46,56 @@ export function AllInOneStayFinder({
   showDashboardHeading,
 }: AllInOneStayFinderProps) {
   const { t } = useLocalizationContext();
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const dash = useOptionalDashboardAppearance();
   const isLight = dash?.isLight ?? false;
-  /** Public stay finder sits on slate-950; dashboard may be dark — use glass + light text. */
   const surfaceDark =
     !showDashboardHeading || (showDashboardHeading && !isLight);
 
-  const [checkIn, setCheckIn] = useState<Date | undefined>(() =>
-    parseYmd(searchParams.get("checkIn"))
-  );
-  const [checkOut, setCheckOut] = useState<Date | undefined>(() =>
-    parseYmd(searchParams.get("checkOut"))
-  );
-  const [adults, setAdults] = useState(
-    Math.max(1, parseInt(searchParams.get("adults") || "2", 10) || 2)
-  );
-  const [children, setChildren] = useState(
-    Math.max(0, parseInt(searchParams.get("children") || "0", 10) || 0)
-  );
-  const [infants, setInfants] = useState(
-    Math.max(0, parseInt(searchParams.get("infants") || "0", 10) || 0)
-  );
+  const stay = usePublicStaySearch({
+    pathnameBase,
+    mergeUrl: false,
+  });
 
-  const [properties, setProperties] = useState<VacationStayCardProperty[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
-  const [searching, setSearching] = useState(false);
-  const [filteredMode, setFilteredMode] = useState(false);
+  const {
+    checkIn,
+    setCheckIn,
+    checkOut,
+    setCheckOut,
+    adults,
+    setAdults,
+    children,
+    setChildren,
+    infants,
+    setInfants,
+    parkingType,
+    setParkingType,
+    guestLabel,
+    properties,
+    loading,
+    searching,
+    filteredMode,
+    zeroResultHints,
+    runAvailabilitySearch,
+    replaceStayUrl,
+    clearStayDatesFromUrl,
+  } = stay;
 
-  const syncUrl = useCallback(() => {
-    const p = new URLSearchParams();
-    const ci = toYmd(checkIn);
-    const co = toYmd(checkOut);
-    if (ci) p.set("checkIn", ci);
-    if (co) p.set("checkOut", co);
-    if (adults !== 2) p.set("adults", String(adults));
-    if (children) p.set("children", String(children));
-    if (infants) p.set("infants", String(infants));
-    const q = p.toString();
-    router.replace(q ? `${pathnameBase}?${q}` : pathnameBase, {
-      scroll: false,
-    });
-  }, [checkIn, checkOut, adults, children, infants, router, pathnameBase]);
-
-  const loadBrowse = useCallback(async () => {
-    setLoading(true);
-    setFilteredMode(false);
-    try {
-      const res = await fetch("/api/properties/public?limit=24");
-      const json = await res.json();
-      const data = json?.data ?? json;
-      setProperties(data?.properties ?? []);
-    } catch {
-      setProperties([]);
-    } finally {
-      setLoading(false);
-    }
+  const [monthsShown, setMonthsShown] = useState(1);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const fn = () => setMonthsShown(mq.matches ? 2 : 1);
+    fn();
+    mq.addEventListener("change", fn);
+    return () => mq.removeEventListener("change", fn);
   }, []);
 
-  const runAvailabilitySearch = useCallback(async () => {
-    const ci = toYmd(checkIn);
-    const co = toYmd(checkOut);
-    if (!ci || !co) return;
-    setSearching(true);
-    setFilteredMode(true);
-    syncUrl();
-    try {
-      const u = new URLSearchParams({ checkIn: ci, checkOut: co });
-      const res = await fetch(
-        `/api/properties/public/available-for-stay?${u.toString()}`
-      );
-      const json = await res.json();
-      if (!res.ok) {
-        setProperties([]);
-        return;
-      }
-      const data = json?.data ?? json;
-      setProperties(data?.properties ?? []);
-    } catch {
-      setProperties([]);
-    } finally {
-      setSearching(false);
-    }
-  }, [checkIn, checkOut, syncUrl]);
-
-  useEffect(() => {
-    loadBrowse();
-  }, [loadBrowse]);
-
-  useEffect(() => {
-    const ci = searchParams.get("checkIn");
-    const co = searchParams.get("checkOut");
-    if (ci && co) {
-      setCheckIn(parseYmd(ci));
-      setCheckOut(parseYmd(co));
-    }
-  }, [searchParams]);
-
-  const guestLabel = useMemo(() => {
-    const total = adults + children + infants;
-    if (total <= 0) return "Guests";
-    return `${total} guest${total === 1 ? "" : "s"}`;
-  }, [adults, children, infants]);
+  const rangeSelected = useMemo<DateRange | undefined>(
+    () =>
+      checkIn || checkOut
+        ? { from: checkIn, to: checkOut }
+        : undefined,
+    [checkIn, checkOut]
+  );
 
   return (
     <div className={cn(className)}>
@@ -240,14 +166,14 @@ export function AllInOneStayFinder({
           )}
         >
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-12 lg:items-end lg:gap-3">
-            <div className="lg:col-span-3">
+            <div className="sm:col-span-2 lg:col-span-5">
               <label
                 className={cn(
                   "mb-1 block text-[11px] font-semibold uppercase tracking-wide",
                   surfaceDark ? "text-white/60" : "text-slate-500"
                 )}
               >
-                Check-in
+                Check-in / Check-out
               </label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -262,70 +188,31 @@ export function AllInOneStayFinder({
                   >
                     <CalendarIcon
                       className={cn(
-                        "mr-2 h-4 w-4",
+                        "mr-2 h-4 w-4 shrink-0",
                         surfaceDark ? "text-teal-300" : "text-teal-600"
                       )}
                     />
-                    {checkIn ? format(checkIn, "MMM d, yyyy") : "Add date"}
+                    <span className="truncate">
+                      {checkIn && checkOut
+                        ? `${format(checkIn, "MMM d")} – ${format(checkOut, "MMM d, y")}`
+                        : checkIn
+                          ? `${format(checkIn, "MMM d, y")} → …`
+                          : "Select dates"}
+                    </span>
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
-                    mode="single"
-                    selected={checkIn}
-                    onSelect={setCheckIn}
+                    mode="range"
+                    numberOfMonths={monthsShown}
+                    selected={rangeSelected}
+                    onSelect={(r) => {
+                      setCheckIn(r?.from);
+                      setCheckOut(r?.to);
+                    }}
                     disabled={(d) =>
                       d < new Date(new Date().setHours(0, 0, 0, 0))
                     }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="lg:col-span-3">
-              <label
-                className={cn(
-                  "mb-1 block text-[11px] font-semibold uppercase tracking-wide",
-                  surfaceDark ? "text-white/60" : "text-slate-500"
-                )}
-              >
-                Check-out
-              </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "h-11 w-full justify-start text-left font-normal",
-                      surfaceDark
-                        ? "border-white/25 bg-white/[0.12] text-white hover:bg-white/[0.18] hover:text-white"
-                        : "border-slate-200 bg-white text-slate-900"
-                    )}
-                  >
-                    <CalendarIcon
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        surfaceDark ? "text-teal-300" : "text-teal-600"
-                      )}
-                    />
-                    {checkOut ? format(checkOut, "MMM d, yyyy") : "Add date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={checkOut}
-                    onSelect={setCheckOut}
-                    disabled={(d) => {
-                      const min = checkIn
-                        ? new Date(
-                            checkIn.getFullYear(),
-                            checkIn.getMonth(),
-                            checkIn.getDate() + 1
-                          )
-                        : new Date(new Date().setHours(0, 0, 0, 0));
-                      return d < min;
-                    }}
                     initialFocus
                   />
                 </PopoverContent>
@@ -393,15 +280,71 @@ export function AllInOneStayFinder({
                 </PopoverContent>
               </Popover>
             </div>
-            <div className="lg:col-span-3">
+            <div className="sm:col-span-2 lg:col-span-4">
+              <label
+                className={cn(
+                  "mb-1 block text-[11px] font-semibold uppercase tracking-wide opacity-0 pointer-events-none select-none lg:mb-1",
+                  surfaceDark ? "text-white/60" : "text-slate-500"
+                )}
+              >
+                Search
+              </label>
               <Button
                 type="button"
                 className="h-11 w-full rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-md shadow-teal-900/20 hover:from-teal-700 hover:to-cyan-700"
                 disabled={searching || !checkIn || !checkOut}
-                onClick={runAvailabilitySearch}
+                onClick={() => runAvailabilitySearch()}
               >
                 {searching ? "Searching…" : "Check availability"}
               </Button>
+            </div>
+            <div className="sm:col-span-2 lg:col-span-12">
+              <div
+                className={cn(
+                  "mb-1.5 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide",
+                  surfaceDark ? "text-white/60" : "text-slate-500"
+                )}
+              >
+                <Car
+                  className={cn(
+                    "h-3.5 w-3.5",
+                    surfaceDark ? "text-teal-300" : "text-teal-600"
+                  )}
+                />
+                Parking
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {(
+                  [
+                    { value: "", label: "Any" },
+                    { value: "garage", label: "Garage" },
+                    { value: "covered", label: "Covered" },
+                    { value: "open", label: "Open" },
+                    { value: "street", label: "Street" },
+                  ] as const
+                ).map((opt) => (
+                  <button
+                    key={opt.value || "any"}
+                    type="button"
+                    onClick={() => {
+                      setParkingType(opt.value);
+                      replaceStayUrl(undefined, undefined, opt.value);
+                    }}
+                    className={cn(
+                      "rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all",
+                      parkingType === opt.value
+                        ? surfaceDark
+                          ? "bg-teal-500/35 text-white ring-1 ring-white/25"
+                          : "bg-teal-100 text-teal-900 ring-1 ring-teal-200"
+                        : surfaceDark
+                          ? "border border-white/20 bg-white/[0.06] text-white/85 hover:bg-white/12"
+                          : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           <p
@@ -442,7 +385,7 @@ export function AllInOneStayFinder({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={loadBrowse}
+                onClick={() => clearStayDatesFromUrl()}
                 className={cn(
                   surfaceDark &&
                     "text-white/80 hover:bg-white/10 hover:text-white"
@@ -475,8 +418,40 @@ export function AllInOneStayFinder({
                 : "border-slate-300 bg-white/60 text-slate-600"
             )}
           >
-            No properties match right now. Try different dates or browse all
-            listings.
+            <p className="mb-4">
+              No properties match right now. Try different dates, parking, or
+              browse all listings.
+            </p>
+            {filteredMode && checkIn && checkOut && zeroResultHints.length > 0 && (
+              <div className="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
+                {zeroResultHints.map((h, idx) => {
+                  const cin = parseStayParamDate(h.suggestedCheckIn);
+                  const cout = parseStayParamDate(h.suggestedCheckOut);
+                  if (!cin || !cout) return null;
+                  return (
+                    <Button
+                      key={`${h.suggestedCheckIn}-${h.suggestedCheckOut}-${idx}`}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={searching}
+                      className={cn(
+                        surfaceDark &&
+                          "border-white/30 bg-white/[0.08] text-white hover:bg-white/15 hover:text-white"
+                      )}
+                      onClick={() =>
+                        runAvailabilitySearch({
+                          checkIn: cin,
+                          checkOut: cout,
+                        })
+                      }
+                    >
+                      {h.label || `${h.suggestedCheckIn} → ${h.suggestedCheckOut}`}
+                    </Button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -487,7 +462,7 @@ export function AllInOneStayFinder({
                 checkIn={toYmd(checkIn)}
                 checkOut={toYmd(checkOut)}
                 adults={adults}
-                children={children}
+                childGuests={children}
                 infants={infants}
                 linkTarget={linkTarget}
                 appearance={surfaceDark ? "glass-dark" : "default"}

@@ -89,6 +89,8 @@ interface AvailabilityCalendarProps {
   monthsShown?: 1 | 2;
   /** Taller day cells for single-month dashboard layouts. */
   daySize?: "default" | "comfortable";
+  /** Drag a range (default) or tap check-in then checkout day (exclusive end). */
+  selectionMode?: "drag" | "two-click";
 }
 
 const BLOCK_TYPE_LABELS: Record<string, string> = {
@@ -176,6 +178,7 @@ export function AvailabilityCalendar({
   className,
   monthsShown = 2,
   daySize = "default",
+  selectionMode = "drag",
 }: AvailabilityCalendarProps) {
   const dash = useOptionalDashboardAppearance();
   const isLight = dash?.isLight ?? false;
@@ -196,6 +199,7 @@ export function AvailabilityCalendar({
   const [selectionStart, setSelectionStart] = useState<Date | null>(null);
   const [selectionEnd, setSelectionEnd] = useState<Date | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [twoClickAnchor, setTwoClickAnchor] = useState<Date | null>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
 
   const maxDate = useMemo(() => {
@@ -327,12 +331,50 @@ export function AvailabilityCalendar({
 
   const handleMouseDown = useCallback(
     (date: Date, dayInfo: DayInfo) => {
+      if (selectionMode === "two-click") return;
       if (readOnly || dayInfo.status === "past") return;
       setSelectionStart(date);
       setSelectionEnd(date);
       setIsDragging(true);
     },
-    [readOnly]
+    [readOnly, selectionMode]
+  );
+
+  const handleTwoClickDay = useCallback(
+    (date: Date, dayInfo: DayInfo) => {
+      if (selectionMode !== "two-click") return;
+      if (readOnly || dayInfo.status === "past") return;
+
+      if (!twoClickAnchor) {
+        setTwoClickAnchor(date);
+        setSelectionStart(date);
+        setSelectionEnd(date);
+        return;
+      }
+
+      const t1 = twoClickAnchor.getTime();
+      const t2 = date.getTime();
+      const checkIn = new Date(Math.min(t1, t2));
+      const checkoutExclusive = isSameDay(twoClickAnchor, date)
+        ? (() => {
+            const e = new Date(checkIn);
+            e.setDate(e.getDate() + 1);
+            return e;
+          })()
+        : new Date(Math.max(t1, t2));
+
+      const lastNight = new Date(checkoutExclusive);
+      lastNight.setDate(lastNight.getDate() - 1);
+
+      setTwoClickAnchor(null);
+      setSelectionStart(checkIn);
+      setSelectionEnd(lastNight);
+
+      if (onDateSelect) {
+        onDateSelect({ startDate: checkIn, endDate: checkoutExclusive });
+      }
+    },
+    [selectionMode, readOnly, twoClickAnchor, onDateSelect]
   );
 
   const handleMouseEnter = useCallback(
@@ -494,6 +536,7 @@ export function AvailabilityCalendar({
               )}
               onMouseDown={() => handleMouseDown(date, dayInfo)}
               onMouseEnter={() => handleMouseEnter(date)}
+              onClick={() => handleTwoClickDay(date, dayInfo)}
               disabled={status === "past"}
               aria-label={`${date.toLocaleDateString()} - ${status}`}
             >
@@ -769,6 +812,7 @@ export function AvailabilityCalendar({
               onClick={() => {
                 setSelectionStart(null);
                 setSelectionEnd(null);
+                setTwoClickAnchor(null);
               }}
             >
               Clear
@@ -847,7 +891,11 @@ export function AvailabilityCalendar({
           {!readOnly && (
             <div className="flex items-center gap-1.5">
               <Info className="h-3 w-3" />
-              <span>Click & drag to select dates</span>
+              <span>
+                {selectionMode === "two-click"
+                  ? "Tap check-in, then checkout day."
+                  : "Click & drag to select dates"}
+              </span>
             </div>
           )}
         </div>

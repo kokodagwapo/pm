@@ -40,6 +40,11 @@ export async function GET(request: NextRequest) {
       : undefined;
     const city = searchParams.get("city") || undefined;
     const neighborhood = searchParams.get("neighborhood") || undefined;
+    const parkingTypeRaw = (searchParams.get("parkingType") || "").toLowerCase();
+    const parkingTypes = ["garage", "covered", "open", "street"] as const;
+    const parkingType = parkingTypes.includes(parkingTypeRaw as (typeof parkingTypes)[number])
+      ? parkingTypeRaw
+      : undefined;
 
     const skip = (page - 1) * limit;
 
@@ -48,6 +53,7 @@ export async function GET(request: NextRequest) {
     };
 
     if (type) query.type = type;
+    if (parkingType) (query as any)["parking.type"] = parkingType;
     if (minRent || maxRent) {
       (query as any)["units.rentAmount"] = {};
       if (minRent) (query as any)["units.rentAmount"].$gte = minRent;

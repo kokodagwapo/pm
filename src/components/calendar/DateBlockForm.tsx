@@ -23,13 +23,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  glassDialog,
-  glassField,
-  glassInsetRow,
-  glassOutlineButton,
-  glassSelectContent,
-} from "@/lib/glass-ui";
+/** Solid light modal — white sheet on white scrim (no glass). */
+const lightField =
+  "!border-slate-200 !bg-white shadow-sm text-slate-900 placeholder:text-slate-400 focus-visible:border-slate-300 focus-visible:ring-slate-400/30";
+const lightInsetRow = "rounded-xl border border-slate-200 bg-slate-50";
+const lightSelectContent = "border-slate-200 bg-white text-slate-900";
+const lightOutlineButton =
+  "border-slate-200 bg-white text-slate-800 hover:bg-slate-50 hover:text-slate-900";
 import { DateBlockType } from "@/types";
 
 const BLOCK_TYPE_OPTIONS: { value: DateBlockType; label: string; adminOnly?: boolean }[] = [
@@ -148,13 +148,19 @@ export function DateBlockForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn("sm:max-w-[480px]", glassDialog)}>
+      <DialogContent
+        overlayClassName="bg-white"
+        className={cn(
+          "sm:max-w-[480px] !rounded-2xl !border-slate-200 !bg-white !shadow-[0_24px_64px_rgba(15,23,42,0.08)] text-slate-900",
+          "[&_[data-slot=dialog-close]]:text-slate-500 [&_[data-slot=dialog-close]]:hover:bg-slate-100 [&_[data-slot=dialog-close]]:hover:text-slate-900"
+        )}
+      >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-foreground">
-            <CalendarDays className="h-5 w-5 text-primary" />
+          <DialogTitle className="flex items-center gap-2 text-slate-900">
+            <CalendarDays className="h-5 w-5 text-teal-600" />
             {editingBlock ? "Edit Date Block" : "Block Dates"}
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground">
+          <DialogDescription className="text-slate-600">
             Block dates to prevent bookings during this period.
           </DialogDescription>
         </DialogHeader>
@@ -162,13 +168,13 @@ export function DateBlockForm({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="startDate" className="text-foreground/90">
+              <Label htmlFor="startDate" className="text-slate-800">
                 Start Date
               </Label>
               <Input
                 id="startDate"
                 type="date"
-                className={glassField}
+                className={lightField}
                 value={formData.startDate}
                 min={todayStr}
                 max={maxDateStr}
@@ -179,13 +185,13 @@ export function DateBlockForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="endDate" className="text-foreground/90">
+              <Label htmlFor="endDate" className="text-slate-800">
                 End Date
               </Label>
               <Input
                 id="endDate"
                 type="date"
-                className={glassField}
+                className={lightField}
                 value={formData.endDate}
                 min={formData.startDate || todayStr}
                 max={maxDateStr}
@@ -198,7 +204,7 @@ export function DateBlockForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="blockType" className="text-foreground/90">
+            <Label htmlFor="blockType" className="text-slate-800">
               Block Type
             </Label>
             <Select
@@ -207,10 +213,10 @@ export function DateBlockForm({
                 setFormData((prev) => ({ ...prev, blockType: value as DateBlockType }))
               }
             >
-              <SelectTrigger id="blockType" className={glassField}>
+              <SelectTrigger id="blockType" className={lightField}>
                 <SelectValue placeholder="Select block type" />
               </SelectTrigger>
-              <SelectContent className={glassSelectContent}>
+              <SelectContent className={lightSelectContent}>
                 {availableBlockTypes.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
@@ -221,12 +227,12 @@ export function DateBlockForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="reason" className="text-foreground/90">
+            <Label htmlFor="reason" className="text-slate-800">
               Reason (Optional)
             </Label>
             <Textarea
               id="reason"
-              className={glassField}
+              className={lightField}
               value={formData.reason}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, reason: e.target.value }))
@@ -241,19 +247,19 @@ export function DateBlockForm({
             <div
               className={cn(
                 "flex items-center justify-between p-3",
-                glassInsetRow
+                lightInsetRow
               )}
             >
               <div className="flex items-center gap-2">
-                <Lock className="h-4 w-4 text-muted-foreground" />
+                <Lock className="h-4 w-4 text-slate-500" />
                 <div>
                   <Label
                     htmlFor="isHardBlock"
-                    className="cursor-pointer text-foreground/90"
+                    className="cursor-pointer text-slate-800"
                   >
                     Hard Block
                   </Label>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-slate-500">
                     Cannot be overridden by owners
                   </p>
                 </div>
@@ -271,19 +277,19 @@ export function DateBlockForm({
           <div
             className={cn(
               "flex items-center justify-between p-3",
-              glassInsetRow
+              lightInsetRow
             )}
           >
             <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-muted-foreground" />
+              <Shield className="h-4 w-4 text-slate-500" />
               <div>
                 <Label
                   htmlFor="recurring"
-                  className="cursor-pointer text-foreground/90"
+                  className="cursor-pointer text-slate-800"
                 >
                   Recurring Yearly
                 </Label>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-slate-500">
                   Block the same dates every year
                 </p>
               </div>
@@ -301,14 +307,14 @@ export function DateBlockForm({
           </div>
 
           {formData.recurring.enabled && (
-            <div className="space-y-2 border-l-2 border-border/60 pl-4 dark:border-white/15">
-              <Label htmlFor="endRecurrence" className="text-foreground/90">
+            <div className="space-y-2 border-l-2 border-slate-200 pl-4">
+              <Label htmlFor="endRecurrence" className="text-slate-800">
                 End Recurrence (Optional)
               </Label>
               <Input
                 id="endRecurrence"
                 type="date"
-                className={glassField}
+                className={lightField}
                 value={formData.recurring.endRecurrence || ""}
                 min={formData.endDate || todayStr}
                 max={maxDateStr}
@@ -329,11 +335,11 @@ export function DateBlockForm({
             <p className="text-sm text-destructive">{error}</p>
           )}
 
-          <DialogFooter className="gap-2 border-t border-border/40 pt-4 dark:border-white/10">
+          <DialogFooter className="gap-2 border-t border-slate-200 pt-4">
             <Button
               type="button"
               variant="outline"
-              className={glassOutlineButton}
+              className={lightOutlineButton}
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
