@@ -1,9 +1,10 @@
 #!/bin/bash
 export PORT=${PORT:-5000}
 
-# Auth URL: prefer APP_URL (custom domain), then REPLIT_DOMAINS, for correct redirects
-if [ -n "$APP_URL" ]; then
-  BASE="${APP_URL#https://}"
+# Auth URL: prefer APP_URL, then CUSTOM_DOMAIN, then REPLIT_DOMAINS, for correct redirects
+APP_BASE_URL="${APP_URL:-$CUSTOM_DOMAIN}"
+if [ -n "$APP_BASE_URL" ]; then
+  BASE="${APP_BASE_URL#https://}"
   BASE="${BASE#http://}"
   export NEXTAUTH_URL="https://${BASE}"
   export AUTH_URL="https://${BASE}"
@@ -29,6 +30,11 @@ fi
 
 echo "Running auto-seed check..."
 node src/scripts/auto-seed.mjs
+
+if [ "$PROVISION_BOOTSTRAP_ACCOUNTS" = "true" ]; then
+  echo "Provisioning bootstrap auth accounts..."
+  node src/scripts/provision-bootstrap-accounts.mjs
+fi
 
 pkill -f "next dev" 2>/dev/null || true
 sleep 1

@@ -45,6 +45,10 @@ const NEIGHBORHOOD_AMENITIES = {
 
 import bcrypt from 'bcryptjs';
 
+const DEMO_AUTH_ENABLED =
+  process.env.NODE_ENV !== 'production' &&
+  process.env.ENABLE_DEMO_AUTH === 'true';
+
 const DEMO_USERS = [
   { email: 'hi@smartstart.us', role: 'admin', firstName: 'Admin', lastName: 'User' },
   { email: 'manager@smartstart.us', role: 'manager', firstName: 'Maria', lastName: 'Manager' },
@@ -157,9 +161,11 @@ async function run() {
       console.log(`  ${propCount} properties already exist, skipping`);
     }
 
-    if (userCount === 0) {
-      console.log('Users collection empty — seeding demo users...');
+    if (userCount === 0 && DEMO_AUTH_ENABLED) {
+      console.log('Users collection empty and demo auth enabled — seeding demo users...');
       await seedUsers(db);
+    } else if (userCount === 0) {
+      console.log('Users collection empty — skipping user auto-seed in this environment');
     } else {
       console.log(`  ${userCount} users already exist, skipping`);
     }

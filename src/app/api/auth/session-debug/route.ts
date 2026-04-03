@@ -8,6 +8,10 @@ import { auth } from "@/lib/auth";
 import { createSuccessResponse, createErrorResponse } from "@/lib/api-utils";
 
 export async function GET(request: NextRequest) {
+  if (process.env.NODE_ENV === "production") {
+    return createErrorResponse("Not found", 404);
+  }
+
   try {
     const session = await auth();
 

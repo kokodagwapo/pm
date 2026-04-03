@@ -161,17 +161,18 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - `src/locales/` - i18n translations
 
 ## Running (Replit)
-- **Run button (Project workflow)**: `bash start.sh` — MongoDB, auto-seed, conditional `npm run build`, then `next start` on port 5000 (stable preview).
-- **Manual dev**: `bash dev.sh` — MongoDB, auto-seed, stops stale `next dev`, clears `.next`, then `next dev` (webpack, port 5000). Prefer **Run** (`start.sh`) for daily preview; restart dev after edits when the watcher is ignored on Replit.
+- **Run button (Project workflow)**: `bash start.sh` — MongoDB, property auto-seed, optional bootstrap-account provisioning, then `next dev` on port 5000 for editable workspace preview.
+- **Deployment runtime**: `bash start-prod.sh` — MongoDB, property auto-seed, optional bootstrap-account provisioning, then `next start` on port 5000.
+- **Manual dev**: `bash dev.sh` — MongoDB, auto-seed, stops stale `next dev`, clears `.next`, then `next dev` (webpack, port 5000). Restart dev after edits when the watcher is ignored on Replit.
 - **Local (Cursor)**: `npm run dev:local` — port 3000, webpack (no Turbopack).
 - Build: `npm run build`
 - Start: `npm run start` (port 5000, bound to 0.0.0.0)
 
 ## Replit-Specific Configuration
 - **MongoDB**: Running locally via Nix (mongodb 7.0), data at `/home/runner/.mongodb-data/data/` (outside project root to avoid file-watcher loops)
-- **start.sh**: Starts `mongod` (background) → runs `src/scripts/auto-seed.mjs` → `npm run build` → `npm run start`
-- **start-prod.sh**: Production start script for Reserved VM deployment — starts local mongod, runs auto-seed, then `npm run start`. Build is handled separately by deployment build step (`npm run build`).
-- **Auto-seed**: `src/scripts/auto-seed.mjs` checks if properties/users collections are empty; if so, seeds 33 VMS Florida properties from `data/vms-properties.json` and 4 demo accounts. Safe for production — skips seeding if data already exists.
+- **start.sh**: Starts `mongod` (background) → runs `src/scripts/auto-seed.mjs` → optionally runs `src/scripts/provision-bootstrap-accounts.mjs` when `PROVISION_BOOTSTRAP_ACCOUNTS=true` → `npm run dev:5000`
+- **start-prod.sh**: Production start script for Reserved VM deployment — starts local mongod, runs auto-seed, optionally provisions bootstrap auth accounts, then `npm run start`. Build is handled separately by deployment build step (`npm run build`).
+- **Auto-seed**: `src/scripts/auto-seed.mjs` seeds properties and promo codes. It only seeds demo users when `ENABLE_DEMO_AUTH=true` in a non-production environment.
 - **Port/Host**: 5000 / 0.0.0.0 (set in `package.json` dev script)
 - **allowedDevOrigins**: `next.config.ts` reads `REPLIT_DEV_DOMAIN`/`REPLIT_DOMAINS` env vars and adds wildcard `*.replit.dev` patterns
 - **NODE_OPTIONS**: `--max-old-space-size=3072` for build memory
@@ -187,22 +188,25 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Import script**: `src/scripts/import-vms-properties.mjs` (manual full re-import)
 - **Image domain**: `vms-florida.com` is allowed in `next.config.ts` `remotePatterns`
 
-## Demo Accounts (seeded into local MongoDB)
-| Role    | Email                    | Password    |
-|---------|--------------------------|-------------|
-| Admin   | hi@smartstart.us         | SmartStart2025 |
-| Manager | manager@smartstart.us    | SmartStart2025 |
-| Owner   | owner@smartstart.us      | SmartStart2025 |
-| Tenant  | tenant@smartstart.us     | SmartStart2025 |
-
-## Quick Login
-The sign-in page (`/auth/signin`) always shows "Dev Quick Login" buttons for all 4 roles — no environment check, always visible.
+## Auth Provisioning
+- **Production sign-in**: `/auth/signin` is credentials-only. Demo quick-login UI is removed from the normal auth flow.
+- **Public sign-up**: `/auth/signup` creates tenant accounts only.
+- **Bootstrap accounts**: Set `PROVISION_BOOTSTRAP_ACCOUNTS=true` plus the `BOOTSTRAP_*` secrets listed below to create/update your initial superadmin, manager, owner, and tenant accounts on Replit startup.
+- **Demo auth**: Leave `ENABLE_DEMO_AUTH` unset in production. Demo endpoints return `404` unless explicitly enabled in a non-production environment.
 
 ## Required Environment Variables (Replit Secrets)
 - `MONGODB_URI` - MongoDB connection string (e.g. `mongodb://localhost:27017/SmartStartPM`)
 - `AUTH_SECRET` - NextAuth secret (required for session signing)
-- `APP_URL` - **Preferred for custom domains** (e.g. `https://pm.smarts.fi`). Sets NEXTAUTH_URL/AUTH_URL so auth redirects use your domain instead of smartpm.replit.app.
+- `APP_URL` - **Preferred for custom domains** (e.g. `https://pm.smarts.fi`). Sets NEXTAUTH_URL/AUTH_URL so auth redirects use your domain instead of the default Replit hostname.
+- `CUSTOM_DOMAIN` - Optional fallback if you prefer setting your custom URL here instead of `APP_URL`
 - `NEXTAUTH_URL` - NextAuth base URL fallback (e.g. `https://<replit-domain>`). Ignored when APP_URL is set.
+- `PROVISION_BOOTSTRAP_ACCOUNTS` - Set to `true` once on a fresh environment to create/update your initial auth users from secrets, then set back to `false`
+- `BOOTSTRAP_SUPERADMIN_EMAIL`, `BOOTSTRAP_SUPERADMIN_PASSWORD`
+- `BOOTSTRAP_MANAGER_EMAIL`, `BOOTSTRAP_MANAGER_PASSWORD`
+- `BOOTSTRAP_OWNER_EMAIL`, `BOOTSTRAP_OWNER_PASSWORD`
+- `BOOTSTRAP_TENANT_EMAIL`, `BOOTSTRAP_TENANT_PASSWORD`
+- Optional name/phone overrides: `BOOTSTRAP_*_FIRST_NAME`, `BOOTSTRAP_*_LAST_NAME`, `BOOTSTRAP_*_PHONE`
+- `ENABLE_DEMO_AUTH` - Optional, non-production only. Enables demo-user endpoints and demo-user seeding when set to `true`
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - Stripe (optional at build time)
 - `OPENAI_API_KEY`, `OPENAI_MODEL` - OpenAI
 - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` - Twilio SMS (optional — gracefully skipped if missing)
@@ -257,9 +261,9 @@ The sign-in page (`/auth/signin`) always shows "Dev Quick Login" buttons for all
 ## Deployment / Build Notes
 - **Deployment type**: Reserved VM (`deploymentTarget = "vm"` in `.replit`). Build: `npm run build`. Run: `bash start-prod.sh`.
 - **MongoDB in deployment**: Reserved VM runs local mongod (same as dev). `start-prod.sh` starts mongod, seeds, then starts Next.js.
-- **Custom domain (pm.smarts.fi)**: Set `APP_URL=https://pm.smarts.fi` in Replit Secrets. This overrides NEXTAUTH_URL so auth and demo-login redirect to your domain. Without it, redirects may go to smartpm.replit.app.
+- **Custom domain (pm.smarts.fi)**: Set `APP_URL=https://pm.smarts.fi` in Replit Secrets. This overrides NEXTAUTH_URL/AUTH_URL so auth redirects use your domain. `CUSTOM_DOMAIN` is also supported as a fallback by the start scripts.
 - **NEXTAUTH_URL**: Set by start-prod.sh from APP_URL or REPLIT_DOMAINS. Auth.js v5 also uses `trustHost: true` to accept request headers.
 - **Stripe lazy init**: All `new Stripe(...)` calls are lazy — only run inside route handlers, never at module load time.
 - **environment.ts**: Stripe and Publishable key fields are `.optional()` in the Zod schema.
 - **NEXTAUTH_SECRET vs AUTH_SECRET**: NextAuth v5 uses `AUTH_SECRET`. The env schema validates `NEXTAUTH_SECRET` but this is not required.
-- **Production seeding**: Both `start.sh` and `start-prod.sh` run `auto-seed.mjs` on every start. In a fresh deployment with empty MongoDB, this auto-seeds 33 properties + 4 demo users. In an existing deployment, it skips (collections already populated).
+- **Production seeding**: Both `start.sh` and `start-prod.sh` run `auto-seed.mjs` on every start. In a fresh deployment, this seeds properties and promo codes. User accounts are only auto-created if you explicitly enable bootstrap provisioning through secrets.

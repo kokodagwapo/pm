@@ -15,6 +15,10 @@ import mongoose from 'mongoose';
 import User from '../models/User';
 import { Property } from '../models';
 
+const DEMO_AUTH_ENABLED =
+  process.env.NODE_ENV !== 'production' &&
+  process.env.ENABLE_DEMO_AUTH === 'true';
+
 const DEMO_ACCOUNTS = [
   {
     email: 'hi@smartstart.us',
@@ -198,6 +202,12 @@ function buildDemoProperties(ownerId: string) {
  */
 async function seedDemoAccounts() {
   try {
+    if (!DEMO_AUTH_ENABLED) {
+      throw new Error(
+        'Demo seeding is disabled. Set ENABLE_DEMO_AUTH=true in a non-production environment to run this script.'
+      );
+    }
+
     // Get MongoDB URI from environment, stripping any accidental KEY=value prefix
     let rawUri = process.env.MONGODB_URI;
     if (!rawUri) {

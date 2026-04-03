@@ -1,11 +1,15 @@
 /**
  * SmartStartPM - Ensure Demo Users
- * Seeds demo accounts if the database has no users. Safe to call on every sign-in page load.
+ * Seeds demo accounts for local/demo environments only.
  */
 
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
+
+const DEMO_AUTH_ENABLED =
+  process.env.NODE_ENV !== "production" &&
+  process.env.ENABLE_DEMO_AUTH === "true";
 
 const DEMO_ACCOUNTS = [
   { email: "admin@propertypro.com", password: "Admin123$", firstName: "Admin", lastName: "User", role: "admin", phone: "+1234567890", isActive: true, emailVerified: new Date() },
@@ -16,6 +20,10 @@ const DEMO_ACCOUNTS = [
 ];
 
 export async function GET() {
+  if (!DEMO_AUTH_ENABLED) {
+    return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
+  }
+
   try {
     await connectDB();
     const demoEmailsLower = DEMO_ACCOUNTS.map((a) => a.email.toLowerCase());

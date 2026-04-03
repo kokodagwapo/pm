@@ -7,22 +7,22 @@ import { getCsrfToken, signIn } from "next-auth/react";
 import { HeroVideo } from "@/components/landing/HeroVideo";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
-import { DemoLeadForm } from "@/components/auth/DemoLeadForm";
-import { heroGlassButtonPrimary, heroGlassInput, heroGlassPanel } from "@/components/auth/hero-glass";
+import {
+  heroGlassButtonPrimary,
+  heroGlassInput,
+  heroGlassPanel,
+} from "@/components/auth/hero-glass";
 import { cn } from "@/lib/utils";
-import { getDemoLead, type DemoLead } from "@/lib/demo-lead-storage";
 import {
   Loader2,
   Building2,
   Mail,
   Lock,
   AlertCircle,
-  Zap,
-  Shield,
-  Users,
   Home,
   Calendar,
   ArrowLeft,
+  CheckCircle2,
 } from "lucide-react";
 
 interface Branding {
@@ -77,28 +77,27 @@ function safeCallbackUrl(input: string | null): string {
   return path.startsWith("/dashboard") ? path : "/dashboard";
 }
 
-/** Production: demo-first UX (quick login only, gated). Development: full credentials + unlocked quick login. */
-const SHOW_CREDENTIALS_SIGN_IN = process.env.NODE_ENV === "development";
-
-const IS_DEV = process.env.NODE_ENV === "development";
-
 function CredentialsSignInSection({
   t,
-  demoAccountsReady,
   isLoading,
   setIsLoading,
   setError,
+  initialEmail,
   signInWithCredentials,
 }: {
   t: (key: string) => string;
-  demoAccountsReady: boolean;
   isLoading: boolean;
   setIsLoading: (v: boolean) => void;
   setError: (v: string) => void;
+  initialEmail: string;
   signInWithCredentials: (email: string, password: string) => Promise<string | null>;
 }) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    setEmail(initialEmail);
+  }, [initialEmail]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,7 +177,7 @@ function CredentialsSignInSection({
 
         <button
           type="submit"
-          disabled={isLoading || !demoAccountsReady}
+          disabled={isLoading}
           className={cn(
             heroGlassButtonPrimary,
             "mt-2 min-h-[46px] py-3 disabled:cursor-not-allowed disabled:opacity-40"
@@ -199,34 +198,15 @@ function CredentialsSignInSection({
   );
 }
 
-/** Landing "See demo" uses `?demo=1` — skip the lead form and enable quick login immediately. */
-function isDemoQuickEntry(demoParam: string | null): boolean {
-  if (!demoParam) return false;
-  const v = demoParam.trim().toLowerCase();
-  return v === "1" || v === "true" || v === "yes";
-}
-
 function SignInContent() {
   const searchParams = useSearchParams();
   const { t } = useLocalizationContext();
-  const isDemoQuick = isDemoQuickEntry(searchParams.get("demo"));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [branding, setBranding] = useState<Branding>(DEFAULT_BRANDING);
   const [logoError, setLogoError] = useState(false);
-  const [demoAccountsReady, setDemoAccountsReady] = useState(false);
-  const [savedDemoLead, setSavedDemoLead] = useState<DemoLead | null>(null);
-  const [demoLeadGatePassed, setDemoLeadGatePassed] = useState(false);
-  /** Local dev: skip the lead form so sign-in works at http://127.0.0.1:3000 and localhost without ?demo=1 */
-  const quickLoginUnlocked = demoLeadGatePassed || isDemoQuick || IS_DEV;
-
-  useEffect(() => {
-    const existing = getDemoLead();
-    if (existing) {
-      setSavedDemoLead(existing);
-      setDemoLeadGatePassed(true);
-    }
-  }, []);
+  const registered = searchParams.get("registered") === "1";
+  const initialEmail = searchParams.get("email") || "";
 
   useEffect(() => {
     const fetchBranding = async () => {
@@ -256,13 +236,6 @@ function SignInContent() {
     );
   }, []);
 
-  // Ensure demo users exist in MongoDB (Docker/local) so Dev Quick Login works without running setup:local
-  useEffect(() => {
-    fetch("/api/setup/ensure-demo", { credentials: "include" })
-      .catch(() => {})
-      .finally(() => setDemoAccountsReady(true));
-  }, []);
-
   /**
    * Same request shape as next-auth/react `signIn("credentials")` (X-Auth-Return-Redirect + JSON body).
    * Fallback runs when the library returns an error (e.g. MissingCSRF) so cookies are always sent with `credentials: "include"`.
@@ -271,10 +244,6 @@ function SignInContent() {
     loginEmail: string,
     loginPassword: string
   ): Promise<string | null> => {
-    await fetch("/api/setup/ensure-demo", { credentials: "include" }).catch(
-      () => {}
-    );
-
     const callbackPath = safeCallbackUrl(searchParams.get("callbackUrl"));
     const callbackUrl = `${window.location.origin}${callbackPath}`;
 
@@ -344,33 +313,6 @@ function SignInContent() {
     );
   };
 
-  const handleQuickLogin = async (demoEmail: string, demoPassword: string) => {
-    setIsLoading(true);
-    setError("");
-    try {
-      const target = await signInCredentialsWithFallback(
-        demoEmail,
-        demoPassword
-      );
-      if (target) {
-        window.location.href = target;
-      } else {
-        setError(t("auth.signin.loginFailed"));
-        setIsLoading(false);
-      }
-    } catch {
-      setError(t("auth.signin.error"));
-      setIsLoading(false);
-    }
-  };
-
-  const demoAccounts = [
-    { label: "Super Admin", role: "admin", email: "hi@smartstart.us", password: "SmartStart2025", icon: Shield, color: "bg-red-500/90 hover:bg-red-600/90" },
-    { label: "Manager", role: "manager", email: "manager@smartstart.us", password: "SmartStart2025", icon: Users, color: "bg-blue-500/90 hover:bg-blue-600/90" },
-    { label: "Owner", role: "owner", email: "owner@smartstart.us", password: "SmartStart2025", icon: Building2, color: "bg-purple-500/90 hover:bg-purple-600/90" },
-    { label: "Tenant", role: "tenant", email: "tenant@smartstart.us", password: "SmartStart2025", icon: Home, color: "bg-green-500/90 hover:bg-green-600/90" },
-  ];
-
   return (
     <div className="fixed inset-0 h-screen w-screen overflow-auto" suppressHydrationWarning>
       <HeroVideo />
@@ -436,6 +378,13 @@ function SignInContent() {
 
           {/* Match LanguageSwitcher (dark) trigger: outline only at rest, hover:bg-white/10 */}
           <div className={cn(heroGlassPanel, "sm:p-8")}>
+            {registered && !error && (
+              <div className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-400/35 bg-emerald-500/15 p-3 text-xs text-emerald-100 backdrop-blur-md backdrop-saturate-125 [box-shadow:inset_0_1px_0_rgba(255,255,255,0.06)]">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                {t("auth.signin.registeredSuccess")}
+              </div>
+            )}
+
             {error && (
               <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-400/35 bg-red-500/15 p-3 text-xs text-red-100 backdrop-blur-md backdrop-saturate-125 [box-shadow:inset_0_1px_0_rgba(255,255,255,0.06)]">
                 <AlertCircle className="h-4 w-4 shrink-0" />
@@ -443,73 +392,27 @@ function SignInContent() {
               </div>
             )}
 
-            {SHOW_CREDENTIALS_SIGN_IN && (
-              <CredentialsSignInSection
-                t={t}
-                demoAccountsReady={demoAccountsReady}
-                isLoading={isLoading}
-                setIsLoading={setIsLoading}
-                setError={setError}
-                signInWithCredentials={signInCredentialsWithFallback}
-              />
-            )}
+            <CredentialsSignInSection
+              t={t}
+              isLoading={isLoading}
+              setIsLoading={setIsLoading}
+              setError={setError}
+              initialEmail={initialEmail}
+              signInWithCredentials={signInCredentialsWithFallback}
+            />
 
-            {/* Quick Login — gated behind name / phone / email (stored in localStorage) */}
-            <div
-              className={
-                SHOW_CREDENTIALS_SIGN_IN ? "mt-7 border-t border-white/20 pt-6" : ""
-              }
+            <p
+              className="mt-5 text-center text-xs tracking-wide text-white/45"
+              style={{ fontWeight: 300 }}
             >
-              <div className="flex items-center gap-2 mb-4">
-                <Zap className="h-3.5 w-3.5 text-amber-400/80" />
-                <span
-                  className="text-xs tracking-wide text-white/40"
-                  style={{ fontWeight: 300 }}
-                >
-                  {t("auth.signin.devQuickLogin")}
-                </span>
-                {!demoAccountsReady && (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-white/35" aria-hidden />
-                )}
-              </div>
-              {!isDemoQuick && (
-                <DemoLeadForm
-                  t={t}
-                  savedLead={savedDemoLead}
-                  onSaved={(lead) => {
-                    setSavedDemoLead(lead);
-                    setDemoLeadGatePassed(true);
-                  }}
-                  onCleared={() => {
-                    setSavedDemoLead(null);
-                    setDemoLeadGatePassed(false);
-                  }}
-                />
-              )}
-              <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2 ${!quickLoginUnlocked ? "opacity-35" : ""}`}>
-                {demoAccounts.map((account) => (
-                  <button
-                    key={account.email}
-                    type="button"
-                    onClick={() => handleQuickLogin(account.email, account.password)}
-                    disabled={isLoading || !demoAccountsReady || !quickLoginUnlocked}
-                    className={`flex flex-col items-center justify-center gap-1.5 min-h-[52px] py-3 rounded-xl text-white text-[11px] tracking-wide transition-all touch-manipulation disabled:opacity-40 disabled:cursor-not-allowed border border-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-sm ${account.color}`}
-                    style={{ fontWeight: 300 }}
-                  >
-                    <account.icon className="h-3.5 w-3.5" />
-                    {account.label}
-                  </button>
-                ))}
-              </div>
-              <p
-                className="text-[10px] text-white/25 mt-2.5 text-center tracking-wide"
-                style={{ fontWeight: 300 }}
+              {t("auth.signin.needAccount")}{" "}
+              <Link
+                href="/auth/signup"
+                className="text-white/80 transition-colors hover:text-white"
               >
-                {quickLoginUnlocked
-                  ? t("auth.signin.devClickToLogin")
-                  : t("auth.signin.demoLead.unlockHint")}
-              </p>
-            </div>
+                {t("auth.signin.createAccount")}
+              </Link>
+            </p>
           </div>
 
           {/* View Rentals + stay finder */}

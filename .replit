@@ -54,7 +54,9 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "pk_test_51Rvq4r2Ouu0wp8JqMcQrvvkDgUlLigRMJ
 NEXTAUTH_URL = "https://b8f4d0d5-4c4d-42b1-bbad-5d5c166f5c2f-00-3ue2u6qtda2ml.spock.replit.dev"
 
 [userenv.production]
+APP_URL = "https://pm.smarts.fi"
 CUSTOM_DOMAIN = "https://pm.smarts.fi"
+PROVISION_BOOTSTRAP_ACCOUNTS = "false"
 
 [postMerge]
 path = "scripts/post-merge.sh"

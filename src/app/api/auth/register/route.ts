@@ -13,6 +13,11 @@ import {
   parseRequestBody,
   withDatabase,
 } from "@/lib/api-utils";
+import {
+  rateLimit,
+  rateLimitConfigs,
+  createRateLimitResponse,
+} from "@/lib/rate-limit";
 import { isValidPhoneNumber, normalizePhoneNumber } from "@/lib/utils";
 
 // ============================================================================
@@ -21,6 +26,15 @@ import { isValidPhoneNumber, normalizePhoneNumber } from "@/lib/utils";
 
 export const POST = withDatabase(async (request: NextRequest) => {
   try {
+    const limiter = rateLimit(rateLimitConfigs.auth);
+    const rateLimitResult = limiter.check(request);
+    if (!rateLimitResult.success) {
+      return createRateLimitResponse(
+        "Too many registration attempts. Please try again later.",
+        rateLimitResult.resetTime
+      );
+    }
+
     const { success, data: body, error } = await parseRequestBody(request);
     if (!success) {
       console.error("Failed to parse request body:", error);
@@ -33,7 +47,6 @@ export const POST = withDatabase(async (request: NextRequest) => {
       email,
       phone,
       password,
-      role = UserRole.TENANT,
       avatar,
     } = body;
 
@@ -64,36 +77,8 @@ export const POST = withDatabase(async (request: NextRequest) => {
       );
     }
 
-    // Map role values to enum values for single company architecture
-    const roleMapping: Record<string, UserRole> = {
-      tenant: UserRole.TENANT,
-      admin: UserRole.ADMIN,
-      manager: UserRole.MANAGER,
-      // Legacy mappings for backward compatibility
-      super_admin: UserRole.ADMIN,
-      property_manager: UserRole.MANAGER,
-      owner: UserRole.MANAGER,
-      property_owner: UserRole.MANAGER,
-      "Property Owner": UserRole.MANAGER,
-      "Property Manager": UserRole.MANAGER,
-      maintenance_staff: UserRole.MANAGER,
-      "Maintenance Staff": UserRole.MANAGER,
-      leasing_agent: UserRole.MANAGER,
-      "Leasing Agent": UserRole.MANAGER,
-    };
-
-    const mappedRole = roleMapping[role] || role;
-
-    // Validate role
-    if (!Object.values(UserRole).includes(mappedRole)) {
-      console.error(
-        "Invalid role specified:",
-        role,
-        "Available roles:",
-        Object.values(UserRole)
-      );
-      return createErrorResponse(`Invalid role specified: ${role}`, 400);
-    }
+    // Public registration is tenant-only. Higher-privilege roles must be created internally.
+    const mappedRole = UserRole.TENANT;
 
     // Validate phone number if provided
     if (phone) {
@@ -179,7 +164,7 @@ export const GET = async () => {
         email: "Required, valid email format",
         password: "Required, minimum 6 characters",
         phone: "Optional, valid phone number format",
-        role: `Optional, one of: ${Object.values(UserRole).join(", ")}`,
+        role: "Assigned automatically as tenant for public registration",
       },
     },
     "Registration endpoint information"

@@ -22,6 +22,7 @@
     "dev:3101": "PORT=3101 next dev -p 3101 -H 0.0.0.0",
     "lint": "next lint",
     "seed:demo": "tsx src/scripts/seed-demo-accounts.ts",
+    "provision:auth": "node src/scripts/provision-bootstrap-accounts.mjs",
     "seed:sample-lease": "tsx src/scripts/seed-sample-active-lease.ts",
     "seed:demo-data": "tsx src/scripts/seed-demo-data.ts",
     "seed:ai-assistants": "tsx src/scripts/seed-ai-assistants.ts",

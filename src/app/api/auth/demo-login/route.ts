@@ -12,6 +12,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
+const DEMO_AUTH_ENABLED =
+  process.env.NODE_ENV !== "production" &&
+  process.env.ENABLE_DEMO_AUTH === "true";
+
 const DEMO_CREDENTIALS: Record<string, { email: string; password: string }> = {
     admin: { email: "hi@smartstart.us", password: "SmartStart2025" },
     manager: { email: "manager@smartstart.us", password: "SmartStart2025" },
@@ -20,6 +24,10 @@ const DEMO_CREDENTIALS: Record<string, { email: string; password: string }> = {
 };
 
 export async function GET(request: NextRequest) {
+    if (!DEMO_AUTH_ENABLED) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
     const role = request.nextUrl.searchParams.get("role") || "admin";
     const creds = DEMO_CREDENTIALS[role];
 
