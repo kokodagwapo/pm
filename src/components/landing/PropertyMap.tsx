@@ -9,14 +9,16 @@ import {
 
 const NEIGHBORHOOD_COORDS: Record<string, [number, number]> = {
   // ── Existing communities ─────────────────────────────────────
-  "Falling Waters":        [26.1030, -81.7510],
-  "Winter Park":           [26.1780, -81.7960],
-  "World Tennis Club":     [26.1550, -81.7650],
+  "Falling Waters":        [26.1318, -81.7298],
+  "Winter Park":           [26.1371, -81.7623],
+  "Winterpark":            [26.1371, -81.7623],
+  "World Tennis Club":     [26.2188, -81.7692],
   "Glen Eagle":            [26.1200, -81.7420],
-  "Moon Lake":             [26.1650, -81.7800],
-  "Naples Park":           [26.2650, -81.8080],
-  "Royal Arms":            [26.1500, -81.7900],
-  "Villas of Whittenberg": [26.1880, -81.7850],
+  "Glen Eagle Golf & Country Club": [26.1200, -81.7420],
+  "Moon Lake":             [26.1454, -81.7420],
+  "Naples Park":           [26.2633, -81.8035],
+  "Royal Arms":            [26.1282, -81.7816],
+  "Villas of Whittenberg": [26.1404, -81.7369],
 
   // ── Seed-35 communities (GPS-verified) ───────────────────────
   "Vanderbilt Beach":      [26.2542, -81.8224],  // 100 Vanderbilt Beach Rd
@@ -68,6 +70,10 @@ interface Property {
   units?: Array<{ bedrooms?: number; bathrooms?: number; rentAmount?: number }>;
   images?: string[];
   neighborhood?: string;
+  latitude?: number;
+  longitude?: number;
+  coordinates?: [number, number];
+  location?: { coordinates?: [number, number] };
 }
 
 interface NeighborhoodFilter {
@@ -85,24 +91,56 @@ interface PropertyMapProps {
   onNeighborhoodChange?: (value: string) => void;
 }
 
-// Verified street-level centroids for all Naples streets in the current dataset
+const EXACT_ADDRESS_COORDS: Record<string, [number, number]> = {
+  "1200 gulf shore blvd n": [26.1598102, -81.8085476],
+  "1500 moorings dr": [26.1970351, -81.7900823],
+  "720 5th ave s": [26.1412553, -81.7974019],
+  "400 park shore dr": [26.1964008, -81.8090146],
+  "4584 w alhambra cir": [26.2026466, -81.7989477],
+  "5016 old pond dr": [26.1453996, -81.7420119],
+  "844 101st ave n": [26.2632882, -81.8035248],
+  "3470 frosty way": [26.1379943, -81.7616886],
+  "3605 arctic cir": [26.1365447, -81.7625486],
+  "3702 northwinds dr": [26.1370574, -81.762256],
+  "3834 snowflake ln": [26.1368082, -81.7606451],
+  "5265 whitten dr": [26.1403792, -81.7369489],
+  "69 georgetown blvd": [26.1282071, -81.7816172],
+};
+
 const STREET_COORDS: Record<string, [number, number]> = {
-  "arctic circle":       [26.1364, -81.7631],
-  "falling waters blvd": [26.1030, -81.7510],
-  "georgetown blvd":     [26.1282, -81.7816],
-  "tamiami trail n":     [26.1600, -81.7976],
-  "olympic dr":          [26.2230, -81.7690],
-  "harwich ct":          [26.1200, -81.7420],
-  "moon lake cir":       [26.1650, -81.7800],
-  "109th ave n":         [26.2650, -81.8080],
-  "whitten dr":          [26.1432, -81.7374],
+  "101st ave n": [26.2632882, -81.8035248],
+  "5th ave s": [26.1412553, -81.7974019],
+  "arctic cir": [26.1365447, -81.7625486],
+  "cascades dr": [26.1308, -81.7288],
+  "falling waters blvd": [26.1318, -81.7298],
+  "georgetown blvd": [26.1282071, -81.7816172],
+  "gulf shore blvd n": [26.1598102, -81.8085476],
+  "gulf shore dr": [26.2542, -81.8224],
+  "harwich ct": [26.1200, -81.7420],
+  "hidden lake ct": [26.1315, -81.7294],
+  "hidden lake dr": [26.1318, -81.7298],
+  "magnolia ave": [26.1304, -81.7281],
+  "magnolia": [26.1304, -81.7281],
+  "moorings dr": [26.1970351, -81.7900823],
+  "moon lake cir": [26.1453996, -81.7420119],
+  "northwinds dr": [26.1370574, -81.762256],
+  "old pond dr": [26.1453996, -81.7420119],
+  "olympic dr": [26.2188, -81.7692],
+  "park shore dr": [26.1964008, -81.8090146],
+  "pelican bay blvd": [26.2312, -81.8056],
+  "snowflake ln": [26.1368082, -81.7606451],
+  "tamiami trail n": [26.1600, -81.7976],
+  "w alhambra cir": [26.2026466, -81.7989477],
+  "whitten dr": [26.1403792, -81.7369489],
+  "windy pines": [26.1312, -81.7292],
+  "windy pines dr": [26.1312, -81.7292],
 };
 
 const ZIP_CENTROIDS: Record<string, [number, number]> = {
-  "34102": [26.1394, -81.8035], "34103": [26.1673, -81.8107],
-  "34104": [26.1400, -81.7404], "34105": [26.1656, -81.7626],
-  "34108": [26.2533, -81.8099], "34109": [26.2243, -81.7698],
-  "34110": [26.2742, -81.7913], "34112": [26.1022, -81.7461],
+  "34102": [26.1660, -81.7990], "34103": [26.1960, -81.8040],
+  "34104": [26.1450, -81.7420], "34105": [26.2190, -81.7690],
+  "34108": [26.2533, -81.8065], "34109": [26.2243, -81.7698],
+  "34110": [26.2742, -81.7913], "34112": [26.1330, -81.7510],
   "34113": [26.0749, -81.7163], "34114": [26.0148, -81.6736],
   "34116": [26.1642, -81.7049], "34119": [26.1030, -81.7510],
   "34120": [26.2319, -81.6401],
@@ -110,41 +148,119 @@ const ZIP_CENTROIDS: Record<string, [number, number]> = {
 
 const coordsCache = new Map<string, [number, number]>();
 
+function hashString(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function offsetFor(seed: string, scale: number): number {
+  const hash = hashString(seed);
+  const normalized = (hash % 1000) / 1000;
+  return (normalized - 0.5) * scale;
+}
+
+function applyOffset(
+  coords: [number, number],
+  seed: string,
+  latScale = 0.0018,
+  lngScale = 0.0018
+): [number, number] {
+  return [
+    coords[0] + offsetFor(`${seed}:lat`, latScale),
+    coords[1] + offsetFor(`${seed}:lng`, lngScale),
+  ];
+}
+
+function normalizeStreet(street: string | undefined): string {
+  return (street || "")
+    .toLowerCase()
+    .replace(/,.*$/, "")
+    .replace(/\bunit\b.*$/, "")
+    .replace(/\bdrive\b/g, "dr")
+    .replace(/\bcircle\b/g, "cir")
+    .replace(/\bcourt\b/g, "ct")
+    .replace(/\bavenue\b/g, "ave")
+    .replace(/\bboulevard\b/g, "blvd")
+    .replace(/\blane\b/g, "ln")
+    .replace(/\bwest\b/g, "w")
+    .replace(/\bnorth\b/g, "n")
+    .replace(/\bsouth\b/g, "s")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function stripHouseNumber(street: string): string {
+  return street.replace(/^\d+\s*/, "").trim();
+}
+
 function getPropertyCoords(property: Property): [number, number] {
   if (coordsCache.has(property._id)) return coordsCache.get(property._id)!;
-  const jitter = (s: number) => (Math.random() - 0.5) * s;
 
-  // 1. Verified street name lookup
-  const rawStreet = property.address?.street || "";
-  const streetKey = rawStreet.replace(/^\d+\s+/, "").toLowerCase().trim();
-  if (STREET_COORDS[streetKey]) {
-    const b = STREET_COORDS[streetKey];
-    const r: [number, number] = [b[0] + jitter(0.008), b[1] + jitter(0.008)];
+  if (
+    typeof property.latitude === "number" &&
+    typeof property.longitude === "number"
+  ) {
+    const direct: [number, number] = [property.latitude, property.longitude];
+    coordsCache.set(property._id, direct);
+    return direct;
+  }
+
+  if (
+    Array.isArray(property.location?.coordinates) &&
+    property.location.coordinates.length === 2
+  ) {
+    const [lng, lat] = property.location.coordinates;
+    const direct: [number, number] = [lat, lng];
+    coordsCache.set(property._id, direct);
+    return direct;
+  }
+
+  if (Array.isArray(property.coordinates) && property.coordinates.length === 2) {
+    const [lng, lat] = property.coordinates;
+    const direct: [number, number] = [lat, lng];
+    coordsCache.set(property._id, direct);
+    return direct;
+  }
+
+  const rawStreet = normalizeStreet(property.address?.street);
+  if (rawStreet && EXACT_ADDRESS_COORDS[rawStreet]) {
+    const r = applyOffset(EXACT_ADDRESS_COORDS[rawStreet], property._id, 0.00012, 0.00012);
     coordsCache.set(property._id, r);
     return r;
   }
 
-  // 2. Zip code centroid
+  // 1. Street-level cluster lookup with deterministic offset.
+  const streetKey = stripHouseNumber(rawStreet);
+  if (streetKey && STREET_COORDS[streetKey]) {
+    const r = applyOffset(STREET_COORDS[streetKey], `${property._id}:${rawStreet}`, 0.0014, 0.0014);
+    coordsCache.set(property._id, r);
+    return r;
+  }
+
+  // 2. Zip code centroid.
   const zip = property.address?.zipCode;
   if (zip && ZIP_CENTROIDS[zip]) {
-    const b = ZIP_CENTROIDS[zip];
-    const r: [number, number] = [b[0] + jitter(0.008), b[1] + jitter(0.008)];
+    const r = applyOffset(ZIP_CENTROIDS[zip], `${property._id}:${zip}`, 0.0022, 0.0022);
     coordsCache.set(property._id, r);
     return r;
   }
 
-  // 3. Neighborhood name match (case-insensitive)
+  // 3. Neighborhood name match (case-insensitive).
   const label = (property.neighborhood || property.name || "").toLowerCase();
   for (const [key, coords] of Object.entries(NEIGHBORHOOD_COORDS)) {
     if (label.includes(key.toLowerCase())) {
-      const r: [number, number] = [coords[0] + jitter(0.003), coords[1] + jitter(0.003)];
+      const r = applyOffset(coords, `${property._id}:${key}`, 0.0018, 0.0018);
       coordsCache.set(property._id, r);
       return r;
     }
   }
 
-  // 4. Naples center fallback
-  const r: [number, number] = [NAPLES_CENTER[0] + jitter(0.01), NAPLES_CENTER[1] + jitter(0.01)];
+  // 4. Naples center fallback.
+  const r = applyOffset(NAPLES_CENTER, property._id, 0.006, 0.006);
   coordsCache.set(property._id, r);
   return r;
 }
@@ -373,8 +489,8 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
     markersRef.current.clear();
 
     const map = mapInstanceRef.current;
-    const bounds: any[] = [];
     const isLight = !TILE_LAYERS[tileMode].pillDark;
+    const bounds: any[] = [];
 
     properties.forEach((property) => {
       const coords = getPropertyCoords(property);
@@ -400,6 +516,20 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
       markersRef.current.set(property._id, marker);
       bounds.push(coords);
     });
+
+    if (bounds.length === 1) {
+      map.flyTo(bounds[0], 14, { animate: false });
+      return;
+    }
+
+    if (bounds.length > 1) {
+      map.fitBounds(L.latLngBounds(bounds), {
+        padding: [48, 48],
+        maxZoom: 13,
+        animate: false,
+      });
+      return;
+    }
 
     map.setView(NAPLES_CENTER, 12);
   }, [properties, mapReady, onMarkerClick, onMarkerHover, tileMode]);

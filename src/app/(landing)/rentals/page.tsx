@@ -493,7 +493,7 @@ function RentalsContent() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
-  const [listDrawerOpen, setListDrawerOpen] = useState(false);
+  const [listDrawerOpen, setListDrawerOpen] = useState(true);
   const [stayCalMonths, setStayCalMonths] = useState(1);
   const [isLg, setIsLg] = useState(() =>
     typeof window !== "undefined"
@@ -582,6 +582,18 @@ function RentalsContent() {
     () => properties.find((p) => p._id === selectedPropertyId) ?? null,
     [properties, selectedPropertyId]
   );
+
+  useEffect(() => {
+    if (properties.length === 0) {
+      setSelectedPropertyId(null);
+      return;
+    }
+
+    const selectedStillExists = properties.some((p) => p._id === selectedPropertyId);
+    if ((!selectedPropertyId && isLg) || (selectedPropertyId && !selectedStillExists)) {
+      setSelectedPropertyId(properties[0]._id);
+    }
+  }, [properties, selectedPropertyId, isLg]);
 
   useEffect(() => {
     try {
@@ -932,7 +944,7 @@ function RentalsContent() {
                   }`}
                 >
                   <LayoutList className="w-4 h-4" />
-                  {listDrawerOpen ? "Close list" : "Browse list"}
+                  {listDrawerOpen ? "Hide panel" : "Show panel"}
                 </button>
               </div>
             </div>
@@ -1220,84 +1232,144 @@ function RentalsContent() {
             </div>
           )}
 
-          {/* Map + Area Guide — desktop (full width; list opens in drawer) */}
-          <div className="hidden lg:flex flex-col w-full flex-1 overflow-y-auto bg-[#f8f7f4] min-w-0">
-            <div className="relative w-full flex-shrink-0" style={{ height: "calc(100vh - 200px)", minHeight: 400, isolation: "isolate" }}>
-              <PropertyMap
-                properties={properties}
-                onMarkerClick={handleMarkerClick}
-                onMarkerHover={setHoveredPropertyId}
-                hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
-                neighborhoods={NEIGHBORHOODS}
-                activeNeighborhood={activeNeighborhood}
-                onNeighborhoodChange={handleNeighborhood}
-              />
-              {selectedProperty && (
-                <div className="absolute bottom-3 left-3 right-3 z-[1000] max-w-md pointer-events-none">
-                  <div className="pointer-events-auto shadow-xl">
-                    <PropertyFeaturedCard
-                      property={selectedProperty}
-                      onClose={() => setSelectedPropertyId(null)}
-                    />
+          {/* Desktop split view */}
+          <div
+            className="hidden lg:grid w-full flex-1 min-h-0"
+            style={{
+              gridTemplateColumns: listDrawerOpen
+                ? "minmax(0, 1fr) minmax(24rem, 30rem)"
+                : "minmax(0, 1fr)",
+            }}
+          >
+            <div className="min-w-0 overflow-y-auto bg-[#f8f7f4] border-r border-slate-200/60">
+              <div
+                className="relative w-full flex-shrink-0"
+                style={{ height: "calc(100vh - 200px)", minHeight: 440, isolation: "isolate" }}
+              >
+                <PropertyMap
+                  properties={properties}
+                  onMarkerClick={handleMarkerClick}
+                  onMarkerHover={setHoveredPropertyId}
+                  hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
+                  neighborhoods={NEIGHBORHOODS}
+                  activeNeighborhood={activeNeighborhood}
+                  onNeighborhoodChange={handleNeighborhood}
+                />
+                {selectedProperty && !listDrawerOpen && (
+                  <div className="absolute bottom-3 left-3 right-3 z-[1000] max-w-md pointer-events-none">
+                    <div className="pointer-events-auto shadow-xl">
+                      <PropertyFeaturedCard
+                        property={selectedProperty}
+                        onClose={() => setSelectedPropertyId(null)}
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
-              {selectedUnavailableOnMap && (
-                <div className="absolute top-3 left-3 right-3 z-[1000] max-w-lg pointer-events-none">
-                  <div className="pointer-events-auto rounded-xl border border-amber-200 bg-amber-50/95 px-4 py-3 text-sm text-amber-900 shadow-lg backdrop-blur-sm">
-                    This property is not available for your selected dates. Adjust dates or pick
-                    another pin.
-                    {zeroResultHints.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {zeroResultHints.slice(0, 2).map((h, idx) => {
-                          const cin = parseStayParamDate(h.suggestedCheckIn);
-                          const cout = parseStayParamDate(h.suggestedCheckOut);
-                          if (!cin || !cout) return null;
-                          return (
-                            <button
-                              key={`hint-${idx}`}
-                              type="button"
-                              className="rounded-lg border border-amber-300 bg-white px-2 py-1 text-xs font-medium text-amber-900 hover:bg-amber-100"
-                              onClick={() =>
-                                runAvailabilitySearch({ checkIn: cin, checkOut: cout })
-                              }
-                            >
-                              {h.label || "Try suggested dates"}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
+                )}
+                {selectedUnavailableOnMap && (
+                  <div className="absolute top-3 left-3 right-3 z-[1000] max-w-lg pointer-events-none">
+                    <div className="pointer-events-auto rounded-xl border border-amber-200 bg-amber-50/95 px-4 py-3 text-sm text-amber-900 shadow-lg backdrop-blur-sm">
+                      This property is not available for your selected dates. Adjust dates or pick
+                      another pin.
+                      {zeroResultHints.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {zeroResultHints.slice(0, 2).map((h, idx) => {
+                            const cin = parseStayParamDate(h.suggestedCheckIn);
+                            const cout = parseStayParamDate(h.suggestedCheckOut);
+                            if (!cin || !cout) return null;
+                            return (
+                              <button
+                                key={`hint-${idx}`}
+                                type="button"
+                                className="rounded-lg border border-amber-300 bg-white px-2 py-1 text-xs font-medium text-amber-900 hover:bg-amber-100"
+                                onClick={() =>
+                                  runAvailabilitySearch({ checkIn: cin, checkOut: cout })
+                                }
+                              >
+                                {h.label || "Try suggested dates"}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-            {pagination.pages > 1 && isLg && !listDrawerOpen && (
-              <div className="flex flex-shrink-0 items-center justify-center gap-2 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur-sm">
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(pagination.page - 1)}
-                  disabled={pagination.page <= 1}
-                  className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronLeft className="w-4 h-4 text-slate-600" />
-                </button>
-                <span className="text-xs font-medium text-slate-600 tabular-nums">
-                  Page {pagination.page} / {pagination.pages}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(pagination.page + 1)}
-                  disabled={pagination.page >= pagination.pages}
-                  className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronRight className="w-4 h-4 text-slate-600" />
-                </button>
+                )}
               </div>
-            )}
-            <div className="px-5 lg:px-8 py-8 border-t border-slate-200">
-              <NaplesAreaGuide />
+              <div className="border-t border-slate-200 bg-white/80 px-5 py-3 backdrop-blur-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                      Explore Naples
+                    </p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Browse on the map and use the panel to compare, save, and open full details.
+                    </p>
+                  </div>
+                  {pagination.pages > 1 && !listDrawerOpen && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handlePageChange(pagination.page - 1)}
+                        disabled={pagination.page <= 1}
+                        className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4 text-slate-600" />
+                      </button>
+                      <span className="text-xs font-medium text-slate-600 tabular-nums">
+                        Page {pagination.page} / {pagination.pages}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handlePageChange(pagination.page + 1)}
+                        disabled={pagination.page >= pagination.pages}
+                        className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4 text-slate-600" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="px-5 lg:px-8 py-8 border-t border-slate-200">
+                <NaplesAreaGuide />
+              </div>
             </div>
+
+            {listDrawerOpen && (
+              <aside className="min-h-0 border-l border-slate-200/70 bg-white/85 backdrop-blur-xl flex flex-col">
+                <div className="shrink-0 border-b border-slate-200 bg-white/95 px-5 py-4 backdrop-blur-xl">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                        Refined stays
+                      </p>
+                      <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-900">
+                        {pagination.total}{" "}
+                        {pagination.total === 1
+                          ? t("rentals.results.property")
+                          : t("rentals.results.properties")}
+                      </h2>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {selectedProperty
+                          ? `Showing “${selectedProperty.name}” first so you can scan details without leaving the map.`
+                          : "Select any pin to preview details while you browse."}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setListDrawerOpen(false)}
+                      className="rounded-xl border border-slate-200 p-2 text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-800"
+                      aria-label="Hide property panel"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+                <div className="min-h-0 flex-1 overflow-y-auto bg-[#fcfcfb] p-4">
+                  {rentalsListBody({ showFeaturedCard: false })}
+                </div>
+              </aside>
+            )}
           </div>
 
           {/* Listings — phone/tablet; desktop uses drawer */}
@@ -1313,37 +1385,6 @@ function RentalsContent() {
           </div>
         </div>
 
-        {/* Desktop listing drawer */}
-        {isLg && listDrawerOpen && (
-          <>
-            <button
-              type="button"
-              className="fixed inset-0 z-[400] hidden bg-black/25 lg:block"
-              aria-label="Close list"
-              onClick={() => setListDrawerOpen(false)}
-            />
-            <aside className="fixed bottom-0 right-0 top-[200px] z-[401] hidden w-full max-w-md flex-col border-l border-slate-200 bg-[#f8f7f4] shadow-2xl lg:flex">
-              <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-sm">
-                <span className="text-sm font-semibold text-slate-900">
-                  {pagination.total}{" "}
-                  {pagination.total === 1
-                    ? t("rentals.results.property")
-                    : t("rentals.results.properties")}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setListDrawerOpen(false)}
-                  className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="min-h-0 flex-1 overflow-y-auto p-4">
-                {rentalsListBody({ showFeaturedCard: false })}
-              </div>
-            </aside>
-          </>
-        )}
       </div>
 
       {/* Floating comparison bar */}
