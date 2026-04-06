@@ -73,6 +73,7 @@ function isTransientDevError(error: unknown): boolean {
   try {
     if (error == null) return true;
 
+    // Empty error objects are almost always transient issues
     if (typeof error === "object" && error !== null && Object.keys(error as object).length === 0) {
       return true;
     }
@@ -94,6 +95,8 @@ function isTransientDevError(error: unknown): boolean {
       if (stack.includes("webpack") && msg.includes("reading 'call'")) return true;
       if (stack.includes("chunkloaderror")) return true;
       if (stack.includes("loading chunk")) return true;
+      if (stack.includes("hydration")) return true;
+      if (stack.includes("mismatch")) return true;
     }
 
     if (msg) {
@@ -105,6 +108,7 @@ function isTransientDevError(error: unknown): boolean {
       if (msg.includes("$refreshreg$")) return true;
       if (msg.includes("dynamically imported module")) return true;
       if (msg.includes("failed to fetch dynamically imported module")) return true;
+      if (msg.includes("sessionStorage")) return true;
     }
 
     return false;
@@ -188,15 +192,33 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
         safeSessionSet(RETRY_COUNT_KEY, "0");
       }
 
-      let transientRetryCountForFingerprint = parseInt(safeSessionGet(RETRY_COUNT_KEY) || "0", 10);
-      if (Number.isNaN(transientRetryCountForFingerprint)) transientRetryCountForFingerprint = 0;
+      let transientRetryCountForFingerprint = 0;
+      try {
+        const raw = safeSessionGet(RETRY_COUNT_KEY);
+        const parsed = parseInt(raw || "0", 10);
+        if (!Number.isNaN(parsed)) {
+          transientRetryCountForFingerprint = parsed;
+        }
+      } catch {
+        // Use default value
+      }
       transientRetryCountForFingerprint = Math.max(transientRetryCountForFingerprint, geTransientRetry.count);
 
       const isTransient = isTransientDevError(error);
       const isDev = process.env.NODE_ENV === "development";
 
       if (isDev && isTransient) {
-        const sessionTotal = parseInt(safeSessionGet(SESSION_TOTAL_KEY) || "0", 10);
+        let sessionTotal = 0;
+        try {
+          const raw = safeSessionGet(SESSION_TOTAL_KEY);
+          const parsed = parseInt(raw || "0", 10);
+          if (!Number.isNaN(parsed)) {
+            sessionTotal = parsed;
+          }
+        } catch {
+          // Use default value
+        }
+
         if (sessionTotal >= MAX_SESSION_AUTO_RECOVERIES) {
           setShowUI(true);
           return;
@@ -220,7 +242,16 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
 
         try {
           const key = "__smartstart_reload";
-          const count = parseInt(safeSessionGet(key) || "0", 10);
+          let count = 0;
+          try {
+            const raw = safeSessionGet(key);
+            const parsed = parseInt(raw || "0", 10);
+            if (!Number.isNaN(parsed)) {
+              count = parsed;
+            }
+          } catch {
+            // Use default value
+          }
           if (count < 2) {
             bumpSessionRecoveryTotal();
             safeSessionSet(key, String(count + 1));
