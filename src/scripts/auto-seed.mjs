@@ -50,10 +50,14 @@ const DEMO_AUTH_ENABLED =
   process.env.ENABLE_DEMO_AUTH === 'true';
 
 const DEMO_USERS = [
-  { email: 'hi@smartstart.us', role: 'admin', firstName: 'Admin', lastName: 'User' },
-  { email: 'manager@smartstart.us', role: 'manager', firstName: 'Maria', lastName: 'Manager' },
-  { email: 'owner@smartstart.us', role: 'owner', firstName: 'Oliver', lastName: 'Owner' },
-  { email: 'tenant@smartstart.us', role: 'tenant', firstName: 'Tina', lastName: 'Tenant' },
+  { email: 'hi@smartstart.us', role: 'admin', firstName: 'Admin', lastName: 'User', password: 'SmartStart2025' },
+  { email: 'manager@smartstart.us', role: 'manager', firstName: 'Maria', lastName: 'Manager', password: 'SmartStart2025' },
+  { email: 'owner@smartstart.us', role: 'owner', firstName: 'Oliver', lastName: 'Owner', password: 'SmartStart2025' },
+  { email: 'tenant@smartstart.us', role: 'tenant', firstName: 'Tina', lastName: 'Tenant', password: 'SmartStart2025' },
+  { email: 'superadmin@smartstartpm.com', role: 'admin', firstName: 'Super', lastName: 'Admin', password: 'Sspm!Super2026' },
+  { email: 'pmadmin@smartstartpm.com', role: 'manager', firstName: 'PM', lastName: 'Admin', password: 'Sspm!Manager2026' },
+  { email: 'owner@smartstartpm.com', role: 'owner', firstName: 'Property', lastName: 'Owner', password: 'Sspm!Owner2026' },
+  { email: 'tenant@smartstartpm.com', role: 'tenant', firstName: 'Smart', lastName: 'Tenant', password: 'Sspm!Tenant2026' },
 ];
 
 async function seedUsers(db) {
@@ -62,14 +66,19 @@ async function seedUsers(db) {
     console.log(`  Users already exist (${existing}), skipping user seed`);
     return;
   }
-  const hash = await bcrypt.hash('SmartStart2025', 12);
   const now = new Date();
-  const users = DEMO_USERS.map(u => ({
-    ...u,
-    password: hash,
-    isActive: true,
-    createdAt: now,
-    updatedAt: now,
+  const users = await Promise.all(DEMO_USERS.map(async (u) => {
+    const hash = await bcrypt.hash(u.password, 12);
+    return {
+      email: u.email,
+      role: u.role,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      password: hash,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    };
   }));
   await db.collection('users').insertMany(users);
   console.log(`  Seeded ${users.length} demo users`);
