@@ -177,8 +177,7 @@ export default function UnitCalendarPage() {
       toast.success("Date block created successfully");
       await fetchCalendarData();
     } catch (err: any) {
-      toast.error(err.message);
-      throw err;
+      toast.error(err.message || "Failed to create date block");
     } finally {
       setIsSubmitting(false);
     }
@@ -202,8 +201,7 @@ export default function UnitCalendarPage() {
       toast.success("Pricing rule created successfully");
       await fetchCalendarData();
     } catch (err: any) {
-      toast.error(err.message);
-      throw err;
+      toast.error(err.message || "Failed to create pricing rule");
     } finally {
       setIsSubmitting(false);
     }

@@ -336,8 +336,7 @@ export function DashboardPropertyCalendarSection() {
       toast.success("Date block created");
       await fetchUnitCalendarData(propertyId, selectedUnitId);
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Failed");
-      throw err;
+      toast.error(err instanceof Error ? err.message : "Failed to create date block");
     } finally {
       setIsSubmitting(false);
     }
@@ -365,8 +364,7 @@ export function DashboardPropertyCalendarSection() {
       );
       if (selectedUnitId) await fetchUnitCalendarData(propertyId, selectedUnitId);
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Failed");
-      throw err;
+      toast.error(err instanceof Error ? err.message : "Failed to create bulk block");
     } finally {
       setIsSubmitting(false);
     }
@@ -391,8 +389,7 @@ export function DashboardPropertyCalendarSection() {
       toast.success("Pricing rule created");
       await fetchUnitCalendarData(propertyId, selectedUnitId);
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Failed");
-      throw err;
+      toast.error(err instanceof Error ? err.message : "Failed to create pricing rule");
     } finally {
       setIsSubmitting(false);
     }
