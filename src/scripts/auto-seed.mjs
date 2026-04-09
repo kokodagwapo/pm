@@ -45,9 +45,7 @@ const NEIGHBORHOOD_AMENITIES = {
 
 import bcrypt from 'bcryptjs';
 
-const DEMO_AUTH_ENABLED =
-  process.env.NODE_ENV !== 'production' &&
-  process.env.ENABLE_DEMO_AUTH === 'true';
+const DEMO_AUTH_ENABLED = process.env.ENABLE_DEMO_AUTH === 'true';
 
 const DEMO_USERS = [
   { email: 'hi@smartstart.us', role: 'admin', firstName: 'Admin', lastName: 'User', password: 'SmartStart2025' },
