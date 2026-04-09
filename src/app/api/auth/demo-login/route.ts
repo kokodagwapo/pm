@@ -12,15 +12,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-const DEMO_AUTH_ENABLED =
-  process.env.NODE_ENV !== "production" &&
-  process.env.ENABLE_DEMO_AUTH === "true";
+const DEMO_AUTH_ENABLED = process.env.ENABLE_DEMO_AUTH === "true";
 
 const DEMO_CREDENTIALS: Record<string, { email: string; password: string }> = {
-    admin: { email: "hi@smartstart.us", password: "SmartStart2025" },
-    manager: { email: "manager@smartstart.us", password: "SmartStart2025" },
-    owner: { email: "owner@smartstart.us", password: "SmartStart2025" },
-    tenant: { email: "tenant@smartstart.us", password: "SmartStart2025" },
+    admin: { email: "superadmin@smartstartpm.com", password: "Sspm!Super2026" },
+    manager: { email: "pmadmin@smartstartpm.com", password: "Sspm!Manager2026" },
+    owner: { email: "owner@smartstartpm.com", password: "Sspm!Owner2026" },
+    tenant: { email: "tenant@smartstartpm.com", password: "Sspm!Tenant2026" },
 };
 
 export async function GET(request: NextRequest) {
