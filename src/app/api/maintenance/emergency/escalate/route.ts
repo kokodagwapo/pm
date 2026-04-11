@@ -6,7 +6,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest } from "next/server";
-import { MaintenanceRequest, User } from "@/models";
+import { MaintenanceRequest, Property, User } from "@/models";
 import { UserRole, MaintenanceStatus } from "@/types";
 import {
   createSuccessResponse,
@@ -16,6 +16,10 @@ import {
   parseRequestBody,
 } from "@/lib/api-utils";
 import { z } from "zod";
+import {
+  EmergencyNotificationService,
+  NotificationPriority as EmergencyNotificationPriority,
+} from "@/lib/emergency-notifications";
 
 // ============================================================================
 // POST /api/maintenance/emergency/escalate - Escalate emergency request
@@ -148,11 +152,64 @@ export const POST = withRoleAndDB([
       })
       .populate("assignedTo", "firstName lastName email");
 
-    // TODO: Send escalation notifications
-    // - Email to escalation target
-    // - SMS if critical
-    // - Push notification
-    // - Update dashboard alerts
+    try {
+      const emergencySvc = EmergencyNotificationService.getInstance();
+      const prevAssignee = emergencyRequest.assignedTo
+        ? await User.findById(emergencyRequest.assignedTo)
+            .select("firstName lastName")
+            .lean()
+        : null;
+      const originalAssignee = prevAssignee
+        ? `${prevAssignee.firstName || ""} ${prevAssignee.lastName || ""}`.trim() ||
+          "Staff"
+        : "Unassigned";
+
+      const prop = await Property.findById(emergencyRequest.propertyId)
+        .select("name")
+        .lean();
+
+      const hours =
+        (Date.now() - new Date(emergencyRequest.createdAt).getTime()) /
+        (1000 * 60 * 60);
+      const timeElapsed = `${hours.toFixed(1)} hours`;
+      const appBase = (process.env.NEXT_PUBLIC_APP_URL || "").replace(/\/$/, "");
+      const viewUrl = `${appBase}/maintenance/emergency/${emergencyRequest._id}`;
+
+      const escalationRecipient = {
+        id: escalationTarget._id.toString(),
+        name: `${escalationTarget.firstName || ""} ${escalationTarget.lastName || ""}`.trim(),
+        email: escalationTarget.email,
+        phone: escalationTarget.phone,
+        role: String(escalationTarget.role),
+        preferences: {
+          email: true,
+          sms: urgencyLevel === "critical",
+          push: true,
+        },
+      };
+
+      await emergencySvc.sendEmergencyNotification(
+        "EMERGENCY_ESCALATED",
+        [escalationRecipient],
+        {
+          propertyName: prop?.name || "Property",
+          title: emergencyRequest.title,
+          originalAssignee,
+          escalationReason: escalationReason || "Escalated",
+          timeElapsed,
+          viewUrl,
+          requestId: emergencyRequest._id.toString(),
+        },
+        urgencyLevel === "critical"
+          ? EmergencyNotificationPriority.CRITICAL
+          : EmergencyNotificationPriority.HIGH
+      );
+    } catch (escalationNotifyErr) {
+      console.error(
+        "[Emergency] Escalation notification failed:",
+        escalationNotifyErr
+      );
+    }
 
     return createSuccessResponse(
       {

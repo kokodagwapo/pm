@@ -566,8 +566,6 @@ export function PropertyDetailClient({
   const status = property?.status;
   const lat = mapCoords?.lat ?? 26.1700;
   const lon = mapCoords?.lon ?? -81.7800;
-  const bbox = `${lon - 0.02},${lat - 0.02},${lon + 0.02},${lat + 0.02}`;
-  const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${lat},${lon}`;
 
   const lunaPropertyContext = useMemo(() => ({
     propertyId: id,

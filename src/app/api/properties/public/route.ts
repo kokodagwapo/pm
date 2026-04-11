@@ -17,6 +17,7 @@ import {
 } from "@/lib/api-utils";
 import connectDB from "@/lib/mongodb";
 import { calculatePropertyStatusFromUnits } from "@/utils/property-status-calculator";
+import { stripUnitSecretsForPublicApi } from "@/lib/unit-access-secrets";
 
 export async function GET(request: NextRequest) {
   try {
@@ -93,6 +94,9 @@ export async function GET(request: NextRequest) {
         if (unitStatuses.length > 0) {
           property.status = calculatePropertyStatusFromUnits(unitStatuses);
         }
+        property.units = property.units.map((u: Record<string, unknown>) =>
+          stripUnitSecretsForPublicApi(u)
+        );
       }
       return property;
     });

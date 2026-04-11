@@ -1,18 +1,15 @@
 #!/bin/bash
-# Optional: Next dev with HMR. On Replit this often crashes (filesystem + memory).
-# Prefer the Run button workflow → start.sh (production) for a stable preview.
-echo "Tip: On Replit use Run → start.sh (production). Dev + HMR is unstable in the cloud IDE."
-MONGO_DATA="/home/runner/.mongodb-data/data"
-MONGO_LOG="/home/runner/.mongodb-data/mongod.log"
-mkdir -p "$MONGO_DATA"
+# Optional: Next dev with HMR. On Replit, `start.sh` defaults to `next start` (stable).
+# Set REPLIT_DEV_SERVER=1 and use this script if you need webpack dev + HMR.
+set -e
+echo "Tip: On Replit the Run button uses start.sh → next build (if needed) → next start."
+echo "For dev + HMR here: ensure REPLIT_DEV_SERVER=1 and use npm run dev:5000, or run this script."
 
-if ! pgrep -x "mongod" > /dev/null; then
-  mongod --dbpath "$MONGO_DATA" --logpath "$MONGO_LOG" --fork --quiet
-  echo "MongoDB started"
-  sleep 2
-else
-  echo "MongoDB already running"
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/replit-mongo.sh
+source "$SCRIPT_DIR/scripts/replit-mongo.sh"
+
+replit_start_local_mongo_if_needed
 
 node src/scripts/auto-seed.mjs
 

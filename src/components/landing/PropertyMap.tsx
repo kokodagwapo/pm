@@ -6,6 +6,8 @@ import {
   Waves, ShoppingBag, TreePine, Stethoscope, ShoppingCart,
   Sprout, Leaf, BookOpen, Flag, PawPrint, Heart,
 } from "lucide-react";
+import { GoogleMap, Marker, OverlayView, useJsApiLoader } from "@react-google-maps/api";
+import { getGoogleMapsBrowserKey, hasGoogleMapsBrowserKey } from "@/lib/google-maps";
 
 const NEIGHBORHOOD_COORDS: Record<string, [number, number]> = {
   // ── Existing communities ─────────────────────────────────────
@@ -272,26 +274,6 @@ function formatPrice(amount: number): string {
 
 type TileMode = "satellite" | "modern" | "terrain";
 
-const TILE_LAYERS: Record<TileMode, { base: string; labels?: string; attribution: string; subdomains?: string; pillDark?: boolean }> = {
-  satellite: {
-    base: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    labels: "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-    attribution: "Tiles &copy; Esri",
-    pillDark: true,
-  },
-  modern: {
-    base: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-    attribution: "&copy; OpenStreetMap &copy; CARTO",
-    subdomains: "abcd",
-    pillDark: false,
-  },
-  terrain: {
-    base: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-    attribution: "Tiles &copy; Esri",
-    pillDark: false,
-  },
-};
-
 const TOGGLE_TABS: { mode: TileMode; label: string; Icon: any }[] = [
   { mode: "satellite", label: "Satellite", Icon: Satellite },
   { mode: "modern",   label: "Modern",    Icon: MapIcon   },
@@ -408,195 +390,115 @@ const POI_CATEGORIES: POICategory[] = [
   },
 ];
 
-export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredPropertyId, neighborhoods, activeNeighborhood, onNeighborhoodChange }: PropertyMapProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const markersRef = useRef<Map<string, any>>(new Map());
-  const poiMarkersRef = useRef<Map<string, any[]>>(new Map());
-  const baseTileRef = useRef<any>(null);
-  const labelTileRef = useRef<any>(null);
-  const [mapReady, setMapReady] = useState(false);
-  const [loadError, setLoadError] = useState(false);
+const NAPLES_CENTER_LATLNG = { lat: NAPLES_CENTER[0], lng: NAPLES_CENTER[1] };
+
+function mapTypeIdForMode(mode: TileMode): string {
+  if (mode === "satellite") return "hybrid";
+  if (mode === "terrain") return "terrain";
+  return "roadmap";
+}
+
+function PropertyMapGoogle({
+  properties,
+  onMarkerClick,
+  onMarkerHover,
+  hoveredPropertyId,
+  neighborhoods,
+  activeNeighborhood,
+  onNeighborhoodChange,
+  apiKey,
+}: PropertyMapProps & { apiKey: string }) {
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: "sspm-rentals-map",
+    googleMapsApiKey: apiKey,
+  });
+  const mapRef = useRef<google.maps.Map | null>(null);
   const [tileMode, setTileMode] = useState<TileMode>("modern");
   const [activePOI, setActivePOI] = useState<Set<string>>(new Set());
+  const [poiFlyTarget, setPoiFlyTarget] = useState<string | null>(null);
+
+  const isLightPill = tileMode === "modern";
 
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
-
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-    document.head.appendChild(link);
-
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-    script.onload = () => {
-      const L = (window as any).L;
-      if (!L || !mapRef.current) { setLoadError(true); return; }
-
-      const map = L.map(mapRef.current, { zoomControl: false, scrollWheelZoom: true }).setView(NAPLES_CENTER, 13);
-
-      const layer = TILE_LAYERS["modern"];
-      const opts: any = { attribution: layer.attribution, maxZoom: 19 };
-      if (layer.subdomains) opts.subdomains = layer.subdomains;
-      baseTileRef.current = L.tileLayer(layer.base, opts).addTo(map);
-      if (layer.labels) {
-        labelTileRef.current = L.tileLayer(layer.labels, { maxZoom: 19, opacity: 0.85 }).addTo(map);
-      }
-
-      L.control.zoom({ position: "bottomright" }).addTo(map);
-      mapInstanceRef.current = map;
-      setMapReady(true);
-      setTimeout(() => map.invalidateSize(), 100);
-    };
-    script.onerror = () => setLoadError(true);
-    document.head.appendChild(script);
-
-    return () => {
-      if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; }
-    };
-  }, []);
-
-  const switchTiles = useCallback((mode: TileMode) => {
-    const L = (window as any).L;
-    const map = mapInstanceRef.current;
-    if (!L || !map) return;
-
-    if (baseTileRef.current) map.removeLayer(baseTileRef.current);
-    if (labelTileRef.current) { map.removeLayer(labelTileRef.current); labelTileRef.current = null; }
-
-    const layer = TILE_LAYERS[mode];
-    const opts: any = { attribution: layer.attribution, maxZoom: 19 };
-    if (layer.subdomains) opts.subdomains = layer.subdomains;
-    baseTileRef.current = L.tileLayer(layer.base, opts).addTo(map);
-    if (layer.labels) {
-      labelTileRef.current = L.tileLayer(layer.labels, { maxZoom: 19, opacity: 0.85 }).addTo(map);
-    }
-    markersRef.current.forEach((m) => m.bringToFront?.());
-  }, []);
+    const map = mapRef.current;
+    if (!map || !isLoaded || typeof google === "undefined") return;
+    map.setMapTypeId(mapTypeIdForMode(tileMode) as google.maps.MapTypeId);
+  }, [tileMode, isLoaded]);
 
   useEffect(() => {
-    if (!mapReady) return;
-    switchTiles(tileMode);
-  }, [tileMode, mapReady, switchTiles]);
-
-  useEffect(() => {
-    if (!mapReady || !mapInstanceRef.current) return;
-    const L = (window as any).L;
-    if (!L) return;
-
-    markersRef.current.forEach((m) => m.remove());
-    markersRef.current.clear();
-
-    const map = mapInstanceRef.current;
-    const isLight = !TILE_LAYERS[tileMode].pillDark;
-    const bounds: any[] = [];
-
-    properties.forEach((property) => {
-      const coords = getPropertyCoords(property);
-      const unit = property.units?.[0];
-      const rent = unit?.rentAmount ?? 0;
-      const price = rent > 500 ? rent : rent * 30;
-      const pillClass = isLight ? "map-price-pill pill-light-bg" : "map-price-pill";
-
-      const icon = L.divIcon({
-        className: "custom-map-marker",
-        html: `<div class="${pillClass}" data-id="${property._id}">${formatPrice(price)}</div>`,
-        iconSize: [76, 30],
-        iconAnchor: [38, 30],
-      });
-
-      const marker = L.marker(coords, { icon }).addTo(map);
-      marker.on("click", () => {
-        onMarkerClick?.(property._id);
-        mapInstanceRef.current?.flyTo(coords, 16, { animate: true, duration: 0.7 });
-      });
-      marker.on("mouseover", () => onMarkerHover?.(property._id));
-      marker.on("mouseout", () => onMarkerHover?.(null));
-      markersRef.current.set(property._id, marker);
-      bounds.push(coords);
-    });
-
-    if (bounds.length === 1) {
-      map.flyTo(bounds[0], 14, { animate: false });
+    const map = mapRef.current;
+    if (!map || !isLoaded || typeof google === "undefined") return;
+    if (properties.length === 0) {
+      map.setCenter(NAPLES_CENTER_LATLNG);
+      map.setZoom(12);
       return;
     }
-
-    if (bounds.length > 1) {
-      map.fitBounds(L.latLngBounds(bounds), {
-        padding: [48, 48],
-        maxZoom: 13,
-        animate: false,
-      });
-      return;
+    const bounds = new google.maps.LatLngBounds();
+    properties.forEach((p) => {
+      const c = getPropertyCoords(p);
+      bounds.extend({ lat: c[0], lng: c[1] });
+    });
+    if (properties.length === 1) {
+      const c = getPropertyCoords(properties[0]);
+      map.setCenter({ lat: c[0], lng: c[1] });
+      map.setZoom(14);
+    } else {
+      map.fitBounds(bounds, { top: 48, right: 48, bottom: 48, left: 48 });
     }
-
-    map.setView(NAPLES_CENTER, 12);
-  }, [properties, mapReady, onMarkerClick, onMarkerHover, tileMode]);
+  }, [properties, isLoaded]);
 
   useEffect(() => {
-    markersRef.current.forEach((marker, id) => {
-      const el = marker.getElement();
-      if (!el) return;
-      const tag = el.querySelector(".map-price-pill");
-      if (!tag) return;
-      if (id === hoveredPropertyId) tag.classList.add("map-pill-active");
-      else tag.classList.remove("map-pill-active");
-    });
-  }, [hoveredPropertyId]);
+    const map = mapRef.current;
+    if (!map || !isLoaded || !poiFlyTarget || typeof google === "undefined") return;
+    const cat = POI_CATEGORIES.find((c) => c.id === poiFlyTarget);
+    if (!cat) {
+      setPoiFlyTarget(null);
+      return;
+    }
+    if (cat.pois.length === 1) {
+      const [lat, lng] = cat.pois[0].coords;
+      map.panTo({ lat, lng });
+      map.setZoom(16);
+    } else {
+      const b = new google.maps.LatLngBounds();
+      cat.pois.forEach((p) => b.extend({ lat: p.coords[0], lng: p.coords[1] }));
+      map.fitBounds(b, { top: 40, right: 40, bottom: 40, left: 40 });
+    }
+    setPoiFlyTarget(null);
+  }, [poiFlyTarget, isLoaded]);
 
   const togglePOI = useCallback((catId: string) => {
-    const L = (window as any).L;
-    const map = mapInstanceRef.current;
-    if (!L || !map) return;
-
-    const cat = POI_CATEGORIES.find((c) => c.id === catId);
-    if (!cat) return;
-
     setActivePOI((prev) => {
       const next = new Set(prev);
       if (next.has(catId)) {
         next.delete(catId);
-        const existing = poiMarkersRef.current.get(catId) || [];
-        existing.forEach((m) => m.remove());
-        poiMarkersRef.current.delete(catId);
       } else {
         next.add(catId);
-        const markers = cat.pois.map((poi) => {
-          const icon = L.divIcon({
-            className: "custom-poi-marker",
-            html: `<div class="poi-bubble" style="background:${cat.color}" title="${poi.name}"><span class="poi-emoji">${cat.emoji}</span></div>`,
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-          });
-          const m = L.marker(poi.coords, { icon }).addTo(map);
-          m.bindTooltip(`<strong>${poi.name}</strong><br/><span style="color:${cat.color};font-size:10px;font-weight:600">${cat.label}</span>`, {
-            direction: "top",
-            offset: [0, -30],
-            className: "poi-tooltip",
-          });
-          return m;
-        });
-        poiMarkersRef.current.set(catId, markers);
-
-        if (cat.pois.length === 1) {
-          map.flyTo(cat.pois[0].coords, 16, { animate: true, duration: 0.8 });
-        } else {
-          const bounds = L.latLngBounds(cat.pois.map((p) => p.coords));
-          map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14, animate: true });
-        }
+        setPoiFlyTarget(catId);
       }
       return next;
     });
   }, []);
 
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+  }, []);
+
   if (loadError) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-slate-800 text-slate-400">
-        <div className="text-center p-8">
-          <p className="text-lg font-medium mb-2">Map unavailable</p>
+      <div className="flex h-full w-full items-center justify-center bg-slate-800 text-slate-400">
+        <div className="p-8 text-center">
+          <p className="mb-2 text-lg font-medium">Map unavailable</p>
           <p className="text-sm">Browse properties from the list on the right</p>
         </div>
+      </div>
+    );
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-slate-800 text-slate-500">
+        <p className="text-lg font-medium">Loading map…</p>
       </div>
     );
   }
@@ -635,132 +537,144 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
           transform: scale(1.12) translateY(-2px);
           z-index: 999;
         }
-        .custom-map-marker, .custom-poi-marker { background: none !important; border: none !important; }
-        .poi-bubble {
-          width: 32px;
-          height: 32px;
-          border-radius: 50% 50% 50% 0;
-          transform: rotate(-45deg);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 3px 12px rgba(0,0,0,0.35);
-          border: 2px solid rgba(255,255,255,0.6);
-        }
-        .poi-emoji {
-          transform: rotate(45deg);
-          font-size: 14px;
-          line-height: 1;
-        }
-        .poi-tooltip {
-          background: white !important;
-          border: 1px solid #e2e8f0 !important;
-          border-radius: 8px !important;
-          padding: 6px 10px !important;
-          font-size: 12px !important;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important;
-          color: #1e293b !important;
-        }
-        .poi-tooltip::before { display: none !important; }
-        .leaflet-control-attribution {
-          font-size: 9px !important;
-          background: rgba(0,0,0,0.45) !important;
-          color: rgba(255,255,255,0.55) !important;
-          backdrop-filter: blur(4px);
-          border-radius: 4px 0 0 0;
-        }
-        .leaflet-control-attribution a { color: rgba(255,255,255,0.6) !important; }
-        .leaflet-control-zoom {
-          border: none !important;
-          box-shadow: 0 2px 16px rgba(0,0,0,0.3) !important;
-          border-radius: 12px !important;
-          overflow: hidden;
-          margin-bottom: 60px !important;
-          margin-right: 14px !important;
-        }
-        .leaflet-control-zoom a {
-          width: 36px !important; height: 36px !important; line-height: 36px !important;
-          font-size: 18px !important; color: #1e293b !important;
-          background: rgba(255,255,255,0.92) !important;
-          border-bottom: 1px solid rgba(0,0,0,0.08) !important;
-          backdrop-filter: blur(8px);
-        }
-        .leaflet-control-zoom a:hover { background: rgba(241,245,249,1) !important; }
       `}</style>
 
-      <div ref={mapRef} className="w-full h-full rounded-none" />
+      <div className="relative h-full w-full">
+        <GoogleMap
+          mapContainerClassName="h-full w-full rounded-none"
+          center={NAPLES_CENTER_LATLNG}
+          zoom={13}
+          onLoad={onMapLoad}
+          options={{
+            mapTypeId: mapTypeIdForMode("modern") as google.maps.MapTypeId,
+            disableDefaultUI: true,
+            zoomControl: true,
+            gestureHandling: "greedy",
+            scrollwheel: true,
+          }}
+        >
+          {properties.map((property) => {
+            const coords = getPropertyCoords(property);
+            const unit = property.units?.[0];
+            const rent = unit?.rentAmount ?? 0;
+            const price = rent > 500 ? rent : rent * 30;
+            const pos = { lat: coords[0], lng: coords[1] };
+            return (
+              <OverlayView key={property._id} position={pos} mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
+                <div
+                  className={`map-price-pill ${isLightPill ? "pill-light-bg" : ""} ${hoveredPropertyId === property._id ? "map-pill-active" : ""}`}
+                  onClick={() => {
+                    onMarkerClick?.(property._id);
+                    const m = mapRef.current;
+                    if (m) {
+                      m.panTo(pos);
+                      m.setZoom(16);
+                    }
+                  }}
+                  onMouseEnter={() => onMarkerHover?.(property._id)}
+                  onMouseLeave={() => onMarkerHover?.(null)}
+                  role="presentation"
+                >
+                  {formatPrice(price)}
+                </div>
+              </OverlayView>
+            );
+          })}
+          {POI_CATEGORIES.filter((c) => activePOI.has(c.id)).flatMap((cat) =>
+            cat.pois.map((poi, idx) => (
+              <Marker
+                key={`${cat.id}-${idx}-${poi.name}`}
+                position={{ lat: poi.coords[0], lng: poi.coords[1] }}
+                title={`${poi.name} — ${cat.label}`}
+                icon={{
+                  path: google.maps.SymbolPath.CIRCLE,
+                  fillColor: cat.color,
+                  fillOpacity: 0.92,
+                  strokeColor: "#ffffff",
+                  strokeWeight: 2,
+                  scale: 8,
+                }}
+              />
+            ))
+          )}
+        </GoogleMap>
+      </div>
 
-      {/* Compass Rose — top-left */}
-      <div className="absolute top-3 left-3 z-[1000] w-16 h-16 select-none pointer-events-none"
+      <div
+        className="pointer-events-none absolute left-3 top-3 z-[1000] h-16 w-16 select-none"
         style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))" }}
       >
-        <div className="relative w-full h-full bg-black/60 backdrop-blur-md rounded-2xl border border-white/25 flex items-center justify-center">
-          {/* Cardinal labels */}
-          <span className="absolute top-1 left-1/2 -translate-x-1/2 text-white text-[10px] font-black leading-none tracking-tight">N</span>
-          <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-white/45 text-[9px] font-bold leading-none">S</span>
-          <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-white/45 text-[9px] font-bold leading-none">E</span>
-          <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-white/45 text-[9px] font-bold leading-none">W</span>
-          {/* Needle */}
+        <div className="relative flex h-full w-full items-center justify-center rounded-2xl border border-white/25 bg-black/60 backdrop-blur-md">
+          <span className="absolute left-1/2 top-1 -translate-x-1/2 text-[10px] font-black leading-none tracking-tight text-white">
+            N
+          </span>
+          <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[9px] font-bold leading-none text-white/45">S</span>
+          <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] font-bold leading-none text-white/45">E</span>
+          <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[9px] font-bold leading-none text-white/45">W</span>
           <div className="absolute inset-0 flex items-center justify-center">
             <svg width="10" height="28" viewBox="0 0 10 28">
               <polygon points="5,0 9,14 5,12 1,14" fill="#ef4444" />
               <polygon points="5,28 9,14 5,16 1,14" fill="rgba(255,255,255,0.35)" />
             </svg>
           </div>
-          {/* Center dot */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-2 h-2 rounded-full bg-white shadow-sm" />
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div className="h-2 w-2 rounded-full bg-white shadow-sm" />
           </div>
         </div>
       </div>
 
-      {/* POI Filter strip — scrollable with fade hint */}
-      <div className="absolute top-3 left-[76px] right-0 z-[1000]">
+      <div className="absolute left-[76px] right-0 top-3 z-[1000]">
         <div className="relative">
-          <div className="overflow-x-auto scrollbar-hide pr-8" style={{ WebkitOverflowScrolling: "touch" }}>
+          <div className="scrollbar-hide overflow-x-auto pr-8" style={{ WebkitOverflowScrolling: "touch" }}>
             <div className="flex gap-1.5 pb-0.5 pl-0.5" style={{ width: "max-content" }}>
               {POI_CATEGORIES.map((cat) => {
                 const active = activePOI.has(cat.id);
                 return (
                   <button
                     key={cat.id}
+                    type="button"
                     onClick={() => togglePOI(cat.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium tracking-wide whitespace-nowrap transition-all border shadow-sm ${
+                    className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl border px-3 py-1.5 text-[11px] font-medium tracking-wide shadow-sm transition-all ${
                       active
-                        ? "text-white border-transparent shadow-md scale-105"
-                        : "bg-white/90 backdrop-blur-md text-slate-600 border-slate-200/60 hover:bg-white hover:text-slate-900 hover:scale-105 shadow-sm"
+                        ? "scale-105 border-transparent text-white shadow-md"
+                        : "border-slate-200/60 bg-white/90 text-slate-600 shadow-sm backdrop-blur-md hover:scale-105 hover:bg-white hover:text-slate-900"
                     }`}
-                    style={active ? { background: cat.color, borderColor: "transparent", boxShadow: `0 4px 14px ${cat.color}55` } : undefined}
+                    style={
+                      active
+                        ? { background: cat.color, borderColor: "transparent", boxShadow: `0 4px 14px ${cat.color}55` }
+                        : undefined
+                    }
                   >
-                    <cat.Icon className="w-3.5 h-3.5 shrink-0" />
+                    <cat.Icon className="h-3.5 w-3.5 shrink-0" />
                     <span>{cat.label}</span>
                   </button>
                 );
               })}
             </div>
           </div>
-          {/* Fade-right scroll hint */}
-          <div className="absolute right-0 top-0 bottom-0 w-8 pointer-events-none"
-            style={{ background: "linear-gradient(to right, transparent, rgba(0,0,0,0.4))" }} />
+          <div
+            className="pointer-events-none absolute bottom-0 right-0 top-0 w-8"
+            style={{ background: "linear-gradient(to right, transparent, rgba(0,0,0,0.4))" }}
+          />
         </div>
       </div>
 
-      {/* Neighborhood filter chips — bottom overlay, only when provided */}
       {neighborhoods && neighborhoods.length > 0 && onNeighborhoodChange && (
         <div className="absolute bottom-[58px] left-3 right-3 z-[1000]">
           <div className="relative">
-            <div className="overflow-x-auto scrollbar-hide pr-6" style={{ WebkitOverflowScrolling: "touch" }}>
+            <div className="scrollbar-hide overflow-x-auto pr-6" style={{ WebkitOverflowScrolling: "touch" }}>
               <div className="flex gap-1.5 pb-0.5" style={{ width: "max-content" }}>
                 {neighborhoods.map((n) => {
                   const isActive = n.value === "" ? !activeNeighborhood : activeNeighborhood === n.value;
                   return (
                     <button
                       key={n.value || "all"}
+                      type="button"
                       onClick={() => onNeighborhoodChange(n.value)}
-                      className={`px-3 py-1.5 rounded-xl text-[11px] font-medium tracking-wide whitespace-nowrap transition-all border shadow-sm ${
+                      className={`whitespace-nowrap rounded-xl border px-3 py-1.5 text-[11px] font-medium tracking-wide shadow-sm transition-all ${
                         isActive
-                          ? "bg-slate-900 text-white border-transparent shadow-md"
-                          : "bg-white/90 backdrop-blur-md text-slate-600 border-slate-200/60 hover:bg-white hover:text-slate-900"
+                          ? "border-transparent bg-slate-900 text-white shadow-md"
+                          : "border-slate-200/60 bg-white/90 text-slate-600 backdrop-blur-md hover:bg-white hover:text-slate-900"
                       }`}
                     >
                       {n.label}
@@ -769,15 +683,16 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
                 })}
               </div>
             </div>
-            <div className="absolute right-0 top-0 bottom-0 w-6 pointer-events-none"
-              style={{ background: "linear-gradient(to right, transparent, rgba(248,247,244,0.8))" }} />
+            <div
+              className="pointer-events-none absolute bottom-0 right-0 top-0 w-6"
+              style={{ background: "linear-gradient(to right, transparent, rgba(248,247,244,0.8))" }}
+            />
           </div>
         </div>
       )}
 
-      {/* Tile mode toggle — centered bottom */}
       <div
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] flex rounded-2xl overflow-hidden shadow-2xl border border-white/20"
+        className="absolute bottom-4 left-1/2 z-[1000] flex -translate-x-1/2 overflow-hidden rounded-2xl border border-white/20 shadow-2xl"
         style={{ backdropFilter: "blur(12px)" }}
       >
         {TOGGLE_TABS.map(({ mode, label, Icon }, i) => {
@@ -785,16 +700,15 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
           return (
             <button
               key={mode}
+              type="button"
               onClick={() => setTileMode(mode)}
               className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium tracking-wide transition-all ${
                 i > 0 ? "border-l border-white/10" : ""
               } ${
-                active
-                  ? "bg-white text-slate-900 shadow-inner"
-                  : "bg-black/55 text-white/75 hover:bg-black/70 hover:text-white"
+                active ? "bg-white text-slate-900 shadow-inner" : "bg-black/55 text-white/75 hover:bg-black/70 hover:text-white"
               }`}
             >
-              <Icon className="w-3.5 h-3.5 shrink-0" />
+              <Icon className="h-3.5 w-3.5 shrink-0" />
               {label}
             </button>
           );
@@ -802,4 +716,21 @@ export function PropertyMap({ properties, onMarkerClick, onMarkerHover, hoveredP
       </div>
     </>
   );
+}
+
+export function PropertyMap(props: PropertyMapProps) {
+  const key = getGoogleMapsBrowserKey();
+  if (!hasGoogleMapsBrowserKey()) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-slate-800 px-6 text-center text-slate-300">
+        <p className="text-lg font-medium">Map preview</p>
+        <p className="max-w-sm text-sm text-slate-400">
+          Set{" "}
+          <code className="rounded bg-slate-700 px-1.5 py-0.5 text-xs text-slate-200">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> in{" "}
+          <code className="rounded bg-slate-700 px-1.5 py-0.5 text-xs">.env.local</code> to enable Google Maps (Maps JavaScript API).
+        </p>
+      </div>
+    );
+  }
+  return <PropertyMapGoogle {...props} apiKey={key} />;
 }

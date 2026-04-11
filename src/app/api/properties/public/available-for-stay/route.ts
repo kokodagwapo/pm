@@ -15,6 +15,7 @@ import {
   handleApiError,
 } from "@/lib/api-utils";
 import { calculatePropertyStatusFromUnits } from "@/utils/property-status-calculator";
+import { stripUnitSecretsForPublicApi } from "@/lib/unit-access-secrets";
 import { PropertyStatus } from "@/types";
 import {
   parseDateOnlyInput,
@@ -248,6 +249,11 @@ export async function GET(request: NextRequest) {
         if (unitStatuses.length > 0) {
           copy.status = calculatePropertyStatusFromUnits(unitStatuses);
         }
+      }
+      if (Array.isArray(copy.units)) {
+        copy.units = copy.units.map((u: Record<string, unknown>) =>
+          stripUnitSecretsForPublicApi(u)
+        );
       }
       return copy;
     });

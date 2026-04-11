@@ -13,7 +13,9 @@ import {
 import { Payment, Lease } from "@/models";
 import { paymentService } from "./payment.service";
 import { paymentStatusService } from "./payment-status.service";
-import { paymentCommunicationService } from "./payment-communication.service";
+import { emailService } from "@/lib/services/email.service";
+import { sendSMS } from "@/lib/services/sms.service";
+import { formatCurrency } from "@/lib/utils/formatting";
 import mongoose from "mongoose";
 
 export interface LateFeeRule {
@@ -509,11 +511,32 @@ export class LateFeeAutomationService {
     calculation: LateFeeCalculation
   ): Promise<void> {
     try {
-      // This would integrate with the communication service
-      // For now, just log the notification
+      const email =
+        payment.tenantId?.userId?.email || payment.tenantId?.email;
+      const phone =
+        payment.tenantId?.userId?.phone || payment.tenantId?.phone;
+      const name = payment.tenantId?.userId
+        ? `${payment.tenantId.userId.firstName || ""} ${payment.tenantId.userId.lastName || ""}`.trim()
+        : "Tenant";
 
-      // TODO: Implement actual notification sending
-      // await paymentCommunicationService.sendLateFeeNotification(payment, calculation);
+      const subject = `Late fee applied — Payment ${payment._id}`;
+      const html = `<p>Hello ${name || "Tenant"},</p>
+<p>A late fee of <strong>${formatCurrency(calculation.calculatedFee)}</strong> has been assessed.</p>
+<p><strong>Reason:</strong> ${calculation.reason}</p>
+<p>Original payment amount: ${formatCurrency(payment.amount)}</p>`;
+      const text = `Late fee ${formatCurrency(calculation.calculatedFee)}. ${calculation.reason}`;
+
+      if (email) {
+        const r = await emailService.sendEmail({ to: email, subject, html, text });
+        if (!r.success) console.warn("[Late fee automation] Email:", r.error);
+      }
+      if (phone) {
+        const s = await sendSMS(
+          phone,
+          `SmartStartPM: Late fee ${formatCurrency(calculation.calculatedFee)} — ${calculation.reason}`
+        );
+        if (!s.success) console.warn("[Late fee automation] SMS:", s.error);
+      }
     } catch (error) {
       console.error("Error sending late fee notification:", error);
     }

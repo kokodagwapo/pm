@@ -292,6 +292,22 @@ const EmbeddedUnitSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Lease",
     },
+
+    /** Network name (stored in plain text; not highly sensitive). */
+    wifiSsid: {
+      type: String,
+      trim: true,
+      maxlength: [128, "WiFi SSID cannot exceed 128 characters"],
+    },
+    /** AES-256-GCM ciphertext (base64); plaintext never persisted. */
+    wifiPasswordEnc: {
+      type: String,
+      maxlength: [2048, "Stored WiFi secret too large"],
+    },
+    doorPasscodeEnc: {
+      type: String,
+      maxlength: [2048, "Stored door passcode too large"],
+    },
   },
   {
     _id: true, // Each unit gets its own _id for easy reference
@@ -533,6 +549,32 @@ const PropertySchema = new Schema<IProperty>(
       default: null,
       trim: true,
       maxlength: [500, "importListingUrl cannot exceed 500 characters"],
+    },
+    /** Optional HOA / association metadata (custom key–value pairs). */
+    hoaCustomFields: {
+      type: [
+        {
+          key: {
+            type: String,
+            required: true,
+            trim: true,
+            maxlength: [120, "HOA field key too long"],
+          },
+          value: {
+            type: String,
+            required: true,
+            trim: true,
+            maxlength: [2000, "HOA field value too long"],
+          },
+        },
+      ],
+      default: [],
+      validate: {
+        validator: function (arr: unknown[]) {
+          return Array.isArray(arr) && arr.length <= 40;
+        },
+        message: "At most 40 HOA custom fields allowed",
+      },
     },
     deletedAt: {
       type: Date,

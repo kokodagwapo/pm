@@ -7,6 +7,7 @@ import { Types } from "mongoose";
 import { Payment, PaymentReceipt, Invoice } from "@/models";
 import jsPDF from "jspdf";
 import { formatCurrency } from "@/lib/utils/formatting";
+import { emailService } from "@/lib/services/email.service";
 
 export interface ReceiptData {
   receiptNumber: string;
@@ -104,9 +105,14 @@ export class ReceiptGenerationService {
 
       // Send email if requested
       let emailSent = false;
-      if (autoEmail && receiptData.tenant.email) {
+      if (
+        autoEmail &&
+        receiptData.tenant.email &&
+        pdfResult.pdfBuffer &&
+        pdfResult.pdfBuffer.length > 0
+      ) {
         try {
-          await this.emailReceipt(receiptData, pdfResult.pdfPath!);
+          await this.emailReceipt(receiptData, pdfResult.pdfBuffer);
           emailSent = true;
 
           // Update receipt record
@@ -186,6 +192,7 @@ export class ReceiptGenerationService {
   private async generateReceiptPDF(receiptData: ReceiptData): Promise<{
     success: boolean;
     pdfPath?: string;
+    pdfBuffer?: Buffer;
     error?: string;
   }> {
     try {
@@ -284,11 +291,13 @@ export class ReceiptGenerationService {
       )}.pdf`;
       const pdfPath = `/receipts/${fileName}`;
 
-      // In a real implementation, you would save the PDF to file system or cloud storage
-      // For now, we'll just return the path
+      const raw = pdf.output("arraybuffer");
+      const pdfBuffer = Buffer.from(new Uint8Array(raw));
+
       return {
         success: true,
         pdfPath,
+        pdfBuffer,
       };
     } catch (error) {
       return {
@@ -330,22 +339,42 @@ export class ReceiptGenerationService {
   }
 
   /**
-   * Email receipt to tenant
+   * Email receipt to tenant (PDF attachment via SMTP when configured)
    */
   private async emailReceipt(
     receiptData: ReceiptData,
-    pdfPath: string
+    pdfBuffer: Buffer
   ): Promise<void> {
-    // This would integrate with your email service
+    const fileName = `receipt_${receiptData.receiptNumber.replace(
+      /[^a-zA-Z0-9]/g,
+      "_"
+    )}.pdf`;
+    const subject = `Payment receipt ${receiptData.receiptNumber}`;
+    const html = `
+      <p>Hello ${receiptData.tenant.name},</p>
+      <p>Thank you for your payment of <strong>${formatCurrency(receiptData.amount)}</strong> for <strong>${receiptData.property.name}</strong>.</p>
+      <p>Your receipt is attached as a PDF.</p>
+      <p style="color:#666;font-size:12px;">${receiptData.company.name}</p>
+    `;
+    const text = `Receipt ${receiptData.receiptNumber} — ${formatCurrency(receiptData.amount)} for ${receiptData.property.name}. See attached PDF.`;
 
-    // TODO: Implement actual email sending
-    // const emailService = new EmailService();
-    // await emailService.sendReceiptEmail({
-    //   to: receiptData.tenant.email,
-    //   subject: `Payment Receipt - ${receiptData.receiptNumber}`,
-    //   receiptData,
-    //   pdfAttachment: pdfPath,
-    // });
+    const result = await emailService.sendEmail({
+      to: receiptData.tenant.email,
+      subject,
+      html,
+      text,
+      attachments: [
+        {
+          filename: fileName,
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+
+    if (!result.success) {
+      throw new Error(result.error || "Email send failed");
+    }
   }
 
   /**

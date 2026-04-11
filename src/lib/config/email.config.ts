@@ -18,15 +18,25 @@ export interface EmailConfig {
 
 export const emailConfig: EmailConfig = {
   smtp: {
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: parseInt(process.env.SMTP_PORT || "587"),
-    secure: process.env.SMTP_PORT === "465",
+    host:
+      process.env.SMTP_HOST ||
+      process.env.EMAIL_SERVER_HOST ||
+      "smtp.gmail.com",
+    port: parseInt(
+      process.env.SMTP_PORT || process.env.EMAIL_SERVER_PORT || "587",
+      10
+    ),
+    secure:
+      process.env.SMTP_PORT === "465" || process.env.EMAIL_SERVER_PORT === "465",
     auth: {
-      user: process.env.SMTP_USER || "",
-      pass: process.env.SMTP_PASS || "",
+      user:
+        process.env.SMTP_USER || process.env.EMAIL_SERVER_USER || "",
+      pass:
+        process.env.SMTP_PASS || process.env.EMAIL_SERVER_PASSWORD || "",
     },
     from:
       process.env.SMTP_FROM ||
+      process.env.EMAIL_FROM ||
       process.env.CONTACT_EMAIL ||
       "noreply@SmartStartPM.com",
   },

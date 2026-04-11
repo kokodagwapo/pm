@@ -1,7 +1,13 @@
 #!/bin/bash
-export PORT=${PORT:-5000}
+# Replit "Run" workflow: stable preview using `next start` (no HMR) unless REPLIT_DEV_SERVER=1.
+set -e
+export PORT="${PORT:-5000}"
 
-# Auth URL: prefer APP_URL, then CUSTOM_DOMAIN, then REPLIT_DOMAINS, for correct redirects
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/replit-mongo.sh
+source "$SCRIPT_DIR/scripts/replit-mongo.sh"
+
+# Auth URL: prefer APP_URL, then CUSTOM_DOMAIN, then REPLIT_DOMAINS (Replit sets this automatically).
 APP_BASE_URL="${APP_URL:-$CUSTOM_DOMAIN}"
 if [ -n "$APP_BASE_URL" ]; then
   BASE="${APP_BASE_URL#https://}"
@@ -14,19 +20,7 @@ elif [ -n "$REPLIT_DOMAINS" ]; then
   export AUTH_URL="https://${FIRST_DOMAIN}"
 fi
 
-MONGO_DATA="/home/runner/.mongodb-data/data"
-MONGO_LOG="/home/runner/.mongodb-data/mongod.log"
-mkdir -p "$MONGO_DATA"
-
-if ! pgrep -x "mongod" > /dev/null; then
-  mongod --dbpath "$MONGO_DATA" \
-    --logpath "$MONGO_LOG" \
-    --fork --quiet
-  echo "MongoDB started"
-  sleep 2
-else
-  echo "MongoDB already running"
-fi
+replit_start_local_mongo_if_needed
 
 echo "Running auto-seed check..."
 node src/scripts/auto-seed.mjs
@@ -38,8 +32,18 @@ fi
 
 pkill -f "next dev" 2>/dev/null || true
 sleep 1
-rm -rf .next
 export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=3072"
 
-echo "Starting dev server..."
-exec npm run dev:5000
+if [ "${REPLIT_DEV_SERVER:-}" = "1" ]; then
+  echo "REPLIT_DEV_SERVER=1 — Next dev on port $PORT (HMR; less stable on Replit)."
+  rm -rf .next
+  exec npm run dev:5000
+fi
+
+if [ ! -f .next/BUILD_ID ]; then
+  echo "No .next build found — running npm run build..."
+  npm run build
+fi
+
+echo "Starting production server on port $PORT (next start)..."
+exec npm run start

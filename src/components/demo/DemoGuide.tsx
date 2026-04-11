@@ -484,7 +484,7 @@ export function DemoGuide() {
           <button
             onClick={handleRestart}
             aria-label="Restart tour"
-            className="absolute -top-10 right-0 flex h-8 w-8 items-center justify-center rounded-xl border border-sky-200/35 bg-sky-950/40 text-white shadow-[0_4px_24px_rgba(56,189,248,0.15)] backdrop-blur-md transition-all hover:border-sky-200/50 hover:bg-sky-900/50"
+            className="absolute -top-10 right-0 flex h-8 w-8 items-center justify-center rounded-xl border border-slate-300/60 bg-white/80 text-slate-900 shadow-[0_4px_24px_rgba(15,23,42,0.08)] backdrop-blur-md transition-all hover:border-slate-400/80 hover:bg-white"
             title="Restart tour"
           >
             <RotateCcw className="h-3.5 w-3.5" />
@@ -512,9 +512,9 @@ export function DemoGuide() {
           )}
         >
           {/* Progress bar */}
-          <div className="h-1 bg-sky-950/40">
+          <div className="h-1 bg-slate-200/90">
             <div
-              className="h-full rounded-md bg-gradient-to-r from-sky-300 via-cyan-200 to-sky-100 shadow-[0_0_12px_rgba(125,211,252,0.45)] transition-all duration-500"
+              className="h-full rounded-md bg-gradient-to-r from-sky-500 via-cyan-500 to-blue-600 shadow-[0_0_8px_rgba(14,165,233,0.35)] transition-all duration-500"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -522,13 +522,13 @@ export function DemoGuide() {
           {/* Header */}
           <div
             className={cn(
-              "flex items-center justify-between border-b border-white/10 px-4 py-3",
-              "bg-sky-950/25 backdrop-blur-md",
+              "flex items-center justify-between border-b border-slate-300/40 px-4 py-3",
+              "bg-white/45 backdrop-blur-md",
               roleColors.light
             )}
           >
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/95">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-900">
                 {userRole === UserRole.ADMIN && "Super Admin Tour"}
                 {userRole === UserRole.MANAGER && "Manager Tour"}
                 {userRole === UserRole.OWNER && "Owner Tour"}
@@ -536,12 +536,12 @@ export function DemoGuide() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-white/70 tabular-nums">
+              <span className="text-xs font-medium text-slate-700 tabular-nums">
                 {currentStep + 1} / {steps.length}
               </span>
               <button
                 onClick={handleClose}
-                className="flex h-6 w-6 items-center justify-center rounded-lg text-white/70 transition-all hover:bg-white/10 hover:text-white"
+                className="flex h-6 w-6 items-center justify-center rounded-lg text-slate-600 transition-all hover:bg-slate-200/70 hover:text-slate-900"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -555,23 +555,23 @@ export function DemoGuide() {
               isAnimating ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0"
             )}
           >
-            <div className="border-b border-white/10 bg-gradient-to-br from-white/[0.07] via-sky-400/[0.06] to-cyan-500/[0.05] p-4">
+            <div className="border-b border-slate-300/35 bg-gradient-to-br from-white/55 via-sky-50/40 to-cyan-50/35 p-4">
               <div className="flex items-start gap-3">
-                <span className="mt-0.5 flex-shrink-0 select-none text-3xl leading-none drop-shadow-[0_2px_8px_rgba(15,23,42,0.35)]">
+                <span className="mt-0.5 flex-shrink-0 select-none text-3xl leading-none">
                   {step.emoji}
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-sm font-semibold leading-tight tracking-tight text-white [text-shadow:0_1px_12px_rgba(0,0,0,0.35)]">
+                    <h3 className="text-sm font-semibold leading-tight tracking-tight text-slate-900">
                       {step.title}
                     </h3>
                     {step.badge && (
-                      <span className="rounded-lg border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/95 shadow-[0_0_20px_rgba(56,189,248,0.12)]">
+                      <span className="rounded-lg border border-slate-300/60 bg-white/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-900 shadow-sm">
                         {step.badge}
                       </span>
                     )}
                   </div>
-                  <p className="mt-1.5 text-xs leading-relaxed text-white/80">
+                  <p className="mt-1.5 text-xs leading-relaxed text-slate-800">
                     {step.description}
                   </p>
                 </div>
@@ -590,7 +590,7 @@ export function DemoGuide() {
                       ? cn("h-2 w-4 shadow-[0_0_10px_rgba(125,211,252,0.4)]", roleColors.dot)
                       : i < currentStep
                         ? cn("h-2 w-2 opacity-70", roleColors.dot)
-                        : "h-2 w-2 bg-white/20 hover:bg-white/30"
+                        : "h-2 w-2 bg-slate-300/90 hover:bg-slate-400/90"
                   )}
                   aria-label={`Go to step ${i + 1}`}
                 />
@@ -605,8 +605,8 @@ export function DemoGuide() {
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-xl border transition-all",
                   isFirst
-                    ? "cursor-not-allowed border-white/10 bg-white/[0.04] text-white/25"
-                    : "border-white/25 bg-white/10 text-white hover:border-white/35 hover:bg-white/15 active:scale-95"
+                    ? "cursor-not-allowed border-slate-200/80 bg-slate-100/50 text-slate-300"
+                    : "border-slate-300/80 bg-white/70 text-slate-900 hover:border-slate-400 hover:bg-white active:scale-95"
                 )}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -615,7 +615,7 @@ export function DemoGuide() {
               {step.href && !isLast && (
                 <button
                   onClick={handleNavigate}
-                  className="flex-1 rounded-lg border border-white/20 bg-white/[0.08] px-3 py-2 text-xs font-semibold text-white transition-all hover:border-sky-200/40 hover:bg-sky-400/15 active:scale-95"
+                  className="flex-1 rounded-lg border border-slate-300/70 bg-white/85 px-3 py-2 text-xs font-semibold text-slate-900 shadow-sm transition-all hover:border-sky-400/50 hover:bg-sky-50/90 active:scale-95"
                 >
                   Go there →
                 </button>
@@ -624,7 +624,7 @@ export function DemoGuide() {
               <button
                 onClick={handleNext}
                 className={cn(
-                  "flex-1 rounded-lg border border-white/20 bg-gradient-to-r from-sky-700/95 via-cyan-800/90 to-blue-900/95 px-4 py-2 text-xs font-semibold text-white shadow-[0_8px_24px_rgba(56,189,248,0.25)] transition-all hover:from-sky-600 hover:via-cyan-700 hover:to-blue-800 active:scale-95"
+                  "flex-1 rounded-lg border border-slate-400/70 bg-white px-4 py-2 text-xs font-semibold text-slate-900 shadow-[0_8px_24px_rgba(15,23,42,0.08)] transition-all hover:border-slate-500/70 hover:bg-slate-50 active:scale-95"
                 )}
               >
                 {isLast ? "Finish Tour 🎉" : "Next"}
@@ -636,8 +636,8 @@ export function DemoGuide() {
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-xl border transition-all",
                   isLast
-                    ? "cursor-not-allowed border-white/10 bg-white/[0.04] text-white/25"
-                    : "border-white/25 bg-white/10 text-white hover:border-white/35 hover:bg-white/15 active:scale-95"
+                    ? "cursor-not-allowed border-slate-200/80 bg-slate-100/50 text-slate-300"
+                    : "border-slate-300/80 bg-white/70 text-slate-900 hover:border-slate-400 hover:bg-white active:scale-95"
                 )}
               >
                 <ChevronRight className="h-4 w-4" />

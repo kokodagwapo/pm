@@ -52,6 +52,12 @@ import { useOptionalDashboardAppearance } from "@/components/providers/Dashboard
 
 import { PortfolioHealthWidget } from "@/components/dashboard/PortfolioHealthWidget";
 
+/**
+ * Avg. rent / unit is easy to confuse with an informal “~$1k per property” revenue goal.
+ * Flip to true when product defines that KPI clearly.
+ */
+const SHOW_DASHBOARD_AVERAGE_RENT_KPI = false;
+
 /** Must be module-level — calling `dynamic()` inside render breaks React (blank / remount loop). */
 const DashboardChartsSection = dynamic(
   () => import("@/components/dashboard/DashboardChartsSection").then((m) => ({ default: m.DashboardChartsSection })),
@@ -783,13 +789,15 @@ export default function DashboardPage() {
           icon={Home}
           iconColor="error"
         />
-        <AnalyticsCard
-          title={t("dashboard.cards.averageRent.title")}
-          value={formatCurrency(overview?.averageRent ?? 0)}
-          description={t("dashboard.cards.averageRent.description")}
-          icon={DollarSign}
-          iconColor="success"
-        />
+        {SHOW_DASHBOARD_AVERAGE_RENT_KPI && (
+          <AnalyticsCard
+            title={t("dashboard.cards.averageRent.title")}
+            value={formatCurrency(overview?.averageRent ?? 0)}
+            description={t("dashboard.cards.averageRent.description")}
+            icon={DollarSign}
+            iconColor="success"
+          />
+        )}
         <AnalyticsCard
           title={t("dashboard.cards.leaseRenewals.title")}
           value={overview?.expiringLeases ?? 0}

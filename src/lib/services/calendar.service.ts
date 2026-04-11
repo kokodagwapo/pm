@@ -52,6 +52,8 @@ export interface EventQueryParams {
   organizer?: string;
   attendeeId?: string;
   propertyId?: string;
+  /** Restrict to events linked to any of these properties (e.g. owner / manager scope) */
+  propertyIds?: string[];
   tenantId?: string;
   search?: string;
   page?: number;
@@ -192,6 +194,7 @@ export class CalendarService {
       organizer,
       attendeeId,
       propertyId,
+      propertyIds,
       tenantId,
       search,
       page = 1,
@@ -216,6 +219,11 @@ export class CalendarService {
     if (priority) query.priority = priority;
     if (organizer) query.organizer = new mongoose.Types.ObjectId(organizer);
     if (propertyId) query.propertyId = new mongoose.Types.ObjectId(propertyId);
+    if (propertyIds && propertyIds.length > 0) {
+      query.propertyId = {
+        $in: propertyIds.map((id) => new mongoose.Types.ObjectId(id)),
+      };
+    }
     if (tenantId) query.tenantId = new mongoose.Types.ObjectId(tenantId);
     if (attendeeId)
       query["attendees.userId"] = new mongoose.Types.ObjectId(attendeeId);

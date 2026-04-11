@@ -13,6 +13,7 @@ import connectDB from "@/lib/mongodb";
 import { calculatePropertyStatusFromUnits } from "@/utils/property-status-calculator";
 import DateBlock from "@/models/DateBlock";
 import PricingRule from "@/models/PricingRule";
+import { stripUnitSecretsForPublicApi } from "@/lib/unit-access-secrets";
 
 export async function GET(
   request: NextRequest,
@@ -97,6 +98,13 @@ export async function GET(
         isActive: true,
       })),
     };
+
+    // Never expose unit access secrets on the public listing API
+    if (Array.isArray(propertyObj.units)) {
+      propertyObj.units = propertyObj.units.map((u: Record<string, unknown>) =>
+        stripUnitSecretsForPublicApi(u)
+      );
+    }
 
     return createSuccessResponse(
       propertyObj,

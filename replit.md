@@ -23,11 +23,11 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **FlickeringGridBackground**: Removed from dashboard layout for cleaner appearance.
 
 ## Dev Server Stability (Replit-specific)
-- **Run button uses production**: The `Project` workflow in `.replit` runs `bash start.sh` → `npm run build` (if needed) → `npm run start` on port 5000 for a stable webview (no HMR). Use `bash dev.sh` only when you need webpack dev; restart after edits on Replit.
+- **Run button uses production server**: The `Project` workflow in `.replit` runs `bash start.sh`, which runs `npm run build` when `.next/BUILD_ID` is missing, then `npm run start` on port **5000** (no HMR — stable preview). Use `npm run replit:dev` (sets `REPLIT_DEV_SERVER=1`) or `bash dev.sh` only when you need webpack dev + HMR; it is heavier and less stable on Replit.
 - **Turbopack disabled**: Replit-facing scripts (`dev`, `dev:5000`) do not use Turbopack. `dev:local` uses webpack on port 3000 for Cursor/local development.
 - **File watcher on Replit dev**: `next.config.ts` sets `watchOptions.ignored: /.*/` when `REPLIT_DEV_DOMAIN` or `REPL_ID` is set so phantom FS events do not spin the dev server. Local development without those env vars gets normal webpack HMR.
 - **Do NOT re-add `--turbopack`** to Replit-facing scripts or remove the `ignored: /.*/` watchOption on Replit without testing — it can reintroduce refresh loops.
-- **`.next` cache cleanup**: `dev.sh` runs `rm -rf .next` before starting Next.js to ensure a fresh build. Do NOT put `rm -rf .next` in `scripts/post-merge.sh` — that script runs while the dev server is still serving, and deleting `.next` mid-session causes permanent 500 errors (the server can't recover because the watcher is disabled).
+- **`.next` cache cleanup**: `dev.sh` runs `rm -rf .next` before `next dev` for a fresh dev build. **`start.sh` does not delete `.next`** on each run — it only builds when `BUILD_ID` is missing. `scripts/post-merge.sh` removes `.next/BUILD_ID` so the next Run triggers a rebuild without wiping the whole cache mid-session.
 - **SSR hydration safety**: All providers (`DashboardAppearanceProvider`, `LocalizationProvider`, `localization.service.ts`) use stable SSR-safe defaults ("immersive", "en-US", "USD") in initial state. Client-side localStorage values are applied only in `useEffect` after hydration.
 - **React Strict Mode disabled**: `reactStrictMode: false` in `next.config.ts` to prevent double-mounting of components in dev mode, which exacerbates hydration issues on Replit.
 - **Auto-recovering error boundaries**: `global-error.tsx` and `error.tsx` detect transient dev errors (webpack chunk loading, hydration, invalid hook calls, dynamic import / chunk failures) and auto-retry via `reset()` with 500ms×attempt backoff. **Retry counts use module-level state** (not `useRef`) so remounts after `reset()` do not reset the counter — this prevents infinite retry/crash loops on Replit. A **session cap** (`sessionStorage`, max 12 auto-recoveries per tab) stops endless reload storms; then the full error UI is shown. Production behavior is unchanged: non-transient errors show the UI immediately; transient classification is dev-only.
@@ -260,9 +260,15 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 
 ## Deployment / Build Notes
 - **Deployment type**: Reserved VM (`deploymentTarget = "vm"` in `.replit`). Build: `npm run build`. Run: `bash start-prod.sh`.
-- **MongoDB in deployment**: Reserved VM runs local mongod (same as dev). `start-prod.sh` starts mongod, seeds, then starts Next.js.
-- **Custom domain (pm.smarts.fi)**: Set `APP_URL=https://pm.smarts.fi` in Replit Secrets. This overrides NEXTAUTH_URL/AUTH_URL so auth redirects use your domain. `CUSTOM_DOMAIN` is also supported as a fallback by the start scripts.
-- **NEXTAUTH_URL**: Set by start-prod.sh from APP_URL or REPLIT_DOMAINS. Auth.js v5 also uses `trustHost: true` to accept request headers.
+- **Secrets (Replit lock icon)**: Do **not** commit API keys or Stripe keys in `.replit`. Set at minimum:
+  - **`AUTH_SECRET`** and **`NEXTAUTH_SECRET`** (e.g. `openssl rand -base64 32`).
+  - **`MONGODB_URI`**: Prefer **MongoDB Atlas** (`mongodb+srv://...`) for production; local `mongod` is skipped automatically when the URI is not `mongodb://localhost` / `127.0.0.1`.
+  - **`NEXT_PUBLIC_APP_URL`**: `https://<your-repl>.replit.app` or your custom domain (must match the browser origin).
+  - Optional: **`APP_URL`** / **`CUSTOM_DOMAIN`** (https://…) for auth redirect base — same as public URL if unsure.
+  - Optional: Stripe, R2, `OPENAI_API_KEY`, `UNIT_SECRETS_ENCRYPTION_KEY`, Google Maps keys — see `.env.local.example`.
+- **MongoDB**: If `MONGODB_URI` is Atlas, `start.sh` / `start-prod.sh` do not start local `mongod` (see `scripts/replit-mongo.sh`).
+- **Custom domain**: Set `APP_URL=https://your.domain` in Secrets so `start-prod.sh` exports `NEXTAUTH_URL` / `AUTH_URL` correctly.
+- **NEXTAUTH_URL**: Also derived from **`REPLIT_DOMAINS`** (auto-provided on Replit) when `APP_URL` is unset. Auth uses `trustHost: true` (`AUTH_TRUST_HOST` in `.replit` shared env).
 - **Stripe lazy init**: All `new Stripe(...)` calls are lazy — only run inside route handlers, never at module load time.
 - **environment.ts**: Stripe and Publishable key fields are `.optional()` in the Zod schema.
 - **NEXTAUTH_SECRET vs AUTH_SECRET**: NextAuth v5 uses `AUTH_SECRET`. The env schema validates `NEXTAUTH_SECRET` but this is not required.

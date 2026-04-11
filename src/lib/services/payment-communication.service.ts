@@ -6,6 +6,7 @@
 import { IPayment, PaymentStatus, ILease } from "@/types";
 import { Payment, Lease, User } from "@/models";
 import { paymentStatusService } from "./payment-status.service";
+import { sendSMS as sendTwilioSMS } from "@/lib/services/sms.service";
 import mongoose from "mongoose";
 
 export interface NotificationTemplate {
@@ -599,33 +600,31 @@ export class PaymentCommunicationService {
   }
 
   /**
-   * Send SMS notification (disabled - SMS service not configured)
+   * Send SMS via Twilio when TWILIO_* env vars are set
    */
   private async sendSMS(
     data: any
   ): Promise<{ success: boolean; error?: string }> {
-    console.warn("SMS service not configured, skipping SMS notification");
-    return { success: false, error: "SMS service not configured" };
+    const body = data.textContent || data.text || data.message || "";
+    const to = data.phone || data.to;
+    if (!to || !body) {
+      return { success: false, error: "Missing phone or message" };
+    }
+    const result = await sendTwilioSMS(to, body);
+    if (result.success) return { success: true };
+    return { success: false, error: result.error || "SMS failed" };
   }
 
   /**
-   * Send push notification
+   * Push notifications (FCM / OneSignal) — not implemented; email/SMS used instead.
    */
   private async sendPushNotification(
-    data: any
+    _data: any
   ): Promise<{ success: boolean; error?: string }> {
-    try {
-      // TODO: Implement actual push notification sending
-
-      // Simulate push notification sending
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error:
-          error instanceof Error ? error.message : "Push notification failed",
-      };
-    }
+    return {
+      success: false,
+      error: "Push notifications not configured (use email/SMS)",
+    };
   }
 
   /**

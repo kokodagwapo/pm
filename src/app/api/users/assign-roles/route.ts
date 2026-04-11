@@ -4,7 +4,13 @@
  */
 
 import { NextRequest } from "next/server";
-import { Role, User } from "@/models";
+import { Role, User, AuditLog } from "@/models";
+import {
+  AuditCategory,
+  AuditAction,
+  AuditSeverity,
+} from "@/models/AuditLog";
+import { emailService } from "@/lib/services/email.service";
 import { UserRole } from "@/types";
 import {
   createSuccessResponse,
@@ -163,18 +169,58 @@ export const POST = withRoleAndDB([UserRole.ADMIN])(
             );
           }
 
-          // TODO: Create audit log entries
-          // This would be implemented when audit logging is added
-
+          await AuditLog.insertMany(
+            roleChanges.map((c) => ({
+              category: AuditCategory.USER_MANAGEMENT,
+              action: AuditAction.ROLE_ASSIGNED,
+              severity: AuditSeverity.MEDIUM,
+              userId: new mongoose.Types.ObjectId(c.userId),
+              userEmail: c.userEmail,
+              userRole: c.newRole,
+              resourceType: "user",
+              resourceId: new mongoose.Types.ObjectId(c.userId),
+              resourceName: c.userName,
+              description: `Role changed from ${c.previousRole} to ${c.newRole}`,
+              oldValues: { role: c.previousRole },
+              newValues: { role: c.newRole },
+              details: {
+                performedBy: c.changedBy,
+                reason: c.reason,
+              },
+              timestamp: new Date(),
+              source: "api" as const,
+            })),
+            { session }
+          );
         });
       } finally {
         await session.endSession();
       }
 
-      // TODO: Send notifications if requested
       if (notifyUsers) {
-
-        // Implement email notifications here
+        const appBase = (process.env.NEXT_PUBLIC_APP_URL || "").replace(
+          /\/$/,
+          ""
+        );
+        for (const change of roleChanges) {
+          try {
+            await emailService.sendEmail({
+              to: change.userEmail,
+              subject: "Your account role has been updated",
+              html: `<p>Hello ${change.userName},</p>
+<p>Your role has been changed from <strong>${change.previousRole}</strong> to <strong>${change.newRole}</strong>.</p>
+${change.reason ? `<p><strong>Reason:</strong> ${change.reason}</p>` : ""}
+<p><a href="${appBase || "#"}/dashboard">Open your dashboard</a></p>`,
+              text: `Your role has been changed from ${change.previousRole} to ${change.newRole}.`,
+            });
+          } catch (emailErr) {
+            console.error(
+              "[assign-roles] Failed to notify user",
+              change.userId,
+              emailErr
+            );
+          }
+        }
       }
 
       // Prepare response with detailed information

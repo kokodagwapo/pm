@@ -18,6 +18,7 @@ import {
   parseRequestBody,
 } from "@/lib/api-utils";
 import Notification, { INotification } from "@/models/Notification";
+import ScheduledNotificationJob from "@/models/ScheduledNotificationJob";
 import { Types } from "mongoose";
 
 type NotificationRecord = {
@@ -51,9 +52,24 @@ export const GET = withRoleAndDB([
     }
 
     if (type === "scheduled") {
-      // Get scheduled notifications (placeholder - would fetch from database)
-      const scheduledNotifications = []; // TODO: Implement database storage
-      return createSuccessResponse(scheduledNotifications);
+      const scheduledNotifications = await ScheduledNotificationJob.find({
+        status: "pending",
+      })
+        .sort({ scheduledFor: 1 })
+        .limit(200)
+        .lean();
+
+      return createSuccessResponse(
+        scheduledNotifications.map((n) => ({
+          id: n.notificationId,
+          type: n.notificationType,
+          userId: n.userId.toString(),
+          scheduledFor: n.scheduledFor,
+          data: n.notificationData || {},
+          status: n.status,
+          createdAt: n.createdAt,
+        }))
+      );
     }
 
     const includeRead = searchParams.get("includeRead") === "true";
@@ -365,6 +381,15 @@ async function handleScheduleNotification(data: any): Promise<NextResponse> {
     scheduledDate,
     notificationData
   );
+
+  await ScheduledNotificationJob.create({
+    notificationId,
+    notificationType: String(type),
+    userId: new Types.ObjectId(userId),
+    scheduledFor: scheduledDate,
+    notificationData: notificationData || {},
+    status: "pending",
+  });
 
   return createSuccessResponse({
     message: "Notification scheduled successfully",

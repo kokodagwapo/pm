@@ -14,6 +14,7 @@ import {
 import { Types } from "mongoose";
 import Notification from "@/models/Notification";
 import { formatCurrency } from "@/lib/utils/formatting";
+import { sendSMS } from "@/lib/services/sms.service";
 
 // Notification types
 export enum NotificationType {
@@ -215,15 +216,19 @@ export class NotificationService {
     }
   }
 
-  // Send SMS notification (disabled - SMS service not configured)
+  // Send SMS via Twilio when configured
   private async sendSMSNotification(data: NotificationData): Promise<boolean> {
-    return false;
+    const phone =
+      (data.data && (data.data as { phone?: string }).phone) || undefined;
+    if (!phone) {
+      return false;
+    }
+    const result = await sendSMS(phone, `${data.title}\n${data.message}`);
+    return result.success;
   }
 
-  // Send push notification (placeholder)
-  private async sendPushNotification(data: NotificationData): Promise<boolean> {
-    // TODO: Implement push notification service (Firebase, OneSignal, etc.)
-
+  // Push (FCM / OneSignal) — not implemented; treated as no-op so email/SMS/in-app still count as success
+  private async sendPushNotification(_data: NotificationData): Promise<boolean> {
     return true;
   }
 

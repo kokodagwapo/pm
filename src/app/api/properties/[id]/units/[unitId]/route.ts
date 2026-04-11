@@ -10,6 +10,11 @@ import { Property, Lease } from "@/models";
 import { UserRole, LeaseStatus } from "@/types";
 import { deleteFromR2 } from "@/lib/r2-server";
 import { isR2Url, extractObjectKey } from "@/lib/r2";
+import {
+  applySecretUpdatesToUnitUpdate,
+  formatEmbeddedUnitForClient,
+  stripSecretPlainFieldsFromBody,
+} from "@/lib/unit-access-secrets";
 
 // GET /api/properties/[id]/units/[unitId] - Get a specific unit
 export async function GET(
@@ -54,7 +59,10 @@ export async function GET(
       return NextResponse.json({ error: "Unit not found" }, { status: 404 });
     }
 
-    return NextResponse.json(unit);
+    const plain = (unit as any).toObject
+      ? (unit as any).toObject()
+      : { ...(unit as object) };
+    return NextResponse.json(formatEmbeddedUnitForClient(plain));
   } catch (error) {
     return NextResponse.json(
       { error: "Internal server error" },
@@ -107,12 +115,13 @@ export async function PUT(
 
     const existingUnit = property.units[unitIndex];
     const body = await request.json();
+    const safeBody = stripSecretPlainFieldsFromBody(body);
 
     // Check if unit number already exists for this property (excluding current unit)
-    if (body.unitNumber !== existingUnit.unitNumber) {
+    if (safeBody.unitNumber !== existingUnit.unitNumber) {
       const duplicateUnit = property.units.find(
         (u: any) =>
-          u.unitNumber === body.unitNumber && u._id.toString() !== unitId
+          u.unitNumber === safeBody.unitNumber && u._id.toString() !== unitId
       );
 
       if (duplicateUnit) {
@@ -126,42 +135,50 @@ export async function PUT(
     // Transform the update data to match the schema
     const updateData: any = {
       ...existingUnit.toObject(),
-      ...body,
+      ...safeBody,
       // Handle parking data structure
       parking:
-        body.parking ||
-        (body.parkingIncluded !== undefined
+        safeBody.parking ||
+        (safeBody.parkingIncluded !== undefined
           ? {
-              included: body.parkingIncluded || false,
-              spaces: body.parkingSpaces || 0,
-              type: body.parkingType || "open",
-              gated: body.parkingGated || false,
-              assigned: body.parkingAssigned || false,
+              included: safeBody.parkingIncluded || false,
+              spaces: safeBody.parkingSpaces || 0,
+              type: safeBody.parkingType || "open",
+              gated: safeBody.parkingGated || false,
+              assigned: safeBody.parkingAssigned || false,
             }
           : existingUnit.parking),
       // Handle utilities data structure
-      utilities: body.utilities || {
-        electricity: body.electricityIncluded ? "included" : UserRole.TENANT,
-        water: body.waterIncluded ? "included" : UserRole.TENANT,
-        gas: body.gasIncluded ? "included" : UserRole.TENANT,
-        internet: body.internetIncluded ? "included" : UserRole.TENANT,
-        heating: body.heatingIncluded ? "included" : UserRole.TENANT,
-        cooling: body.coolingIncluded ? "included" : UserRole.TENANT,
+      utilities: safeBody.utilities || {
+        electricity: safeBody.electricityIncluded ? "included" : UserRole.TENANT,
+        water: safeBody.waterIncluded ? "included" : UserRole.TENANT,
+        gas: safeBody.gasIncluded ? "included" : UserRole.TENANT,
+        internet: safeBody.internetIncluded ? "included" : UserRole.TENANT,
+        heating: safeBody.heatingIncluded ? "included" : UserRole.TENANT,
+        cooling: safeBody.coolingIncluded ? "included" : UserRole.TENANT,
         cable: existingUnit.utilities?.cable || UserRole.TENANT,
         trash: existingUnit.utilities?.trash || "included",
         sewer: existingUnit.utilities?.sewer || "included",
       },
       // Handle appliances data structure
-      appliances: body.appliances || {
-        refrigerator: body.refrigerator || false,
-        stove: body.stove || false,
-        oven: body.oven || false,
-        microwave: body.microwave || false,
-        dishwasher: body.dishwasher || false,
-        washer: body.washer || false,
-        dryer: body.dryer || false,
+      appliances: safeBody.appliances || {
+        refrigerator: safeBody.refrigerator || false,
+        stove: safeBody.stove || false,
+        oven: safeBody.oven || false,
+        microwave: safeBody.microwave || false,
+        dishwasher: safeBody.dishwasher || false,
+        washer: safeBody.washer || false,
+        dryer: safeBody.dryer || false,
       },
     };
+
+    const secretErr = applySecretUpdatesToUnitUpdate(body, updateData);
+    if (secretErr.error) {
+      return NextResponse.json(
+        { error: secretErr.error },
+        { status: secretErr.status ?? 400 }
+      );
+    }
 
     if (String(updateData.status).toLowerCase() === "occupied") {
       const activeLease = await Lease.findOne({
@@ -220,7 +237,11 @@ export async function PUT(
       }
     }
 
-    const responsePayload = NextResponse.json(property.units[unitIndex]);
+    const saved = property.units[unitIndex] as any;
+    const savedPlain = saved.toObject ? saved.toObject() : { ...saved };
+    const responsePayload = NextResponse.json(
+      formatEmbeddedUnitForClient(savedPlain)
+    );
     if (syncWarning) {
       responsePayload.headers.set("x-propertypro-warning", syncWarning);
     }

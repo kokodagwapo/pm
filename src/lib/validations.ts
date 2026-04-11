@@ -357,6 +357,17 @@ export const propertyCreateSchema = z.object({
     z.string().url("Invalid virtual tour URL").max(2000).optional()
   ),
   neighborhood: z.string().max(100).optional(),
+
+  hoaCustomFields: z
+    .array(
+      z.object({
+        key: z.string().min(1).max(120),
+        value: z.string().max(2000),
+      })
+    )
+    .max(40)
+    .optional()
+    .default([]),
 });
 
 export const propertyUpdateSchema = propertyCreateSchema

@@ -6,7 +6,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest } from "next/server";
-import { MaintenanceRequest, Property, Tenant, User } from "@/models";
+import { MaintenanceRequest, Property, User } from "@/models";
 import { UserRole, MaintenancePriority, MaintenanceStatus } from "@/types";
 import {
   createSuccessResponse,
@@ -23,6 +23,10 @@ import {
   validateSchema,
 } from "@/lib/validations";
 import { z } from "zod";
+import {
+  EmergencyNotificationService,
+  NotificationPriority as EmergencyNotificationPriority,
+} from "@/lib/emergency-notifications";
 
 // ============================================================================
 // GET /api/maintenance/emergency - Get emergency maintenance requests
@@ -486,9 +490,13 @@ export const POST = withRoleAndDB([
       return createErrorResponse("Property not found", 404);
     }
 
-    // Verify tenant exists
-    const tenant = await Tenant.findById(emergencyData.tenantId);
-    if (!tenant) {
+    // tenantId references the tenant user account
+    const tenantUser = await User.findOne({
+      _id: emergencyData.tenantId,
+      role: UserRole.TENANT,
+      isActive: true,
+    });
+    if (!tenantUser) {
       return createErrorResponse("Tenant not found", 404);
     }
 
@@ -526,8 +534,50 @@ export const POST = withRoleAndDB([
       .populate("tenantId", "firstName lastName email phone")
       .populate("assignedTo", "firstName lastName email");
 
-    // TODO: Trigger emergency notifications (email, SMS, push notifications)
-    // This would be implemented in a separate notification service
+    try {
+      const emergencySvc = EmergencyNotificationService.getInstance();
+      const recipients = await emergencySvc.getEmergencyRecipients(
+        emergencyData.propertyId,
+        assignedTo ? [assignedTo] : [],
+        user.id
+      );
+      const appBase = (process.env.NEXT_PUBLIC_APP_URL || "").replace(
+        /\/$/,
+        ""
+      );
+      const viewUrl = `${appBase}/maintenance/emergency/${emergencyRequest._id}`;
+      const addr = (property as any).address;
+      const propertyAddress =
+        typeof addr === "string"
+          ? addr
+          : [addr?.street, addr?.city, addr?.state, addr?.zipCode]
+              .filter(Boolean)
+              .join(", ");
+
+      await emergencySvc.sendEmergencyNotification(
+        "NEW_EMERGENCY",
+        recipients,
+        {
+          propertyName: (property as any).name || "Property",
+          propertyAddress,
+          emergencyType: emergencyData.emergencyType || "other",
+          title: emergencyData.title,
+          description: emergencyData.description,
+          tenantName:
+            `${tenantUser.firstName || ""} ${tenantUser.lastName || ""}`.trim(),
+          tenantPhone:
+            tenantUser.phone || emergencyData.contactPhone || "",
+          safetyRisk: "See description",
+          immediateAction: "None reported",
+          createdAt: emergencyRequest.createdAt.toISOString(),
+          viewUrl,
+          requestId: emergencyRequest._id.toString(),
+        },
+        EmergencyNotificationPriority.CRITICAL
+      );
+    } catch (notifyErr) {
+      console.error("[Emergency] Notification dispatch failed:", notifyErr);
+    }
 
     return createSuccessResponse(
       populatedRequest,

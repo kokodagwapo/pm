@@ -5,7 +5,12 @@
 
 import { IMaintenanceRequest, IUser, ITenant } from "@/types";
 import Notification from "@/models/Notification";
+import Property from "@/models/Property";
+import User from "@/models/User";
 import { Types } from "mongoose";
+import { UserRole } from "@/types";
+import { emailService } from "@/lib/services/email.service";
+import { sendSMS } from "@/lib/services/sms.service";
 
 // Notification types
 export enum NotificationType {
@@ -247,20 +252,18 @@ export class EmergencyNotificationService {
       const subject = this.interpolateTemplate(template.subject, data);
       const body = this.interpolateTemplate(template.body, data);
 
-      // In a real implementation, this would integrate with an email service
-      // like SMTP/Nodemailer, AWS SES, or similar
-      const emailData = {
+      if (!recipient.email) return;
+
+      const result = await emailService.sendEmail({
         to: recipient.email,
         subject,
         html: body,
-        priority:
-          priority === NotificationPriority.CRITICAL ? "high" : "normal",
-      };
+        text: body.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
+      });
 
-      // Mock email sending - replace with actual email service
-
-      // TODO: Integrate with actual email service
-      // await emailService.send(emailData);
+      if (!result.success) {
+        console.warn("[Emergency] Email not sent:", result.error);
+      }
     } catch (error) {
       console.error("Failed to send emergency email:", error);
       throw error;
@@ -281,17 +284,12 @@ export class EmergencyNotificationService {
 
       // In a real implementation, this would integrate with an SMS service
       // like Twilio, AWS SNS, or similar
-      const smsData = {
-        to: recipient.phone,
-        message,
-        priority:
-          priority === NotificationPriority.CRITICAL ? "high" : "normal",
-      };
+      if (!recipient.phone) return;
 
-      // Mock SMS sending - replace with actual SMS service
-
-      // TODO: Integrate with actual SMS service
-      // await smsService.send(smsData);
+      const smsResult = await sendSMS(recipient.phone, message);
+      if (!smsResult.success) {
+        console.warn("[Emergency] SMS not sent:", smsResult.error);
+      }
     } catch (error) {
       console.error("Failed to send emergency SMS:", error);
       throw error;
@@ -311,24 +309,14 @@ export class EmergencyNotificationService {
       const title = this.interpolateTemplate(template.pushTitle, data);
       const body = this.interpolateTemplate(template.pushBody, data);
 
-      // In a real implementation, this would integrate with a push service
-      // like Firebase Cloud Messaging, Apple Push Notifications, etc.
-      const pushData = {
-        userId: recipient.id,
-        title,
-        body,
-        priority:
-          priority === NotificationPriority.CRITICAL ? "high" : "normal",
-        data: {
-          type: "emergency",
-          requestId: data.requestId,
-        },
-      };
-
-      // Mock push notification - replace with actual push service
-
-      // TODO: Integrate with actual push notification service
-      // await pushService.send(pushData);
+      // Mobile push (FCM / APNs) not wired; in-app + email/SMS deliver the alert.
+      if (process.env.NODE_ENV === "development") {
+        console.debug(
+          "[Emergency] Push skipped (no FCM integration):",
+          title,
+          body
+        );
+      }
     } catch (error) {
       console.error("Failed to send emergency push notification:", error);
       throw error;
@@ -388,11 +376,7 @@ export class EmergencyNotificationService {
         actionUrl: data.viewUrl,
       });
 
-      // TODO: Send real-time update via WebSocket
-      // await websocketService.sendToUser(recipient.id, {
-      //   type: 'emergency_notification',
-      //   data: notificationData,
-      // });
+      // Real-time WebSocket updates: optional future enhancement
     } catch (error) {
       console.error("Failed to send in-app emergency notification:", error);
       throw error;
@@ -411,39 +395,85 @@ export class EmergencyNotificationService {
     });
   }
 
-  // Get notification recipients based on emergency type and property
+  private userToRecipient(u: {
+    _id: Types.ObjectId;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    role?: string;
+  }): NotificationRecipient {
+    const name =
+      `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.email || "User";
+    return {
+      id: u._id.toString(),
+      name,
+      email: u.email,
+      phone: u.phone,
+      role: u.role || "user",
+      preferences: { email: true, sms: true, push: true },
+    };
+  }
+
+  /**
+   * Resolve recipients: property manager, owner, and optionally assigned staff.
+   * Falls back to active admins if no property contacts exist.
+   */
   async getEmergencyRecipients(
-    emergencyType: string,
     propertyId: string,
+    additionalUserIds: string[] = [],
     excludeUserId?: string
   ): Promise<NotificationRecipient[]> {
-    // In a real implementation, this would query the database for:
-    // 1. Property managers for the specific property
-    // 2. Maintenance staff available for emergency calls
-    // 3. Super admins
-    // 4. On-call personnel based on time/day
+    const recipients: NotificationRecipient[] = [];
+    const seen = new Set<string>();
 
-    // Mock recipients - replace with actual database query
-    const mockRecipients: NotificationRecipient[] = [
-      {
-        id: "manager1",
-        name: "Property Manager",
-        email: "manager@property.com",
-        phone: "+1234567890",
-        role: "property_manager",
-        preferences: { email: true, sms: true, push: true },
-      },
-      {
-        id: "maintenance1",
-        name: "Maintenance Staff",
-        email: "maintenance@property.com",
-        phone: "+1234567891",
-        role: "maintenance_staff",
-        preferences: { email: true, sms: true, push: true },
-      },
-    ];
+    const property = await Property.findById(propertyId)
+      .select("managerId ownerId")
+      .lean();
 
-    // Filter out the user who created the request
-    return mockRecipients.filter((r) => r.id !== excludeUserId);
+    const candidateIds: string[] = [];
+    if (property?.managerId) candidateIds.push(property.managerId.toString());
+    if (property?.ownerId) candidateIds.push(property.ownerId.toString());
+    for (const id of additionalUserIds) {
+      if (id && Types.ObjectId.isValid(id)) candidateIds.push(id);
+    }
+
+    const uniqueIds = [...new Set(candidateIds)].filter(
+      (id) => id && id !== excludeUserId
+    );
+
+    const loadUsers = async (ids: string[]) => {
+      if (ids.length === 0) return;
+      const users = await User.find({
+        _id: { $in: ids.map((id) => new Types.ObjectId(id)) },
+        isActive: true,
+      })
+        .select("_id firstName lastName email phone role")
+        .lean();
+      for (const u of users) {
+        const id = u._id.toString();
+        if (seen.has(id)) continue;
+        seen.add(id);
+        recipients.push(this.userToRecipient(u));
+      }
+    };
+
+    await loadUsers(uniqueIds);
+
+    if (recipients.length === 0) {
+      const admins = await User.find({
+        role: UserRole.ADMIN,
+        isActive: true,
+      })
+        .select("_id firstName lastName email phone role")
+        .limit(10)
+        .lean();
+      for (const u of admins) {
+        if (excludeUserId && u._id.toString() === excludeUserId) continue;
+        recipients.push(this.userToRecipient(u));
+      }
+    }
+
+    return recipients;
   }
 }

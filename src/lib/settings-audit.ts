@@ -395,6 +395,8 @@ export function sanitizeAuditData(data: any): any {
     "bankAccount",
     "creditCard",
     "paymentMethod",
+    "wifiPasswordEnc",
+    "doorPasscodeEnc",
   ];
 
   const sanitized = { ...data };

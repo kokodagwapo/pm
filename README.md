@@ -18,6 +18,7 @@
 
 ### 🌐 Deployment Guides
 
+- **[Replit](replit.md)** - Run and deploy on Replit (Secrets, MongoDB Atlas, `start.sh` / `start-prod.sh`)
 - **[VPS Deployment Guide](VPS_DEPLOYMENT_GUIDE.md)** - Deploy on your own server
 - **[Vercel Deployment](INSTALLATION_GUIDE.md#vercel-deployment-recommended)** - One-click cloud deployment
 

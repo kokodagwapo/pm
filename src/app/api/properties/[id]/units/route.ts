@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { Property } from "@/models";
 import { UserRole } from "@/types";
+import { stripSecretCiphertextForList } from "@/lib/unit-access-secrets";
 
 // GET /api/properties/[id]/units - Get all units for a property
 export async function GET(
@@ -45,10 +46,14 @@ export async function GET(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Get all units from the embedded units array
+    // Get all units from the embedded units array (no secret ciphertext in list)
     const units = property.units || [];
+    const safe = units.map((u: any) => {
+      const plain = u.toObject ? u.toObject() : { ...u };
+      return stripSecretCiphertextForList(plain);
+    });
 
-    return NextResponse.json(units);
+    return NextResponse.json(safe);
   } catch (error) {
     return NextResponse.json(
       { error: "Internal server error" },

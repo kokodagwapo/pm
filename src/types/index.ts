@@ -307,6 +307,12 @@ export interface IEmbeddedUnit {
   // Current tenant information
   currentTenantId?: Types.ObjectId;
   currentLeaseId?: Types.ObjectId;
+
+  /** Wi‑Fi network name (plain). */
+  wifiSsid?: string;
+  /** Encrypted at rest; use API `wifiPassword` for reads/writes. */
+  wifiPasswordEnc?: string;
+  doorPasscodeEnc?: string;
 }
 
 export interface IProperty extends Document {
@@ -337,6 +343,8 @@ export interface IProperty extends Document {
   importExternalId?: string;
   /** Canonical public URL on the listing site. */
   importListingUrl?: string;
+  /** Optional HOA / association custom metadata (e.g. gate codes, registration URLs). */
+  hoaCustomFields?: Array<{ key: string; value: string }>;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;

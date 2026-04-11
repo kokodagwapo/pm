@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Card,
@@ -55,6 +55,7 @@ import {
   Sofa,
   Sparkles,
   Star,
+  Trash2,
   ThermometerSun,
   Utensils,
   WashingMachine,
@@ -141,6 +142,17 @@ const enhancedPropertySchema = (t: (key: string, options?: any) => string) =>
           fileType: z.string(),
         })
       )
+      .default([]),
+
+    hoaCustomFields: z
+      .array(
+        z.object({
+          key: z.string().max(120),
+          value: z.string().max(2000),
+        })
+      )
+      .max(40)
+      .optional()
       .default([]),
   });
 
@@ -579,7 +591,16 @@ export function EnhancedPropertyForm({
       amenities: initialData?.amenities || [],
       images: initialData?.images || [],
       attachments: initialData?.attachments || [],
+      hoaCustomFields:
+        Array.isArray(initialData?.hoaCustomFields) && initialData.hoaCustomFields.length > 0
+          ? initialData.hoaCustomFields
+          : [],
     },
+  });
+
+  const { fields: hoaFieldRows, append: appendHoaRow, remove: removeHoaRow } = useFieldArray({
+    control: form.control,
+    name: "hoaCustomFields",
   });
 
   const { watch, setValue } = form;
@@ -679,6 +700,9 @@ export function EnhancedPropertyForm({
         isMultiUnit,
         totalUnits,
         units: apiUnits, // Always include units array for unified architecture
+        hoaCustomFields: (data.hoaCustomFields || [])
+          .filter((r) => r.key && r.key.trim().length > 0)
+          .map((r) => ({ key: r.key.trim(), value: (r.value || "").trim() })),
       };
 
       await onSubmit(submissionData);
@@ -833,6 +857,58 @@ export function EnhancedPropertyForm({
                 <p className="text-sm text-red-600">{form.formState.errors.virtualTourUrl.message as string}</p>
               )}
               <p className="text-xs text-muted-foreground">YouTube or Matterport links will be embedded automatically</p>
+            </div>
+          </div>
+
+          <div className={insetCalloutClass}>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <div>
+                <p className="text-sm font-semibold text-foreground">HOA / association custom fields</p>
+                <p className="text-xs text-muted-foreground">
+                  Optional key–value pairs (e.g. registration portal, gate rules). Empty rows are ignored on save.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="shrink-0 gap-1"
+                onClick={() => appendHoaRow({ key: "", value: "" })}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add field
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {hoaFieldRows.length === 0 && (
+                <p className="text-xs text-muted-foreground">No custom fields yet. Use “Add field” to add HOA metadata.</p>
+              )}
+              {hoaFieldRows.map((row, index) => (
+                <div key={row.id} className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                  <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2">
+                    <Input
+                      placeholder="Label (e.g. HOA registration URL)"
+                      {...form.register(`hoaCustomFields.${index}.key` as const)}
+                    />
+                    <Textarea
+                      placeholder="Value"
+                      rows={2}
+                      className="min-h-[40px] resize-y"
+                      {...form.register(`hoaCustomFields.${index}.value` as const)}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0 text-muted-foreground hover:text-destructive"
+                    onClick={() => removeHoaRow(index)}
+                    aria-label="Remove HOA field"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
             </div>
           </div>
 

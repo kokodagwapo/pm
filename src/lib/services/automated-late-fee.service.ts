@@ -6,6 +6,9 @@
 import { Types } from "mongoose";
 import { Invoice, Lease } from "@/models";
 import { InvoiceStatus, InvoiceType } from "@/types";
+import { emailService } from "@/lib/services/email.service";
+import { sendSMS } from "@/lib/services/sms.service";
+import { formatCurrency } from "@/lib/utils/formatting";
 
 export interface LateFeeRule {
   id: string;
@@ -364,15 +367,45 @@ export class AutomatedLateFeeService {
     lateFeeAmount: number
   ): Promise<void> {
     try {
-      // This would integrate with your notification service
+      const tenant = invoice.tenantId;
+      const email =
+        tenant?.email ||
+        (typeof tenant === "object" && tenant?.userId?.email
+          ? tenant.userId.email
+          : undefined);
+      const phone =
+        tenant?.phone ||
+        (typeof tenant === "object" && tenant?.userId?.phone
+          ? tenant.userId.phone
+          : undefined);
+      const name =
+        tenant?.firstName && tenant?.lastName
+          ? `${tenant.firstName} ${tenant.lastName}`
+          : "Tenant";
 
-      // TODO: Implement actual email/SMS notification
-      // await notificationService.sendLateFeeNotification({
-      //   tenantEmail: invoice.tenantId.email,
-      //   invoiceNumber: invoice.invoiceNumber,
-      //   lateFeeAmount,
-      //   newBalance: invoice.totalAmount + lateFeeAmount,
-      // });
+      const newBalance = (invoice.totalAmount ?? 0) + lateFeeAmount;
+      const subject = `Late fee applied — Invoice ${invoice.invoiceNumber}`;
+      const html = `<p>Hello ${name},</p>
+<p>A late fee of <strong>${formatCurrency(lateFeeAmount)}</strong> has been applied to invoice <strong>${invoice.invoiceNumber}</strong>.</p>
+<p>New balance (including this fee): <strong>${formatCurrency(newBalance)}</strong>.</p>
+<p>If you have questions, contact your property manager.</p>`;
+      const text = `Late fee ${formatCurrency(lateFeeAmount)} applied to invoice ${invoice.invoiceNumber}. New balance about ${formatCurrency(newBalance)}.`;
+
+      if (email) {
+        const r = await emailService.sendEmail({ to: email, subject, html, text });
+        if (!r.success) {
+          console.warn("[Late fee] Email not sent:", r.error);
+        }
+      }
+      if (phone) {
+        const s = await sendSMS(
+          phone,
+          `SmartStartPM: Late fee ${formatCurrency(lateFeeAmount)} applied to invoice ${invoice.invoiceNumber}.`
+        );
+        if (!s.success) {
+          console.warn("[Late fee] SMS not sent:", s.error);
+        }
+      }
     } catch (error) {
       console.error("Failed to send late fee notification:", error);
     }

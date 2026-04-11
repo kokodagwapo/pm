@@ -201,14 +201,43 @@ export const GET = withRoleAndDB([
           return createSuccessResponse({ events: [], total: 0, page: 1, limit: 50 }, "Events retrieved successfully");
         }
         
-        // Add owner's properties filter to params
-        (params as any).ownerPropertyIds = propertyIds;
-        (params as any).organizerId = user.id.toString();
+        let scoped = propertyIds;
+        if (params.propertyId) {
+          if (!propertyIds.includes(params.propertyId)) {
+            return createSuccessResponse(
+              { events: [], total: 0, page: 1, limit: 50 },
+              "Events retrieved successfully"
+            );
+          }
+          scoped = [params.propertyId];
+        }
+        (params as any).propertyIds = scoped;
       }
 
       // For property managers, filter by their assigned properties
       if (user.role === UserRole.MANAGER) {
-        // TODO: Add property filtering based on user's assigned properties
+        const { Property } = await import("@/models");
+        const managed = await Property.find({ managerId: user.id }).select("_id").lean();
+        const propertyIds = managed.map((p: any) => p._id.toString());
+
+        if (propertyIds.length === 0) {
+          return createSuccessResponse(
+            { events: [], total: 0, page: 1, limit: 50 },
+            "Events retrieved successfully"
+          );
+        }
+
+        let scoped = propertyIds;
+        if (params.propertyId) {
+          if (!propertyIds.includes(params.propertyId)) {
+            return createSuccessResponse(
+              { events: [], total: 0, page: 1, limit: 50 },
+              "Events retrieved successfully"
+            );
+          }
+          scoped = [params.propertyId];
+        }
+        (params as any).propertyIds = scoped;
       }
 
       const result = await calendarService.getEvents(params);

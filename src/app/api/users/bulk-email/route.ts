@@ -13,6 +13,7 @@ import {
   withRoleAndDB,
   parseRequestBody,
 } from "@/lib/api-utils";
+import { emailService } from "@/lib/services/email.service";
 
 // ============================================================================
 // POST /api/users/bulk-email - Send bulk email to users
@@ -88,10 +89,7 @@ export const POST = withRoleAndDB([
       try {
         // TODO: Implement actual email sending
         // This is a placeholder for email service integration
-        const emailData = {
-          to: targetUser.email,
-          subject: subject,
-          html: `
+        const html = `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h2 style="color: #333;">SmartStartPM Notification</h2>
                 <p>Dear ${targetUser.firstName} ${targetUser.lastName},</p>
@@ -108,8 +106,8 @@ export const POST = withRoleAndDB([
                   SmartStartPM Property Management System
                 </p>
               </div>
-            `,
-          text: `
+            `;
+        const text = `
 SmartStartPM Notification
 
 Dear ${targetUser.firstName} ${targetUser.lastName},
@@ -121,19 +119,18 @@ This message was sent by ${
           } via the SmartStartPM system.
 
 SmartStartPM Property Management System
-            `.trim(),
-        };
+            `.trim();
 
-        // Simulate email sending (replace with actual email service)
+        const sendResult = await emailService.sendEmail({
+          to: targetUser.email,
+          subject,
+          html,
+          text,
+        });
 
-        // In a real implementation, you would use a service like:
-        // - SMTP/Nodemailer
-        // - AWS SES
-        // - Resend
-        // etc.
-
-        // For now, we'll simulate success
-        await new Promise((resolve) => setTimeout(resolve, 100)); // Simulate API delay
+        if (!sendResult.success) {
+          throw new Error(sendResult.error || "SMTP send failed");
+        }
 
         results.sent++;
       } catch (emailError) {

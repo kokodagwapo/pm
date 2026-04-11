@@ -7,6 +7,8 @@ import { PropertyStatus } from "@/types";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -47,6 +49,9 @@ import {
   ExternalLink,
   Download,
   Clock,
+  Eye,
+  EyeOff,
+  Loader2,
 } from "lucide-react";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { unitService } from "@/lib/services/unit.service";
@@ -127,6 +132,11 @@ interface UnitDetails {
   }>;
   createdAt: string;
   updatedAt: string;
+
+  /** Decrypted for dashboard; never stored in Mongo as plain text. */
+  wifiSsid?: string;
+  wifiPassword?: string | null;
+  doorPasscode?: string | null;
 }
 
 interface PropertyInfo {
@@ -179,6 +189,15 @@ export default function UnitDetailsPage() {
   const [isUploadingDocs, setIsUploadingDocs] = useState(false);
   const [showDocUpload, setShowDocUpload] = useState(false);
 
+  const [accessWifiSsid, setAccessWifiSsid] = useState("");
+  const [accessWifiPassword, setAccessWifiPassword] = useState("");
+  const [accessDoorPasscode, setAccessDoorPasscode] = useState("");
+  const [accessWifiTouched, setAccessWifiTouched] = useState(false);
+  const [accessDoorTouched, setAccessDoorTouched] = useState(false);
+  const [showAccessWifiPass, setShowAccessWifiPass] = useState(false);
+  const [showAccessDoorPass, setShowAccessDoorPass] = useState(false);
+  const [accessSaving, setAccessSaving] = useState(false);
+
   useEffect(() => {
     if (!unitId || unitId === "undefined" || unitId === "null") {
       router.replace(`/dashboard/properties/${propertyId}`);
@@ -202,6 +221,15 @@ export default function UnitDetailsPage() {
         ? data.currentLeaseId.toString()
         : undefined;
       setUnit({ ...data, currentLeaseId: leaseId });
+      setAccessWifiSsid(typeof data.wifiSsid === "string" ? data.wifiSsid : "");
+      setAccessWifiPassword(
+        typeof data.wifiPassword === "string" ? data.wifiPassword : ""
+      );
+      setAccessDoorPasscode(
+        typeof data.doorPasscode === "string" ? data.doorPasscode : ""
+      );
+      setAccessWifiTouched(false);
+      setAccessDoorTouched(false);
       if (leaseId) {
         await fetchLeaseDetails(leaseId);
       } else {
@@ -256,6 +284,13 @@ export default function UnitDetailsPage() {
     if (!unit) return;
 
     try {
+      const { wifiPassword: _wp, doorPasscode: _dp, ...unitWithoutSecrets } =
+        unit as UnitDetails & {
+          wifiPassword?: string | null;
+          doorPasscode?: string | null;
+        };
+      void _wp;
+      void _dp;
       const response = await fetch(
         `/api/properties/${propertyId}/units/${unitId}`,
         {
@@ -264,7 +299,7 @@ export default function UnitDetailsPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            ...unit,
+            ...unitWithoutSecrets,
             status: newStatus,
           }),
         }
@@ -275,7 +310,19 @@ export default function UnitDetailsPage() {
       }
 
       const data = await response.json();
-      setUnit(data);
+      const leaseId = data?.currentLeaseId
+        ? data.currentLeaseId.toString()
+        : undefined;
+      setUnit({ ...data, currentLeaseId: leaseId });
+      setAccessWifiSsid(typeof data.wifiSsid === "string" ? data.wifiSsid : "");
+      setAccessWifiPassword(
+        typeof data.wifiPassword === "string" ? data.wifiPassword : ""
+      );
+      setAccessDoorPasscode(
+        typeof data.doorPasscode === "string" ? data.doorPasscode : ""
+      );
+      setAccessWifiTouched(false);
+      setAccessDoorTouched(false);
       toast.success(
         t("properties.unitDetails.toasts.statusUpdate.success", {
           values: { status: newStatus },
@@ -287,6 +334,58 @@ export default function UnitDetailsPage() {
           ? err.message
           : t("properties.unitDetails.toasts.statusUpdate.error")
       );
+    }
+  };
+
+  const saveUnitAccessCredentials = async () => {
+    if (!unit) return;
+    setAccessSaving(true);
+    try {
+      const payload: Record<string, string> = {
+        wifiSsid: accessWifiSsid.trim(),
+      };
+      if (accessWifiTouched) payload.wifiPassword = accessWifiPassword;
+      if (accessDoorTouched) payload.doorPasscode = accessDoorPasscode;
+
+      const response = await fetch(
+        `/api/properties/${propertyId}/units/${unitId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          typeof data.error === "string"
+            ? data.error
+            : t("properties.unitDetails.access.saveError")
+        );
+      }
+
+      const leaseId = data?.currentLeaseId
+        ? data.currentLeaseId.toString()
+        : undefined;
+      setUnit({ ...data, currentLeaseId: leaseId });
+      setAccessWifiPassword(
+        typeof data.wifiPassword === "string" ? data.wifiPassword : ""
+      );
+      setAccessDoorPasscode(
+        typeof data.doorPasscode === "string" ? data.doorPasscode : ""
+      );
+      setAccessWifiTouched(false);
+      setAccessDoorTouched(false);
+      toast.success(t("properties.unitDetails.access.saved"));
+    } catch (err) {
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : t("properties.unitDetails.access.saveError")
+      );
+    } finally {
+      setAccessSaving(false);
     }
   };
 
@@ -1187,6 +1286,115 @@ export default function UnitDetailsPage() {
         </TabsContent>
 
         <TabsContent value="tenant" className="space-y-6">
+          <Card>
+            <CardHeader className="text-left">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Shield className="h-5 w-5" />
+                {t("properties.unitDetails.access.title")}
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {t("properties.unitDetails.access.description")}
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4 text-left">
+              <div className="grid gap-2">
+                <Label htmlFor="unit-wifi-ssid">
+                  {t("properties.unitDetails.access.wifiSsid")}
+                </Label>
+                <Input
+                  id="unit-wifi-ssid"
+                  autoComplete="off"
+                  value={accessWifiSsid}
+                  onChange={(e) => setAccessWifiSsid(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="unit-wifi-password">
+                  {t("properties.unitDetails.access.wifiPassword")}
+                </Label>
+                <div className="relative flex gap-2">
+                  <Input
+                    id="unit-wifi-password"
+                    autoComplete="new-password"
+                    type={showAccessWifiPass ? "text" : "password"}
+                    value={accessWifiPassword}
+                    onChange={(e) => {
+                      setAccessWifiPassword(e.target.value);
+                      setAccessWifiTouched(true);
+                    }}
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-9 w-9 shrink-0"
+                    onClick={() => setShowAccessWifiPass((v) => !v)}
+                    aria-label={
+                      showAccessWifiPass ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showAccessWifiPass ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t("properties.unitDetails.access.hintPasswords")}
+                </p>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="unit-door-pass">
+                  {t("properties.unitDetails.access.doorPasscode")}
+                </Label>
+                <div className="relative flex gap-2">
+                  <Input
+                    id="unit-door-pass"
+                    autoComplete="off"
+                    type={showAccessDoorPass ? "text" : "password"}
+                    value={accessDoorPasscode}
+                    onChange={(e) => {
+                      setAccessDoorPasscode(e.target.value);
+                      setAccessDoorTouched(true);
+                    }}
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-9 w-9 shrink-0"
+                    onClick={() => setShowAccessDoorPass((v) => !v)}
+                    aria-label={
+                      showAccessDoorPass ? "Hide passcode" : "Show passcode"
+                    }
+                  >
+                    {showAccessDoorPass ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+              <Button
+                type="button"
+                onClick={saveUnitAccessCredentials}
+                disabled={accessSaving}
+                className="gap-2"
+              >
+                {accessSaving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : null}
+                {accessSaving
+                  ? t("properties.unitDetails.access.saving")
+                  : t("properties.unitDetails.access.save")}
+              </Button>
+            </CardContent>
+          </Card>
+
           {unit.status === PropertyStatus.OCCUPIED ? (
             <div className="grid gap-6 md:grid-cols-2">
               <Card>
