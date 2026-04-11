@@ -250,13 +250,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
       }
       transientRetryCountForFingerprint = Math.max(transientRetryCountForFingerprint, geTransientRetry.count);
 
-      const isTransient = transient;
-      const allowAutoRecover =
-        process.env.NODE_ENV === "development" ||
-        isBareEmptyErrorPayload(error) ||
-        isReplitHosted();
-
-      if (allowAutoRecover && isTransient) {
+      if (allowAutoRecover && transient) {
         let sessionTotal = 0;
         try {
           const raw = safeSessionGet(SESSION_TOTAL_KEY);
