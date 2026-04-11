@@ -61,13 +61,13 @@
 :root {
   --radius: 0.625rem;
 
-  /* Modern Minimalist - Light Mode */
+  /* Modern Minimalist - Light Mode (foreground: near-black for stronger body text) */
   --background: #fafafa;
-  --foreground: #18181b;
+  --foreground: #09090b;
   --card: #ffffff;
-  --card-foreground: #18181b;
+  --card-foreground: #09090b;
   --popover: #ffffff;
-  --popover-foreground: #18181b;
+  --popover-foreground: #09090b;
 
   /* Primary - Refined Indigo */
   --primary: #4f46e5;
@@ -77,11 +77,11 @@
 
   /* Neutral Palette */
   --secondary: #f4f4f5;
-  --secondary-foreground: #18181b;
+  --secondary-foreground: #09090b;
   --muted: #f4f4f5;
-  --muted-foreground: #71717a;
+  --muted-foreground: #3f3f46;
   --accent: #f4f4f5;
-  --accent-foreground: #18181b;
+  --accent-foreground: #09090b;
 
   /* Status Colors - Softer tones */
   --success: #10b981;
@@ -131,11 +131,11 @@
 
   /* Sidebar */
   --sidebar: #ffffff;
-  --sidebar-foreground: #18181b;
+  --sidebar-foreground: #09090b;
   --sidebar-primary: #4f46e5;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f4f4f5;
-  --sidebar-accent-foreground: #18181b;
+  --sidebar-accent-foreground: #09090b;
   --sidebar-border: #e4e4e7;
   --sidebar-ring: #4f46e5;
 }
