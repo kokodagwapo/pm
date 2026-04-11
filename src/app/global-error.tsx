@@ -2,150 +2,25 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { isReplitHosted } from "@/lib/replit-host";
+import {
+  MAX_AUTO_RETRIES,
+  MAX_SESSION_AUTO_RECOVERIES,
+  SESSION_TOTAL_KEY,
+  LAST_FP_KEY,
+  RETRY_COUNT_KEY,
+  geTransientRetry,
+  safeSessionGet,
+  safeSessionSet,
+  safeSessionRemove,
+  fingerprintError,
+  isBareEmptyErrorPayload,
+  isTransientDevError,
+  bumpSessionRecoveryTotal,
+} from "@/lib/global-error-logic";
 
 interface GlobalErrorProps {
   error?: Error & { digest?: string };
   reset?: () => void;
-}
-
-const MAX_AUTO_RETRIES = 3;
-const MAX_SESSION_AUTO_RECOVERIES = 12;
-const SESSION_TOTAL_KEY = "__smartstart_global_err_session_total";
-const LAST_FP_KEY = "__smartstart_ge_last_fp";
-const RETRY_COUNT_KEY = "__smartstart_ge_retry";
-
-/** In-memory fallback when sessionStorage is blocked (Replit iframe / private mode). */
-const geTransientRetry = { fingerprint: "", count: 0 };
-
-function safeSessionGet(key: string): string | null {
-  try {
-    if (typeof window === "undefined") return null;
-    return sessionStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function safeSessionSet(key: string, value: string): void {
-  try {
-    if (typeof window === "undefined") return;
-    sessionStorage.setItem(key, value);
-  } catch {
-    /* Replit / private mode / sandboxed iframe */
-  }
-}
-
-function safeSessionRemove(key: string): void {
-  try {
-    if (typeof window === "undefined") return;
-    sessionStorage.removeItem(key);
-  } catch {
-    /* ignore */
-  }
-}
-
-function fingerprintError(error: unknown): string {
-  try {
-    if (error == null) return "__null__";
-    if (typeof error !== "object") return `v:${String(error).slice(0, 160)}`;
-    const e = error as Record<string, unknown>;
-    const digest = e.digest;
-    if (digest != null && String(digest)) return `d:${String(digest)}`;
-    const message = e.message;
-    if (message != null && String(message)) return `m:${String(message).slice(0, 160)}`;
-    const keys = Object.keys(e).sort().join(",");
-    return keys ? `k:${keys}` : "__empty_object__";
-  } catch {
-    return "__fp_error__";
-  }
-}
-
-function safeLower(s: unknown): string {
-  try {
-    if (s == null) return "";
-    const t = typeof s === "string" ? s : String(s);
-    return t.toLowerCase();
-  } catch {
-    return "";
-  }
-}
-
-/**
- * Next.js may pass `undefined` or `{}` to the root error boundary during transient
- * failures (chunk load timing, Replit, etc.). Without this, production skips
- * auto-recovery because it is not `development`.
- */
-function isBareEmptyErrorPayload(error: unknown): boolean {
-  if (error == null) return true;
-  if (typeof error === "object" && error !== null && Object.keys(error as object).length === 0) {
-    return true;
-  }
-  return false;
-}
-
-function isTransientDevError(error: unknown): boolean {
-  try {
-    if (error == null) return true;
-
-    // Empty error objects are almost always transient issues
-    if (typeof error === "object" && error !== null && Object.keys(error as object).length === 0) {
-      return true;
-    }
-
-    const msg = safeLower(
-      typeof error === "object" && error !== null && "message" in error
-        ? (error as { message?: unknown }).message
-        : undefined
-    );
-    const stack = safeLower(
-      typeof error === "object" && error !== null && "stack" in error
-        ? (error as { stack?: unknown }).stack
-        : undefined
-    );
-
-    if (stack) {
-      if (stack.includes("options.factory")) return true;
-      if (stack.includes("webpack_require")) return true;
-      if (stack.includes("webpack") && msg.includes("reading 'call'")) return true;
-      if (stack.includes("chunkloaderror")) return true;
-      if (stack.includes("loading chunk")) return true;
-      if (stack.includes("hydration")) return true;
-      if (stack.includes("mismatch")) return true;
-    }
-
-    if (msg) {
-      if (
-        msg.includes("cannot read properties of undefined") &&
-        (msg.includes("reading 'call'") || msg.includes("'call'"))
-      ) {
-        return true;
-      }
-      if (msg.includes("hydration")) return true;
-      if (msg.includes("server rendered html")) return true;
-      if (msg.includes("text content does not match")) return true;
-      if (msg.includes("invalid hook call")) return true;
-      if (msg.includes("minified react error")) return true;
-      if (msg.includes("$refreshreg$")) return true;
-      if (msg.includes("dynamically imported module")) return true;
-      if (msg.includes("failed to fetch dynamically imported module")) return true;
-      if (msg.includes("sessionStorage")) return true;
-    }
-
-    return false;
-  } catch {
-    return true;
-  }
-}
-
-function bumpSessionRecoveryTotal(): number {
-  try {
-    const raw = safeSessionGet(SESSION_TOTAL_KEY);
-    const n = parseInt(raw || "0", 10) + 1;
-    safeSessionSet(SESSION_TOTAL_KEY, String(n));
-    return n;
-  } catch {
-    return MAX_SESSION_AUTO_RECOVERIES;
-  }
 }
 
 /** Inline icons only — avoid importing lucide (chunk load failures would break this page). */
@@ -201,7 +76,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   const [showUI, setShowUI] = useState(false);
   const resetRef = useRef(reset);
   resetRef.current = reset;
-  /** Fast-path retries for empty payloads (no sessionStorage yet — avoids noisy stack traces). */
+  /** Fast-path retries for empty payloads (before sessionStorage). */
   const fastEmptyRecoveryRef = useRef(0);
 
   useEffect(() => {
@@ -212,7 +87,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
         isBareEmptyErrorPayload(error) ||
         isReplitHosted();
 
-      // Immediate recovery for empty/unknown payloads on Replit or dev: reset before touching sessionStorage.
+      // Empty / unknown boundary payloads: reset immediately (no sessionStorage, no microtask).
       if (
         allowAutoRecover &&
         transient &&
@@ -220,13 +95,11 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
         fastEmptyRecoveryRef.current < MAX_AUTO_RETRIES
       ) {
         fastEmptyRecoveryRef.current += 1;
-        queueMicrotask(() => {
-          try {
-            resetRef.current?.();
-          } catch {
-            setShowUI(true);
-          }
-        });
+        try {
+          resetRef.current?.();
+        } catch {
+          setShowUI(true);
+        }
         return;
       }
 
