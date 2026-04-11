@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { isReplitHosted } from "@/lib/replit-host";
 
 interface GlobalErrorProps {
   error?: Error & { digest?: string };
@@ -82,21 +83,6 @@ function isBareEmptyErrorPayload(error: unknown): boolean {
   return false;
 }
 
-/** Replit preview/deploy hosts — same transient issues as local dev (chunks, timing). */
-function isReplitHosted(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    const h = window.location.hostname;
-    return (
-      h.endsWith(".replit.dev") ||
-      h.endsWith(".replit.app") ||
-      h.endsWith(".repl.co")
-    );
-  } catch {
-    return false;
-  }
-}
-
 function isTransientDevError(error: unknown): boolean {
   try {
     if (error == null) return true;
@@ -128,6 +114,12 @@ function isTransientDevError(error: unknown): boolean {
     }
 
     if (msg) {
+      if (
+        msg.includes("cannot read properties of undefined") &&
+        (msg.includes("reading 'call'") || msg.includes("'call'"))
+      ) {
+        return true;
+      }
       if (msg.includes("hydration")) return true;
       if (msg.includes("server rendered html")) return true;
       if (msg.includes("text content does not match")) return true;

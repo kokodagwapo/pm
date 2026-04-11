@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { isReplitHosted } from "@/lib/replit-host";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -165,7 +166,10 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
       msg.includes("minified react error") ||
       msg.includes("$refreshreg$");
 
-    if (process.env.NODE_ENV === "development" && isTransientDevError) {
+    const allowTransientRecovery =
+      process.env.NODE_ENV === "development" || isReplitHosted();
+
+    if (allowTransientRecovery && isTransientDevError) {
       const sessionTotal = parseInt(
         typeof window !== "undefined"
           ? sessionStorage.getItem(SESSION_SEGMENT_ERR_KEY) || "0"

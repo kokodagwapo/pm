@@ -147,7 +147,7 @@ const nextConfig: NextConfig = {
           raw: true,
           entryOnly: false,
           include: /webpack|main-app|app-pages/,
-          banner: `(function(){if(typeof window==='undefined'||window.__wpErrGuard)return;window.__wpErrGuard=true;window.addEventListener('error',function(e){var err=e&&e.error;if(err){var s=String(err.stack||'');if(s.indexOf('options.factory')!==-1||s.indexOf('webpack_require')!==-1){e.preventDefault();e.stopImmediatePropagation();return false;}}},true);window.addEventListener('unhandledrejection',function(e){var r=e&&e.reason;if(r){var s=String(r.stack||'');if(s.indexOf('options.factory')!==-1||s.indexOf('webpack_require')!==-1){e.preventDefault();}}});})();`,
+          banner: `(function(){if(typeof window==='undefined'||window.__wpErrGuard)return;window.__wpErrGuard=true;function shouldHandle(err){if(!err)return false;var s=String(err.stack||'');var m=String(err.message||'');if(s.indexOf('options.factory')!==-1)return true;if(s.indexOf('webpack_require')!==-1)return true;if(m.indexOf("reading 'call'")!==-1&&m.indexOf('undefined')!==-1)return true;return false;}function bumpReload(){try{var k='__wp_chunk_reload';var n=parseInt(sessionStorage.getItem(k)||'0',10);if(n<2){sessionStorage.setItem(k,String(n+1));location.reload();}}catch(_){}}window.addEventListener('error',function(e){var err=e&&e.error;if(shouldHandle(err)){e.preventDefault();e.stopImmediatePropagation();bumpReload();return false;}},true);window.addEventListener('unhandledrejection',function(e){var r=e&&e.reason;if(shouldHandle(r)){e.preventDefault();bumpReload();}});})();`,
         })
       );
     }
