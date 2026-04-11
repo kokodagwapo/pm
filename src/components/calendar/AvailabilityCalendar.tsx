@@ -102,14 +102,14 @@ const BLOCK_TYPE_LABELS: Record<string, string> = {
   seasonal_closure: "Seasonal Closure",
 };
 
-/** High-contrast cells on light dashboard (avoids `dark:` when html.dark + dashboard-light) */
+/** High-contrast cells on light dashboard + landing (blue type for readability) */
 const STATUS_COLORS_LIGHT: Record<DayStatus, string> = {
   available:
-    "bg-emerald-100 text-emerald-900 hover:bg-emerald-200",
+    "border border-emerald-200/80 bg-emerald-50 text-blue-950 hover:bg-emerald-100/90",
   blocked: "bg-red-100 text-red-900",
-  booked: "bg-sky-100 text-sky-900",
+  booked: "bg-sky-100 text-blue-950",
   pending: "bg-amber-100 text-amber-950",
-  past: "bg-slate-100 text-slate-500",
+  past: "bg-slate-100 text-blue-800/70",
 };
 
 /** Immersive / video dashboard: translucent cells (do not rely on `dark:` — html may stay light). */
@@ -181,13 +181,14 @@ export function AvailabilityCalendar({
   selectionMode = "drag",
 }: AvailabilityCalendarProps) {
   const dash = useOptionalDashboardAppearance();
-  const isLight = dash?.isLight ?? false;
+  /** Default light when no provider (e.g. property landing) — avoids glass + pale text on cream backgrounds */
+  const isLight = dash?.isLight ?? true;
   const statusColors = isLight ? STATUS_COLORS_LIGHT : STATUS_COLORS_GLASS;
 
   const glassOutlineBtn =
     "rounded-xl border border-white/18 bg-white/[0.08] shadow-none backdrop-blur-sm transition-[background-color,border-color] hover:bg-white/[0.12]";
   const glassOutlineBtnLight =
-    "rounded-xl border border-slate-200/80 bg-white/75 shadow-sm backdrop-blur-sm hover:bg-white/90";
+    "rounded-xl border border-blue-200/80 bg-white/90 text-blue-950 shadow-sm backdrop-blur-sm hover:bg-white hover:border-blue-300/90";
 
   const today = useMemo(() => {
     const d = new Date();
@@ -448,7 +449,7 @@ export function AvailabilityCalendar({
           <h3
             className={cn(
               "mb-3 text-center text-base font-semibold",
-              isLight ? "text-slate-900" : "text-white"
+              isLight ? "text-blue-950" : "text-white"
             )}
           >
             {monthName}
@@ -468,7 +469,7 @@ export function AvailabilityCalendar({
               key={header}
               className={cn(
                 "py-1 text-center text-[11px] font-semibold uppercase tracking-wider",
-                isLight ? "text-slate-500" : "text-white/55"
+                isLight ? "text-blue-800" : "text-white/55"
               )}
             >
               {header}
@@ -525,11 +526,11 @@ export function AvailabilityCalendar({
                 statusColors[status],
                 selected &&
                   (isLight
-                    ? "z-[1] ring-2 ring-sky-500 ring-offset-2 ring-offset-white"
+                    ? "z-[1] ring-2 ring-blue-600 ring-offset-2 ring-offset-white"
                     : "z-[1] ring-2 ring-cyan-300/70 ring-offset-2 ring-offset-transparent"),
                 isToday &&
                   !selected &&
-                  (isLight ? "ring-1 ring-sky-400/60" : "ring-1 ring-white/35"),
+                  (isLight ? "ring-1 ring-blue-400/70" : "ring-1 ring-white/35"),
                 status === "available" && !readOnly && "cursor-pointer",
                 (status === "past" || readOnly) && "cursor-default",
                 status !== "past" && status !== "available" && "cursor-default"
@@ -548,7 +549,7 @@ export function AvailabilityCalendar({
                   className={cn(
                     "max-w-full truncate px-0.5 font-medium leading-none tabular-nums",
                     daySize === "comfortable" ? "text-[11px]" : "text-[10px]",
-                    isLight ? "text-slate-600" : "text-cyan-100/85"
+                    isLight ? "text-blue-800" : "text-cyan-100/85"
                   )}
                 >
                   ${dayInfo.pricePerNight.toFixed(0)}
@@ -717,7 +718,7 @@ export function AvailabilityCalendar({
             <h2
               className={cn(
                 "min-w-0 flex-1 truncate text-center text-lg font-semibold tracking-tight sm:text-xl",
-                isLight ? "text-slate-900" : "text-white"
+                isLight ? "text-blue-950" : "text-white"
               )}
             >
               {centerMonthLabel}
@@ -752,7 +753,7 @@ export function AvailabilityCalendar({
               className={cn(
                 "text-xs font-medium backdrop-blur-sm",
                 isLight
-                  ? "border-slate-200/80 bg-white/70"
+                  ? "border-blue-200/80 bg-white/90 text-blue-950"
                   : "border-white/20 bg-white/[0.06] text-white"
               )}
             >
@@ -836,7 +837,7 @@ export function AvailabilityCalendar({
           className={cn(
             "flex flex-wrap items-center gap-3 rounded-xl border px-3 py-2.5 text-xs backdrop-blur-sm sm:gap-4",
             isLight
-              ? "border-slate-200/80 bg-white/50 text-slate-600"
+              ? "border-blue-200/60 bg-blue-50/40 text-blue-900"
               : "border-white/[0.1] bg-white/[0.05] text-white/65"
           )}
         >
