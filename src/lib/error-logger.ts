@@ -10,6 +10,16 @@ export enum ErrorSeverity {
   CRITICAL = "critical",
 }
 
+function safeErrorMessage(error: Error): string {
+  try {
+    const m = (error as { message?: unknown }).message;
+    if (m == null) return "";
+    return String(m);
+  } catch {
+    return "";
+  }
+}
+
 export enum ErrorCategory {
   AUTHENTICATION = "authentication",
   AUTHORIZATION = "authorization",
@@ -106,7 +116,7 @@ class ErrorLogger {
   private categorizeError(error: Error, providedCategory?: ErrorCategory): ErrorCategory {
     if (providedCategory) return providedCategory;
 
-    const message = error.message.toLowerCase();
+    const message = safeErrorMessage(error).toLowerCase();
 
     if (message.includes("unauthorized") || message.includes("authentication")) {
       return ErrorCategory.AUTHENTICATION;
@@ -162,7 +172,7 @@ class ErrorLogger {
     }
 
     // Check error message for severity indicators
-    const message = error.message.toLowerCase();
+    const message = safeErrorMessage(error).toLowerCase();
     if (message.includes("critical") || message.includes("fatal")) {
       return ErrorSeverity.CRITICAL;
     }
@@ -212,7 +222,7 @@ class ErrorLogger {
 
     const loggedError: LoggedError = {
       id: this.generateErrorId(),
-      message: error.message,
+      message: safeErrorMessage(error) || "(no message)",
       stack: error.stack,
       category: errorCategory,
       severity: errorSeverity,
@@ -227,7 +237,7 @@ class ErrorLogger {
     // Log to console in development
     if (process.env.NODE_ENV === "development") {
       console.group(`🔴 Error [${errorSeverity.toUpperCase()}] - ${errorCategory}`);
-      console.error("Message:", error.message);
+      console.error("Message:", safeErrorMessage(error) || "(no message)");
       console.error("Stack:", error.stack);
       console.error("Context:", errorContext);
       if (metadata) console.error("Metadata:", metadata);

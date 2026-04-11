@@ -69,6 +69,19 @@ function safeLower(s: unknown): string {
   }
 }
 
+/**
+ * Next.js may pass `undefined` or `{}` to the root error boundary during transient
+ * failures (chunk load timing, Replit, etc.). Without this, production skips
+ * auto-recovery because it is not `development`.
+ */
+function isBareEmptyErrorPayload(error: unknown): boolean {
+  if (error == null) return true;
+  if (typeof error === "object" && error !== null && Object.keys(error as object).length === 0) {
+    return true;
+  }
+  return false;
+}
+
 function isTransientDevError(error: unknown): boolean {
   try {
     if (error == null) return true;
@@ -206,8 +219,10 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
 
       const isTransient = isTransientDevError(error);
       const isDev = process.env.NODE_ENV === "development";
+      const allowAutoRecover =
+        isDev || isBareEmptyErrorPayload(error);
 
-      if (isDev && isTransient) {
+      if (allowAutoRecover && isTransient) {
         let sessionTotal = 0;
         try {
           const raw = safeSessionGet(SESSION_TOTAL_KEY);
