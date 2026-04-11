@@ -82,6 +82,21 @@ function isBareEmptyErrorPayload(error: unknown): boolean {
   return false;
 }
 
+/** Replit preview/deploy hosts — same transient issues as local dev (chunks, timing). */
+function isReplitHosted(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const h = window.location.hostname;
+    return (
+      h.endsWith(".replit.dev") ||
+      h.endsWith(".replit.app") ||
+      h.endsWith(".repl.co")
+    );
+  } catch {
+    return false;
+  }
+}
+
 function isTransientDevError(error: unknown): boolean {
   try {
     if (error == null) return true;
@@ -194,9 +209,35 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   const [showUI, setShowUI] = useState(false);
   const resetRef = useRef(reset);
   resetRef.current = reset;
+  /** Fast-path retries for empty payloads (no sessionStorage yet — avoids noisy stack traces). */
+  const fastEmptyRecoveryRef = useRef(0);
 
   useEffect(() => {
     try {
+      const transient = isTransientDevError(error);
+      const allowAutoRecover =
+        process.env.NODE_ENV === "development" ||
+        isBareEmptyErrorPayload(error) ||
+        isReplitHosted();
+
+      // Immediate recovery for empty/unknown payloads on Replit or dev: reset before touching sessionStorage.
+      if (
+        allowAutoRecover &&
+        transient &&
+        isBareEmptyErrorPayload(error) &&
+        fastEmptyRecoveryRef.current < MAX_AUTO_RETRIES
+      ) {
+        fastEmptyRecoveryRef.current += 1;
+        queueMicrotask(() => {
+          try {
+            resetRef.current?.();
+          } catch {
+            setShowUI(true);
+          }
+        });
+        return;
+      }
+
       const fp = fingerprintError(error);
       if (fp !== geTransientRetry.fingerprint) {
         geTransientRetry.fingerprint = fp;
@@ -217,10 +258,11 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
       }
       transientRetryCountForFingerprint = Math.max(transientRetryCountForFingerprint, geTransientRetry.count);
 
-      const isTransient = isTransientDevError(error);
-      const isDev = process.env.NODE_ENV === "development";
+      const isTransient = transient;
       const allowAutoRecover =
-        isDev || isBareEmptyErrorPayload(error);
+        process.env.NODE_ENV === "development" ||
+        isBareEmptyErrorPayload(error) ||
+        isReplitHosted();
 
       if (allowAutoRecover && isTransient) {
         let sessionTotal = 0;
