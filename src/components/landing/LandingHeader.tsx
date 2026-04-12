@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { useLandingTheme } from "@/components/landing/LandingThemeProvider";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Lock } from "lucide-react";
 
 const HEADER_H = 48; // px — single source of truth
 const NAV_BG_SELECTOR = "[data-landing-nav-bg]";
@@ -17,6 +17,14 @@ const HOME_NAV = [
   { href: "#why", key: "landing.home.nav.why" as const },
   { href: "#connect", key: "landing.home.nav.connect" as const },
   { href: "#migrate", key: "landing.home.nav.migrate" as const },
+] as const;
+
+const RENTALS_NAV = [
+  { href: "/#homepage", label: "Homepage", teal: false },
+  { href: "/about", label: "About Us", teal: false },
+  { href: "/things-to-do", label: "Things to Do", teal: false },
+  { href: "/contact", label: "Contact", teal: false },
+  { href: "/rentals", label: "Search Properties", teal: true },
 ] as const;
 
 function probeNavBandDark(): boolean {
@@ -43,9 +51,10 @@ export function LandingHeader() {
   const [navBandDark, setNavBandDark] = useState(true);
 
   const isHome = pathname === "/";
+  const isRentals = pathname?.startsWith("/rentals") ?? false;
   const isLight =
     (isHome && theme === "light") ||
-    pathname?.startsWith("/rentals") ||
+    isRentals ||
     pathname?.startsWith("/properties") ||
     pathname?.startsWith("/all-in-one-calendar") ||
     pathname?.startsWith("/contact");
@@ -82,11 +91,13 @@ export function LandingHeader() {
     };
   }, [open]);
 
-  const headerBg = !isLight
-    ? "border-b border-white/10 bg-slate-950/25 backdrop-blur-md"
-    : overDarkBg
-      ? "border-b border-white/15 bg-black/[0.12] backdrop-blur-md supports-[backdrop-filter]:bg-black/10"
-      : "border-b border-slate-200/25 bg-white/[0.06] backdrop-blur-md supports-[backdrop-filter]:bg-white/[0.05]";
+  const headerBg = isRentals
+    ? "border-b border-slate-100 bg-white"
+    : !isLight
+      ? "border-b border-white/10 bg-slate-950/25 backdrop-blur-md"
+      : overDarkBg
+        ? "border-b border-white/15 bg-black/[0.12] backdrop-blur-md supports-[backdrop-filter]:bg-black/10"
+        : "border-b border-slate-200/25 bg-white/[0.06] backdrop-blur-md supports-[backdrop-filter]:bg-white/[0.05]";
 
   const linkClass = () => {
     if (!isLight) {
@@ -98,8 +109,11 @@ export function LandingHeader() {
     return `hidden lg:inline px-2 py-1 text-[13px] font-medium tracking-wide text-slate-900 transition-opacity touch-manipulation hover:opacity-70`;
   };
 
-  const logoSrc =
-    !isLight || (isLight && overDarkBg) ? "/images/logo-dark.svg" : "/images/logo-light.svg";
+  const logoSrc = isRentals
+    ? "/images/logo-light.svg"
+    : !isLight || (isLight && overDarkBg)
+      ? "/images/logo-dark.svg"
+      : "/images/logo-light.svg";
 
   const logoShadow = !isLight
     ? "drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]"
@@ -147,6 +161,26 @@ export function LandingHeader() {
                 <Link href="/auth/signin" className={linkClass()}>
                   {t("landing.cta.portal")}
                 </Link>
+              </nav>
+            </div>
+          ) : isRentals ? (
+            <div className="hidden min-w-0 flex-1 justify-center px-2 lg:flex">
+              <nav
+                className="flex max-w-full items-center gap-1 overflow-x-auto whitespace-nowrap xl:gap-5 [&::-webkit-scrollbar]:hidden"
+                style={{ scrollbarWidth: "none" }}
+                aria-label="Rentals navigation"
+              >
+                {RENTALS_NAV.map(({ href, label, teal }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`hidden lg:inline px-2 py-1 text-[13px] font-medium tracking-wide transition-opacity touch-manipulation hover:opacity-70 ${
+                      teal ? "text-[#0ABAB5]" : "text-slate-900"
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                ))}
               </nav>
             </div>
           ) : (
@@ -202,20 +236,38 @@ export function LandingHeader() {
               />
             </button>
 
-            <Link
-              href="/auth/signin"
-              className={`hidden h-8 items-center px-2 text-[12px] transition-opacity touch-manipulation sm:flex ${
-                isHome ? "lg:hidden" : ""
-              } ${
-                isLight
-                  ? overDarkBg
-                    ? "font-medium text-white/95 hover:opacity-85"
-                    : "font-medium text-slate-900 hover:opacity-75"
-                  : "font-medium text-white/90 hover:opacity-90"
-              }`}
-            >
-              {t("landing.cta.portal")}
-            </Link>
+            {isRentals ? (
+              <>
+                <Link
+                  href="/auth/signin"
+                  className="hidden h-8 items-center gap-1 px-2 text-[12px] font-medium text-slate-800 transition-opacity touch-manipulation hover:opacity-70 sm:flex"
+                >
+                  <Lock className="h-3.5 w-3.5" strokeWidth={2} />
+                  Login
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="hidden h-8 items-center px-2 text-[12px] font-medium text-slate-800 transition-opacity touch-manipulation hover:opacity-70 sm:flex"
+                >
+                  + Sign Up
+                </Link>
+              </>
+            ) : (
+              <Link
+                href="/auth/signin"
+                className={`hidden h-8 items-center px-2 text-[12px] transition-opacity touch-manipulation sm:flex ${
+                  isHome ? "lg:hidden" : ""
+                } ${
+                  isLight
+                    ? overDarkBg
+                      ? "font-medium text-white/95 hover:opacity-85"
+                      : "font-medium text-slate-900 hover:opacity-75"
+                    : "font-medium text-white/90 hover:opacity-90"
+                }`}
+              >
+                {t("landing.cta.portal")}
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -262,6 +314,23 @@ export function LandingHeader() {
                 <div className={`my-1 border-t ${isLight ? "border-slate-100" : "border-white/8"}`} />
               </>
             )}
+            {isRentals && (
+              <>
+                {RENTALS_NAV.map(({ href, label, teal }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setOpen(false)}
+                    className="flex h-11 items-center justify-between rounded-xl px-3 text-[14px] transition-all touch-manipulation hover:bg-slate-50"
+                    style={{ fontWeight: 500, color: teal ? "#0ABAB5" : "#1e293b" }}
+                  >
+                    {label}
+                    <span className="text-xs text-slate-400">→</span>
+                  </Link>
+                ))}
+                <div className="my-1 border-t border-slate-100" />
+              </>
+            )}
             {isHome && (
               <button
                 type="button"
@@ -287,17 +356,38 @@ export function LandingHeader() {
               <LanguageSwitcher variant={isLight ? "light" : "dark"} align="right" ghost={false} />
             </div>
             <div className={`my-1 border-t ${isLight ? "border-slate-100" : "border-white/8"}`} />
-            <Link
-              href="/auth/signin"
-              onClick={() => setOpen(false)}
-              className={`flex h-11 items-center justify-between rounded-xl px-3 text-[14px] transition-all touch-manipulation ${
-                isLight ? "text-slate-900 hover:bg-slate-50" : "text-white hover:bg-white/8"
-              }`}
-              style={{ fontWeight: 500 }}
-            >
-              {t("landing.cta.signin")}
-              <span className={`text-xs ${isLight ? "text-slate-400" : "text-white/30"}`}>→</span>
-            </Link>
+            {isRentals ? (
+              <>
+                <Link
+                  href="/auth/signin"
+                  onClick={() => setOpen(false)}
+                  className="flex h-11 items-center gap-2 rounded-xl px-3 text-[14px] font-medium text-slate-800 transition-all touch-manipulation hover:bg-slate-50"
+                >
+                  <Lock className="h-4 w-4" strokeWidth={2} />
+                  Login
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  onClick={() => setOpen(false)}
+                  className="flex h-11 items-center justify-between rounded-xl px-3 text-[14px] font-medium text-slate-800 transition-all touch-manipulation hover:bg-slate-50"
+                >
+                  + Sign Up
+                  <span className="text-xs text-slate-400">→</span>
+                </Link>
+              </>
+            ) : (
+              <Link
+                href="/auth/signin"
+                onClick={() => setOpen(false)}
+                className={`flex h-11 items-center justify-between rounded-xl px-3 text-[14px] transition-all touch-manipulation ${
+                  isLight ? "text-slate-900 hover:bg-slate-50" : "text-white hover:bg-white/8"
+                }`}
+                style={{ fontWeight: 500 }}
+              >
+                {t("landing.cta.signin")}
+                <span className={`text-xs ${isLight ? "text-slate-400" : "text-white/30"}`}>→</span>
+              </Link>
+            )}
           </nav>
         </div>
       </div>
