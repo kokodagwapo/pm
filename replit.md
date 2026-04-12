@@ -53,6 +53,8 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 
 ## Local Development (Cursor + Docker)
 - **Docker**: `docker-compose.dev.yml` runs MongoDB 7 on port 27017
+- **Where data is stored**: MongoDB database from `MONGODB_URI` (e.g. `SmartStartPM`). Rental/property documents are in the **`properties`** collection (plus `users`, `leases`, etc.). Imports from vms-florida.com use `importSource: "vms-florida.com"` and `importListingUrl`.
+- **Import VMS Florida listings** (optional): `npm run docker:mongo`, set `ENABLE_DEMO_AUTH=true` and `MONGODB_URI` in `.env.local`, run `npm run seed:demo`, then `npm run migrate:vms` (35 listings from advanced search). For Replit/Atlas, set `MONGODB_URI` in Secrets instead of localhost.
 - **Env vars**: Copy `.env.local.example` to `.env.local` and fill in values
 - **Quick start**: `npm run setup:local` (starts Docker MongoDB + seeds data), then `npm run dev:local` (port 3000)
 - **Scripts**: `npm run docker:up`, `docker:down`, `docker:logs` for container management

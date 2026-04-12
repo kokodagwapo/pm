@@ -18,6 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  ChevronUp,
+  SlidersHorizontal,
   Map,
   LayoutList,
   Home,
@@ -33,6 +35,8 @@ import {
   Users,
   Plus,
   Minus,
+  Building2,
+  DollarSign,
 } from "lucide-react";
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
@@ -43,6 +47,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   usePublicStaySearch,
   parseStayParamDate,
@@ -495,6 +506,7 @@ function RentalsContent() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
   const [listDrawerOpen, setListDrawerOpen] = useState(true);
+  const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
   const [stayCalMonths, setStayCalMonths] = useState(1);
   const [isLg, setIsLg] = useState(() =>
     typeof window !== "undefined"
@@ -625,7 +637,10 @@ function RentalsContent() {
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
-    const fn = () => setIsLg(mq.matches);
+    const fn = () => {
+      setIsLg(mq.matches);
+      if (mq.matches) setMoreFiltersOpen(true);
+    };
     fn();
     mq.addEventListener("change", fn);
     return () => mq.removeEventListener("change", fn);
@@ -883,322 +898,359 @@ function RentalsContent() {
       <LandingHeader />
 
       <div className="pt-[48px] flex flex-col flex-1">
-        {/* Sticky filter bar — modern, organized layout */}
-        <div className="bg-white/95 backdrop-blur-sm border-b border-slate-200/60 sticky top-[48px] z-30 shadow-sm">
-          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 space-y-4">
-            {/* Row 1: Search (hero) + View toggle + Actions */}
-            <div className="flex items-center gap-3">
-              <div className="relative flex-1 min-w-0">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                <input
-                  type="text"
-                  value={searchText}
-                  onChange={(e) => handleSearchInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-                      pushFilters({ search: searchText || undefined });
-                    }
-                  }}
-                  placeholder={t("rentals.search.placeholder")}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50/80 border border-slate-200/80 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/8 focus:border-slate-300 transition-all font-medium"
-                />
-              </div>
-              {hasActiveFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-xs font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700 hover:bg-slate-50 transition-all"
-                  title="Clear all filters"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{t("rentals.filters.reset")}</span>
-                </button>
-              )}
-              <div className="flex items-center gap-px bg-slate-100 rounded-lg overflow-hidden shrink-0">
-                <button
-                  onClick={() => setMobileView("list")}
-                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-all ${
-                    mobileView === "list" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/70"
-                  }`}
-                >
-                  <LayoutList className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t("rentals.view.list")}</span>
-                </button>
-                <button
-                  onClick={() => setMobileView("map")}
-                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-all ${
-                    mobileView === "map" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/70"
-                  }`}
-                >
-                  <Map className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t("rentals.view.map")}</span>
-                </button>
-              </div>
-              <div className="hidden lg:flex items-center gap-2 shrink-0">
+        {/* Sticky search — compact card, filters collapsible on small screens */}
+        <div className="sticky top-[48px] z-30 border-b border-slate-200/50 bg-[#f8f7f4]/90 backdrop-blur-md">
+          <div className="mx-auto max-w-[1600px] px-4 py-3 sm:px-6">
+            <div className="rounded-2xl border border-slate-200/70 bg-white px-3 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:px-4 sm:py-3.5">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <div className="relative min-w-0 flex-1 basis-[min(100%,18rem)]">
+                  <Search
+                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                    aria-hidden
+                  />
+                  <input
+                    type="text"
+                    value={searchText}
+                    onChange={(e) => handleSearchInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+                        pushFilters({ search: searchText || undefined });
+                      }
+                    }}
+                    placeholder={t("rentals.search.placeholder")}
+                    className="w-full rounded-xl border border-slate-200/90 bg-slate-50/40 py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900/5"
+                  />
+                </div>
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
+                    title="Clear all filters"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{t("rentals.filters.reset")}</span>
+                  </button>
+                )}
+                <div className="ml-auto flex shrink-0 items-center gap-1 rounded-xl border border-slate-200/80 bg-slate-50/40 p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setMobileView("list")}
+                    className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors sm:px-3 ${
+                      mobileView === "list"
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    <LayoutList className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t("rentals.view.list")}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobileView("map")}
+                    className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors sm:px-3 ${
+                      mobileView === "map"
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    <Map className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t("rentals.view.map")}</span>
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={() => setListDrawerOpen((v) => !v)}
-                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border transition-all ${
+                  className={`hidden h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition-colors lg:inline-flex ${
                     listDrawerOpen
-                      ? "bg-slate-900 text-white border-slate-900"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                      ? "border-slate-900 bg-slate-900 text-white"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                   }`}
                 >
-                  <LayoutList className="w-4 h-4" />
-                  {listDrawerOpen ? "Hide panel" : "Show panel"}
+                  <LayoutList className="h-3.5 w-3.5" />
+                  {listDrawerOpen ? "Hide list" : "List"}
                 </button>
               </div>
-            </div>
 
-            {/* Row 2: Filters — grouped, labeled, organized */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6 gap-3">
-              {/* Filter groups */}
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold hidden sm:inline">Type</span>
-                  <div className="flex items-center rounded-lg border border-slate-200/80 overflow-hidden bg-slate-50/50">
-                    {PROPERTY_TYPES.map((opt) => (
-                      <button
-                        key={opt.value || "all-types"}
-                        onClick={() => pushFilters({ type: opt.value || undefined })}
-                        className={`px-2.5 py-1.5 text-xs font-medium transition-all whitespace-nowrap ${
-                          activeType === opt.value
-                            ? "bg-slate-900 text-white"
-                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="h-4 w-px bg-slate-200 hidden sm:block" aria-hidden />
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold hidden sm:inline">Beds</span>
-                  <div className="flex items-center rounded-lg border border-slate-200/80 overflow-hidden bg-slate-50/50">
-                    {BEDROOMS_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value || "any-beds"}
-                        onClick={() => pushFilters({ bedrooms: opt.value || undefined })}
-                        className={`px-2.5 py-1.5 text-xs font-medium transition-all whitespace-nowrap ${
-                          activeBedrooms === opt.value
-                            ? "bg-slate-900 text-white"
-                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="h-4 w-px bg-slate-200 hidden sm:block" aria-hidden />
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold hidden sm:inline shrink-0">
-                    <Car className="inline h-3 w-3 -mt-0.5 mr-0.5 opacity-60" aria-hidden />
-                    Park
-                  </span>
-                  <div className="flex items-center rounded-lg border border-slate-200/80 overflow-hidden bg-slate-50/50 max-w-[min(100vw-8rem,520px)] overflow-x-auto scrollbar-hide">
-                    {PARKING_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value || "any-park"}
-                        onClick={() => pushFilters({ parkingType: opt.value || undefined })}
-                        className={`px-2 py-1.5 text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
-                          activeParkingType === opt.value
-                            ? "bg-slate-900 text-white"
-                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="h-4 w-px bg-slate-200 hidden sm:block" aria-hidden />
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold hidden sm:inline">Price</span>
-                  <div className="flex items-center gap-1.5">
-                    <input
-                      type="number"
-                      value={minPrice}
-                      onChange={(e) => setMinPrice(e.target.value)}
-                      onBlur={() => pushFilters({ minRent: minPrice || undefined })}
-                      onKeyDown={(e) => e.key === "Enter" && pushFilters({ minRent: minPrice || undefined })}
-                    placeholder="Min"
-                    className="w-16 sm:w-20 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200/80 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/8 transition-all"
-                    />
-                    <span className="text-slate-300 text-sm select-none font-light">–</span>
-                    <input
-                      type="number"
-                      value={maxPrice}
-                      onChange={(e) => setMaxPrice(e.target.value)}
-                      onBlur={() => pushFilters({ maxRent: maxPrice || undefined })}
-                      onKeyDown={(e) => e.key === "Enter" && pushFilters({ maxRent: maxPrice || undefined })}
-                      placeholder="Max"
-                      className="w-16 sm:w-20 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200/80 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/8 transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Saved + count */}
-              <div className="flex items-center gap-3 sm:ml-auto">
-                <button
-                  onClick={() => setShowFavoritesOnly((v) => !v)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
-                    showFavoritesOnly
-                      ? "bg-rose-500 text-white border-rose-500"
-                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-                  }`}
-                >
-                  <Heart className={`w-3.5 h-3.5 ${showFavoritesOnly ? "fill-current" : ""}`} />
-                  {t("rentals.filters.saved")}
-                  {favoriteIds.length > 0 && (
-                    <span className={`ml-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none ${showFavoritesOnly ? "bg-white/25 text-white" : "bg-rose-100 text-rose-600"}`}>
-                      {favoriteIds.length}
-                    </span>
-                  )}
-                </button>
-                {mapLoading ? (
-                  <span className="flex items-center gap-2 text-xs text-slate-400">
-                    <span className="w-3 h-3 rounded-full border-2 border-slate-300 border-t-transparent animate-spin" />
-                  </span>
+              <button
+                type="button"
+                onClick={() => setMoreFiltersOpen((v) => !v)}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 py-2 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50/80 lg:hidden"
+                aria-expanded={moreFiltersOpen}
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5 text-slate-400" />
+                {moreFiltersOpen ? "Hide filters" : "Filters & availability"}
+                {moreFiltersOpen ? (
+                  <ChevronUp className="h-3.5 w-3.5 text-slate-400" />
                 ) : (
-                  <span className="text-xs text-slate-500 whitespace-nowrap">
-                    <span className="font-semibold text-slate-700">{pagination.total}</span> {pagination.total === 1 ? t("rentals.results.property") : t("rentals.results.properties")}
-                  </span>
+                  <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
                 )}
-              </div>
-            </div>
+              </button>
 
-            {/* Row 3: Areas (neighborhoods) — horizontal scroll */}
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-0.5 -mx-1 px-1">
-              <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold shrink-0 hidden sm:inline">Area</span>
-              {NEIGHBORHOODS.map((n) => {
-                const isActive = n.value === "" ? !activeNeighborhood : activeNeighborhood === n.value;
-                return (
-                  <button
-                    key={n.value || "all-n"}
-                    onClick={() => handleNeighborhood(n.value)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
-                      isActive
-                        ? "bg-slate-900 text-white"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800"
-                    }`}
-                  >
-                    {n.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Stay search (Stayfinder) */}
-            <div className="flex flex-col gap-3 pt-1 border-t border-slate-200/60">
-              <div className="flex flex-wrap items-end gap-2 sm:gap-3">
-                <div className="min-w-[200px] flex-1 sm:flex-none sm:min-w-[240px]">
-                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block mb-1">
-                    Stay dates
-                  </span>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="h-10 w-full justify-start text-left font-normal border-slate-200 bg-white text-slate-900"
+              <div
+                className={`mt-3 space-y-3 border-t border-slate-100 pt-3 ${moreFiltersOpen ? "block" : "hidden lg:block"}`}
+              >
+                <div className="flex flex-nowrap items-stretch gap-2 overflow-x-auto pb-0.5 scrollbar-hide sm:gap-2.5 md:items-center md:gap-3">
+                  <div className="flex min-w-0 flex-1 flex-nowrap items-stretch gap-2 sm:gap-2.5 md:items-center md:gap-3">
+                    <div className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-2 shadow-sm">
+                      <Building2 className="size-3.5 shrink-0 text-slate-400" aria-hidden />
+                      <Select
+                        value={activeType || "__all"}
+                        onValueChange={(v) => pushFilters({ type: v === "__all" ? undefined : v })}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4 shrink-0 text-teal-600" />
-                        <span className="truncate text-sm">
-                          {checkIn && checkOut
-                            ? `${format(checkIn, "MMM d")} – ${format(checkOut, "MMM d, y")}`
-                            : checkIn
-                              ? `${format(checkIn, "MMM d, y")} → …`
-                              : "Select check-in / check-out"}
-                        </span>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="range"
-                        numberOfMonths={stayCalMonths}
-                        selected={rangeSelected}
-                        onSelect={(r) => {
-                          setCheckIn(r?.from);
-                          setCheckOut(r?.to);
-                        }}
-                        disabled={(d) =>
-                          d < new Date(new Date().setHours(0, 0, 0, 0))
+                        <SelectTrigger
+                          size="sm"
+                          aria-label="Property type"
+                          className="h-8 w-[7.25rem] border-0 bg-transparent px-1 shadow-none focus-visible:ring-0 sm:w-36"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PROPERTY_TYPES.map((opt) => (
+                            <SelectItem key={opt.value || "all-types"} value={opt.value || "__all"}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-2 shadow-sm">
+                      <Bed className="size-3.5 shrink-0 text-slate-400" aria-hidden />
+                      <Select
+                        value={activeBedrooms || "__all"}
+                        onValueChange={(v) => pushFilters({ bedrooms: v === "__all" ? undefined : v })}
+                      >
+                        <SelectTrigger
+                          size="sm"
+                          aria-label="Bedrooms"
+                          className="h-8 w-[6.5rem] border-0 bg-transparent px-1 shadow-none focus-visible:ring-0 sm:w-32"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {BEDROOMS_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value || "any-beds"} value={opt.value || "__all"}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-2 shadow-sm">
+                      <Car className="size-3.5 shrink-0 text-slate-400" aria-hidden />
+                      <Select
+                        value={activeParkingType || "__all"}
+                        onValueChange={(v) =>
+                          pushFilters({ parkingType: v === "__all" ? undefined : v })
                         }
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="w-full min-w-[140px] sm:w-40">
-                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block mb-1">
-                    Guests
-                  </span>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="h-10 w-full justify-between font-normal border-slate-200 bg-white text-slate-900"
                       >
-                        <span className="flex items-center gap-2 text-sm">
-                          <Users className="h-4 w-4 text-teal-600" />
-                          {guestLabel}
-                        </span>
-                        <ChevronDown className="h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-72 p-4" align="start">
-                      <RentalsGuestRow
-                        label="Adults"
-                        sub="Ages 13+"
-                        value={adults}
-                        min={1}
-                        onChange={setAdults}
-                      />
-                      <RentalsGuestRow
-                        label="Children"
-                        sub="Ages 2–12"
-                        value={children}
-                        min={0}
-                        onChange={setChildren}
-                      />
-                      <RentalsGuestRow
-                        label="Infants"
-                        sub="Under 2"
-                        value={infants}
-                        min={0}
-                        onChange={setInfants}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    className="h-10 rounded-xl bg-slate-900 text-white hover:bg-slate-800 px-4"
-                    disabled={searching || !checkIn || !checkOut}
-                    onClick={() => runAvailabilitySearch()}
-                  >
-                    {searching ? "Searching…" : "Check availability"}
-                  </Button>
-                  {(activeCheckIn || activeCheckOut) && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="h-10 border-slate-200"
-                      onClick={() => clearStayDatesFromUrl()}
+                        <SelectTrigger
+                          size="sm"
+                          aria-label="Parking"
+                          className="h-8 w-[5.75rem] border-0 bg-transparent px-1 shadow-none focus-visible:ring-0 sm:w-28"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PARKING_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value || "any-park"} value={opt.value || "__all"}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div
+                      className="flex h-9 shrink-0 items-center gap-1 rounded-lg border border-slate-200/90 bg-white px-2 shadow-sm"
+                      role="group"
+                      aria-label="Price per month"
                     >
-                      Clear dates
-                    </Button>
+                      <DollarSign className="size-3.5 shrink-0 text-slate-400" aria-hidden />
+                      <input
+                        type="number"
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(e.target.value)}
+                        onBlur={() => pushFilters({ minRent: minPrice || undefined })}
+                        onKeyDown={(e) => e.key === "Enter" && pushFilters({ minRent: minPrice || undefined })}
+                        placeholder="Min"
+                        className="h-7 w-14 border-0 bg-transparent p-0 text-xs text-slate-800 tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-0 sm:w-16"
+                      />
+                      <span className="text-[10px] text-slate-300">–</span>
+                      <input
+                        type="number"
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                        onBlur={() => pushFilters({ maxRent: maxPrice || undefined })}
+                        onKeyDown={(e) => e.key === "Enter" && pushFilters({ maxRent: maxPrice || undefined })}
+                        placeholder="Max"
+                        className="h-7 w-14 border-0 bg-transparent p-0 text-xs text-slate-800 tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-0 sm:w-16"
+                      />
+                    </div>
+
+                    <div className="flex h-9 min-w-0 shrink-0 flex-1 items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-2 shadow-sm sm:w-44 md:w-52 lg:w-60">
+                      <MapPin className="size-3.5 shrink-0 text-slate-400" aria-hidden />
+                      <Select
+                        value={activeNeighborhood || "__all"}
+                        onValueChange={(v) => handleNeighborhood(v === "__all" ? "" : v)}
+                      >
+                        <SelectTrigger
+                          size="sm"
+                          aria-label="Area"
+                          className="h-8 min-w-0 flex-1 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {NEIGHBORHOODS.map((n) => (
+                            <SelectItem key={n.value || "all-n"} value={n.value || "__all"}>
+                              {n.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-2 border-l border-slate-100 pl-2 sm:gap-3 sm:pl-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowFavoritesOnly((v) => !v)}
+                      aria-pressed={showFavoritesOnly}
+                      aria-label={`${t("rentals.filters.saved")} (${favoriteIds.length})`}
+                      className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-colors sm:px-3 ${
+                        showFavoritesOnly
+                          ? "border-rose-400 bg-rose-50 text-rose-700"
+                          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      <Heart className={`h-3.5 w-3.5 ${showFavoritesOnly ? "fill-current" : ""}`} />
+                      <span className="max-sm:sr-only">{t("rentals.filters.saved")}</span>
+                      {favoriteIds.length > 0 ? (
+                        <span className="tabular-nums text-slate-400">({favoriteIds.length})</span>
+                      ) : null}
+                    </button>
+                    {mapLoading ? (
+                      <span className="inline-flex h-9 items-center gap-2 text-xs text-slate-400">
+                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500" />
+                      </span>
+                    ) : (
+                      <p className="whitespace-nowrap text-[11px] text-slate-500 sm:text-xs">
+                        <span className="font-semibold text-slate-800">{pagination.total}</span>{" "}
+                        <span className="hidden sm:inline">
+                          {pagination.total === 1
+                            ? t("rentals.results.property")
+                            : t("rentals.results.properties")}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="rounded-xl bg-slate-50/70 px-3 py-3 sm:px-4">
+                  <p className="mb-2 text-[11px] font-medium text-slate-400">Stay</p>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+                    <div className="min-w-0 flex-1 sm:min-w-[220px] sm:max-w-xs">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="h-10 w-full justify-start border-slate-200/90 bg-white text-left font-normal text-slate-900 shadow-none hover:bg-slate-50"
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4 shrink-0 text-slate-500" />
+                            <span className="truncate text-sm">
+                              {checkIn && checkOut
+                                ? `${format(checkIn, "MMM d")} – ${format(checkOut, "MMM d, y")}`
+                                : checkIn
+                                  ? `${format(checkIn, "MMM d, y")} → …`
+                                  : "Check-in — Check-out"}
+                            </span>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="range"
+                            numberOfMonths={stayCalMonths}
+                            selected={rangeSelected}
+                            onSelect={(r) => {
+                              setCheckIn(r?.from);
+                              setCheckOut(r?.to);
+                            }}
+                            disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="w-full sm:w-40">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="h-10 w-full justify-between border-slate-200/90 bg-white font-normal text-slate-900 shadow-none hover:bg-slate-50"
+                          >
+                            <span className="flex items-center gap-2 text-sm">
+                              <Users className="h-4 w-4 text-slate-500" />
+                              {guestLabel}
+                            </span>
+                            <ChevronDown className="h-4 w-4 opacity-40" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-4" align="start">
+                          <RentalsGuestRow
+                            label="Adults"
+                            sub="Ages 13+"
+                            value={adults}
+                            min={1}
+                            onChange={setAdults}
+                          />
+                          <RentalsGuestRow
+                            label="Children"
+                            sub="Ages 2–12"
+                            value={children}
+                            min={0}
+                            onChange={setChildren}
+                          />
+                          <RentalsGuestRow
+                            label="Infants"
+                            sub="Under 2"
+                            value={infants}
+                            min={0}
+                            onChange={setInfants}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        className="h-10 rounded-xl bg-slate-900 px-4 text-white shadow-none hover:bg-slate-800"
+                        disabled={searching || !checkIn || !checkOut}
+                        onClick={() => runAvailabilitySearch()}
+                      >
+                        {searching ? "Searching…" : "Check availability"}
+                      </Button>
+                      {(activeCheckIn || activeCheckOut) && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="h-10 text-slate-600 hover:bg-white/80"
+                          onClick={() => clearStayDatesFromUrl()}
+                        >
+                          Clear dates
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  {filteredMode && (
+                    <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+                      Showing units available for your dates. Parking filter applies.
+                    </p>
                   )}
                 </div>
               </div>
-              {filteredMode && (
-                <p className="text-[11px] text-slate-500">
-                  Showing properties with at least one unit available for your dates (parking filter
-                  above applies).
-                </p>
-              )}
             </div>
           </div>
         </div>
