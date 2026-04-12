@@ -3,6 +3,8 @@
  * Handles authentication endpoints for the application
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { handlers } from "@/lib/auth";
 

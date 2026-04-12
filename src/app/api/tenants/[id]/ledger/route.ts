@@ -3,6 +3,8 @@
  * API endpoints for tenant ledger and financial history
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { tenantLedgerService } from "@/lib/services/tenant-ledger.service";

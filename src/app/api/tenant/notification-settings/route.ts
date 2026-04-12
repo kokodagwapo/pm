@@ -3,6 +3,8 @@
  * Handles CRUD operations for tenant notification preferences
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";

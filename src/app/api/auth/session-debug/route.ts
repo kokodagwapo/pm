@@ -3,6 +3,8 @@
  * Debug endpoint to check current session and user role
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { createSuccessResponse, createErrorResponse } from "@/lib/api-utils";

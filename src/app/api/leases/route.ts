@@ -3,6 +3,8 @@
  * CRUD operations for lease management
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { Lease, Property, User } from "@/models";
 import { UserRole, LeaseStatus } from "@/types";

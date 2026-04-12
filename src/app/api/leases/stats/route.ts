@@ -3,6 +3,8 @@
  * Get lease statistics and metrics
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { Lease } from "@/models";
 import { UserRole, LeaseStatus } from "@/types";

@@ -3,6 +3,8 @@
  * Handle image uploads to R2 for properties and other features
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import {

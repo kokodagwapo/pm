@@ -3,6 +3,8 @@
  * Handles Stripe webhook events for payment processing
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { constructWebhookEvent, handleWebhookEvent } from "@/lib/stripe";

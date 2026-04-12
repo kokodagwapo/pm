@@ -3,6 +3,8 @@
  * CRUD operations for payment management
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";

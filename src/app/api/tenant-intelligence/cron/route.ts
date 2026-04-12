@@ -16,6 +16,8 @@
  * to avoid repeat nightly notifications.
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { UserRole, PaymentStatus } from "@/types";
 import { verifyCronRequestOrAdmin } from "@/lib/cron-auth";

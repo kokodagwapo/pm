@@ -3,6 +3,8 @@
  * Handle session listing and bulk operations
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { UserRole } from "@/types";
 import {

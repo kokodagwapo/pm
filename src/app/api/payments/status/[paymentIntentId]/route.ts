@@ -3,6 +3,8 @@
  * Check Stripe payment intent status
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { Payment } from "@/models";

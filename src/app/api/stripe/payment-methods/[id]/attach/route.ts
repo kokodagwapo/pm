@@ -3,6 +3,8 @@
  * Attach payment methods to customers
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 

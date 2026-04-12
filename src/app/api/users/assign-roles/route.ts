@@ -3,6 +3,8 @@
  * Bulk role assignment with validation and audit logging
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { Role, User, AuditLog } from "@/models";
 import {

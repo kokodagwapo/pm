@@ -3,6 +3,8 @@
  * Exports dashboard data in various formats
  */
 
+export const dynamic = "force-dynamic";
+
 import {
   createSuccessResponse,
   handleApiError,

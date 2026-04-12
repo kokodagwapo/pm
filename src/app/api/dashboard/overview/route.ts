@@ -3,6 +3,8 @@
  * Aggregates cross-domain metrics for the manager/owner dashboard
  */
 
+export const dynamic = "force-dynamic";
+
 import {
   createSuccessResponse,
   handleApiError,

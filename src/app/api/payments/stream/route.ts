@@ -3,6 +3,8 @@
  * Server-Sent Events endpoint for real-time payment status updates
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 
 // Store active connections

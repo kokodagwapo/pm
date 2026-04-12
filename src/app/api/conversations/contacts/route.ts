@@ -3,6 +3,8 @@
  * Returns active users available to add to conversations
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import {
   withRoleAndDB,

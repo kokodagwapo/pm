@@ -3,6 +3,8 @@
  * Generate financial reports and analytics
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { Payment, Property, Lease } from "@/models";
 import { UserRole, PaymentStatus, PaymentType } from "@/types";

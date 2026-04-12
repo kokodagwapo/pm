@@ -3,6 +3,8 @@
  * Creates sample invoices for testing the tenant invoice history feature
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { Invoice, Property, User, Lease } from "@/models";
 import { UserRole, InvoiceStatus, InvoiceType } from "@/types";

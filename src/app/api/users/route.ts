@@ -3,6 +3,8 @@
  * Handle user-related operations with role-based access control
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { User, Role } from "@/models";

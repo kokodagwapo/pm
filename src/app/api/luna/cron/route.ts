@@ -14,6 +14,8 @@
  * to make it clear that scheduled execution is distinct from manual runs.
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { UserRole } from "@/types";

@@ -3,6 +3,8 @@
  * API endpoints for accessing and managing audit logs
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { withRoleAndDB } from "@/lib/api-utils";
 import { UserRole } from "@/types";

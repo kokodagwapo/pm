@@ -3,6 +3,8 @@
  * Send lease invoice PDFs via email
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { UserRole } from "@/types";
 import {

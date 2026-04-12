@@ -3,6 +3,8 @@
  * Generate comprehensive analytics and business intelligence data
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { Property, Lease, Payment, MaintenanceRequest } from "@/models";

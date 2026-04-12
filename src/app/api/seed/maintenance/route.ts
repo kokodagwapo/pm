@@ -3,6 +3,8 @@
  * Creates sample maintenance requests for testing
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { MaintenanceRequest, Property, Tenant, User } from "@/models";
 import { UserRole, MaintenancePriority, MaintenanceStatus } from "@/types";

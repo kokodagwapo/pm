@@ -32,7 +32,9 @@ fi
 
 pkill -f "next dev" 2>/dev/null || true
 sleep 1
-export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=3072"
+if [ -z "${REPLIT_DEPLOYMENT:-}" ]; then
+  export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=3072"
+fi
 
 if [ "${REPLIT_DEV_SERVER:-}" = "1" ]; then
   echo "REPLIT_DEV_SERVER=1 — Next dev on port $PORT (HMR; less stable on Replit)."

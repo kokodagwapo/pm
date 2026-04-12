@@ -9,6 +9,8 @@
  * to the NextAuth callback endpoint with proper CSRF token.
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 

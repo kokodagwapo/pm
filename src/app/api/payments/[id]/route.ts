@@ -3,6 +3,8 @@
  * CRUD operations for individual payments with Stripe integration
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { Payment, Tenant } from "@/models";
 import { UserRole, PaymentStatus } from "@/types";

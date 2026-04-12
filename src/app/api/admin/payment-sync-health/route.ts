@@ -3,6 +3,8 @@
  * Provides monitoring and health check endpoints for payment-lease synchronization
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { UserRole } from "@/types";

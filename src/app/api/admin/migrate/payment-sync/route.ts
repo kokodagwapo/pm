@@ -3,6 +3,8 @@
  * Safely execute payment synchronization enhancement migration
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { UserRole } from "@/types";
 import {

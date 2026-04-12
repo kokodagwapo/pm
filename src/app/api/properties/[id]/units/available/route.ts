@@ -3,6 +3,8 @@
  * Get available units for a specific property
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { Property } from "@/models";
 import { UserRole } from "@/types";

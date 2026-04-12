@@ -3,6 +3,8 @@
  * CRUD operations for custom roles and permissions
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { Role, User } from "@/models";
 import { UserRole, IRoleConfig } from "@/types";

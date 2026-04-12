@@ -3,6 +3,8 @@
  * Handle user registration with validation and role assignment
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { User } from "@/models";
 import { UserRole } from "@/types";

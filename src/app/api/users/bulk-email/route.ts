@@ -3,6 +3,8 @@
  * Send emails to multiple users
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { User } from "@/models";
 import { UserRole } from "@/types";

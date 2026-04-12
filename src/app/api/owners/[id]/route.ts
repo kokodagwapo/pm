@@ -3,6 +3,8 @@
  * Get, update, or delete a specific property owner
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { withRoleAndDB } from "@/lib/api-utils";
 import { User, Property } from "@/models";

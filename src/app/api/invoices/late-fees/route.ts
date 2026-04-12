@@ -3,6 +3,8 @@
  * API endpoints for automated late fee processing
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { automatedLateFeeService } from "@/lib/services/automated-late-fee.service";

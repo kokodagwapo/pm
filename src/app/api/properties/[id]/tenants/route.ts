@@ -3,6 +3,8 @@
  * Get tenants associated with a specific property through active leases
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { UserRole } from "@/types";
 import {

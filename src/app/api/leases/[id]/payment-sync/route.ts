@@ -3,6 +3,8 @@
  * Comprehensive API for managing synchronized payment processing, status updates, and invoice generation
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { withRoleAndDB } from "@/lib/api-utils";
 import { UserRole } from "@/types";

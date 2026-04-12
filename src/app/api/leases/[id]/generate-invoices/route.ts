@@ -3,6 +3,8 @@
  * API endpoint to generate invoices for a specific lease
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { Lease } from "@/models";

@@ -3,6 +3,8 @@
  * Manages property owner users
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { withRoleAndDB } from "@/lib/api-utils";
 import { User, Property } from "@/models";

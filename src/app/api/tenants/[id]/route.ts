@@ -3,6 +3,8 @@
  * CRUD operations for individual tenants
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { User, Tenant } from "@/models";
 import { UserRole } from "@/types";

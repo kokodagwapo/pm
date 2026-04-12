@@ -3,6 +3,8 @@
  * Provides aggregated metrics and system insights for admin dashboard
  */
 
+export const dynamic = "force-dynamic";
+
 import {
   createSuccessResponse,
   handleApiError,

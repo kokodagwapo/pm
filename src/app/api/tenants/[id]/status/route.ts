@@ -3,6 +3,8 @@
  * Dedicated endpoints for tenant status workflow management
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { User } from "@/models";
 import { UserRole } from "@/types";

@@ -3,6 +3,8 @@
  * Handle status changes for maintenance requests with role-based permissions
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";
@@ -93,7 +95,7 @@ export async function PATCH(
     // Validate action permissions
     switch (action) {
       case "assign":
-      case "reassign":
+      case "reassign": {
         if (!canManage) {
           return createErrorResponse(
             "Only managers can assign maintenance requests",
@@ -107,7 +109,6 @@ export async function PATCH(
           return createErrorResponse("Invalid assigned user ID", 400);
         }
 
-        // Verify the assigned user exists and has appropriate role
         const assignedUser = await User.findById(assignedTo);
         if (!assignedUser) {
           return createErrorResponse("Assigned user not found", 404);
@@ -119,8 +120,9 @@ export async function PATCH(
         maintenanceRequest.assignedTo = assignedTo;
         maintenanceRequest.status = MaintenanceStatus.ASSIGNED;
         break;
+      }
 
-      case "start":
+      case "start": {
         if (!canWork || (!isAssignedToUser && !canManage)) {
           return createErrorResponse(
             "You can only start work on requests assigned to you",
@@ -135,8 +137,9 @@ export async function PATCH(
         }
         maintenanceRequest.status = MaintenanceStatus.IN_PROGRESS;
         break;
+      }
 
-      case "complete":
+      case "complete": {
         if (!canWork || (!isAssignedToUser && !canManage)) {
           return createErrorResponse(
             "You can only complete requests assigned to you",
@@ -153,11 +156,11 @@ export async function PATCH(
         maintenanceRequest.completedDate = new Date();
 
         if (actualCost !== undefined) {
-          const cost = parseFloat(actualCost);
-          if (isNaN(cost) || cost < 0) {
+          const parsedCost = parseFloat(actualCost);
+          if (isNaN(parsedCost) || parsedCost < 0) {
             return createErrorResponse("Invalid actual cost", 400);
           }
-          maintenanceRequest.actualCost = cost;
+          maintenanceRequest.actualCost = parsedCost;
         }
 
         if (notes) {
@@ -172,8 +175,9 @@ export async function PATCH(
             : completionNote;
         }
         break;
+      }
 
-      case "cancel":
+      case "cancel": {
         if (!canManage && !isRequestOwner) {
           return createErrorResponse(
             "Only managers or request owners can cancel requests",
@@ -185,6 +189,7 @@ export async function PATCH(
         }
         maintenanceRequest.status = MaintenanceStatus.CANCELLED;
         break;
+      }
 
       default:
         return createErrorResponse("Invalid action specified", 400);

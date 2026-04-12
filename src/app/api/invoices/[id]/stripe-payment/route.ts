@@ -3,6 +3,8 @@
  * Handle Stripe payment processing for specific invoices
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";

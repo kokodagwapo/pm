@@ -3,6 +3,8 @@
  * Handles fetching and managing payment receipts for tenants
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";

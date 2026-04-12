@@ -3,6 +3,8 @@
  * CRUD operations for maintenance request management
  */
 
+export const dynamic = "force-dynamic";
+
 import { auth } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";
 import { NextRequest } from "next/server";
