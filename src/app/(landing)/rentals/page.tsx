@@ -7,6 +7,7 @@ import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LunaWidget } from "@/components/landing/LunaWidget";
 import { NaplesAreaGuide } from "@/components/landing/NaplesAreaGuide";
 import { RentalsGoogleMap } from "@/components/landing/RentalsGoogleMap";
+import { MapErrorBoundary } from "@/components/landing/MapErrorBoundary";
 import Link from "next/link";
 import {
   Search,
@@ -1209,15 +1210,17 @@ function RentalsContent() {
           {mobileView === "map" && (
             <div className="flex lg:hidden flex-col w-full overflow-y-auto bg-[#f8f7f4]">
               <div className="relative w-full flex-shrink-0" style={{ height: "62vmax", minHeight: 320, maxHeight: "70vh", isolation: "isolate" }}>
-                <RentalsGoogleMap
-                  properties={properties}
-                  onMarkerClick={handleMarkerClick}
-                  onMarkerHover={setHoveredPropertyId}
-                  hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
-                  neighborhoods={NEIGHBORHOODS}
-                  activeNeighborhood={activeNeighborhood}
-                  onNeighborhoodChange={handleNeighborhood}
-                />
+                <MapErrorBoundary>
+                  <RentalsGoogleMap
+                    properties={properties}
+                    onMarkerClick={handleMarkerClick}
+                    onMarkerHover={setHoveredPropertyId}
+                    hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
+                    neighborhoods={NEIGHBORHOODS}
+                    activeNeighborhood={activeNeighborhood}
+                    onNeighborhoodChange={handleNeighborhood}
+                  />
+                </MapErrorBoundary>
                 {selectedProperty && (
                   <div className="absolute bottom-3 left-3 right-3 z-[1000] max-w-md pointer-events-none">
                     <div className="pointer-events-auto shadow-xl">
@@ -1249,15 +1252,17 @@ function RentalsContent() {
                 className="relative w-full flex-shrink-0"
                 style={{ height: "calc(100vh - 200px)", minHeight: 440, isolation: "isolate" }}
               >
-                <RentalsGoogleMap
-                  properties={properties}
-                  onMarkerClick={handleMarkerClick}
-                  onMarkerHover={setHoveredPropertyId}
-                  hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
-                  neighborhoods={NEIGHBORHOODS}
-                  activeNeighborhood={activeNeighborhood}
-                  onNeighborhoodChange={handleNeighborhood}
-                />
+                <MapErrorBoundary>
+                  <RentalsGoogleMap
+                    properties={properties}
+                    onMarkerClick={handleMarkerClick}
+                    onMarkerHover={setHoveredPropertyId}
+                    hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
+                    neighborhoods={NEIGHBORHOODS}
+                    activeNeighborhood={activeNeighborhood}
+                    onNeighborhoodChange={handleNeighborhood}
+                  />
+                </MapErrorBoundary>
                 {selectedProperty && !listDrawerOpen && (
                   <div className="absolute bottom-3 left-3 right-3 z-[1000] max-w-md pointer-events-none">
                     <div className="pointer-events-auto shadow-xl">

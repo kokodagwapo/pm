@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LunaWidget } from "@/components/landing/LunaWidget";
+import { SinglePropertyMap } from "@/components/landing/SinglePropertyMap";
+import { MapErrorBoundary } from "@/components/landing/MapErrorBoundary";
 import {
   Bed,
   Bath,
@@ -1494,12 +1496,14 @@ export function PropertyDetailClient({
                     </h2>
                   </div>
                   <div className="relative h-[380px] bg-slate-100">
-                    <SinglePropertyMap
-                      lat={lat}
-                      lon={lon}
-                      address={fullAddress || "Naples, FL"}
-                      propertyName={property.name}
-                    />
+                    <MapErrorBoundary>
+                      <SinglePropertyMap
+                        lat={lat}
+                        lon={lon}
+                        address={fullAddress || "Naples, FL"}
+                        propertyName={property.name}
+                      />
+                    </MapErrorBoundary>
                   </div>
                   <div className={FROST_MAP_FOOTER}>
                     <span className="flex items-center gap-2 text-sm text-slate-600">
