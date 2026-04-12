@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Map, Maximize2, Satellite, Shield, StreetView } from "lucide-react";
+import { Map, Satellite, Shield, Eye } from "lucide-react";
 import { getGoogleMapsBrowserKey, hasGoogleMapsBrowserKey } from "@/lib/google-maps";
 
 type TileMode = "roadmap" | "satellite" | "terrain" | "streetview";
@@ -142,7 +142,7 @@ export function RentalsGoogleMap({
         <button onClick={() => setMode("roadmap")} className={`rounded-full px-3 py-1.5 text-xs font-medium ${mode === "roadmap" ? "bg-slate-900 text-white" : "bg-white text-slate-700"}`}><Map className="mr-1 inline h-3.5 w-3.5" />Map</button>
         <button onClick={() => setMode("satellite")} className={`rounded-full px-3 py-1.5 text-xs font-medium ${mode === "satellite" ? "bg-slate-900 text-white" : "bg-white text-slate-700"}`}><Satellite className="mr-1 inline h-3.5 w-3.5" />Satellite</button>
         <button onClick={() => setMode("terrain")} className={`rounded-full px-3 py-1.5 text-xs font-medium ${mode === "terrain" ? "bg-slate-900 text-white" : "bg-white text-slate-700"}`}><Shield className="mr-1 inline h-3.5 w-3.5" />3D</button>
-        <button onClick={openStreetView} className={`rounded-full px-3 py-1.5 text-xs font-medium ${mode === "streetview" ? "bg-slate-900 text-white" : "bg-white text-slate-700"}`}><StreetView className="mr-1 inline h-3.5 w-3.5" />Street View</button>
+        <button onClick={openStreetView} className={`rounded-full px-3 py-1.5 text-xs font-medium ${mode === "streetview" ? "bg-slate-900 text-white" : "bg-white text-slate-700"}`}><Eye className="mr-1 inline h-3.5 w-3.5" />Street View</button>
       </div>
       {neighborhoods?.length ? (
         <div className="absolute right-3 top-3 z-20 rounded-2xl border border-white/50 bg-white/90 p-2 shadow-lg backdrop-blur">
