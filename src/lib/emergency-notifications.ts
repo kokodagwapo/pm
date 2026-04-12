@@ -176,7 +176,7 @@ export const EMERGENCY_TEMPLATES = {
       <p><strong>Title:</strong> {{title}}</p>
       <p><strong>Resolved By:</strong> {{resolvedBy}}</p>
       <p><strong>Resolution Time:</strong> {{resolutionTime}}</p>
-      <p><strong>Total Cost:</strong> ${{ actualCost }}</p>
+      <p><strong>Total Cost:</strong> \${{actualCost}}</p>
       
       <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 16px; margin: 16px 0; border-radius: 8px;">
         <p style="color: #16a34a; font-weight: bold;">✅ Emergency successfully resolved!</p>
