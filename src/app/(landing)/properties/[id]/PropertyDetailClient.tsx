@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LunaWidget } from "@/components/landing/LunaWidget";
-import { SinglePropertyMap } from "@/components/landing/SinglePropertyMap";
 import {
   Bed,
   Bath,

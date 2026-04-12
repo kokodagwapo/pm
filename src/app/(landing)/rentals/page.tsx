@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LunaWidget } from "@/components/landing/LunaWidget";
-import { PropertyMap } from "@/components/landing/PropertyMap";
 import { NaplesAreaGuide } from "@/components/landing/NaplesAreaGuide";
 import Link from "next/link";
 import {
