@@ -1208,12 +1208,11 @@ function RentalsContent() {
           {mobileView === "map" && (
             <div className="flex lg:hidden flex-col w-full overflow-y-auto bg-[#f8f7f4]">
               <div className="relative w-full flex-shrink-0" style={{ height: "62vmax", minHeight: 320, maxHeight: "70vh", isolation: "isolate" }}>
-                <PropertyMap
-                  properties={properties}
-                  onMarkerClick={handleMarkerClick}
-                  onMarkerHover={setHoveredPropertyId}
-                  hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
-                />
+                <div className="flex h-full w-full items-center justify-center bg-white">
+                  <div className="rounded-2xl border border-slate-200 bg-white px-6 py-4 text-sm text-slate-600 shadow-sm">
+                    Map view temporarily unavailable
+                  </div>
+                </div>
                 {selectedProperty && (
                   <div className="absolute bottom-3 left-3 right-3 z-[1000] max-w-md pointer-events-none">
                     <div className="pointer-events-auto shadow-xl">
@@ -1245,15 +1244,11 @@ function RentalsContent() {
                 className="relative w-full flex-shrink-0"
                 style={{ height: "calc(100vh - 200px)", minHeight: 440, isolation: "isolate" }}
               >
-                <PropertyMap
-                  properties={properties}
-                  onMarkerClick={handleMarkerClick}
-                  onMarkerHover={setHoveredPropertyId}
-                  hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
-                  neighborhoods={NEIGHBORHOODS}
-                  activeNeighborhood={activeNeighborhood}
-                  onNeighborhoodChange={handleNeighborhood}
-                />
+                <div className="flex h-full w-full items-center justify-center bg-white">
+                  <div className="rounded-2xl border border-slate-200 bg-white px-6 py-4 text-sm text-slate-600 shadow-sm">
+                    Map view temporarily unavailable
+                  </div>
+                </div>
                 {selectedProperty && !listDrawerOpen && (
                   <div className="absolute bottom-3 left-3 right-3 z-[1000] max-w-md pointer-events-none">
                     <div className="pointer-events-auto shadow-xl">
