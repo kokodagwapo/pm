@@ -40,6 +40,11 @@ if [ "${REPLIT_DEV_SERVER:-}" = "1" ]; then
   exec npm run dev:5000
 fi
 
+if [ -d .next ] && [ ! -f .next/BUILD_ID ]; then
+  echo "Stale/incomplete .next directory detected (no BUILD_ID) — removing it to avoid crash loop."
+  rm -rf .next
+fi
+
 if [ ! -f .next/BUILD_ID ]; then
   echo "No .next build found — running npm run build..."
   npm run build

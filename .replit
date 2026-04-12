@@ -29,7 +29,6 @@ author = "agent"
 [workflows.workflow.metadata]
 outputType = "webview"
 
-# Run button: bash start.sh → next build (if missing) → next start on PORT 5000
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "bash start.sh"
@@ -54,6 +53,7 @@ publicDir = "public"
 [userenv.shared]
 AUTH_TRUST_HOST = "true"
 ENABLE_DEMO_AUTH = "true"
+REPLIT_DEV_SERVER = "1"
 
 [postMerge]
 path = "scripts/post-merge.sh"
