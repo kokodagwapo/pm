@@ -921,10 +921,10 @@ function RentalsContent() {
       <div className="pt-[48px] flex flex-col flex-1">
         {/* Sticky search — compact card, filters collapsible on small screens */}
         <div className="sticky top-[48px] z-30 border-b border-slate-200/60 bg-[#f8f7f4]/92 backdrop-blur-md">
-          <div className="mx-auto max-w-[1600px] px-4 py-3 pr-16 sm:px-6 sm:pr-20 lg:pr-24">
-            <div className="rounded-2xl border border-slate-200/80 bg-white/95 px-3 py-2.5 shadow-[0_10px_30px_rgba(148,163,184,0.14)] sm:px-4 sm:py-3">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                <div className="relative min-w-0 w-full max-w-full sm:w-auto sm:max-w-[12rem] md:max-w-[13rem] lg:max-w-[14rem] xl:max-w-[15rem]">
+          <div className="mx-auto w-full max-w-[1720px] px-3 py-3 sm:px-5 lg:px-6">
+            <div className="rounded-[1.4rem] border border-slate-200/80 bg-white/90 px-3 py-3 shadow-[0_18px_50px_rgba(148,163,184,0.14)] backdrop-blur-xl sm:px-4 sm:py-3.5">
+              <div className="flex flex-wrap items-center gap-2.5 lg:flex-nowrap lg:gap-3">
+                <div className="relative min-w-0 w-full lg:w-[18rem] xl:w-[20rem]">
                   <Search
                     className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400"
                     aria-hidden
@@ -940,14 +940,14 @@ function RentalsContent() {
                       }
                     }}
                     placeholder={t("rentals.search.placeholder")}
-                    className="w-full rounded-xl border border-sky-100 bg-sky-50/55 py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-100"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 py-2.75 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-sky-200 focus:bg-white focus:ring-4 focus:ring-sky-100/70"
                   />
                 </div>
                 {hasActiveFilters && (
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50/80 px-2.5 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-white hover:text-slate-800 hover:shadow-sm"
                     title="Clear all filters"
                   >
                     <RotateCcw className="h-3.5 w-3.5 text-violet-400" />
@@ -955,14 +955,14 @@ function RentalsContent() {
                   </button>
                 )}
                 {/* Stay: dates, guests, availability — before list/map */}
-                <div className="flex min-w-0 flex-1 basis-full flex-wrap items-center gap-1.5 lg:basis-auto xl:flex-nowrap xl:gap-2">
+                <div className="flex min-w-0 flex-1 basis-full flex-wrap items-center gap-2 lg:flex-nowrap lg:basis-auto lg:justify-end lg:gap-2">
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
                         type="button"
                         variant="outline"
                         aria-label="Stay dates"
-                        className="h-9 max-w-[10.5rem] shrink-0 justify-start rounded-xl border-sky-100 bg-sky-50/60 px-2.5 text-left text-xs font-medium text-slate-700 shadow-none hover:bg-sky-50 sm:max-w-[12.5rem] md:max-w-[14rem]"
+                        className="h-10 max-w-[11rem] shrink-0 justify-start rounded-2xl border-slate-200 bg-slate-50/80 px-3 text-left text-xs font-medium text-slate-700 shadow-sm hover:bg-white sm:max-w-[12.5rem] md:max-w-[14rem]"
                       >
                         <CalendarIcon className="mr-1.5 h-3.5 w-3.5 shrink-0 text-sky-500" />
                         <span className="truncate">
@@ -993,7 +993,7 @@ function RentalsContent() {
                         type="button"
                         variant="outline"
                         aria-label="Guests"
-                        className="h-9 w-[6.75rem] shrink-0 justify-between rounded-xl border-violet-100 bg-violet-50/60 px-2.5 text-xs font-medium text-slate-700 shadow-none hover:bg-violet-50 sm:w-28"
+                        className="h-10 w-[6.75rem] shrink-0 justify-between rounded-2xl border-slate-200 bg-slate-50/80 px-3 text-xs font-medium text-slate-700 shadow-sm hover:bg-white sm:w-28"
                       >
                         <span className="flex min-w-0 items-center gap-1.5">
                           <Users className="h-3.5 w-3.5 shrink-0 text-violet-500" />
@@ -1028,7 +1028,7 @@ function RentalsContent() {
                   </Popover>
                   <Button
                     type="button"
-                    className="h-9 shrink-0 rounded-xl bg-sky-100 px-3 text-xs font-semibold text-sky-900 shadow-none hover:bg-sky-200"
+                    className="h-10 shrink-0 rounded-2xl bg-sky-500 px-3.5 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-600"
                     disabled={searching || !checkIn || !checkOut}
                     onClick={() => runAvailabilitySearch()}
                   >
@@ -1038,15 +1038,15 @@ function RentalsContent() {
                     <Button
                       type="button"
                       variant="ghost"
-                      className="h-9 shrink-0 rounded-xl px-2 text-xs text-slate-600 hover:bg-slate-100"
+                    className="h-10 shrink-0 rounded-2xl px-3 text-xs text-slate-600 hover:bg-slate-100"
                       onClick={() => clearStayDatesFromUrl()}
                     >
                       Clear dates
                     </Button>
                   )}
                 </div>
-                <div className="hidden min-w-0 basis-full flex-wrap items-center gap-2 pt-1 lg:flex xl:basis-auto xl:pt-0">
-                  <div className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/80 px-2 shadow-none">
+                <div className="hidden min-w-0 basis-full flex-wrap items-center gap-2 pt-1 lg:flex xl:basis-auto xl:justify-end xl:pt-0">
+                  <div className="flex h-10 shrink-0 items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-2.5 shadow-sm">
                     <Building2 className="size-3.5 shrink-0 text-sky-400" aria-hidden />
                     <Select
                       value={activeType || "__all"}
@@ -1069,7 +1069,7 @@ function RentalsContent() {
                     </Select>
                   </div>
 
-                  <div className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/80 px-2 shadow-none">
+                  <div className="flex h-10 shrink-0 items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-2.5 shadow-sm">
                     <Bed className="size-3.5 shrink-0 text-violet-400" aria-hidden />
                     <Select
                       value={activeBedrooms || "__all"}
@@ -1092,7 +1092,7 @@ function RentalsContent() {
                     </Select>
                   </div>
 
-                  <div className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/80 px-2 shadow-none">
+                  <div className="flex h-10 shrink-0 items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-2.5 shadow-sm">
                     <Car className="size-3.5 shrink-0 text-emerald-400" aria-hidden />
                     <Select
                       value={activeParkingType || "__all"}
@@ -1118,7 +1118,7 @@ function RentalsContent() {
                   </div>
 
                   <div
-                    className="flex h-9 shrink-0 items-center gap-1 rounded-xl border border-slate-200/80 bg-slate-50/80 px-2 shadow-none"
+                    className="flex h-10 shrink-0 items-center gap-1 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-2.5 shadow-sm"
                     role="group"
                     aria-label="Price per month"
                   >
@@ -1144,7 +1144,7 @@ function RentalsContent() {
                     />
                   </div>
 
-                  <div className="flex h-9 min-w-0 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/80 px-2 shadow-none lg:w-40 xl:w-48">
+                  <div className="flex h-10 min-w-0 shrink-0 items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-2.5 shadow-sm lg:w-40 xl:w-48">
                     <MapPin className="size-3.5 shrink-0 text-rose-300" aria-hidden />
                     <Select
                       value={activeNeighborhood || "__all"}
@@ -1172,7 +1172,7 @@ function RentalsContent() {
                     onClick={() => setShowFavoritesOnly((v) => !v)}
                     aria-pressed={showFavoritesOnly}
                     aria-label={`${t("rentals.filters.saved")} (${favoriteIds.length})`}
-                    className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl border px-2.5 text-xs font-medium transition-colors ${
+                    className={`inline-flex h-10 shrink-0 items-center gap-1.5 rounded-2xl border px-3 text-xs font-medium transition-colors ${
                       showFavoritesOnly
                         ? "border-rose-400 bg-rose-50 text-rose-700"
                         : "border-rose-100 bg-rose-50/55 text-slate-600 hover:bg-rose-50"
@@ -1197,7 +1197,7 @@ function RentalsContent() {
                     </p>
                   )}
                 </div>
-                <div className="ml-auto flex shrink-0 items-center gap-1 rounded-xl border border-slate-200/80 bg-slate-50/40 p-0.5">
+                <div className="ml-auto flex shrink-0 items-center gap-1 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-1 shadow-sm">
                   <button
                     type="button"
                     onClick={() => setMobileView("list")}
