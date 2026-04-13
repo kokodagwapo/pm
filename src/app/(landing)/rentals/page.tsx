@@ -933,6 +933,7 @@ function RentalsContent() {
                   }}
                   placeholder={t("rentals.search.placeholder")}
                   className="w-full h-9 rounded-full border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-800 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+                  suppressHydrationWarning
                 />
               </div>
 
@@ -1055,9 +1056,9 @@ function RentalsContent() {
                     <div>
                       <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-slate-400">Price / month</label>
                       <div className="flex items-center gap-2">
-                        <input type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} onBlur={() => pushFilters({ minRent: minPrice || undefined })} onKeyDown={(e) => e.key === "Enter" && pushFilters({ minRent: minPrice || undefined })} placeholder="Min" className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-sm tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-100" />
+                        <input type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} onBlur={() => pushFilters({ minRent: minPrice || undefined })} onKeyDown={(e) => e.key === "Enter" && pushFilters({ minRent: minPrice || undefined })} placeholder="Min" className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-sm tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-100" suppressHydrationWarning />
                         <span className="text-xs text-slate-300">–</span>
-                        <input type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} onBlur={() => pushFilters({ maxRent: maxPrice || undefined })} onKeyDown={(e) => e.key === "Enter" && pushFilters({ maxRent: maxPrice || undefined })} placeholder="Max" className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-sm tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-100" />
+                        <input type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} onBlur={() => pushFilters({ maxRent: maxPrice || undefined })} onKeyDown={(e) => e.key === "Enter" && pushFilters({ maxRent: maxPrice || undefined })} placeholder="Max" className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-sm tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-100" suppressHydrationWarning />
                       </div>
                     </div>
                     <div className="flex items-center justify-between pt-1 border-t border-slate-100">
@@ -1235,6 +1236,7 @@ function RentalsContent() {
                         onKeyDown={(e) => e.key === "Enter" && pushFilters({ minRent: minPrice || undefined })}
                         placeholder="Min"
                         className="h-7 w-14 border-0 bg-transparent p-0 text-xs text-slate-800 tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-0 sm:w-16"
+                        suppressHydrationWarning
                       />
                       <span className="text-[10px] text-slate-300">–</span>
                       <input
@@ -1244,6 +1246,7 @@ function RentalsContent() {
                         onBlur={() => pushFilters({ maxRent: maxPrice || undefined })}
                         onKeyDown={(e) => e.key === "Enter" && pushFilters({ maxRent: maxPrice || undefined })}
                         placeholder="Max"
+                        suppressHydrationWarning
                         className="h-7 w-14 border-0 bg-transparent p-0 text-xs text-slate-800 tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-0 sm:w-16"
                       />
                     </div>

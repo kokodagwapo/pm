@@ -69,7 +69,7 @@ export const viewport = {
 };
 
 const devOverlaySuppressor = process.env.NODE_ENV === "development"
-  ? `(function(){if(typeof window==='undefined')return;var CAP=3,KEY='__empty_err_seen';function isEmptyErr(el){if(!el)return false;var t=el.textContent||'';return t.indexOf('Critical Application Error')!==-1&&(t.indexOf('{}')!==-1||t.indexOf(': {}')!==-1);}function hide(portal){try{var sr=portal.shadowRoot;if(!sr)return;var dlg=sr.querySelector('[data-nextjs-dialog-overlay]')||sr.querySelector('div');if(dlg){var n=parseInt(sessionStorage.getItem(KEY)||'0',10);if(n<CAP){sessionStorage.setItem(KEY,String(n+1));portal.style.display='none';}}}catch(_){}}var obs=new MutationObserver(function(muts){for(var i=0;i<muts.length;i++){for(var j=0;j<muts[i].addedNodes.length;j++){var nd=muts[i].addedNodes[j];if(nd.tagName&&nd.tagName.toLowerCase()==='nextjs-portal'){setTimeout(function(p){if(isEmptyErr(p))hide(p);},50,nd);}}}});obs.observe(document.documentElement,{childList:true,subtree:true});})();`
+  ? `(function(){if(typeof window==='undefined')return;function isEmptyErr(el){if(!el)return false;var t=el.textContent||'';return t.indexOf('Critical Application Error')!==-1&&(t.indexOf('{}')!==-1||t.indexOf(': {}')!==-1);}var obs=new MutationObserver(function(muts){for(var i=0;i<muts.length;i++){for(var j=0;j<muts[i].addedNodes.length;j++){var nd=muts[i].addedNodes[j];if(nd.tagName&&nd.tagName.toLowerCase()==='nextjs-portal'){nd.style.display='none';setTimeout(function(p){if(isEmptyErr(p)){p.remove();}else{p.style.display='';}},120,nd);}}}});obs.observe(document.documentElement,{childList:true,subtree:true});})();`
   : "";
 
 export default function RootLayout({

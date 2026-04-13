@@ -148,6 +148,7 @@ function CredentialsSignInSection({
               className={heroGlassInput}
               style={{ fontWeight: 300 }}
               required
+              suppressHydrationWarning
             />
           </div>
         </div>
@@ -171,6 +172,7 @@ function CredentialsSignInSection({
               className={heroGlassInput}
               style={{ fontWeight: 300 }}
               required
+              suppressHydrationWarning
             />
           </div>
         </div>
