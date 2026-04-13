@@ -18,70 +18,50 @@ import {
 import { connectDBSafe, isConnected } from "@/lib/mongodb";
 import { calculatePropertyStatusFromUnits } from "@/utils/property-status-calculator";
 import { stripUnitSecretsForPublicApi } from "@/lib/unit-access-secrets";
+import { VMS_FLORIDA_PROPERTIES } from "@/lib/vms-florida-properties";
 
-const FALLBACK_PUBLIC_PROPERTIES = [
-  {
-    _id: "fallback-public-1",
-    name: "Falling Waters Lakeview Condo",
-    type: "condo",
-    status: "available",
-    neighborhood: "Falling Waters",
-    address: {
-      street: "7050 Falling Waters Drive",
-      city: "Naples",
-      state: "FL",
-      zipCode: "34119",
-      country: "United States",
-    },
-    images: ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=900&q=85"],
-    units: [
-      {
-        _id: "fallback-public-unit-1",
-        unitNumber: "C442-LV",
-        bedrooms: 2,
-        bathrooms: 2,
-        squareFootage: 1200,
-        rentAmount: 3900,
-        status: "available",
-      },
-    ],
-  },
-  {
-    _id: "fallback-public-2",
-    name: "World Tennis Club Condo",
-    type: "condo",
-    status: "available",
-    neighborhood: "World Tennis Club",
-    address: {
-      street: "3650 Olympic Drive",
-      city: "Naples",
-      state: "FL",
-      zipCode: "34105",
-      country: "United States",
-    },
-    images: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=900&q=85"],
-    units: [
-      {
-        _id: "fallback-public-unit-2",
-        unitNumber: "C373-WTC",
-        bedrooms: 2,
-        bathrooms: 2,
-        squareFootage: 1100,
-        rentAmount: 3900,
-        status: "available",
-      },
-    ],
-  },
-];
+function applyClientFilters(props: any[], params: URLSearchParams) {
+  let filtered = [...props];
+  const search = params.get("search")?.toLowerCase();
+  const type = params.get("type");
+  const bedrooms = params.get("bedrooms") ? parseInt(params.get("bedrooms")!) : undefined;
+  const neighborhood = params.get("neighborhood");
+  const minRent = params.get("minRent") ? parseFloat(params.get("minRent")!) : undefined;
+  const maxRent = params.get("maxRent") ? parseFloat(params.get("maxRent")!) : undefined;
 
-const FALLBACK_RESPONSE = () =>
-  createSuccessResponse(
+  if (search) {
+    filtered = filtered.filter(p =>
+      p.name.toLowerCase().includes(search) ||
+      p.description?.toLowerCase().includes(search) ||
+      p.neighborhood?.toLowerCase().includes(search) ||
+      p.address?.street?.toLowerCase().includes(search)
+    );
+  }
+  if (type) filtered = filtered.filter(p => p.type === type);
+  if (bedrooms) filtered = filtered.filter(p => (p.units?.[0]?.bedrooms ?? 0) >= bedrooms);
+  if (neighborhood) filtered = filtered.filter(p => p.neighborhood?.toLowerCase().includes(neighborhood.toLowerCase()));
+  if (minRent) filtered = filtered.filter(p => (p.units?.[0]?.rentAmount ?? 0) >= minRent);
+  if (maxRent) filtered = filtered.filter(p => (p.units?.[0]?.rentAmount ?? 0) <= maxRent);
+
+  return filtered;
+}
+
+function buildFallbackResponse(searchParams: URLSearchParams) {
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = Math.min(parseInt(searchParams.get("limit") || "24"), 50);
+  const filtered = applyClientFilters(VMS_FLORIDA_PROPERTIES, searchParams);
+  const total = filtered.length;
+  const skip = (page - 1) * limit;
+  const paged = filtered.slice(skip, skip + limit);
+
+  return createSuccessResponse(
     {
-      properties: FALLBACK_PUBLIC_PROPERTIES,
-      pagination: { page: 1, limit: 24, total: FALLBACK_PUBLIC_PROPERTIES.length, pages: 1 },
+      properties: paged,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     },
     "Properties retrieved successfully"
   );
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -96,7 +76,7 @@ export async function GET(request: NextRequest) {
       db = raceResult;
     }
     if (!db) {
-      return FALLBACK_RESPONSE();
+      return buildFallbackResponse(new URL(request.url).searchParams);
     }
 
     const { searchParams } = new URL(request.url);
@@ -183,6 +163,6 @@ export async function GET(request: NextRequest) {
     );
   } catch (error) {
     console.error("Public properties API error, returning fallback:", (error as Error)?.message);
-    return FALLBACK_RESPONSE();
+    return buildFallbackResponse(new URL(request.url).searchParams);
   }
 }
