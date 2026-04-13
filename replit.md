@@ -171,7 +171,7 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - `src/locales/` - i18n translations
 
 ## Running (Replit)
-- **Run button (Project workflow)**: `bash start.sh` — MongoDB, property auto-seed, optional bootstrap-account provisioning, then `next dev` on port 5000 for editable workspace preview.
+- **Run button (Project workflow)**: `bash start.sh` — MongoDB, property auto-seed, optional bootstrap-account provisioning, then a production-style Next startup on port 5000. It builds automatically when `.next/BUILD_ID` is missing and runs `next start` by default for a more Replit-stable preview.
 - **Deployment runtime**: `bash start-prod.sh` — MongoDB, property auto-seed, optional bootstrap-account provisioning, then `next start` on port 5000.
 - **Manual dev**: `bash dev.sh` — MongoDB, auto-seed, stops stale `next dev`, clears `.next`, then `next dev` (webpack, port 5000). Restart dev after edits when the watcher is ignored on Replit.
 - **Local (Cursor)**: `npm run dev:local` — port 3000, webpack (no Turbopack).
@@ -180,7 +180,7 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 
 ## Replit-Specific Configuration
 - **MongoDB**: Running locally via Nix (mongodb 7.0), data at `/home/runner/.mongodb-data/data/` (outside project root to avoid file-watcher loops)
-- **start.sh**: Starts `mongod` (background) → runs `src/scripts/auto-seed.mjs` → optionally runs `src/scripts/provision-bootstrap-accounts.mjs` when `PROVISION_BOOTSTRAP_ACCOUNTS=true` → `npm run dev:5000`
+- **start.sh**: Starts `mongod` (background) → runs `src/scripts/auto-seed.mjs` → optionally runs `src/scripts/provision-bootstrap-accounts.mjs` when `PROVISION_BOOTSTRAP_ACCOUNTS=true` → runs `npm run build` if needed → `npm run start`. Set `REPLIT_DEV_SERVER=1` only when you explicitly want webpack dev mode.
 - **start-prod.sh**: Production start script for Reserved VM deployment — starts local mongod, runs auto-seed, optionally provisions bootstrap auth accounts, then `npm run start`. Build is handled separately by deployment build step (`npm run build`).
 - **Auto-seed**: `src/scripts/auto-seed.mjs` seeds properties and promo codes. It only seeds demo users when `ENABLE_DEMO_AUTH=true` in a non-production environment.
 - **Port/Host**: 5000 / 0.0.0.0 (set in `package.json` dev script)

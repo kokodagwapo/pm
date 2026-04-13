@@ -112,6 +112,7 @@ function collectGalleryUrls($: cheerio.CheerioAPI): string[] {
   const imageUrls: string[] = [];
   const push = (href: string | undefined) => {
     if (!href || !href.includes("wp-content/uploads") || href.includes("site-icon")) return;
+    if (/defaultimage_prop\.(jpg|jpeg|png|webp)$/i.test(href)) return;
     if (/-60x60\.|-100x100\.|-300x300\.|-400x314\./i.test(href)) return;
     if (!imageUrls.includes(href)) imageUrls.push(href);
   };
@@ -390,6 +391,8 @@ async function upsertOne(
     existing.type = propertyType;
     existing.description = scraped.description;
     existing.address = scraped.address as (typeof existing)["address"];
+    existing.latitude = scraped.coords?.latitude ?? null;
+    existing.longitude = scraped.coords?.longitude ?? null;
     if (scraped.neighborhood) existing.neighborhood = scraped.neighborhood;
     existing.importSource = VMS_SOURCE;
     existing.importListingUrl = scraped.url;
@@ -409,6 +412,8 @@ async function upsertOne(
     type: propertyType,
     description: scraped.description,
     address: scraped.address,
+    latitude: scraped.coords?.latitude ?? null,
+    longitude: scraped.coords?.longitude ?? null,
     neighborhood: scraped.neighborhood ?? undefined,
     importSource: VMS_SOURCE,
     importListingUrl: scraped.url,
@@ -444,6 +449,23 @@ async function runForUri(uri: string, label: string, urls: string[], ownerId: mo
     const scraped = await scrapeListingPage(url);
     if (!scraped) {
       console.log("skip");
+      skipped++;
+      continue;
+    }
+    if (scraped.images.length === 0) {
+      if (!DRY_RUN) {
+        await Property.deleteMany({
+          importSource: VMS_SOURCE,
+          $or: [
+            { importListingUrl: scraped.url },
+            { importListingUrl: `${scraped.url}/` },
+            ...(scraped.importExternalId
+              ? [{ importExternalId: scraped.importExternalId }]
+              : []),
+          ],
+        });
+      }
+      console.log("skip (no official image)");
       skipped++;
       continue;
     }

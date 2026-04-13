@@ -322,6 +322,8 @@ export interface IProperty extends Document {
   type: PropertyType;
   status: PropertyStatus;
   address: IAddress;
+  latitude?: number;
+  longitude?: number;
   // Note: bedrooms, bathrooms, squareFootage, rentAmount, securityDeposit
   // are now stored only at the unit level in the units array
   yearBuilt?: number;

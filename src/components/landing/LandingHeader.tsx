@@ -27,7 +27,6 @@ const RENTALS_NAV = [
   { href: "https://vms-florida.com/about-us/", label: "About Us", teal: false, external: true },
   { href: "https://vms-florida.com/things-to-do/", label: "Things to Do", teal: false, external: true },
   { href: "/contact/", label: "Contact", teal: false },
-  { href: "/rentals", label: "Search Properties", teal: true },
 ] as const;
 
 function probeNavBandDark(): boolean {

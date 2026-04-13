@@ -1,8 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Map, Satellite, Mountain, Eye } from "lucide-react";
-import { getGoogleMapsBrowserKey, hasGoogleMapsBrowserKey } from "@/lib/google-maps";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
+import { Eye, Map, Mountain, Satellite } from "lucide-react";
+import {
+  getGoogleMapsBrowserKey,
+  hasGoogleMapsBrowserKey,
+} from "@/lib/google-maps";
+
+type LeafletModule = typeof import("leaflet");
+type LeafletMap = import("leaflet").Map;
+type LeafletMarker = import("leaflet").Marker;
+type LeafletTileLayer = import("leaflet").TileLayer;
 
 type TileMode = "roadmap" | "satellite" | "terrain" | "streetview";
 
@@ -30,6 +39,8 @@ interface RentalsGoogleMapProps {
 }
 
 const NAPLES_CENTER = { lat: 26.17, lng: -81.78 };
+const LEAFLET_CSS_ID = "rentals-leaflet-css";
+const mapContainerStyle = { width: "100%", height: "100%" };
 
 function getCoords(p: Property): { lat: number; lng: number } {
   if (typeof p.latitude === "number" && typeof p.longitude === "number")
@@ -50,296 +61,81 @@ function fmtPrice(amount: number): string {
   return `$${amount}`;
 }
 
-function loadGoogleMapsScript(apiKey: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === "undefined") return reject(new Error("SSR"));
-    if ((window as any).google?.maps) return resolve();
-    const existing = document.querySelector<HTMLScriptElement>(
-      'script[data-gmap-loader="1"]'
+function ensureLeafletCss() {
+  if (typeof document === "undefined") return;
+  if (document.getElementById(LEAFLET_CSS_ID)) return;
+  const link = document.createElement("link");
+  link.id = LEAFLET_CSS_ID;
+  link.rel = "stylesheet";
+  link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+  document.head.appendChild(link);
+}
+
+function markerHtml(text: string, active: boolean): string {
+  return `
+    <div style="
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      white-space:nowrap;
+      border-radius:999px;
+      padding:6px 12px;
+      font-size:11px;
+      font-weight:600;
+      letter-spacing:0.02em;
+      color:${active ? "#ffffff" : "#0f172a"};
+      background:${active ? "#0f172a" : "rgba(255,255,255,0.96)"};
+      border:1.5px solid ${active ? "#0f172a" : "rgba(15,23,42,0.12)"};
+      box-shadow:${active ? "0 6px 18px rgba(15,23,42,0.28)" : "0 4px 12px rgba(15,23,42,0.16)"};
+      transform:${active ? "scale(1.06)" : "scale(1)"};
+      transition:all 0.15s ease;
+      backdrop-filter:blur(6px);
+      -webkit-backdrop-filter:blur(6px);
+    ">${text}</div>
+  `;
+}
+
+function tileLayerFor(L: LeafletModule, mode: Exclude<TileMode, "streetview">): LeafletTileLayer {
+  if (mode === "satellite") {
+    return L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      {
+        attribution:
+          "&copy; Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        maxZoom: 19,
+      }
     );
-    if (existing) {
-      if ((window as any).google?.maps) return resolve();
-      existing.addEventListener("load", () => resolve());
-      return;
-    }
-    const script = document.createElement("script");
-    script.dataset.gmapLoader = "1";
-    script.async = true;
-    script.defer = true;
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}`;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load Google Maps"));
-    document.head.appendChild(script);
+  }
+  if (mode === "terrain") {
+    return L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+      attribution:
+        "Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap",
+      maxZoom: 17,
+    });
+  }
+  return L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors",
+    maxZoom: 19,
   });
 }
 
-let OverlayClass: any = null;
-
-function getOverlayClass() {
-  if (OverlayClass) return OverlayClass;
-  const g = (window as any).google;
-  if (!g?.maps?.OverlayView) return null;
-
-  OverlayClass = class extends g.maps.OverlayView {
-    pos: any;
-    div: HTMLDivElement | null = null;
-    text: string;
-    propId: string;
-    onClickCb?: (id: string) => void;
-    onEnterCb?: (id: string) => void;
-    onLeaveCb?: () => void;
-
-    constructor(
-      pos: any,
-      text: string,
-      propId: string,
-      onClick?: (id: string) => void,
-      onEnter?: (id: string) => void,
-      onLeave?: () => void
-    ) {
-      super();
-      this.pos = pos;
-      this.text = text;
-      this.propId = propId;
-      this.onClickCb = onClick;
-      this.onEnterCb = onEnter;
-      this.onLeaveCb = onLeave;
-    }
-
-    onAdd() {
-      const div = document.createElement("div");
-      div.style.cssText =
-        "position:absolute;cursor:pointer;white-space:nowrap;font-size:11px;font-weight:500;" +
-        "padding:5px 12px;border-radius:999px;background:rgba(255,255,255,0.92);color:#0f172a;" +
-        "border:1.5px solid rgba(15,23,42,0.15);box-shadow:0 2px 8px rgba(0,0,0,0.18);" +
-        "backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);" +
-        "transition:all 0.15s ease;z-index:1;letter-spacing:0.04em;";
-      div.textContent = this.text;
-      div.addEventListener("click", (e: MouseEvent) => {
-        e.stopPropagation();
-        this.onClickCb?.(this.propId);
-      });
-      div.addEventListener("mouseenter", () => {
-        this._applyHighlight(div, true);
-        this.onEnterCb?.(this.propId);
-      });
-      div.addEventListener("mouseleave", () => {
-        this._applyHighlight(div, false);
-        this.onLeaveCb?.();
-      });
-      this.div = div;
-      const panes = this.getPanes();
-      panes?.overlayMouseTarget?.appendChild(div);
-    }
-
-    draw() {
-      if (!this.div) return;
-      const proj = this.getProjection();
-      if (!proj) return;
-      const point = proj.fromLatLngToDivPixel(this.pos);
-      if (!point) return;
-      this.div.style.left = `${point.x}px`;
-      this.div.style.top = `${point.y}px`;
-      this.div.style.transform = "translate(-50%, -50%)";
-    }
-
-    onRemove() {
-      this.div?.remove();
-      this.div = null;
-    }
-
-    setHighlighted(on: boolean) {
-      if (this.div) this._applyHighlight(this.div, on);
-    }
-
-    _applyHighlight(div: HTMLDivElement, on: boolean) {
-      if (on) {
-        div.style.background = "rgba(255,255,255,0.97)";
-        div.style.borderColor = "rgba(99,102,241,0.4)";
-        div.style.boxShadow = "0 4px 16px rgba(0,0,0,0.25), 0 0 0 3px rgba(99,102,241,0.2)";
-        div.style.transform = "scale(1.12) translate(-50%, -50%)";
-        div.style.zIndex = "999";
-      } else {
-        div.style.background = "rgba(255,255,255,0.92)";
-        div.style.borderColor = "rgba(15,23,42,0.15)";
-        div.style.boxShadow = "0 2px 8px rgba(0,0,0,0.18)";
-        div.style.transform = "translate(-50%, -50%)";
-        div.style.zIndex = "1";
-      }
-    }
-  };
-
-  return OverlayClass;
-}
-
-export function RentalsGoogleMap({
-  properties,
-  onMarkerClick,
-  onMarkerHover,
-  hoveredPropertyId,
+function RentalsMapToolbar({
+  mode,
+  setMode,
+  onStreetView,
   neighborhoods,
   activeNeighborhood,
   onNeighborhoodChange,
-}: RentalsGoogleMapProps) {
-  const apiKey = getGoogleMapsBrowserKey();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any>(null);
-  const overlaysRef = useRef<globalThis.Map<string, any>>(new globalThis.Map());
-  const [mode, setMode] = useState<TileMode>("roadmap");
-  const [ready, setReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!apiKey) return;
-    let cancelled = false;
-    loadGoogleMapsScript(apiKey)
-      .then(() => {
-        if (!cancelled) setReady(true);
-      })
-      .catch(() => {
-        if (!cancelled) setError("Could not load Google Maps");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [apiKey]);
-
-  useEffect(() => {
-    if (!ready || !containerRef.current || mapRef.current) return;
-    try {
-      const g = (window as any).google;
-      mapRef.current = new g.maps.Map(containerRef.current, {
-        center: NAPLES_CENTER,
-        zoom: 12,
-        mapTypeId: "roadmap",
-        disableDefaultUI: true,
-        zoomControl: true,
-        streetViewControl: false,
-        mapTypeControl: false,
-        fullscreenControl: false,
-        gestureHandling: "greedy",
-      });
-    } catch {
-      setError("Failed to initialize map");
-    }
-  }, [ready]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !ready) return;
-    try {
-      if (mode === "streetview") {
-        const sv = map.getStreetView();
-        sv.setPosition(map.getCenter() ?? NAPLES_CENTER);
-        sv.setVisible(true);
-        return;
-      }
-      map.getStreetView()?.setVisible(false);
-      const typeId =
-        mode === "satellite" ? "hybrid" : mode === "terrain" ? "terrain" : "roadmap";
-      map.setMapTypeId(typeId);
-    } catch {
-      // ignore mode switch errors
-    }
-  }, [mode, ready]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !ready) return;
-
-    overlaysRef.current.forEach((ov) => {
-      try {
-        ov.setMap(null);
-      } catch {
-        // ignore
-      }
-    });
-    overlaysRef.current.clear();
-
-    const g = (window as any).google;
-    if (!g?.maps) return;
-
-    if (properties.length === 0) {
-      map.setCenter(NAPLES_CENTER);
-      map.setZoom(12);
-      return;
-    }
-
-    const OvClass = getOverlayClass();
-    const bounds = new g.maps.LatLngBounds();
-
-    properties.forEach((property) => {
-      const pos = getCoords(property);
-      const latLng = new g.maps.LatLng(pos.lat, pos.lng);
-      bounds.extend(latLng);
-
-      if (OvClass) {
-        const rent = property.units?.[0]?.rentAmount ?? 0;
-        const price = rent > 500 ? rent : rent * 30;
-        const overlay = new OvClass(
-          latLng,
-          fmtPrice(price),
-          property._id,
-          onMarkerClick,
-          (id: string) => onMarkerHover?.(id),
-          () => onMarkerHover?.(null)
-        );
-        overlay.setMap(map);
-        overlaysRef.current.set(property._id, overlay);
-      } else {
-        const marker = new g.maps.Marker({
-          position: latLng,
-          map,
-          title: property.name,
-        });
-        marker.addListener("click", () => onMarkerClick?.(property._id));
-        overlaysRef.current.set(property._id, marker);
-      }
-    });
-
-    if (properties.length === 1) {
-      const c = getCoords(properties[0]);
-      map.setCenter({ lat: c.lat, lng: c.lng });
-      map.setZoom(14);
-    } else {
-      map.fitBounds(bounds, { top: 48, right: 48, bottom: 48, left: 48 });
-    }
-  }, [properties, ready, onMarkerClick, onMarkerHover]);
-
-  useEffect(() => {
-    overlaysRef.current.forEach((ov, id) => {
-      if (typeof ov.setHighlighted === "function") {
-        ov.setHighlighted(id === hoveredPropertyId);
-      }
-    });
-  }, [hoveredPropertyId]);
-
-  if (!hasGoogleMapsBrowserKey()) {
-    return (
-      <div className="flex h-full w-full items-center justify-center bg-slate-50">
-        <div className="rounded-2xl border border-slate-200 bg-white px-6 py-4 text-sm text-slate-600 shadow-sm">
-          Add{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">
-            NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-          </code>{" "}
-          to enable the map
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex h-full w-full items-center justify-center bg-slate-50">
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-700 shadow-sm">
-          {error}
-        </div>
-      </div>
-    );
-  }
-
+}: {
+  mode: TileMode;
+  setMode: (mode: TileMode) => void;
+  onStreetView: () => void;
+  neighborhoods?: { label: string; value: string }[];
+  activeNeighborhood?: string;
+  onNeighborhoodChange?: (value: string) => void;
+}) {
   return (
-    <div className="relative h-full w-full">
+    <>
       <div className="absolute left-3 top-3 z-20 flex flex-wrap gap-1.5 rounded-xl border border-white/60 bg-white/90 p-1.5 shadow-lg backdrop-blur-sm">
         {(
           [
@@ -347,12 +143,18 @@ export function RentalsGoogleMap({
             { id: "satellite", label: "Satellite", Icon: Satellite },
             { id: "terrain", label: "3D", Icon: Mountain },
             { id: "streetview", label: "Street View", Icon: Eye },
-          ] as { id: TileMode; label: string; Icon: any }[]
+          ] as { id: TileMode; label: string; Icon: typeof Eye }[]
         ).map(({ id, label, Icon }) => (
           <button
             key={id}
             type="button"
-            onClick={() => setMode(id)}
+            onClick={() => {
+              if (id === "streetview") {
+                onStreetView();
+                return;
+              }
+              setMode(id);
+            }}
             className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
               mode === id
                 ? "bg-slate-900 text-white shadow-sm"
@@ -380,8 +182,156 @@ export function RentalsGoogleMap({
           </select>
         </div>
       )}
+    </>
+  );
+}
+
+function RentalsLeafletFallback({
+  properties,
+  onMarkerClick,
+  onMarkerHover,
+  hoveredPropertyId,
+  neighborhoods,
+  activeNeighborhood,
+  onNeighborhoodChange,
+  message,
+}: RentalsGoogleMapProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const leafletRef = useRef<LeafletModule | null>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const tileLayerRef = useRef<LeafletTileLayer | null>(null);
+  const markersRef = useRef<globalThis.Map<string, LeafletMarker>>(new globalThis.Map());
+  const [mode, setMode] = useState<TileMode>("roadmap");
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const markers = markersRef.current;
+    ensureLeafletCss();
+    import("leaflet")
+      .then((L) => {
+        if (cancelled || !containerRef.current || mapRef.current) return;
+        leafletRef.current = L;
+        const map = L.map(containerRef.current, {
+          center: [NAPLES_CENTER.lat, NAPLES_CENTER.lng],
+          zoom: 12,
+          zoomControl: false,
+          attributionControl: true,
+        });
+        L.control.zoom({ position: "bottomright" }).addTo(map);
+        tileLayerRef.current = tileLayerFor(L, "roadmap").addTo(map);
+        mapRef.current = map;
+        setReady(true);
+      })
+      .catch(() => setError("Could not load the map"));
+    return () => {
+      const tileLayer = tileLayerRef.current;
+      const map = mapRef.current;
+      cancelled = true;
+      markers.forEach((marker) => marker.remove());
+      markers.clear();
+      tileLayer?.remove();
+      tileLayerRef.current = null;
+      map?.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const L = leafletRef.current;
+    if (!map || !L || !ready) return;
+    if (mode === "streetview") return;
+    tileLayerRef.current?.remove();
+    tileLayerRef.current = tileLayerFor(L, mode).addTo(map);
+  }, [mode, ready]);
+
+  const openStreetView = useCallback(() => {
+    const map = mapRef.current;
+    const center = map?.getCenter();
+    const lat = center?.lat ?? NAPLES_CENTER.lat;
+    const lng = center?.lng ?? NAPLES_CENTER.lng;
+    window.open(
+      `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const L = leafletRef.current;
+    if (!map || !L || !ready) return;
+
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current.clear();
+
+    if (properties.length === 0) {
+      map.setView([NAPLES_CENTER.lat, NAPLES_CENTER.lng], 12);
+      return;
+    }
+
+    const bounds: [number, number][] = [];
+
+    properties.forEach((property) => {
+      const pos = getCoords(property);
+      bounds.push([pos.lat, pos.lng]);
+      const rent = property.units?.[0]?.rentAmount ?? 0;
+      const price = rent > 500 ? rent : rent * 30;
+      const active = hoveredPropertyId === property._id;
+      const marker = L.marker([pos.lat, pos.lng], {
+        icon: L.divIcon({
+          className: "",
+          html: markerHtml(fmtPrice(price), active),
+          iconSize: [80, 32],
+          iconAnchor: [40, 16],
+        }),
+      })
+        .addTo(map)
+        .on("click", () => onMarkerClick?.(property._id))
+        .on("mouseover", () => onMarkerHover?.(property._id))
+        .on("mouseout", () => onMarkerHover?.(null));
+
+      markersRef.current.set(property._id, marker);
+    });
+
+    if (properties.length === 1) {
+      const c = getCoords(properties[0]);
+      map.setView([c.lat, c.lng], 14);
+    } else {
+      map.fitBounds(bounds, { padding: [48, 48] });
+    }
+  }, [properties, ready, onMarkerClick, onMarkerHover, hoveredPropertyId]);
+
+  if (error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-slate-50">
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-700 shadow-sm">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-full w-full">
+      <RentalsMapToolbar
+        mode={mode}
+        setMode={setMode}
+        onStreetView={openStreetView}
+        neighborhoods={neighborhoods}
+        activeNeighborhood={activeNeighborhood}
+        onNeighborhoodChange={onNeighborhoodChange}
+      />
 
       <div ref={containerRef} className="h-full w-full" />
+
+      {message ? (
+        <div className="absolute bottom-3 left-3 z-20 max-w-sm rounded-lg border border-amber-200 bg-amber-50/95 px-3 py-2 text-[11px] text-amber-900 shadow-sm">
+          {message}
+        </div>
+      ) : null}
 
       {!ready && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-50">
@@ -390,4 +340,159 @@ export function RentalsGoogleMap({
       )}
     </div>
   );
+}
+
+function RentalsGooglePrimary(props: RentalsGoogleMapProps) {
+  const apiKey = getGoogleMapsBrowserKey();
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const [mode, setMode] = useState<TileMode>("roadmap");
+  const [forceFallback, setForceFallback] = useState(false);
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: "rentals-google-maps",
+    googleMapsApiKey: apiKey,
+    version: "weekly",
+  });
+
+  const markers = useMemo(
+    () => props.properties.map((property) => ({ property, position: getCoords(property) })),
+    [props.properties]
+  );
+
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+    const bounds = new google.maps.LatLngBounds();
+    markers.forEach(({ position }) => bounds.extend(position));
+    if (markers.length === 1) {
+      map.setCenter(markers[0].position);
+      map.setZoom(14);
+    } else if (markers.length > 1) {
+      map.fitBounds(bounds, 48);
+    } else {
+      map.setCenter(NAPLES_CENTER);
+      map.setZoom(12);
+    }
+  }, [markers]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    const map = mapRef.current;
+    if (!map) return;
+    const pano = map.getStreetView();
+    if (mode === "streetview") {
+      pano.setPosition(map.getCenter() ?? NAPLES_CENTER);
+      pano.setPov({ heading: 0, pitch: 0 });
+      pano.setVisible(true);
+      return;
+    }
+    pano.setVisible(false);
+    map.setMapTypeId(
+      mode === "terrain" ? "terrain" : mode === "satellite" ? "hybrid" : "roadmap"
+    );
+  }, [mode, isLoaded]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = () => setForceFallback(true);
+    (window as typeof window & { gm_authFailure?: () => void }).gm_authFailure = handler;
+    return () => {
+      delete (window as typeof window & { gm_authFailure?: () => void }).gm_authFailure;
+    };
+  }, []);
+
+  if (loadError || forceFallback) {
+    return (
+      <RentalsLeafletFallback
+        {...props}
+        message="Google Maps is blocked for this local host. Using the local fallback map instead."
+      />
+    );
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-slate-50">
+        <p className="text-sm text-slate-500">Loading map…</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-full w-full">
+      <RentalsMapToolbar
+        mode={mode}
+        setMode={setMode}
+        onStreetView={() => setMode("streetview")}
+        neighborhoods={props.neighborhoods}
+        activeNeighborhood={props.activeNeighborhood}
+        onNeighborhoodChange={props.onNeighborhoodChange}
+      />
+      <GoogleMap
+        mapContainerStyle={mapContainerStyle}
+        center={NAPLES_CENTER}
+        zoom={12}
+        onLoad={onMapLoad}
+        options={{
+          disableDefaultUI: true,
+          zoomControl: true,
+          streetViewControl: false,
+          mapTypeControl: false,
+          fullscreenControl: false,
+          gestureHandling: "greedy",
+          clickableIcons: false,
+          mapTypeId: "roadmap",
+        }}
+      >
+        {markers.map(({ property, position }) => {
+          const rent = property.units?.[0]?.rentAmount ?? 0;
+          const price = rent > 500 ? rent : rent * 30;
+          const active = props.hoveredPropertyId === property._id;
+          return (
+            <MarkerF
+              key={property._id}
+              position={position}
+              onClick={() => props.onMarkerClick?.(property._id)}
+              onMouseOver={() => props.onMarkerHover?.(property._id)}
+              onMouseOut={() => props.onMarkerHover?.(null)}
+              label={{
+                text: fmtPrice(price),
+                color: active ? "#ffffff" : "#0f172a",
+                fontSize: "11px",
+                fontWeight: "600",
+              }}
+              icon={{
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: active ? 10 : 8,
+                fillColor: active ? "#0f172a" : "#ffffff",
+                fillOpacity: 0.96,
+                strokeColor: active ? "#ffffff" : "#cbd5e1",
+                strokeWeight: 2,
+              }}
+            />
+          );
+        })}
+      </GoogleMap>
+    </div>
+  );
+}
+
+export function RentalsGoogleMap(props: RentalsGoogleMapProps) {
+  const useLeafletFallback =
+    typeof window !== "undefined" &&
+    window.location.hostname === "127.0.0.1" &&
+    hasGoogleMapsBrowserKey();
+
+  if (!hasGoogleMapsBrowserKey()) {
+    return <RentalsLeafletFallback {...props} />;
+  }
+
+  if (useLeafletFallback) {
+    return (
+      <RentalsLeafletFallback
+        {...props}
+        message="Google Maps is restricted for 127.0.0.1. Open localhost:3000 or whitelist this host in Google Cloud to use Google here."
+      />
+    );
+  }
+
+  return <RentalsGooglePrimary {...props} />;
 }

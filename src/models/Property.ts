@@ -418,6 +418,18 @@ const PropertySchema = new Schema<IProperty>(
       type: AddressSchema,
       required: [true, "Property address is required"],
     },
+    latitude: {
+      type: Number,
+      min: [-90, "Latitude cannot be less than -90"],
+      max: [90, "Latitude cannot be greater than 90"],
+      default: null,
+    },
+    longitude: {
+      type: Number,
+      min: [-180, "Longitude cannot be less than -180"],
+      max: [180, "Longitude cannot be greater than 180"],
+      default: null,
+    },
     // Note: bedrooms, bathrooms, squareFootage, rentAmount, securityDeposit
     // are now stored only at the unit level in the units array
     yearBuilt: {

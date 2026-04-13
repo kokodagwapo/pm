@@ -326,11 +326,13 @@ function PropertyListCard({
   const bedrooms = unit?.bedrooms ?? 0;
   const bathrooms = unit?.bathrooms ?? 0;
   const rentAmount = unit?.rentAmount ?? 0;
-  const price = rentAmount > 500 ? rentAmount : rentAmount * 30;
+  const monthlyPrice = rentAmount > 500 ? rentAmount : rentAmount * 30;
+  const dailyPrice = rentAmount > 500 ? monthlyPrice / 30 : rentAmount;
+  const displayedDailyPrice = Math.max(1, Math.round(dailyPrice));
+  const displayedMonthlyPrice = Math.round(monthlyPrice);
+  const monthlySavings = Math.max(0, displayedDailyPrice * 30 - displayedMonthlyPrice);
   const sqft = unit?.squareFootage ?? 0;
-  const imageUrl =
-    property.images?.[0] ||
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80";
+  const imageUrl = property.images?.[0] || null;
   const imageCount = property.images?.length ?? 0;
 
   return (
@@ -348,12 +350,20 @@ function PropertyListCard({
       >
         {/* Image */}
         <div className="relative w-full h-[175px] sm:w-[180px] sm:min-w-[180px] sm:h-[155px] overflow-hidden bg-slate-100">
-          <img
-            src={imageUrl}
-            alt={property.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+          {imageUrl ? (
+            <>
+              <img
+                src={imageUrl}
+                alt={property.name}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+            </>
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-slate-100">
+              <Home className="h-8 w-8 text-slate-300" />
+            </div>
+          )}
 
           {/* FOR RENT badge */}
           <div className="absolute top-2.5 left-2.5">
@@ -406,10 +416,21 @@ function PropertyListCard({
                 {property.name}
               </h3>
               <div className="text-right shrink-0">
-                <p className="text-base font-semibold text-slate-900 leading-none tracking-tight">
-                  {formatPrice(price)}
+                <div className="flex items-end justify-end gap-1">
+                  <p className="text-base font-semibold text-slate-900 leading-none tracking-tight">
+                    {formatPrice(displayedDailyPrice)}
+                  </p>
+                  <p className="text-[10px] text-slate-400 font-normal">/day</p>
+                </div>
+                <p className="mt-0.5 text-[11px] text-slate-500">
+                  {formatPrice(displayedMonthlyPrice)}
+                  <span className="ml-1 text-[10px] text-slate-400">/month</span>
                 </p>
-                <p className="text-[10px] text-slate-400 mt-0.5 font-normal">/month</p>
+                {monthlySavings > 0 && (
+                  <p className="mt-1 inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-700">
+                    Save {formatPrice(monthlySavings)}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -899,13 +920,13 @@ function RentalsContent() {
 
       <div className="pt-[48px] flex flex-col flex-1">
         {/* Sticky search — compact card, filters collapsible on small screens */}
-        <div className="sticky top-[48px] z-30 border-b border-slate-200/50 bg-[#f8f7f4]/90 backdrop-blur-md">
+        <div className="sticky top-[48px] z-30 border-b border-slate-200/60 bg-[#f8f7f4]/92 backdrop-blur-md">
           <div className="mx-auto max-w-[1600px] px-4 py-3 sm:px-6">
-            <div className="rounded-2xl border border-slate-200/70 bg-white px-3 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:px-4 sm:py-3.5">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <div className="relative min-w-0 flex-1 basis-[min(100%,18rem)]">
+            <div className="rounded-2xl border border-slate-200/80 bg-white/95 px-3 py-2.5 shadow-[0_10px_30px_rgba(148,163,184,0.14)] sm:px-4 sm:py-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                <div className="relative min-w-0 w-full max-w-full sm:w-auto sm:max-w-[12rem] md:max-w-[13rem] lg:max-w-[14rem] xl:max-w-[15rem]">
                   <Search
-                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400"
                     aria-hidden
                   />
                   <input
@@ -919,28 +940,271 @@ function RentalsContent() {
                       }
                     }}
                     placeholder={t("rentals.search.placeholder")}
-                    className="w-full rounded-xl border border-slate-200/90 bg-slate-50/40 py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900/5"
+                    className="w-full rounded-xl border border-sky-100 bg-sky-50/55 py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-100"
                   />
                 </div>
                 {hasActiveFilters && (
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
+                    className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50/80 px-2.5 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800"
                     title="Clear all filters"
                   >
-                    <RotateCcw className="h-3.5 w-3.5" />
+                    <RotateCcw className="h-3.5 w-3.5 text-violet-400" />
                     <span className="hidden sm:inline">{t("rentals.filters.reset")}</span>
                   </button>
                 )}
+                {/* Stay: dates, guests, availability — before list/map */}
+                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 sm:flex-nowrap sm:gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        aria-label="Stay dates"
+                        className="h-9 max-w-[10.5rem] shrink-0 justify-start rounded-xl border-sky-100 bg-sky-50/60 px-2.5 text-left text-xs font-medium text-slate-700 shadow-none hover:bg-sky-50 sm:max-w-[12.5rem] md:max-w-[14rem]"
+                      >
+                        <CalendarIcon className="mr-1.5 h-3.5 w-3.5 shrink-0 text-sky-500" />
+                        <span className="truncate">
+                          {checkIn && checkOut
+                            ? `${format(checkIn, "MMM d")} – ${format(checkOut, "MMM d")}`
+                            : checkIn
+                              ? `${format(checkIn, "MMM d")} → …`
+                              : "Check-in — Check-out"}
+                        </span>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="range"
+                        numberOfMonths={stayCalMonths}
+                        selected={rangeSelected}
+                        onSelect={(r) => {
+                          setCheckIn(r?.from);
+                          setCheckOut(r?.to);
+                        }}
+                        disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        aria-label="Guests"
+                        className="h-9 w-[6.75rem] shrink-0 justify-between rounded-xl border-violet-100 bg-violet-50/60 px-2.5 text-xs font-medium text-slate-700 shadow-none hover:bg-violet-50 sm:w-28"
+                      >
+                        <span className="flex min-w-0 items-center gap-1.5">
+                          <Users className="h-3.5 w-3.5 shrink-0 text-violet-500" />
+                          <span className="truncate">{guestLabel}</span>
+                        </span>
+                        <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-40" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-4" align="start">
+                      <RentalsGuestRow
+                        label="Adults"
+                        sub="Ages 13+"
+                        value={adults}
+                        min={1}
+                        onChange={setAdults}
+                      />
+                      <RentalsGuestRow
+                        label="Children"
+                        sub="Ages 2–12"
+                        value={children}
+                        min={0}
+                        onChange={setChildren}
+                      />
+                      <RentalsGuestRow
+                        label="Infants"
+                        sub="Under 2"
+                        value={infants}
+                        min={0}
+                        onChange={setInfants}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Button
+                    type="button"
+                    className="h-9 shrink-0 rounded-xl bg-sky-100 px-3 text-xs font-semibold text-sky-900 shadow-none hover:bg-sky-200"
+                    disabled={searching || !checkIn || !checkOut}
+                    onClick={() => runAvailabilitySearch()}
+                  >
+                    {searching ? "…" : "Check availability"}
+                  </Button>
+                  {(activeCheckIn || activeCheckOut) && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="h-9 shrink-0 rounded-xl px-2 text-xs text-slate-600 hover:bg-slate-100"
+                      onClick={() => clearStayDatesFromUrl()}
+                    >
+                      Clear dates
+                    </Button>
+                  )}
+                </div>
+                <div className="hidden min-w-0 shrink-0 items-center gap-2 lg:flex">
+                  <div className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/80 px-2 shadow-none">
+                    <Building2 className="size-3.5 shrink-0 text-sky-400" aria-hidden />
+                    <Select
+                      value={activeType || "__all"}
+                      onValueChange={(v) => pushFilters({ type: v === "__all" ? undefined : v })}
+                    >
+                      <SelectTrigger
+                        size="sm"
+                        aria-label="Property type"
+                        className="h-8 w-[6.25rem] border-0 bg-transparent px-1 text-slate-700 shadow-none focus-visible:ring-0 xl:w-[7rem]"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PROPERTY_TYPES.map((opt) => (
+                          <SelectItem key={opt.value || "all-types"} value={opt.value || "__all"}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/80 px-2 shadow-none">
+                    <Bed className="size-3.5 shrink-0 text-violet-400" aria-hidden />
+                    <Select
+                      value={activeBedrooms || "__all"}
+                      onValueChange={(v) => pushFilters({ bedrooms: v === "__all" ? undefined : v })}
+                    >
+                      <SelectTrigger
+                        size="sm"
+                        aria-label="Bedrooms"
+                        className="h-8 w-[5.5rem] border-0 bg-transparent px-1 text-slate-700 shadow-none focus-visible:ring-0 xl:w-[6rem]"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BEDROOMS_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value || "any-beds"} value={opt.value || "__all"}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/80 px-2 shadow-none">
+                    <Car className="size-3.5 shrink-0 text-emerald-400" aria-hidden />
+                    <Select
+                      value={activeParkingType || "__all"}
+                      onValueChange={(v) =>
+                        pushFilters({ parkingType: v === "__all" ? undefined : v })
+                      }
+                    >
+                      <SelectTrigger
+                        size="sm"
+                        aria-label="Parking"
+                        className="h-8 w-[5rem] border-0 bg-transparent px-1 text-slate-700 shadow-none focus-visible:ring-0"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PARKING_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value || "any-park"} value={opt.value || "__all"}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div
+                    className="flex h-9 shrink-0 items-center gap-1 rounded-xl border border-slate-200/80 bg-slate-50/80 px-2 shadow-none"
+                    role="group"
+                    aria-label="Price per month"
+                  >
+                    <DollarSign className="size-3.5 shrink-0 text-amber-400" aria-hidden />
+                    <input
+                      type="number"
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value)}
+                      onBlur={() => pushFilters({ minRent: minPrice || undefined })}
+                      onKeyDown={(e) => e.key === "Enter" && pushFilters({ minRent: minPrice || undefined })}
+                      placeholder="Min"
+                      className="h-7 w-11 border-0 bg-transparent p-0 text-xs text-slate-800 tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-0"
+                    />
+                    <span className="text-[10px] text-slate-300">–</span>
+                    <input
+                      type="number"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                      onBlur={() => pushFilters({ maxRent: maxPrice || undefined })}
+                      onKeyDown={(e) => e.key === "Enter" && pushFilters({ maxRent: maxPrice || undefined })}
+                      placeholder="Max"
+                      className="h-7 w-11 border-0 bg-transparent p-0 text-xs text-slate-800 tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-0"
+                    />
+                  </div>
+
+                  <div className="flex h-9 min-w-0 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/80 px-2 shadow-none lg:w-40 xl:w-48">
+                    <MapPin className="size-3.5 shrink-0 text-rose-300" aria-hidden />
+                    <Select
+                      value={activeNeighborhood || "__all"}
+                      onValueChange={(v) => handleNeighborhood(v === "__all" ? "" : v)}
+                    >
+                      <SelectTrigger
+                        size="sm"
+                        aria-label="Area"
+                        className="h-8 min-w-0 flex-1 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {NEIGHBORHOODS.map((n) => (
+                          <SelectItem key={n.value || "all-n"} value={n.value || "__all"}>
+                            {n.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowFavoritesOnly((v) => !v)}
+                    aria-pressed={showFavoritesOnly}
+                    aria-label={`${t("rentals.filters.saved")} (${favoriteIds.length})`}
+                    className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl border px-2.5 text-xs font-medium transition-colors ${
+                      showFavoritesOnly
+                        ? "border-rose-400 bg-rose-50 text-rose-700"
+                        : "border-rose-100 bg-rose-50/55 text-slate-600 hover:bg-rose-50"
+                    }`}
+                  >
+                    <Heart className={`h-3.5 w-3.5 ${showFavoritesOnly ? "fill-current" : ""}`} />
+                    <span>{t("rentals.filters.saved")}</span>
+                    {favoriteIds.length > 0 ? (
+                      <span className="tabular-nums text-slate-400">({favoriteIds.length})</span>
+                    ) : null}
+                  </button>
+                  {mapLoading ? (
+                    <span className="inline-flex h-9 shrink-0 items-center gap-2 text-xs text-slate-400">
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500" />
+                    </span>
+                  ) : (
+                    <p className="shrink-0 whitespace-nowrap text-xs text-slate-500">
+                      <span className="font-semibold text-slate-800">{pagination.total}</span>{" "}
+                      {pagination.total === 1
+                        ? t("rentals.results.property")
+                        : t("rentals.results.properties")}
+                    </p>
+                  )}
+                </div>
                 <div className="ml-auto flex shrink-0 items-center gap-1 rounded-xl border border-slate-200/80 bg-slate-50/40 p-0.5">
                   <button
                     type="button"
                     onClick={() => setMobileView("list")}
-                    className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors sm:px-3 ${
+                    className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-medium transition-colors sm:px-3 ${
                       mobileView === "list"
                         ? "bg-white text-slate-900 shadow-sm"
-                        : "text-slate-500 hover:text-slate-800"
+                        : "text-slate-500 hover:bg-white/70 hover:text-slate-800"
                     }`}
                   >
                     <LayoutList className="h-4 w-4" />
@@ -949,10 +1213,10 @@ function RentalsContent() {
                   <button
                     type="button"
                     onClick={() => setMobileView("map")}
-                    className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors sm:px-3 ${
+                    className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-medium transition-colors sm:px-3 ${
                       mobileView === "map"
                         ? "bg-white text-slate-900 shadow-sm"
-                        : "text-slate-500 hover:text-slate-800"
+                        : "text-slate-500 hover:bg-white/70 hover:text-slate-800"
                     }`}
                   >
                     <Map className="h-4 w-4" />
@@ -962,16 +1226,22 @@ function RentalsContent() {
                 <button
                   type="button"
                   onClick={() => setListDrawerOpen((v) => !v)}
-                  className={`hidden h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition-colors lg:inline-flex ${
+                  className={`hidden h-9 items-center gap-1.5 rounded-xl border px-3 text-xs font-medium transition-colors lg:inline-flex ${
                     listDrawerOpen
                       ? "border-slate-900 bg-slate-900 text-white"
-                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                      : "border-slate-200 bg-slate-50/80 text-slate-600 hover:bg-slate-100"
                   }`}
                 >
                   <LayoutList className="h-3.5 w-3.5" />
                   {listDrawerOpen ? "Hide list" : "List"}
                 </button>
               </div>
+
+              {filteredMode && (
+                <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+                  Showing units available for your dates. Parking filter applies.
+                </p>
+              )}
 
               <button
                 type="button"
@@ -980,7 +1250,7 @@ function RentalsContent() {
                 aria-expanded={moreFiltersOpen}
               >
                 <SlidersHorizontal className="h-3.5 w-3.5 text-slate-400" />
-                {moreFiltersOpen ? "Hide filters" : "Filters & availability"}
+                {moreFiltersOpen ? "Hide filters" : "More filters"}
                 {moreFiltersOpen ? (
                   <ChevronUp className="h-3.5 w-3.5 text-slate-400" />
                 ) : (
@@ -989,7 +1259,7 @@ function RentalsContent() {
               </button>
 
               <div
-                className={`mt-3 space-y-3 border-t border-slate-100 pt-3 ${moreFiltersOpen ? "block" : "hidden lg:block"}`}
+                className={`mt-3 space-y-3 border-t border-slate-100 pt-3 lg:hidden ${moreFiltersOpen ? "block" : "hidden"}`}
               >
                 <div className="flex flex-nowrap items-stretch gap-2 overflow-x-auto pb-0.5 scrollbar-hide sm:gap-2.5 md:items-center md:gap-3">
                   <div className="flex min-w-0 flex-1 flex-nowrap items-stretch gap-2 sm:gap-2.5 md:items-center md:gap-3">
@@ -1148,107 +1418,6 @@ function RentalsContent() {
                       </p>
                     )}
                   </div>
-                </div>
-
-                <div className="rounded-xl bg-slate-50/70 px-3 py-3 sm:px-4">
-                  <p className="mb-2 text-[11px] font-medium text-slate-400">Stay</p>
-                  <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-                    <div className="min-w-0 flex-1 sm:min-w-[220px] sm:max-w-xs">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="h-10 w-full justify-start border-slate-200/90 bg-white text-left font-normal text-slate-900 shadow-none hover:bg-slate-50"
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4 shrink-0 text-slate-500" />
-                            <span className="truncate text-sm">
-                              {checkIn && checkOut
-                                ? `${format(checkIn, "MMM d")} – ${format(checkOut, "MMM d, y")}`
-                                : checkIn
-                                  ? `${format(checkIn, "MMM d, y")} → …`
-                                  : "Check-in — Check-out"}
-                            </span>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="range"
-                            numberOfMonths={stayCalMonths}
-                            selected={rangeSelected}
-                            onSelect={(r) => {
-                              setCheckIn(r?.from);
-                              setCheckOut(r?.to);
-                            }}
-                            disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    <div className="w-full sm:w-40">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="h-10 w-full justify-between border-slate-200/90 bg-white font-normal text-slate-900 shadow-none hover:bg-slate-50"
-                          >
-                            <span className="flex items-center gap-2 text-sm">
-                              <Users className="h-4 w-4 text-slate-500" />
-                              {guestLabel}
-                            </span>
-                            <ChevronDown className="h-4 w-4 opacity-40" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-72 p-4" align="start">
-                          <RentalsGuestRow
-                            label="Adults"
-                            sub="Ages 13+"
-                            value={adults}
-                            min={1}
-                            onChange={setAdults}
-                          />
-                          <RentalsGuestRow
-                            label="Children"
-                            sub="Ages 2–12"
-                            value={children}
-                            min={0}
-                            onChange={setChildren}
-                          />
-                          <RentalsGuestRow
-                            label="Infants"
-                            sub="Under 2"
-                            value={infants}
-                            min={0}
-                            onChange={setInfants}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        type="button"
-                        className="h-10 rounded-xl bg-slate-900 px-4 text-white shadow-none hover:bg-slate-800"
-                        disabled={searching || !checkIn || !checkOut}
-                        onClick={() => runAvailabilitySearch()}
-                      >
-                        {searching ? "Searching…" : "Check availability"}
-                      </Button>
-                      {(activeCheckIn || activeCheckOut) && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          className="h-10 text-slate-600 hover:bg-white/80"
-                          onClick={() => clearStayDatesFromUrl()}
-                        >
-                          Clear dates
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                  {filteredMode && (
-                    <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
-                      Showing units available for your dates. Parking filter applies.
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
@@ -1409,11 +1578,6 @@ function RentalsContent() {
                           ? t("rentals.results.property")
                           : t("rentals.results.properties")}
                       </h2>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {selectedProperty
-                          ? `Showing “${selectedProperty.name}” first so you can scan details without leaving the map.`
-                          : "Select any pin to preview details while you browse."}
-                      </p>
                     </div>
                     <button
                       type="button"

@@ -53,7 +53,7 @@ publicDir = "public"
 [userenv.shared]
 AUTH_TRUST_HOST = "true"
 ENABLE_DEMO_AUTH = "true"
-REPLIT_DEV_SERVER = "1"
+REPLIT_DEV_SERVER = "0"
 
 [postMerge]
 path = "scripts/post-merge.sh"
