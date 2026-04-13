@@ -36,8 +36,8 @@ if [ -z "${REPLIT_DEPLOYMENT:-}" ]; then
   export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=3072"
 fi
 
-if [ "${REPLIT_DEV_SERVER:-}" = "1" ]; then
-  echo "REPLIT_DEV_SERVER=1 — Next dev on port $PORT (HMR; less stable on Replit)."
+if [ -z "${REPLIT_DEPLOYMENT:-}" ]; then
+  echo "Development environment — Next dev on port $PORT."
   rm -rf .next
   exec npm run dev:5000
 fi
