@@ -921,324 +921,215 @@ function RentalsContent() {
       <div className="pt-[48px] flex flex-col flex-1">
         {/* Sticky search — compact card, filters collapsible on small screens */}
         <div className="sticky top-[48px] z-30 border-b border-slate-200/60 bg-[#f8f7f4]/92 backdrop-blur-md">
-          <div className="mx-auto w-full max-w-[1720px] px-3 py-3 sm:px-5 lg:px-6">
-            <div className="rounded-[1.4rem] border border-slate-200/80 bg-white/90 px-3 py-3 shadow-[0_18px_50px_rgba(148,163,184,0.14)] backdrop-blur-xl sm:px-4 sm:py-3.5">
-              <div className="flex flex-wrap items-center gap-2.5 lg:flex-nowrap lg:gap-3">
-                <div className="relative min-w-0 w-full lg:w-[18rem] xl:w-[20rem]">
-                  <Search
-                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400"
-                    aria-hidden
-                  />
-                  <input
-                    type="text"
-                    value={searchText}
-                    onChange={(e) => handleSearchInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-                        pushFilters({ search: searchText || undefined });
-                      }
-                    }}
-                    placeholder={t("rentals.search.placeholder")}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 py-2.75 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-sky-200 focus:bg-white focus:ring-4 focus:ring-sky-100/70"
-                  />
-                </div>
-                {hasActiveFilters && (
-                  <button
-                    type="button"
-                    onClick={clearFilters}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-white hover:text-slate-800 hover:shadow-sm"
-                    title="Clear all filters"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5 text-violet-400" />
-                    <span className="hidden sm:inline">{t("rentals.filters.reset")}</span>
-                  </button>
-                )}
-                {/* Stay: dates, guests, availability — before list/map */}
-                <div className="flex min-w-0 flex-1 basis-full flex-wrap items-center gap-2 lg:flex-nowrap lg:basis-auto lg:justify-end lg:gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        aria-label="Stay dates"
-                        className="h-10 max-w-[11rem] shrink-0 justify-start rounded-2xl border-slate-200 bg-slate-50/80 px-3 text-left text-xs font-medium text-slate-700 shadow-sm hover:bg-white sm:max-w-[12.5rem] md:max-w-[14rem]"
-                      >
-                        <CalendarIcon className="mr-1.5 h-3.5 w-3.5 shrink-0 text-sky-500" />
-                        <span className="truncate">
-                          {checkIn && checkOut
-                            ? `${format(checkIn, "MMM d")} – ${format(checkOut, "MMM d")}`
-                            : checkIn
-                              ? `${format(checkIn, "MMM d")} → …`
-                              : "Check-in — Check-out"}
-                        </span>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="range"
-                        numberOfMonths={stayCalMonths}
-                        selected={rangeSelected}
-                        onSelect={(r) => {
-                          setCheckIn(r?.from);
-                          setCheckOut(r?.to);
-                        }}
-                        disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        aria-label="Guests"
-                        className="h-10 w-[6.75rem] shrink-0 justify-between rounded-2xl border-slate-200 bg-slate-50/80 px-3 text-xs font-medium text-slate-700 shadow-sm hover:bg-white sm:w-28"
-                      >
-                        <span className="flex min-w-0 items-center gap-1.5">
-                          <Users className="h-3.5 w-3.5 shrink-0 text-violet-500" />
-                          <span className="truncate">{guestLabel}</span>
-                        </span>
-                        <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-40" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-72 p-4" align="start">
-                      <RentalsGuestRow
-                        label="Adults"
-                        sub="Ages 13+"
-                        value={adults}
-                        min={1}
-                        onChange={setAdults}
-                      />
-                      <RentalsGuestRow
-                        label="Children"
-                        sub="Ages 2–12"
-                        value={children}
-                        min={0}
-                        onChange={setChildren}
-                      />
-                      <RentalsGuestRow
-                        label="Infants"
-                        sub="Under 2"
-                        value={infants}
-                        min={0}
-                        onChange={setInfants}
-                      />
-                    </PopoverContent>
-                  </Popover>
+          <div className="w-full px-3 py-2.5 sm:px-5 lg:px-6">
+            <div className="flex flex-wrap items-center gap-2 lg:flex-nowrap lg:gap-2">
+              <div className="relative shrink-0 w-full sm:w-auto sm:min-w-[11rem] lg:min-w-[13rem] xl:min-w-[15rem]">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" aria-hidden />
+                <input
+                  type="text"
+                  value={searchText}
+                  onChange={(e) => handleSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+                      pushFilters({ search: searchText || undefined });
+                    }
+                  }}
+                  placeholder={t("rentals.search.placeholder")}
+                  className="w-full h-9 rounded-full border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-800 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+                />
+              </div>
+
+              <div className="h-5 w-px bg-slate-200 hidden lg:block shrink-0" />
+
+              <Popover>
+                <PopoverTrigger asChild>
                   <Button
                     type="button"
-                    className="h-10 shrink-0 rounded-2xl bg-sky-500 px-3.5 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-600"
-                    disabled={searching || !checkIn || !checkOut}
-                    onClick={() => runAvailabilitySearch()}
+                    variant="outline"
+                    aria-label="Stay dates"
+                    className="h-9 shrink-0 justify-start rounded-full border-slate-200 bg-white px-3 text-left text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 max-w-[11rem] sm:max-w-[13rem]"
                   >
-                    {searching ? "…" : "Check availability"}
-                  </Button>
-                  {(activeCheckIn || activeCheckOut) && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                    className="h-10 shrink-0 rounded-2xl px-3 text-xs text-slate-600 hover:bg-slate-100"
-                      onClick={() => clearStayDatesFromUrl()}
-                    >
-                      Clear dates
-                    </Button>
-                  )}
-                </div>
-                <div className="hidden min-w-0 basis-full flex-wrap items-center gap-2 pt-1 lg:flex xl:basis-auto xl:justify-end xl:pt-0">
-                  <div className="flex h-10 shrink-0 items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-2.5 shadow-sm">
-                    <Building2 className="size-3.5 shrink-0 text-sky-400" aria-hidden />
-                    <Select
-                      value={activeType || "__all"}
-                      onValueChange={(v) => pushFilters({ type: v === "__all" ? undefined : v })}
-                    >
-                      <SelectTrigger
-                        size="sm"
-                        aria-label="Property type"
-                        className="h-8 w-[6.25rem] border-0 bg-transparent px-1 text-slate-700 shadow-none focus-visible:ring-0 xl:w-[7rem]"
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PROPERTY_TYPES.map((opt) => (
-                          <SelectItem key={opt.value || "all-types"} value={opt.value || "__all"}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex h-10 shrink-0 items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-2.5 shadow-sm">
-                    <Bed className="size-3.5 shrink-0 text-violet-400" aria-hidden />
-                    <Select
-                      value={activeBedrooms || "__all"}
-                      onValueChange={(v) => pushFilters({ bedrooms: v === "__all" ? undefined : v })}
-                    >
-                      <SelectTrigger
-                        size="sm"
-                        aria-label="Bedrooms"
-                        className="h-8 w-[5.5rem] border-0 bg-transparent px-1 text-slate-700 shadow-none focus-visible:ring-0 xl:w-[6rem]"
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {BEDROOMS_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value || "any-beds"} value={opt.value || "__all"}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex h-10 shrink-0 items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-2.5 shadow-sm">
-                    <Car className="size-3.5 shrink-0 text-emerald-400" aria-hidden />
-                    <Select
-                      value={activeParkingType || "__all"}
-                      onValueChange={(v) =>
-                        pushFilters({ parkingType: v === "__all" ? undefined : v })
-                      }
-                    >
-                      <SelectTrigger
-                        size="sm"
-                        aria-label="Parking"
-                        className="h-8 w-[5rem] border-0 bg-transparent px-1 text-slate-700 shadow-none focus-visible:ring-0"
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PARKING_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value || "any-park"} value={opt.value || "__all"}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div
-                    className="flex h-10 shrink-0 items-center gap-1 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-2.5 shadow-sm"
-                    role="group"
-                    aria-label="Price per month"
-                  >
-                    <DollarSign className="size-3.5 shrink-0 text-amber-400" aria-hidden />
-                    <input
-                      type="number"
-                      value={minPrice}
-                      onChange={(e) => setMinPrice(e.target.value)}
-                      onBlur={() => pushFilters({ minRent: minPrice || undefined })}
-                      onKeyDown={(e) => e.key === "Enter" && pushFilters({ minRent: minPrice || undefined })}
-                      placeholder="Min"
-                      className="h-7 w-11 border-0 bg-transparent p-0 text-xs text-slate-800 tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-0"
-                    />
-                    <span className="text-[10px] text-slate-300">–</span>
-                    <input
-                      type="number"
-                      value={maxPrice}
-                      onChange={(e) => setMaxPrice(e.target.value)}
-                      onBlur={() => pushFilters({ maxRent: maxPrice || undefined })}
-                      onKeyDown={(e) => e.key === "Enter" && pushFilters({ maxRent: maxPrice || undefined })}
-                      placeholder="Max"
-                      className="h-7 w-11 border-0 bg-transparent p-0 text-xs text-slate-800 tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-0"
-                    />
-                  </div>
-
-                  <div className="flex h-10 min-w-0 shrink-0 items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-2.5 shadow-sm lg:w-40 xl:w-48">
-                    <MapPin className="size-3.5 shrink-0 text-rose-300" aria-hidden />
-                    <Select
-                      value={activeNeighborhood || "__all"}
-                      onValueChange={(v) => handleNeighborhood(v === "__all" ? "" : v)}
-                    >
-                      <SelectTrigger
-                        size="sm"
-                        aria-label="Area"
-                        className="h-8 min-w-0 flex-1 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0"
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {NEIGHBORHOODS.map((n) => (
-                          <SelectItem key={n.value || "all-n"} value={n.value || "__all"}>
-                            {n.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowFavoritesOnly((v) => !v)}
-                    aria-pressed={showFavoritesOnly}
-                    aria-label={`${t("rentals.filters.saved")} (${favoriteIds.length})`}
-                    className={`inline-flex h-10 shrink-0 items-center gap-1.5 rounded-2xl border px-3 text-xs font-medium transition-colors ${
-                      showFavoritesOnly
-                        ? "border-rose-400 bg-rose-50 text-rose-700"
-                        : "border-rose-100 bg-rose-50/55 text-slate-600 hover:bg-rose-50"
-                    }`}
-                  >
-                    <Heart className={`h-3.5 w-3.5 ${showFavoritesOnly ? "fill-current" : ""}`} />
-                    <span>{t("rentals.filters.saved")}</span>
-                    {favoriteIds.length > 0 ? (
-                      <span className="tabular-nums text-slate-400">({favoriteIds.length})</span>
-                    ) : null}
-                  </button>
-                  {mapLoading ? (
-                    <span className="inline-flex h-9 shrink-0 items-center gap-2 text-xs text-slate-400">
-                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500" />
+                    <CalendarIcon className="mr-1.5 h-3.5 w-3.5 shrink-0 text-sky-500" />
+                    <span className="truncate">
+                      {checkIn && checkOut
+                        ? `${format(checkIn, "MMM d")} – ${format(checkOut, "MMM d")}`
+                        : checkIn
+                          ? `${format(checkIn, "MMM d")} → …`
+                          : "Check-in — Check-out"}
                     </span>
-                  ) : (
-                    <p className="shrink-0 whitespace-nowrap text-xs text-slate-500">
-                      <span className="font-semibold text-slate-800">{pagination.total}</span>{" "}
-                      {pagination.total === 1
-                        ? t("rentals.results.property")
-                        : t("rentals.results.properties")}
-                    </p>
-                  )}
-                </div>
-                <div className="ml-auto flex shrink-0 items-center gap-1 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-1 shadow-sm">
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="range"
+                    numberOfMonths={stayCalMonths}
+                    selected={rangeSelected}
+                    onSelect={(r) => {
+                      setCheckIn(r?.from);
+                      setCheckOut(r?.to);
+                    }}
+                    disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    aria-label="Guests"
+                    className="h-9 w-[6.5rem] shrink-0 justify-between rounded-full border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 sm:w-[7rem]"
+                  >
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <Users className="h-3.5 w-3.5 shrink-0 text-violet-500" />
+                      <span className="truncate">{guestLabel}</span>
+                    </span>
+                    <ChevronDown className="h-3 w-3 shrink-0 opacity-40" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-4" align="start">
+                  <RentalsGuestRow label="Adults" sub="Ages 13+" value={adults} min={1} onChange={setAdults} />
+                  <RentalsGuestRow label="Children" sub="Ages 2–12" value={children} min={0} onChange={setChildren} />
+                  <RentalsGuestRow label="Infants" sub="Under 2" value={infants} min={0} onChange={setInfants} />
+                </PopoverContent>
+              </Popover>
+
+              <Button
+                type="button"
+                className="h-9 shrink-0 rounded-full bg-sky-500 px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-600 active:bg-sky-700"
+                disabled={searching || !checkIn || !checkOut}
+                onClick={() => runAvailabilitySearch()}
+              >
+                {searching ? "…" : "Check availability"}
+              </Button>
+
+              {(activeCheckIn || activeCheckOut) && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-9 shrink-0 rounded-full px-3 text-xs text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                  onClick={() => clearStayDatesFromUrl()}
+                >
+                  Clear dates
+                </Button>
+              )}
+
+              <div className="h-5 w-px bg-slate-200 hidden lg:block shrink-0" />
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button type="button" variant="outline" className="hidden lg:inline-flex h-9 shrink-0 rounded-full border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+                    <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5 text-slate-400" />
+                    Filters
+                    {hasActiveFilters && <span className="ml-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-sky-500 text-[10px] font-bold text-white">!</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-4" align="end">
+                  <div className="space-y-3">
+                    <div>
+                      <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-slate-400">Type</label>
+                      <Select value={activeType || "__all"} onValueChange={(v) => pushFilters({ type: v === "__all" ? undefined : v })}>
+                        <SelectTrigger size="sm" className="h-9 w-full rounded-lg border-slate-200 bg-slate-50 text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent>{PROPERTY_TYPES.map((opt) => (<SelectItem key={opt.value || "all-types"} value={opt.value || "__all"}>{opt.label}</SelectItem>))}</SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-slate-400">Bedrooms</label>
+                      <Select value={activeBedrooms || "__all"} onValueChange={(v) => pushFilters({ bedrooms: v === "__all" ? undefined : v })}>
+                        <SelectTrigger size="sm" className="h-9 w-full rounded-lg border-slate-200 bg-slate-50 text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent>{BEDROOMS_OPTIONS.map((opt) => (<SelectItem key={opt.value || "any-beds"} value={opt.value || "__all"}>{opt.label}</SelectItem>))}</SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-slate-400">Parking</label>
+                      <Select value={activeParkingType || "__all"} onValueChange={(v) => pushFilters({ parkingType: v === "__all" ? undefined : v })}>
+                        <SelectTrigger size="sm" className="h-9 w-full rounded-lg border-slate-200 bg-slate-50 text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent>{PARKING_OPTIONS.map((opt) => (<SelectItem key={opt.value || "any-park"} value={opt.value || "__all"}>{opt.label}</SelectItem>))}</SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-slate-400">Neighborhood</label>
+                      <Select value={activeNeighborhood || "__all"} onValueChange={(v) => handleNeighborhood(v === "__all" ? "" : v)}>
+                        <SelectTrigger size="sm" className="h-9 w-full rounded-lg border-slate-200 bg-slate-50 text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent>{NEIGHBORHOODS.map((n) => (<SelectItem key={n.value || "all-n"} value={n.value || "__all"}>{n.label}</SelectItem>))}</SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-slate-400">Price / month</label>
+                      <div className="flex items-center gap-2">
+                        <input type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} onBlur={() => pushFilters({ minRent: minPrice || undefined })} onKeyDown={(e) => e.key === "Enter" && pushFilters({ minRent: minPrice || undefined })} placeholder="Min" className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-sm tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-100" />
+                        <span className="text-xs text-slate-300">–</span>
+                        <input type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} onBlur={() => pushFilters({ maxRent: maxPrice || undefined })} onKeyDown={(e) => e.key === "Enter" && pushFilters({ maxRent: maxPrice || undefined })} placeholder="Max" className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-sm tabular-nums placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-100" />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                      <button type="button" onClick={() => setShowFavoritesOnly((v) => !v)} className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${showFavoritesOnly ? "bg-rose-50 text-rose-700" : "text-slate-600 hover:bg-slate-50"}`}>
+                        <Heart className={`h-3.5 w-3.5 ${showFavoritesOnly ? "fill-current" : ""}`} />
+                        {t("rentals.filters.saved")} {favoriteIds.length > 0 && `(${favoriteIds.length})`}
+                      </button>
+                      {hasActiveFilters && (
+                        <button type="button" onClick={clearFilters} className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-700">
+                          <RotateCcw className="h-3 w-3" />
+                          {t("rentals.filters.reset")}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              <div className="ml-auto flex shrink-0 items-center gap-1.5">
+                {mapLoading ? (
+                  <span className="inline-flex shrink-0 items-center pr-1">
+                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500" />
+                  </span>
+                ) : (
+                  <p className="hidden sm:block shrink-0 whitespace-nowrap pr-1 text-xs text-slate-500">
+                    <span className="font-semibold text-slate-700">{pagination.total}</span>{" "}
+                    {pagination.total === 1 ? t("rentals.results.property") : t("rentals.results.properties")}
+                  </p>
+                )}
+                <div className="flex items-center gap-0.5 rounded-full border border-slate-200 bg-white p-0.5 shadow-sm">
                   <button
                     type="button"
                     onClick={() => setMobileView("list")}
-                    className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-medium transition-colors sm:px-3 ${
-                      mobileView === "list"
-                        ? "bg-white text-slate-900 shadow-sm"
-                        : "text-slate-500 hover:bg-white/70 hover:text-slate-800"
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1.5 text-xs font-medium transition-colors ${
+                      mobileView === "list" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-50"
                     }`}
                   >
-                    <LayoutList className="h-4 w-4" />
+                    <LayoutList className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">{t("rentals.view.list")}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setMobileView("map")}
-                    className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-medium transition-colors sm:px-3 ${
-                      mobileView === "map"
-                        ? "bg-white text-slate-900 shadow-sm"
-                        : "text-slate-500 hover:bg-white/70 hover:text-slate-800"
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1.5 text-xs font-medium transition-colors ${
+                      mobileView === "map" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-50"
                     }`}
                   >
-                    <Map className="h-4 w-4" />
+                    <Map className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">{t("rentals.view.map")}</span>
                   </button>
                 </div>
                 <button
                   type="button"
                   onClick={() => setListDrawerOpen((v) => !v)}
-                  className={`hidden h-9 items-center gap-1.5 rounded-xl border px-3 text-xs font-medium transition-colors lg:inline-flex ${
+                  className={`hidden lg:inline-flex h-8 items-center gap-1 rounded-full border px-2.5 text-xs font-medium transition-colors ${
                     listDrawerOpen
                       ? "border-slate-900 bg-slate-900 text-white"
-                      : "border-slate-200 bg-slate-50/80 text-slate-600 hover:bg-slate-100"
+                      : "border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"
                   }`}
                 >
-                  <LayoutList className="h-3.5 w-3.5" />
-                  {listDrawerOpen ? "Hide list" : "List"}
+                  <LayoutList className="h-3 w-3" />
+                  {listDrawerOpen ? "Hide" : "List"}
                 </button>
               </div>
+            </div>
 
               {filteredMode && (
-                <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+                <p className="px-3 pb-2 sm:px-5 lg:px-6 text-[11px] leading-relaxed text-slate-500">
                   Showing units available for your dates. Parking filter applies.
                 </p>
               )}
@@ -1420,7 +1311,6 @@ function RentalsContent() {
                   </div>
                 </div>
               </div>
-            </div>
           </div>
         </div>
 
