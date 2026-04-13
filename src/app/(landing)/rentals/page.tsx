@@ -529,11 +529,7 @@ function RentalsContent() {
   const [listDrawerOpen, setListDrawerOpen] = useState(true);
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
   const [stayCalMonths, setStayCalMonths] = useState(1);
-  const [isLg, setIsLg] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia("(min-width: 1024px)").matches
-      : false
-  );
+  const [isLg, setIsLg] = useState(false);
 
   const activeType = searchParams.get("type") || "";
   const activeBedrooms = searchParams.get("bedrooms") || "";

@@ -1,23 +1,14 @@
 "use client";
 
-import { useEffect, useState, ReactNode } from "react";
+import { ReactNode } from "react";
 
 /**
- * HydrationGuard prevents hydration mismatches by deferring client-only rendering
- * until after the component has hydrated. This prevents Fast Refresh errors during
- * development and ensures server/client HTML matches perfectly.
+ * HydrationGuard — pass-through wrapper.
+ * Previously deferred all rendering until after hydration, which caused blank
+ * pages and "Critical Application Error: {}" on every Fast Refresh cycle.
+ * Individual components that need client-only rendering should use their own
+ * useEffect/useState guards instead of blocking the entire tree.
  */
 export function HydrationGuard({ children }: { children: ReactNode }) {
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
-  // Return empty div with same dimensions during SSR to prevent layout shift
-  if (!isHydrated) {
-    return <div suppressHydrationWarning />;
-  }
-
   return <>{children}</>;
 }

@@ -1,200 +1,63 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { isReplitHosted } from "@/lib/replit-host";
-import {
-  MAX_AUTO_RETRIES,
-  MAX_SESSION_AUTO_RECOVERIES,
-  SESSION_TOTAL_KEY,
-  LAST_FP_KEY,
-  RETRY_COUNT_KEY,
-  geTransientRetry,
-  safeSessionGet,
-  safeSessionSet,
-  safeSessionRemove,
-  fingerprintError,
-  isBareEmptyErrorPayload,
-  isTransientDevError,
-  bumpSessionRecoveryTotal,
-} from "@/lib/global-error-logic";
+import { useEffect, useRef, type CSSProperties } from "react";
 
 interface GlobalErrorProps {
   error?: Error & { digest?: string };
   reset?: () => void;
 }
 
-/** Inline icons only — avoid importing lucide (chunk load failures would break this page). */
-function IconAlert({ className, style }: { className?: string; style?: CSSProperties }) {
+function IconAlert({ style }: { style?: CSSProperties }) {
   return (
-    <svg
-      className={className}
-      style={style}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden
-    >
+    <svg style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
       <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" />
     </svg>
   );
 }
 
-function IconRefresh({ className, style }: { className?: string; style?: CSSProperties }) {
+function IconRefresh({ style }: { style?: CSSProperties }) {
   return (
-    <svg
-      className={className}
-      style={style}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden
-    >
+    <svg style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
       <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
     </svg>
   );
 }
 
-function IconHome({ className, style }: { className?: string; style?: CSSProperties }) {
+function IconHome({ style }: { style?: CSSProperties }) {
   return (
-    <svg
-      className={className}
-      style={style}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden
-    >
+    <svg style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10" />
     </svg>
   );
 }
 
+function isEmptyError(error: unknown): boolean {
+  if (error == null) return true;
+  if (error instanceof Error) return false;
+  if (typeof error === "object" && Object.keys(error as object).length === 0) return true;
+  return false;
+}
+
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
-  const [showUI, setShowUI] = useState(false);
-  const resetRef = useRef(reset);
-  resetRef.current = reset;
-  /** Fast-path retries for empty payloads (before sessionStorage). */
-  const fastEmptyRecoveryRef = useRef(0);
+  const retryCount = useRef(0);
+  const isEmpty = isEmptyError(error);
 
   useEffect(() => {
-    try {
-      const transient = isTransientDevError(error);
-      const allowAutoRecover =
-        process.env.NODE_ENV === "development" ||
-        isBareEmptyErrorPayload(error) ||
-        isReplitHosted();
-
-      // Empty / unknown boundary payloads: reset immediately (no sessionStorage, no microtask).
-      if (
-        allowAutoRecover &&
-        transient &&
-        isBareEmptyErrorPayload(error) &&
-        fastEmptyRecoveryRef.current < MAX_AUTO_RETRIES
-      ) {
-        fastEmptyRecoveryRef.current += 1;
-        try {
-          resetRef.current?.();
-        } catch {
-          setShowUI(true);
-        }
-        return;
-      }
-
-      const fp = fingerprintError(error);
-      if (fp !== geTransientRetry.fingerprint) {
-        geTransientRetry.fingerprint = fp;
-        geTransientRetry.count = 0;
-        safeSessionSet(LAST_FP_KEY, fp);
-        safeSessionSet(RETRY_COUNT_KEY, "0");
-      }
-
-      let transientRetryCountForFingerprint = 0;
-      try {
-        const raw = safeSessionGet(RETRY_COUNT_KEY);
-        const parsed = parseInt(raw || "0", 10);
-        if (!Number.isNaN(parsed)) {
-          transientRetryCountForFingerprint = parsed;
-        }
-      } catch {
-        // Use default value
-      }
-      transientRetryCountForFingerprint = Math.max(transientRetryCountForFingerprint, geTransientRetry.count);
-
-      if (allowAutoRecover && transient) {
-        let sessionTotal = 0;
-        try {
-          const raw = safeSessionGet(SESSION_TOTAL_KEY);
-          const parsed = parseInt(raw || "0", 10);
-          if (!Number.isNaN(parsed)) {
-            sessionTotal = parsed;
-          }
-        } catch {
-          // Use default value
-        }
-
-        if (sessionTotal >= MAX_SESSION_AUTO_RECOVERIES) {
-          setShowUI(true);
-          return;
-        }
-
-        if (transientRetryCountForFingerprint < MAX_AUTO_RETRIES) {
-          const next = transientRetryCountForFingerprint + 1;
-          geTransientRetry.count = next;
-          safeSessionSet(RETRY_COUNT_KEY, String(next));
-          bumpSessionRecoveryTotal();
-          const delay = 500 * next;
-          const timer = setTimeout(() => {
-            try {
-              resetRef.current?.();
-            } catch {
-              setShowUI(true);
-            }
-          }, delay);
-          return () => clearTimeout(timer);
-        }
-
-        try {
-          const key = "__smartstart_reload";
-          let count = 0;
-          try {
-            const raw = safeSessionGet(key);
-            const parsed = parseInt(raw || "0", 10);
-            if (!Number.isNaN(parsed)) {
-              count = parsed;
-            }
-          } catch {
-            // Use default value
-          }
-          if (count < 2) {
-            bumpSessionRecoveryTotal();
-            safeSessionSet(key, String(count + 1));
-            window.location.reload();
-            return;
-          }
-          safeSessionRemove(key);
-        } catch {
-          // ignore
-        }
-      }
-
-      setShowUI(true);
-    } catch {
-      setShowUI(true);
+    if (isEmpty && retryCount.current < 1 && reset) {
+      retryCount.current += 1;
+      try { reset(); } catch { /* ignore */ }
     }
-  }, [error]);
+  }, [isEmpty, reset]);
 
-  if (!showUI) {
+  if (isEmpty) {
     return (
       <html lang="en">
         <head>
           <meta charSet="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>Loading - SmartStartPM</title>
+          <title>SmartStartPM</title>
         </head>
-        <body style={{ margin: 0, background: "#f9fafb" }} />
+        <body style={{ margin: 0 }} />
       </html>
     );
   }
@@ -249,31 +112,12 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 problem, or temporary server error.
               </div>
             </div>
-            {process.env.NODE_ENV === "development" && (
+            {process.env.NODE_ENV === "development" && devMessage && (
               <div className="ed">
                 <details>
                   <summary>Technical Details</summary>
                   <div className="ec">
-                    <div>
-                      <strong>Error:</strong>{" "}
-                      {devMessage || "(no message — often a transient dev/build glitch or empty error payload)"}
-                    </div>
-                    {error &&
-                      typeof error === "object" &&
-                      "digest" in error &&
-                      (error as { digest?: string }).digest && (
-                        <div style={{ marginTop: "0.5rem" }}>
-                          <strong>Digest:</strong> {(error as { digest: string }).digest}
-                        </div>
-                      )}
-                    {error &&
-                      typeof error === "object" &&
-                      "stack" in error &&
-                      (error as { stack?: string }).stack && (
-                        <div style={{ marginTop: "0.5rem" }}>
-                          <strong>Stack:</strong> {(error as { stack: string }).stack}
-                        </div>
-                      )}
+                    <div><strong>Error:</strong> {devMessage}</div>
                   </div>
                 </details>
               </div>
@@ -281,13 +125,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
             <div className="ac">
               <button
                 type="button"
-                onClick={() => {
-                  try {
-                    resetRef.current?.();
-                  } catch {
-                    /* ignore */
-                  }
-                }}
+                onClick={() => { try { reset?.(); } catch { /* ignore */ } }}
                 className="b bs"
               >
                 <IconRefresh style={{ width: "1rem", height: "1rem" }} />
