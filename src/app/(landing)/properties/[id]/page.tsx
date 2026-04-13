@@ -1,13 +1,31 @@
 import { PropertyDetailClient } from "./PropertyDetailClient";
-import connectDB from "@/lib/mongodb";
+import { connectDBSafe } from "@/lib/mongodb";
 import Property from "@/models/Property";
 import DateBlock from "@/models/DateBlock";
 import PricingRule from "@/models/PricingRule";
+import { VMS_FLORIDA_PROPERTIES } from "@/lib/vms-florida-properties";
+
+function getVmsProperty(id: string) {
+  const prop = VMS_FLORIDA_PROPERTIES.find((p) => p._id === id);
+  if (!prop) return null;
+  return { ...prop, availability: { blocks: [], pricingRules: [] } };
+}
 
 async function getProperty(id: string) {
   try {
-    if (!id || id.length !== 24) return null;
-    await connectDB();
+    if (!id) return null;
+
+    if (id.startsWith("vms-")) {
+      return getVmsProperty(id);
+    }
+
+    if (id.length !== 24) return null;
+
+    const conn = await connectDBSafe();
+    if (!conn) {
+      return getVmsProperty(id);
+    }
+
     const property = await Property.findById(id).lean();
     if (!property) return null;
 
@@ -64,7 +82,7 @@ async function getProperty(id: string) {
 
     return propertyObj;
   } catch {
-    return null;
+    return getVmsProperty(id);
   }
 }
 

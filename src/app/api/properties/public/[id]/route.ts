@@ -9,23 +9,41 @@ import {
   handleApiError,
   isValidObjectId,
 } from "@/lib/api-utils";
-import connectDB from "@/lib/mongodb";
+import { connectDBSafe } from "@/lib/mongodb";
 import { calculatePropertyStatusFromUnits } from "@/utils/property-status-calculator";
 import DateBlock from "@/models/DateBlock";
 import PricingRule from "@/models/PricingRule";
 import { stripUnitSecretsForPublicApi } from "@/lib/unit-access-secrets";
+import { VMS_FLORIDA_PROPERTIES } from "@/lib/vms-florida-properties";
+
+function getVmsFallback(id: string) {
+  const prop = VMS_FLORIDA_PROPERTIES.find((p) => p._id === id);
+  if (!prop) return null;
+  return { ...prop, availability: { blocks: [], pricingRules: [] } };
+}
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectDB();
-
     const { id } = await params;
+
+    if (id.startsWith("vms-")) {
+      const vmsProp = getVmsFallback(id);
+      if (!vmsProp) return createErrorResponse("Property not found", 404);
+      return createSuccessResponse(vmsProp, "Property retrieved successfully");
+    }
 
     if (!isValidObjectId(id)) {
       return createErrorResponse("Invalid property ID", 400);
+    }
+
+    const conn = await connectDBSafe();
+    if (!conn) {
+      const vmsProp = getVmsFallback(id);
+      if (vmsProp) return createSuccessResponse(vmsProp, "Property retrieved successfully");
+      return createErrorResponse("Database unavailable", 503);
     }
 
     const property = await Property.findOne({
@@ -99,7 +117,6 @@ export async function GET(
       })),
     };
 
-    // Never expose unit access secrets on the public listing API
     if (Array.isArray(propertyObj.units)) {
       propertyObj.units = propertyObj.units.map((u: Record<string, unknown>) =>
         stripUnitSecretsForPublicApi(u)
