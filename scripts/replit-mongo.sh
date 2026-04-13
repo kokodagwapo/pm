@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # Shared by start.sh and start-prod.sh on Replit: local mongod only when using localhost URI.
 
-export MONGODB_URI="${MONGODB_URI:-mongodb://localhost:27017/SmartStartPM}"
+_raw="${MONGODB_URI:-mongodb://localhost:27017/SmartStartPM}"
+if [[ "$_raw" == MONGODB_URI=* ]]; then
+  _raw="${_raw#MONGODB_URI=}"
+fi
+export MONGODB_URI="$_raw"
 
 replit_should_start_local_mongo() {
   case "${MONGODB_URI}" in
