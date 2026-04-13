@@ -770,6 +770,24 @@ function RentalsContent() {
     selectedPropertyId &&
     !properties.some((p) => p._id === selectedPropertyId);
 
+  const listViewActive = isLg ? listDrawerOpen : mobileView === "list";
+  const mapViewActive = isLg ? !listDrawerOpen : mobileView === "map";
+
+  const handleShowListView = useCallback(() => {
+    if (isLg) {
+      setListDrawerOpen(true);
+      return;
+    }
+    setMobileView("list");
+  }, [isLg]);
+
+  const handleShowMapView = useCallback(() => {
+    if (isLg) {
+      setListDrawerOpen(false);
+    }
+    setMobileView("map");
+  }, [isLg]);
+
   const rentalsListBody = (opts: { showFeaturedCard: boolean }) => (
     <>
       {opts.showFeaturedCard && selectedProperty && (
@@ -1077,33 +1095,42 @@ function RentalsContent() {
                 </PopoverContent>
               </Popover>
 
-              <div className="ml-auto flex shrink-0 items-center gap-1.5">
+              <div className="ml-auto flex shrink-0 items-center gap-2">
                 {mapLoading ? (
-                  <span className="inline-flex shrink-0 items-center pr-1">
+                  <span className="inline-flex h-8 shrink-0 items-center rounded-full border border-slate-200 bg-white px-3 shadow-sm">
                     <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500" />
                   </span>
                 ) : (
-                  <p className="hidden sm:block shrink-0 whitespace-nowrap pr-1 text-xs text-slate-500">
-                    <span className="font-semibold text-slate-700">{pagination.total}</span>{" "}
-                    {pagination.total === 1 ? t("rentals.results.property") : t("rentals.results.properties")}
+                  <p className="inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 text-xs text-slate-500 shadow-sm">
+                    <span className="font-semibold text-slate-700">{pagination.total}</span>
+                    <span className="ml-1 hidden sm:inline">
+                      {pagination.total === 1
+                        ? t("rentals.results.property")
+                        : t("rentals.results.properties")}
+                    </span>
                   </p>
                 )}
                 <div className="flex items-center gap-0.5 rounded-full border border-slate-200 bg-white p-0.5 shadow-sm">
                   <button
                     type="button"
-                    onClick={() => setMobileView("list")}
+                    onClick={handleShowListView}
+                    aria-pressed={listViewActive}
+                    title={isLg ? "Show list and map" : t("rentals.view.list")}
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-1.5 text-xs font-medium transition-colors ${
-                      mobileView === "list" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-50"
+                      listViewActive ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-50"
                     }`}
                   >
                     <LayoutList className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">{t("rentals.view.list")}</span>
+                    <span className="hidden sm:inline lg:hidden">{t("rentals.view.list")}</span>
+                    <span className="hidden lg:inline">Split</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => setMobileView("map")}
+                    onClick={handleShowMapView}
+                    aria-pressed={mapViewActive}
+                    title={isLg ? "Show map only" : t("rentals.view.map")}
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-1.5 text-xs font-medium transition-colors ${
-                      mobileView === "map" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-50"
+                      mapViewActive ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-50"
                     }`}
                   >
                     <Map className="h-3.5 w-3.5" />
@@ -1113,14 +1140,16 @@ function RentalsContent() {
                 <button
                   type="button"
                   onClick={() => setListDrawerOpen((v) => !v)}
-                  className={`hidden lg:inline-flex h-8 items-center gap-1 rounded-full border px-2.5 text-xs font-medium transition-colors ${
+                  aria-pressed={listDrawerOpen}
+                  title={listDrawerOpen ? "Hide property list panel" : "Show property list panel"}
+                  className={`hidden md:inline-flex h-8 items-center gap-1 rounded-full border px-2.5 text-xs font-medium transition-colors ${
                     listDrawerOpen
                       ? "border-slate-900 bg-slate-900 text-white"
                       : "border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"
                   }`}
                 >
                   <LayoutList className="h-3 w-3" />
-                  {listDrawerOpen ? "Hide" : "List"}
+                  {listDrawerOpen ? "Hide list" : "Show list"}
                 </button>
               </div>
             </div>

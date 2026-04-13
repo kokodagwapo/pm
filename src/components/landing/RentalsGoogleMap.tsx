@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
-import { Eye, Map, Mountain, Satellite } from "lucide-react";
+import { Map, Mountain, Satellite } from "lucide-react";
 import {
   getGoogleMapsBrowserKey,
   hasGoogleMapsBrowserKey,
@@ -122,14 +122,12 @@ function tileLayerFor(L: LeafletModule, mode: Exclude<TileMode, "streetview">): 
 function RentalsMapToolbar({
   mode,
   setMode,
-  onStreetView,
   neighborhoods,
   activeNeighborhood,
   onNeighborhoodChange,
 }: {
   mode: TileMode;
   setMode: (mode: TileMode) => void;
-  onStreetView: () => void;
   neighborhoods?: { label: string; value: string }[];
   activeNeighborhood?: string;
   onNeighborhoodChange?: (value: string) => void;
@@ -142,19 +140,12 @@ function RentalsMapToolbar({
             { id: "roadmap", label: "Map", Icon: Map },
             { id: "satellite", label: "Satellite", Icon: Satellite },
             { id: "terrain", label: "3D", Icon: Mountain },
-            { id: "streetview", label: "Street View", Icon: Eye },
-          ] as { id: TileMode; label: string; Icon: typeof Eye }[]
+          ] as { id: Exclude<TileMode, "streetview">; label: string; Icon: typeof Map }[]
         ).map(({ id, label, Icon }) => (
           <button
             key={id}
             type="button"
-            onClick={() => {
-              if (id === "streetview") {
-                onStreetView();
-                return;
-              }
-              setMode(id);
-            }}
+            onClick={() => setMode(id)}
             className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
               mode === id
                 ? "bg-slate-900 text-white shadow-sm"
@@ -319,7 +310,6 @@ function RentalsLeafletFallback({
       <RentalsMapToolbar
         mode={mode}
         setMode={setMode}
-        onStreetView={openStreetView}
         neighborhoods={neighborhoods}
         activeNeighborhood={activeNeighborhood}
         onNeighborhoodChange={onNeighborhoodChange}
@@ -421,7 +411,6 @@ function RentalsGooglePrimary(props: RentalsGoogleMapProps) {
       <RentalsMapToolbar
         mode={mode}
         setMode={setMode}
-        onStreetView={() => setMode("streetview")}
         neighborhoods={props.neighborhoods}
         activeNeighborhood={props.activeNeighborhood}
         onNeighborhoodChange={props.onNeighborhoodChange}
@@ -476,22 +465,8 @@ function RentalsGooglePrimary(props: RentalsGoogleMapProps) {
 }
 
 export function RentalsGoogleMap(props: RentalsGoogleMapProps) {
-  const useLeafletFallback =
-    typeof window !== "undefined" &&
-    window.location.hostname === "127.0.0.1" &&
-    hasGoogleMapsBrowserKey();
-
   if (!hasGoogleMapsBrowserKey()) {
     return <RentalsLeafletFallback {...props} />;
-  }
-
-  if (useLeafletFallback) {
-    return (
-      <RentalsLeafletFallback
-        {...props}
-        message="Google Maps is restricted for 127.0.0.1. Open localhost:3000 or whitelist this host in Google Cloud to use Google here."
-      />
-    );
   }
 
   return <RentalsGooglePrimary {...props} />;
