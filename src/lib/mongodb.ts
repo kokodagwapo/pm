@@ -31,9 +31,9 @@ async function connectDB() {
     const opts = {
       bufferCommands: false,
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: isLocal ? 5000 : 30000,
+      serverSelectionTimeoutMS: isLocal ? 2000 : 30000,
       socketTimeoutMS: 45000,
-      connectTimeoutMS: isLocal ? 5000 : 30000,
+      connectTimeoutMS: isLocal ? 2000 : 30000,
       family: 4,
     };
 

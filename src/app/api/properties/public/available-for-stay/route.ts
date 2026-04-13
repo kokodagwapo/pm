@@ -6,7 +6,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest } from "next/server";
-import connectDB from "@/lib/mongodb";
+import { connectDBSafe, isConnected } from "@/lib/mongodb";
 import { Property, DateBlock, Lease } from "@/models";
 import { LeaseStatus } from "@/types";
 import {
@@ -94,7 +94,21 @@ function passesPublicFilters(
 
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
+    let db: Awaited<ReturnType<typeof connectDBSafe>>;
+    if (isConnected()) {
+      db = await connectDBSafe();
+    } else {
+      db = await Promise.race([
+        connectDBSafe(),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 800)),
+      ]);
+    }
+    if (!db) {
+      return createSuccessResponse(
+        { properties: [], checkIn: "", checkOut: "", count: 0 },
+        "Database unavailable – no availability data"
+      );
+    }
     const { searchParams } = new URL(request.url);
     const checkInRaw = searchParams.get("checkIn") || "";
     const checkOutRaw = searchParams.get("checkOut") || "";
@@ -346,6 +360,10 @@ export async function GET(request: NextRequest) {
       "Available properties for stay window"
     );
   } catch (error) {
-    return handleApiError(error);
+    console.error("Stay availability API error:", (error as Error)?.message);
+    return createSuccessResponse(
+      { properties: [], checkIn: "", checkOut: "", count: 0 },
+      "Database unavailable – no availability data"
+    );
   }
 }

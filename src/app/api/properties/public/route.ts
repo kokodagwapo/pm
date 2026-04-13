@@ -15,7 +15,7 @@ import {
   handleApiError,
   parsePaginationParams,
 } from "@/lib/api-utils";
-import connectDB from "@/lib/mongodb";
+import { connectDBSafe, isConnected } from "@/lib/mongodb";
 import { calculatePropertyStatusFromUnits } from "@/utils/property-status-calculator";
 import { stripUnitSecretsForPublicApi } from "@/lib/unit-access-secrets";
 
@@ -74,9 +74,30 @@ const FALLBACK_PUBLIC_PROPERTIES = [
   },
 ];
 
+const FALLBACK_RESPONSE = () =>
+  createSuccessResponse(
+    {
+      properties: FALLBACK_PUBLIC_PROPERTIES,
+      pagination: { page: 1, limit: 24, total: FALLBACK_PUBLIC_PROPERTIES.length, pages: 1 },
+    },
+    "Properties retrieved successfully"
+  );
+
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
+    let db: Awaited<ReturnType<typeof connectDBSafe>>;
+    if (isConnected()) {
+      db = await connectDBSafe();
+    } else {
+      const raceResult = await Promise.race([
+        connectDBSafe(),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 800)),
+      ]);
+      db = raceResult;
+    }
+    if (!db) {
+      return FALLBACK_RESPONSE();
+    }
 
     const { searchParams } = new URL(request.url);
     const paginationParams = parsePaginationParams(searchParams);
@@ -156,28 +177,12 @@ export async function GET(request: NextRequest) {
       return property;
     });
 
-    if (properties.length === 0) {
-      return createSuccessResponse(
-        {
-          properties: FALLBACK_PUBLIC_PROPERTIES,
-          pagination: { page, limit, total: FALLBACK_PUBLIC_PROPERTIES.length, pages: 1 },
-        },
-        "Properties retrieved successfully"
-      );
-    }
-
     return createSuccessResponse(
       { properties, pagination: { page, limit, total, pages: Math.ceil(total / limit) } },
       "Properties retrieved successfully"
     );
   } catch (error) {
     console.error("Public properties API error, returning fallback:", (error as Error)?.message);
-    return createSuccessResponse(
-      {
-        properties: FALLBACK_PUBLIC_PROPERTIES,
-        pagination: { page: 1, limit: 24, total: FALLBACK_PUBLIC_PROPERTIES.length, pages: 1 },
-      },
-      "Properties retrieved successfully"
-    );
+    return FALLBACK_RESPONSE();
   }
 }
