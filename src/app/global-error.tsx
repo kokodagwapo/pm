@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 
 interface GlobalErrorProps {
   error?: Error & { digest?: string };
@@ -33,23 +33,15 @@ function IconHome({ style }: { style?: CSSProperties }) {
 
 function isEmptyError(error: unknown): boolean {
   if (error == null) return true;
-  if (error instanceof Error) return false;
+  if (error instanceof Error) {
+    return !error.message && !error.stack;
+  }
   if (typeof error === "object" && Object.keys(error as object).length === 0) return true;
   return false;
 }
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
-  const retryCount = useRef(0);
-  const isEmpty = isEmptyError(error);
-
-  useEffect(() => {
-    if (isEmpty && retryCount.current < 1 && reset) {
-      retryCount.current += 1;
-      try { reset(); } catch { /* ignore */ }
-    }
-  }, [isEmpty, reset]);
-
-  if (isEmpty) {
+  if (isEmptyError(error)) {
     return (
       <html lang="en">
         <head>
@@ -57,7 +49,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title>SmartStartPM</title>
         </head>
-        <body style={{ margin: 0 }} />
+        <body style={{ margin: 0, background: "#fafafa" }} />
       </html>
     );
   }
