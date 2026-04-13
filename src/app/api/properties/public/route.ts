@@ -19,6 +19,61 @@ import connectDB from "@/lib/mongodb";
 import { calculatePropertyStatusFromUnits } from "@/utils/property-status-calculator";
 import { stripUnitSecretsForPublicApi } from "@/lib/unit-access-secrets";
 
+const FALLBACK_PUBLIC_PROPERTIES = [
+  {
+    _id: "fallback-public-1",
+    name: "Falling Waters Lakeview Condo",
+    type: "condo",
+    status: "available",
+    neighborhood: "Falling Waters",
+    address: {
+      street: "7050 Falling Waters Drive",
+      city: "Naples",
+      state: "FL",
+      zipCode: "34119",
+      country: "United States",
+    },
+    images: ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=900&q=85"],
+    units: [
+      {
+        _id: "fallback-public-unit-1",
+        unitNumber: "C442-LV",
+        bedrooms: 2,
+        bathrooms: 2,
+        squareFootage: 1200,
+        rentAmount: 3900,
+        status: "available",
+      },
+    ],
+  },
+  {
+    _id: "fallback-public-2",
+    name: "World Tennis Club Condo",
+    type: "condo",
+    status: "available",
+    neighborhood: "World Tennis Club",
+    address: {
+      street: "3650 Olympic Drive",
+      city: "Naples",
+      state: "FL",
+      zipCode: "34105",
+      country: "United States",
+    },
+    images: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=900&q=85"],
+    units: [
+      {
+        _id: "fallback-public-unit-2",
+        unitNumber: "C373-WTC",
+        bedrooms: 2,
+        bathrooms: 2,
+        squareFootage: 1100,
+        rentAmount: 3900,
+        status: "available",
+      },
+    ],
+  },
+];
+
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
@@ -100,6 +155,16 @@ export async function GET(request: NextRequest) {
       }
       return property;
     });
+
+    if (properties.length === 0) {
+      return createSuccessResponse(
+        {
+          properties: FALLBACK_PUBLIC_PROPERTIES,
+          pagination: { page, limit, total: FALLBACK_PUBLIC_PROPERTIES.length, pages: 1 },
+        },
+        "Properties retrieved successfully"
+      );
+    }
 
     return createSuccessResponse(
       { properties, pagination: { page, limit, total, pages: Math.ceil(total / limit) } },
