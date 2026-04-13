@@ -68,7 +68,11 @@ export function LandingThemeProvider({ children }: { children: ReactNode }) {
 export function useLandingTheme(): LandingThemeContextValue {
   const ctx = useContext(LandingThemeContext);
   if (!ctx) {
-    throw new Error("useLandingTheme must be used within LandingThemeProvider");
+    return {
+      theme: "dark",
+      setTheme: () => {},
+      toggleTheme: () => {},
+    };
   }
   return ctx;
 }
