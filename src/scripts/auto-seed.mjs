@@ -83,6 +83,13 @@ async function seedUsers(db) {
   console.log(`  Seeded ${users.length} demo users`);
 }
 
+async function seedRequiredDemoUsers(db) {
+  if (!DEMO_AUTH_ENABLED) {
+    return;
+  }
+  await seedUsers(db);
+}
+
 function normalizeUrl(url = '') {
   return String(url).trim().replace(/\/$/, '');
 }
@@ -333,7 +340,7 @@ async function run() {
       console.log('Users collection empty and demo auth enabled — seeding demo users...');
       await seedUsers(db);
     } else if (userCount === 0) {
-      console.log('Users collection empty — skipping user auto-seed in this environment');
+      await seedRequiredDemoUsers(db);
     } else {
       console.log(`  ${userCount} users already exist, skipping`);
     }
