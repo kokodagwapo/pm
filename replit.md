@@ -2,6 +2,13 @@
 
 A Next.js 15 property management application using the App Router (`src/app/`).
 
+## VMS Florida Properties
+- **35 real VMS Florida properties** are stored in `src/lib/vms-florida-properties.ts` — this file serves as both the fallback data source (when MongoDB is unavailable) and the reference for seeding.
+- Properties are seeded into MongoDB via `src/scripts/auto-seed.mjs` which reads from `data/vms-properties.json` and `data/vms-florida-advanced-search-export.json`.
+- The `auto-seed.mjs` also creates properties from the bundled JSON files. New properties added only to `vms-florida-properties.ts` must be manually inserted into MongoDB (the seed only runs when 0 VMS properties exist).
+- Neighborhoods configured: Falling Waters, Naples Park, Winter Park, Glen Eagle, World Tennis Club, Royal Arms, Moon Lake, Villas of Whittenberg, Park Shore, Naples.
+- **Production MongoDB**: The deployed app connects to MongoDB Atlas via the `MONGODB_URI` secret. If production shows `ECONNREFUSED 127.0.0.1:27017`, re-deploy the app so the production environment picks up the current secret value.
+
 ## Internationalization (i18n)
 - **9 languages supported**: English (en), German (de), Spanish (es), French (fr), Italian (it), Chinese Simplified (zh), Japanese (ja), Filipino (fil), Russian (ru)
 - **LanguageSwitcher component**: `src/components/ui/LanguageSwitcher.tsx` — dropdown with flag emojis and native labels; `variant="light"|"dark"` prop; integrated into `LandingHeader` and the sign-in page

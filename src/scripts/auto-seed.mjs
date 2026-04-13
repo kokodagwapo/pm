@@ -29,6 +29,7 @@ const NEIGHBORHOOD_ADDRESSES = {
   'Royal Arms':        { street: '1280 Georgetown Blvd',       city: 'Naples', state: 'FL', zipCode: '34104' },
   'Moon Lake':         { street: '5640 Moon Lake Cir',         city: 'Naples', state: 'FL', zipCode: '34119' },
   'Villas of Whittenberg': { street: '4823 Whitten Dr',        city: 'Naples', state: 'FL', zipCode: '34104' },
+  'Park Shore':        { street: '4584 Alhambra Circle',       city: 'Naples', state: 'FL', zipCode: '34103' },
   'Naples':            { street: '3000 Tamiami Trail N',       city: 'Naples', state: 'FL', zipCode: '34103' },
 };
 
@@ -41,6 +42,7 @@ const NEIGHBORHOOD_AMENITIES = {
   'Royal Arms':        ['Pool', 'Gated Community', 'Air Conditioning', 'WiFi', 'Kitchen', 'Washer/Dryer', 'Parking', 'Lanai'],
   'Moon Lake':         ['Pool', 'Lake View', 'Air Conditioning', 'WiFi', 'Full Kitchen', 'Washer/Dryer', 'Parking', 'Patio'],
   'Villas of Whittenberg': ['Pool', 'Air Conditioning', 'WiFi', 'Full Kitchen', 'Washer/Dryer', 'Parking', 'Patio', 'BBQ Grill'],
+  'Park Shore':        ['Pool', 'Lake View', 'Air Conditioning', 'WiFi', 'Full Kitchen', 'Washer/Dryer', 'Parking', 'Patio', 'BBQ Grill'],
   'Naples':            ['Pool', 'Air Conditioning', 'WiFi', 'Kitchen', 'Parking'],
 };
 

@@ -470,10 +470,10 @@ export const VMS_FLORIDA_PROPERTIES: any[] = [
   {
     "_id": "vms-modern2b",
     "name": "Beautiful 2 bed-/ 2 bathroom condo with lakeview",
-    "description": "Beautiful condo in Naples, Naples, FL. 2 bedroom, 2 bathroom vacation rental.",
+    "description": "Welcome to your dream retreat in Falling Waters, a premier residential community nestled in the heart of Naples, Florida. This stunning modern lakeview condo offers an exquisite blend of luxury, comfort, and the breathtaking natural beauty that Southwest Florida is renowned for. Open-concept layout with large windows framing picturesque views of the serene lake and lush landscaping.",
     "type": "condo",
     "status": "available",
-    "neighborhood": "Naples",
+    "neighborhood": "Falling Waters",
     "address": {
       "street": "2348 Hidden lake drive",
       "city": "Naples",
@@ -1276,6 +1276,107 @@ export const VMS_FLORIDA_PROPERTIES: any[] = [
         "maxGuests": 6,
         "cleaningFee": 200,
         "minNights": 21
+      }
+    ]
+  },
+  {
+    "_id": "vms-h900-ps",
+    "name": "Lakeview House near Park Shore",
+    "description": "NEW House in perfect location - near to shopping, beach and city with privacy and own pool! The perfect place if you want all at once!",
+    "type": "house",
+    "status": "available",
+    "neighborhood": "Park Shore",
+    "address": {
+      "street": "4584 Alhambra Circle",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34103",
+      "country": "United States"
+    },
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1279-1-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1300-3-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1277-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1289-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1293-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1296-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1298-1-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1306-1-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1297-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1303-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1341-2-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1340-2-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1334-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1332-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1333-1-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1331-1-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1330-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1313-3-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1318-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1322-scaled.jpeg"
+    ],
+    "vmsUrl": "https://vms-florida.com/properties/lakeview-house-near-park-shore-3-bed-3bath-900/",
+    "units": [
+      {
+        "_id": "vms-unit-h900-ps",
+        "unitNumber": "H900",
+        "bedrooms": 3,
+        "bathrooms": 3,
+        "squareFootage": 2200,
+        "rentAmount": 12000,
+        "status": "available",
+        "pricePerNight": 400,
+        "maxGuests": 6,
+        "cleaningFee": 350,
+        "minNights": 14
+      }
+    ]
+  },
+  {
+    "_id": "vms-c454",
+    "name": "ROSEWOOD Condo, Falling Waters – #454",
+    "description": "This beautiful 2 bed-/ 2 bathroom lakeview condo with stunning tropical island view, illuminated island at night, sundown in the evening on back lanai and sunrise in the morning on front lanai is the perfect allaround vacation destination. The Kitchen is well equipped as much as the whole condo offers everything you need for total comfort. Let your vacation begin!",
+    "type": "condo",
+    "status": "available",
+    "neighborhood": "Falling Waters",
+    "address": {
+      "street": "1625 Windy Pines Drive",
+      "city": "Naples",
+      "state": "FL",
+      "zipCode": "34112",
+      "country": "United States"
+    },
+    "images": [
+      "https://vms-florida.com/wp-content/uploads/2026/03/PHOTO-2026-03-26-10-11-24-4.jpg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/PHOTO-2026-03-26-10-11-24-2.jpg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/PHOTO-2026-03-26-10-11-24.jpg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_5849-3.jpg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_5847-1.jpg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_5848-1.jpg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/PHOTO-2025-07-09-12-00-16.jpg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_5853-1.jpg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_5852-1.jpg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_5851-1.jpg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_5850-1.jpg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1777-4-scaled.jpeg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_5854-1.jpg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_5855-1.jpg",
+      "https://vms-florida.com/wp-content/uploads/2026/03/IMG_1771.jpeg"
+    ],
+    "vmsUrl": "https://vms-florida.com/properties/rosewood-condo-falling-waters-2-br-2-ba-454/",
+    "units": [
+      {
+        "_id": "vms-unit-c454",
+        "unitNumber": "C454",
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "squareFootage": 1100,
+        "rentAmount": 4650,
+        "status": "available",
+        "pricePerNight": 155,
+        "maxGuests": 4,
+        "cleaningFee": 160,
+        "minNights": 30
       }
     ]
   }
