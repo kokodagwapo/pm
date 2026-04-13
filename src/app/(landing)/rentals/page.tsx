@@ -921,7 +921,7 @@ function RentalsContent() {
       <div className="pt-[48px] flex flex-col flex-1">
         {/* Sticky search — compact card, filters collapsible on small screens */}
         <div className="sticky top-[48px] z-30 border-b border-slate-200/60 bg-[#f8f7f4]/92 backdrop-blur-md">
-          <div className="mx-auto max-w-[1600px] px-4 py-3 sm:px-6">
+          <div className="mx-auto max-w-[1600px] px-4 py-3 pr-16 sm:px-6 sm:pr-20 lg:pr-24">
             <div className="rounded-2xl border border-slate-200/80 bg-white/95 px-3 py-2.5 shadow-[0_10px_30px_rgba(148,163,184,0.14)] sm:px-4 sm:py-3">
               <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                 <div className="relative min-w-0 w-full max-w-full sm:w-auto sm:max-w-[12rem] md:max-w-[13rem] lg:max-w-[14rem] xl:max-w-[15rem]">
@@ -955,7 +955,7 @@ function RentalsContent() {
                   </button>
                 )}
                 {/* Stay: dates, guests, availability — before list/map */}
-                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 sm:flex-nowrap sm:gap-2">
+                <div className="flex min-w-0 flex-1 basis-full flex-wrap items-center gap-1.5 lg:basis-auto xl:flex-nowrap xl:gap-2">
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -1045,7 +1045,7 @@ function RentalsContent() {
                     </Button>
                   )}
                 </div>
-                <div className="hidden min-w-0 shrink-0 items-center gap-2 lg:flex">
+                <div className="hidden min-w-0 basis-full flex-wrap items-center gap-2 pt-1 lg:flex xl:basis-auto xl:pt-0">
                   <div className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/80 px-2 shadow-none">
                     <Building2 className="size-3.5 shrink-0 text-sky-400" aria-hidden />
                     <Select

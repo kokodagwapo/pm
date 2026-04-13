@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const VMS_SOURCE = 'vms-florida.com';
 
 const AMENITY_CATEGORIES = {
   'Pool': 'Recreation', 'Private Pool': 'Recreation', 'Heated Pool': 'Recreation',
@@ -82,70 +83,234 @@ async function seedUsers(db) {
   console.log(`  Seeded ${users.length} demo users`);
 }
 
+function normalizeUrl(url = '') {
+  return String(url).trim().replace(/\/$/, '');
+}
+
+function parseUsdAmount(value) {
+  if (!value) return 0;
+  const match = String(value).replace(/,/g, '').match(/[\d.]+/);
+  return match ? parseFloat(match[0]) : 0;
+}
+
+function readBundledVmsProperties() {
+  const summaryPath = resolve(__dirname, '../../data/vms-properties.json');
+  const exportPath = resolve(__dirname, '../../data/vms-florida-advanced-search-export.json');
+
+  const summaryRows = JSON.parse(readFileSync(summaryPath, 'utf8'));
+  const exportRows = JSON.parse(readFileSync(exportPath, 'utf8'))?.properties || [];
+
+  const summaryByUrl = new Map(
+    summaryRows.map((row) => [normalizeUrl(row.url), row])
+  );
+
+  return exportRows.map((row) => {
+    const summary = summaryByUrl.get(normalizeUrl(row.url)) || null;
+    return { exportRow: row, summary };
+  });
+}
+
+function collectOfficialImages(summary) {
+  const candidates = [
+    ...(Array.isArray(summary?.images) ? summary.images : []),
+    summary?.ogImage,
+  ].filter(Boolean);
+
+  const seen = new Set();
+  const images = [];
+
+  for (const raw of candidates) {
+    const url = String(raw);
+    if (!url.includes('/wp-content/uploads/')) continue;
+    if (url.includes('site-icon') || url.includes('favicon')) continue;
+    if (/defaultimage_prop\.(jpg|jpeg|png|webp)$/i.test(url)) continue;
+    if (seen.has(url)) continue;
+    seen.add(url);
+    images.push(url);
+  }
+
+  return images.slice(0, 20);
+}
+
 async function seedProperties(db) {
-  const dataPath = resolve(__dirname, '../../data/vms-properties.json');
-  const raw = JSON.parse(readFileSync(dataPath, 'utf8'));
+  const rows = readBundledVmsProperties();
   const now = new Date();
-  const docs = raw.map((prop, i) => {
-    const addrBase = NEIGHBORHOOD_ADDRESSES[prop.neighborhood] || NEIGHBORHOOD_ADDRESSES['Naples'];
-    const address = { ...addrBase, country: 'United States' };
-    const streetNum = parseInt(address.street) || 1000;
-    address.street = address.street.replace(/^\d+/, String(streetNum + i * 10));
+  const users = await db
+    .collection('users')
+    .find({
+      email: {
+        $in: [
+          'owner@smartstart.us',
+          'hi@smartstart.us',
+          'owner@smartstartpm.com',
+          'superadmin@smartstartpm.com',
+          'pmadmin@smartstartpm.com',
+        ],
+      },
+    })
+    .project({ _id: 1, email: 1 })
+    .toArray();
 
-    const amenityNames = NEIGHBORHOOD_AMENITIES[prop.neighborhood] || NEIGHBORHOOD_AMENITIES['Naples'];
-    const amenities = amenityNames.map(n => ({ name: n, category: AMENITY_CATEGORIES[n] || 'Other', isAvailable: true }));
+  const getUserId = (email) => users.find((user) => user.email === email)?._id;
+  const ownerId =
+    getUserId('owner@smartstart.us') ||
+    getUserId('owner@smartstartpm.com') ||
+    getUserId('hi@smartstart.us') ||
+    getUserId('superadmin@smartstartpm.com') ||
+    null;
+  const managerId =
+    getUserId('hi@smartstart.us') ||
+    getUserId('pmadmin@smartstartpm.com') ||
+    getUserId('superadmin@smartstartpm.com') ||
+    null;
 
-    const images = prop.images
-      .filter(img => img.includes('/uploads/') && !img.includes('site-icon') && !img.includes('favicon'))
-      .slice(0, 15);
+  const operations = [];
+  let prepared = 0;
 
-    const unit = {
-      unitNumber: `${i + 1}01`,
-      unitType: prop.propType === 'house' ? 'house' : 'condo',
-      bedrooms: prop.beds,
-      bathrooms: prop.baths,
-      squareFeet: prop.beds * 550 + prop.baths * 150 + 450,
-      rentAmount: prop.monthlyRent,
-      depositAmount: prop.monthlyRent,
-      status: 'available',
+  for (const { exportRow, summary } of rows) {
+    const extId = String(exportRow.property_id || '').trim();
+    const importListingUrl = normalizeUrl(summary?.url || exportRow.url || '');
+    const images = collectOfficialImages(summary);
+    if (!importListingUrl || !extId || images.length === 0) {
+      continue;
+    }
+
+    const neighborhood =
+      summary?.neighborhood ||
+      exportRow.area ||
+      exportRow.city ||
+      'Naples';
+    const amenityNames =
+      NEIGHBORHOOD_AMENITIES[neighborhood] || NEIGHBORHOOD_AMENITIES['Naples'];
+    const amenities = amenityNames.map((name) => ({
+      name,
+      category: AMENITY_CATEGORIES[name] || 'Other',
       isAvailable: true,
-      features: [], amenities: [], appliances: [], images: images.slice(0, 5),
-      floorPlan: null, notes: '',
-      leaseTerms: { minLeaseTerm: 30, maxLeaseTerm: 365, availableDate: now },
-      utilities: { water: true, electricity: false, gas: false, internet: false, trash: true, sewage: true },
-      petsAllowed: false, smokingAllowed: false, parkingSpaces: 1, storageIncluded: false,
-      lastInspectionDate: null, nextInspectionDate: null,
-    };
+    }));
 
-    return {
-      name: prop.name,
-      description: prop.description || `Beautiful ${prop.propType} in ${prop.neighborhood}, Naples, FL.`,
-      type: prop.propType === 'house' ? 'house' : 'condo',
+    const propertyType =
+      summary?.propType === 'house'
+        ? 'house'
+        : summary?.propType === 'villa'
+          ? 'townhouse'
+          : 'condo';
+    const unitType =
+      propertyType === 'house'
+        ? 'loft'
+        : propertyType === 'townhouse'
+          ? 'penthouse'
+          : 'apartment';
+    const bedrooms = summary?.beds || exportRow.bedrooms || 2;
+    const bathrooms = summary?.baths || exportRow.bathrooms || 2;
+    const pricePerNight = summary?.pricePerNight || parseUsdAmount(exportRow.price_per_night) || 125;
+    const monthlyRent = summary?.monthlyRent || Math.round(pricePerNight * 30);
+    const squareFootage = Math.max(650, bedrooms * 550 + bathrooms * 150 + 300);
+
+    const doc = {
+      name: summary?.name || exportRow.title || `VMS ${extId}`,
+      description:
+        summary?.description ||
+        exportRow.description ||
+        `Beautiful ${propertyType} in ${neighborhood}, Naples, FL.`,
+      type: propertyType,
       status: 'available',
-      propertyCode: prop.code,
-      address,
-      images: images.length > 0 ? images : [prop.ogImage].filter(Boolean),
-      mainImage: prop.ogImage || images[0] || '',
+      propertyCode: summary?.code || `VMS-${extId}`,
+      address: {
+        street: exportRow.address || 'Address on file',
+        city: exportRow.city || 'Naples',
+        state: /^florida$/i.test(exportRow.state || '') ? 'FL' : (exportRow.state || 'FL'),
+        zipCode: exportRow.zip || '34119',
+        country: exportRow.country || 'United States',
+      },
+      images,
+      mainImage: images[0],
       amenities,
-      units: [unit],
-      bedrooms: prop.beds,
-      bathrooms: prop.baths,
-      squareFeet: unit.squareFeet,
-      yearBuilt: 2000 + Math.floor(Math.random() * 22),
+      units: [
+        {
+          unitNumber: summary?.code || `VMS-${extId}`,
+          unitType,
+          bedrooms,
+          bathrooms,
+          squareFootage,
+          rentAmount: monthlyRent,
+          securityDeposit: monthlyRent,
+          status: 'available',
+          isAvailable: true,
+          features: [],
+          amenities: [],
+          appliances: [],
+          images: images.slice(0, 10),
+          floorPlan: null,
+          notes: '',
+          leaseTerms: { minLeaseTerm: 30, maxLeaseTerm: 365, availableDate: now },
+          utilities: {
+            water: true,
+            electricity: false,
+            gas: false,
+            internet: false,
+            trash: true,
+            sewage: true,
+          },
+          petsAllowed: false,
+          smokingAllowed: false,
+          parkingSpaces: 1,
+          storageIncluded: false,
+          lastInspectionDate: null,
+          nextInspectionDate: null,
+        },
+      ],
+      bedrooms,
+      bathrooms,
+      squareFootage,
+      yearBuilt: 2005,
       parkingSpaces: 1,
       isPublic: true,
-      isFeatured: i < 6,
-      tags: [prop.neighborhood, prop.propType, 'Naples', 'Florida', 'Vacation Rental'],
-      sourceUrl: prop.url,
-      pricePerNight: prop.pricePerNight,
-      monthlyRent: prop.monthlyRent,
+      isFeatured: prepared < 6,
+      tags: [neighborhood, propertyType, 'Naples', 'Florida', 'Vacation Rental'],
+      sourceUrl: importListingUrl,
+      pricePerNight,
+      monthlyRent,
+      neighborhood,
+      importSource: VMS_SOURCE,
+      importExternalId: extId,
+      importListingUrl,
+      deletedAt: null,
       createdAt: now,
       updatedAt: now,
+      ...(ownerId ? { ownerId } : {}),
+      ...(managerId ? { managerId } : {}),
     };
-  });
 
-  await db.collection('properties').insertMany(docs);
-  console.log(`  Seeded ${docs.length} properties from VMS Florida`);
+    const { createdAt, ...docForSet } = doc;
+
+    operations.push({
+      updateOne: {
+        filter: {
+          importSource: VMS_SOURCE,
+          $or: [
+            { importExternalId: extId },
+            { importListingUrl },
+          ],
+        },
+        update: {
+          $set: docForSet,
+          $setOnInsert: {
+            createdAt: now,
+          },
+        },
+        upsert: true,
+      },
+    });
+    prepared++;
+  }
+
+  if (operations.length === 0) {
+    console.log('  No bundled VMS properties were eligible for import');
+    return;
+  }
+
+  await db.collection('properties').bulkWrite(operations, { ordered: false });
+  console.log(`  Seeded or refreshed ${prepared} official VMS properties from bundled data`);
 }
 
 async function run() {
@@ -156,17 +321,13 @@ async function run() {
     await mongoose.connect(uri, { serverSelectionTimeoutMS: 8000 });
     const db = mongoose.connection.db;
 
-    const propCount = await db.collection('properties').countDocuments();
+    const propCount = await db.collection('properties').countDocuments({ deletedAt: null });
+    const vmsPropCount = await db
+      .collection('properties')
+      .countDocuments({ deletedAt: null, importSource: VMS_SOURCE });
     const userCount = await db.collection('users').countDocuments();
 
-    console.log(`Auto-seed check: ${propCount} properties, ${userCount} users`);
-
-    if (propCount === 0) {
-      console.log('Properties collection empty — seeding from VMS Florida data...');
-      await seedProperties(db);
-    } else {
-      console.log(`  ${propCount} properties already exist, skipping`);
-    }
+    console.log(`Auto-seed check: ${propCount} active properties, ${vmsPropCount} VMS properties, ${userCount} users`);
 
     if (userCount === 0 && DEMO_AUTH_ENABLED) {
       console.log('Users collection empty and demo auth enabled — seeding demo users...');
@@ -175,6 +336,13 @@ async function run() {
       console.log('Users collection empty — skipping user auto-seed in this environment');
     } else {
       console.log(`  ${userCount} users already exist, skipping`);
+    }
+
+    if (vmsPropCount === 0) {
+      console.log('No active VMS properties found — seeding official rentals from bundled VMS data...');
+      await seedProperties(db);
+    } else {
+      console.log(`  ${vmsPropCount} VMS properties already exist, skipping`);
     }
 
     const promoCount = await db.collection('promocodes').countDocuments();
