@@ -37,6 +37,7 @@ const authUrlForClient =
 const nextConfig: NextConfig = {
   reactStrictMode: false,
   allowedDevOrigins: replitDevOrigins,
+  devIndicators: false,
 
   // Only inject when we know the URL. A wrong default like :3000 breaks sign-in when dev runs on :3101, :3020, etc.
   // If unset, Auth.js uses the current origin for client-side auth requests.
