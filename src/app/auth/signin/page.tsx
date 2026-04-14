@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getCsrfToken, signIn } from "next-auth/react";
@@ -229,8 +229,10 @@ function SignInContent() {
   const [logoError, setLogoError] = useState(false);
   const registered = searchParams.get("registered") === "1";
   const initialEmail = searchParams.get("email") || "";
-  const demoCredentials = getDemoLoginCredentials(searchParams);
-  const isDemoRedirect = searchParams.get("demo") === "1";
+  // Read demo params once at mount — never re-read to avoid object-reference loop
+  const demoEmail = useRef(searchParams.get("demo") === "1" ? getDemoLoginCredentials(searchParams)?.email ?? null : null);
+  const demoPassword = useRef(searchParams.get("demo") === "1" ? getDemoLoginCredentials(searchParams)?.password ?? null : null);
+  const demoAttempted = useRef(false);
 
   useEffect(() => {
     const fetchBranding = async () => {
@@ -247,36 +249,30 @@ function SignInContent() {
     fetchBranding();
   }, []);
 
+  // Demo auto-login — runs once at mount using ref values to avoid object-reference loop
   useEffect(() => {
-    if (!demoCredentials) return;
-    void (async () => {
-      setError("");
-      setIsLoading(true);
-      const target = await signInCredentialsWithFallback(
-        demoCredentials.email,
-        demoCredentials.password
-      );
-      if (target) {
-        window.location.href = target;
-        return;
-      }
-      setIsLoading(false);
-    })();
-  }, [demoCredentials]);
-
-  useEffect(() => {
-    if (!isDemoRedirect) return;
+    if (!demoEmail.current || !demoPassword.current || demoAttempted.current) return;
+    demoAttempted.current = true;
+    // Clean up URL immediately
     const params = new URLSearchParams(window.location.search);
     params.delete("demo");
     params.delete("role");
     params.delete("type");
-    const next = params.toString();
-    window.history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}${next ? `?${next}` : ""}`
-    );
-  }, [isDemoRedirect]);
+    const qs = params.toString();
+    window.history.replaceState(null, "", `${window.location.pathname}${qs ? `?${qs}` : ""}`);
+    void (async () => {
+      setError("");
+      setIsLoading(true);
+      const target = await signInCredentialsWithFallback(demoEmail.current!, demoPassword.current!);
+      if (target) {
+        window.location.href = target;
+        return;
+      }
+      setError("Demo login failed — please try again or sign in manually.");
+      setIsLoading(false);
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Remove stale Auth.js error query (bookmark / failed attempt) so it does not confuse users
   useEffect(() => {
