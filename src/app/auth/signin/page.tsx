@@ -81,7 +81,7 @@ function getDemoLoginCredentials(
   searchParams: URLSearchParams
 ): { email: string; password: string } | null {
   if (searchParams.get("demo") !== "1") return null;
-  const role = searchParams.get("role") || "superadmin";
+  const role = searchParams.get("role") || searchParams.get("type") || "superadmin";
   if (role === "superadmin" || role === "admin") {
     return { email: "superadmin@smartstartpm.com", password: "Sspm!Super2026" };
   }
@@ -230,6 +230,7 @@ function SignInContent() {
   const registered = searchParams.get("registered") === "1";
   const initialEmail = searchParams.get("email") || "";
   const demoCredentials = getDemoLoginCredentials(searchParams);
+  const isDemoRedirect = searchParams.get("demo") === "1";
 
   useEffect(() => {
     const fetchBranding = async () => {
@@ -262,6 +263,20 @@ function SignInContent() {
       setIsLoading(false);
     })();
   }, [demoCredentials]);
+
+  useEffect(() => {
+    if (!isDemoRedirect) return;
+    const params = new URLSearchParams(window.location.search);
+    params.delete("demo");
+    params.delete("role");
+    params.delete("type");
+    const next = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${next ? `?${next}` : ""}`
+    );
+  }, [isDemoRedirect]);
 
   // Remove stale Auth.js error query (bookmark / failed attempt) so it does not confuse users
   useEffect(() => {
