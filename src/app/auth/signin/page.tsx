@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getCsrfToken, signIn } from "next-auth/react";
-import { HeroVideo } from "@/components/landing/HeroVideo";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import {
@@ -23,8 +22,6 @@ import {
   Calendar,
   ArrowLeft,
   CheckCircle2,
-  ShieldCheck,
-  Users,
 } from "lucide-react";
 
 interface Branding {
@@ -202,10 +199,6 @@ function CredentialsForm({
   );
 }
 
-/**
- * SignInForm — only this part needs useSearchParams (demo auto-login, registered flag, etc.)
- * Wrapped in Suspense so the rest of the page renders immediately.
- */
 function SignInForm() {
   const searchParams = useSearchParams();
   const { t } = useLocalizationContext();
@@ -228,7 +221,6 @@ function SignInForm() {
       .catch(() => {});
   }, []);
 
-  // Demo auto-login — runs once at mount, never loops
   useEffect(() => {
     if (!demoEmail.current || !demoPassword.current || demoAttempted.current) return;
     demoAttempted.current = true;
@@ -252,7 +244,6 @@ function SignInForm() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Remove stale Auth.js error param
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (!params.has("error")) return;
@@ -312,7 +303,6 @@ function SignInForm() {
 
   return (
     <div className="w-full max-w-[440px] space-y-6 sm:space-y-8">
-      {/* Logo + title */}
       <div className="text-center">
         <div className="flex justify-center items-center">
           {logoError ? (
@@ -337,7 +327,6 @@ function SignInForm() {
         </p>
       </div>
 
-      {/* Form panel */}
       <div className={cn(heroGlassPanel, "sm:p-8")}>
         {registered && !error && (
           <div className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-400/35 bg-emerald-500/15 p-3 text-xs text-emerald-100 backdrop-blur-md">
@@ -385,18 +374,16 @@ export default function SignInPage() {
   const { t } = useLocalizationContext();
 
   return (
-    <div className="fixed inset-0 h-screen w-screen overflow-auto" suppressHydrationWarning>
-      <HeroVideo />
-
-      {/* Dark gradient overlay */}
-      <div
-        className="fixed inset-0 z-[1] pointer-events-none"
-        style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.38) 42%, rgba(0,0,0,0.72) 100%)" }}
-        aria-hidden
-      />
+    <div className="min-h-screen overflow-auto bg-slate-950" suppressHydrationWarning>
+      {/* Static gradient background — no video, no z-index problems */}
+      <div className="fixed inset-0 z-0" aria-hidden>
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-sky-950/80 to-indigo-950" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_20%,rgba(56,189,248,0.12),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_70%_80%,rgba(99,102,241,0.10),transparent_50%)]" />
+      </div>
 
       {/* Top-left: back button */}
-      <div className="fixed left-4 top-4 z-20 sm:left-6">
+      <div className="relative z-20 flex items-center justify-between px-4 sm:px-6 py-4">
         <Link
           href="/"
           className="inline-flex h-9 min-h-[36px] touch-manipulation items-center gap-2 rounded-2xl border border-white/15 px-3.5 text-xs tracking-wide text-white/65 transition-colors hover:border-white/30 hover:text-white/95"
@@ -405,21 +392,16 @@ export default function SignInPage() {
           <ArrowLeft className="h-3.5 w-3.5 shrink-0" aria-hidden />
           {t("auth.signin.backToHome")}
         </Link>
-      </div>
-
-      {/* Top-right: language switcher */}
-      <div className="fixed top-4 right-4 z-20">
         <LanguageSwitcher variant="dark" align="right" />
       </div>
 
       {/* Main content */}
-      <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-20">
+      <main className="relative z-10 flex flex-col items-center justify-center px-4 sm:px-6 py-8" style={{ minHeight: "calc(100vh - 64px)" }}>
 
-        {/* Form — inside Suspense because it uses useSearchParams */}
         <Suspense fallback={
           <div className="w-full max-w-[440px] flex flex-col items-center gap-8">
             <div className="h-11 w-40 rounded-lg bg-white/10 animate-pulse" />
-            <div className="w-full rounded-2xl border border-white/15 bg-white/[0.06] p-8 space-y-4 backdrop-blur-xl">
+            <div className="w-full rounded-2xl border border-white/15 bg-white/[0.06] p-8 space-y-4">
               <div className="h-5 w-32 rounded bg-white/10 animate-pulse" />
               <div className="h-12 w-full rounded-xl bg-white/10 animate-pulse" />
               <div className="h-12 w-full rounded-xl bg-white/10 animate-pulse" />
@@ -430,7 +412,7 @@ export default function SignInPage() {
           <SignInForm />
         </Suspense>
 
-        {/* Demo quick-access — rendered immediately, no Suspense needed */}
+        {/* Demo buttons — always visible, no Suspense needed */}
         <div className="mt-6 w-full max-w-[440px] space-y-2.5">
           <p className="text-center text-[10px] tracking-widest text-white/30 uppercase" style={{ fontWeight: 400 }}>
             Or try a live demo
@@ -441,7 +423,7 @@ export default function SignInPage() {
                 key={role}
                 href={`/auth/signin?demo=1&role=${role}`}
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 h-10 rounded-xl border bg-white/[0.04] text-xs tracking-wide text-white/55 backdrop-blur-md transition-all duration-200 hover:text-white/90",
+                  "inline-flex items-center justify-center gap-1.5 h-10 rounded-xl border bg-white/[0.04] text-xs tracking-wide text-white/55 transition-all duration-200 hover:text-white/90",
                   color
                 )}
                 style={{ fontWeight: 300 }}

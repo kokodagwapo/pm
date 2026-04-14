@@ -15,7 +15,6 @@ import {
   Phone,
   User,
 } from "lucide-react";
-import { HeroVideo } from "@/components/landing/HeroVideo";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import {
@@ -242,25 +241,15 @@ function SignupContent() {
   };
 
   return (
-    <div
-      className="fixed inset-0 h-screen w-screen overflow-auto"
-      suppressHydrationWarning
-    >
-      <HeroVideo />
-      <div
-        className="fixed inset-0 z-[1] pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.38) 42%, rgba(0,0,0,0.72) 100%)",
-        }}
-        aria-hidden
-      />
-
-      <div className="fixed top-4 right-4 z-20">
-        <LanguageSwitcher variant="dark" align="right" />
+    <div className="min-h-screen overflow-auto bg-slate-950" suppressHydrationWarning>
+      {/* Static gradient background */}
+      <div className="fixed inset-0 z-0" aria-hidden>
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-sky-950/80 to-indigo-950" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_20%,rgba(56,189,248,0.12),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_70%_80%,rgba(99,102,241,0.10),transparent_50%)]" />
       </div>
 
-      <div className="fixed left-4 top-4 z-20 sm:left-6">
+      <div className="relative z-20 flex items-center justify-between px-4 sm:px-6 py-4">
         <Link
           href="/auth/signin"
           className="inline-flex h-9 min-h-[36px] touch-manipulation items-center gap-2 rounded-2xl border border-white/15 px-3.5 text-xs tracking-wide text-white/65 transition-colors hover:border-white/30 hover:text-white/95"
@@ -269,9 +258,10 @@ function SignupContent() {
           <ArrowLeft className="h-3.5 w-3.5 shrink-0" aria-hidden />
           {t("auth.signup.backToSignIn")}
         </Link>
+        <LanguageSwitcher variant="dark" align="right" />
       </div>
 
-      <main className="relative z-10 flex min-h-screen items-center justify-center px-4 py-12 sm:px-6">
+      <main className="relative z-10 flex items-center justify-center px-4 py-8 sm:px-6" style={{ minHeight: "calc(100vh - 64px)" }}>
         <div className="w-full max-w-[440px] space-y-6 sm:space-y-8">
           <div className="text-center">
             <div className="flex justify-center items-center">

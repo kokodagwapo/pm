@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Building2, Users, Wrench, BarChart3, Globe, ShieldCheck, Zap, Star, ChevronRight, Home, Calendar } from "lucide-react";
-import { HeroVideo } from "@/components/landing/HeroVideo";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
@@ -64,18 +63,16 @@ const FEATURES = [
 
 export default function LandingPage() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <HeroVideo />
-
-      {/* Dark overlay */}
-      <div
-        className="fixed inset-0 z-[1] pointer-events-none"
-        style={{ background: "linear-gradient(to bottom, rgba(2,6,23,0.72) 0%, rgba(2,6,23,0.52) 40%, rgba(2,6,23,0.88) 100%)" }}
-        aria-hidden
-      />
+    <div className="relative min-h-screen overflow-x-hidden bg-slate-950">
+      {/* Static gradient background — works everywhere, no video z-index issues */}
+      <div className="fixed inset-0 z-0" aria-hidden>
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-sky-950/80 to-indigo-950" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_20%,rgba(56,189,248,0.12),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_70%_80%,rgba(99,102,241,0.10),transparent_50%)]" />
+      </div>
 
       {/* Nav */}
-      <header className="fixed top-0 left-0 right-0 z-20 flex items-center justify-between px-5 sm:px-8 py-4">
+      <header className="relative z-20 flex items-center justify-between px-5 sm:px-8 py-4">
         <Link href="/" className="flex items-center gap-2.5 select-none">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -91,19 +88,19 @@ export default function LandingPage() {
           <LanguageSwitcher variant="dark" align="right" ghost onDarkBackdrop />
           <Link
             href="/auth/signin"
-            className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-4 text-xs font-medium text-white backdrop-blur-md transition hover:bg-white/18 hover:border-white/35"
+            className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-4 text-xs font-medium text-white backdrop-blur-md transition hover:bg-white/[0.18] hover:border-white/35"
           >
             Sign In
           </Link>
         </div>
       </header>
 
-      {/* ── Main — single screen layout: hero + demo cards together ── */}
-      <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 sm:px-6 pt-20 pb-10">
+      {/* Main — single screen layout: hero + demo cards together */}
+      <main className="relative z-10 flex flex-col items-center justify-center px-4 sm:px-6 pt-8 pb-10" style={{ minHeight: "calc(100vh - 64px)" }}>
 
-        {/* Hero headline — compact */}
+        {/* Hero headline */}
         <div className="text-center space-y-3 mb-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-1.5 text-xs tracking-wide text-white/55 backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-xs tracking-wide text-white/55">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Naples, Florida — Enterprise Property Management
           </div>
@@ -121,7 +118,7 @@ export default function LandingPage() {
           </p>
         </div>
 
-        {/* ── Demo Role Cards ── */}
+        {/* Demo Role Cards */}
         <div className="w-full max-w-2xl space-y-3 mb-8">
           <p className="text-center text-[10px] font-medium tracking-widest text-white/35 uppercase">
             Try a live demo — one click, no account needed
@@ -164,14 +161,14 @@ export default function LandingPage() {
           </Link>
           <Link
             href="/rentals"
-            className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/15 bg-white/8 px-5 text-xs font-medium text-white/70 backdrop-blur-md transition hover:bg-white/14 hover:text-white"
+            className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-5 text-xs font-medium text-white/70 transition hover:bg-white/[0.12] hover:text-white"
           >
             <Home className="h-3.5 w-3.5" />
             Browse Rentals
           </Link>
           <Link
             href="/all-in-one-calendar"
-            className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/15 bg-white/8 px-5 text-xs font-medium text-white/70 backdrop-blur-md transition hover:bg-white/14 hover:text-white"
+            className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-5 text-xs font-medium text-white/70 transition hover:bg-white/[0.12] hover:text-white"
           >
             <Calendar className="h-3.5 w-3.5" />
             Availability
@@ -179,7 +176,7 @@ export default function LandingPage() {
         </div>
       </main>
 
-      {/* ── Features section (scrollable) ── */}
+      {/* Features section */}
       <section className="relative z-10 px-4 sm:px-8 pb-20">
         <div className="mx-auto max-w-4xl">
           <h2 className="text-center text-xl font-light text-white/80 mb-8">Platform Features</h2>
@@ -187,7 +184,7 @@ export default function LandingPage() {
             {FEATURES.map(({ icon: Icon, title, description }) => (
               <div
                 key={title}
-                className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-md hover:bg-white/[0.07] hover:border-white/16 transition"
+                className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-4 hover:bg-white/[0.07] hover:border-white/[0.16] transition"
               >
                 <div className="shrink-0 rounded-lg bg-white/10 p-2 h-fit">
                   <Icon className="h-4 w-4 text-white/60" />
@@ -203,7 +200,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-white/8 px-4 sm:px-8 py-6">
+      <footer className="relative z-10 border-t border-white/[0.08] px-4 sm:px-8 py-6">
         <div className="mx-auto max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-white/25" style={{ fontWeight: 300 }} suppressHydrationWarning>
             © {new Date().getFullYear()} SmartStart PM · Naples, Florida

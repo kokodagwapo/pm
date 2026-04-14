@@ -32,18 +32,20 @@ import {
   useSidebarCollapse,
 } from "@/components/providers/SidebarCollapseProvider";
 
-const HeroVideo = dynamic(() => import("@/components/landing/HeroVideo").then((m) => ({ default: m.HeroVideo })), {
-  ssr: false,
-});
 
 const DemoGuide = dynamic(
   () => import("@/components/demo/DemoGuide").then((m) => ({ default: m.DemoGuide })),
   { ssr: false }
 );
 
-/** Base dim + vignette over HeroVideo — immersive / dark (lighter overlay = more video visible). */
-const DASHBOARD_VIDEO_OVERLAY =
-  "linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.46) 40%, rgba(0,0,0,0.80) 100%), rgba(0,0,0,0.26)";
+function DarkGradientBg() {
+  return (
+    <div className="fixed inset-0 z-0" aria-hidden>
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-sky-950/80 to-indigo-950" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_20%,rgba(56,189,248,0.08),transparent_55%)]" />
+    </div>
+  );
+}
 
 const COLLAPSED_WIDTH = 56; // px — narrow icon rail, icons only
 
@@ -292,16 +294,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
           isLight ? "bg-transparent" : "bg-black"
         )}
       >
-        {!isLight && (
-          <>
-            <HeroVideo />
-            <div
-              className="pointer-events-none fixed inset-0 z-[1]"
-              style={{ background: DASHBOARD_VIDEO_OVERLAY }}
-              aria-hidden
-            />
-          </>
-        )}
+        {!isLight && <DarkGradientBg />}
         <div className="relative z-10">
           <InlinePreloader size="md" />
         </div>
@@ -323,16 +316,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
         isLight ? "bg-transparent" : "bg-black"
       )}
     >
-      {!isLight && (
-        <>
-          <HeroVideo />
-          <div
-            className="pointer-events-none fixed inset-0 z-[1]"
-            style={{ background: DASHBOARD_VIDEO_OVERLAY }}
-            aria-hidden
-          />
-        </>
-      )}
+      {!isLight && <DarkGradientBg />}
       <SidebarCollapseProvider>
         <div className="relative z-10 flex h-full min-h-0 min-w-0 w-full overflow-hidden">
           {isMobileMenuOpen && (
