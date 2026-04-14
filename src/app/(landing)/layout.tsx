@@ -1,4 +1,9 @@
 import type { Metadata } from "next";
+import { LandingLayoutShell } from "@/components/landing/LandingLayoutShell";
+
+/**
+ * Landing layout — default light theme; optional dark (toggle on home).
+ */
 
 export const metadata: Metadata = {
   title: "SmartStart PM | Modern Property Management",
@@ -17,5 +22,5 @@ export default function LandingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <LandingLayoutShell>{children}</LandingLayoutShell>;
 }

@@ -59,8 +59,6 @@ import {
   parseStayParamDate,
 } from "@/components/stay-finder/usePublicStaySearch";
 
-const LISTINGS_PER_PAGE = 15;
-
 const NEIGHBORHOODS = [
   { label: "All Properties", value: "" },
   { label: "Falling Waters", value: "Falling Waters" },
@@ -105,22 +103,14 @@ function formatPrice(amount: number): string {
   }).format(amount);
 }
 
-function PropertyFeaturedCard({
-  property,
-  onClose,
-  label = "Selected Property",
-}: {
-  property: any;
-  onClose: () => void;
-  label?: string;
-}) {
+function PropertyFeaturedCard({ property, onClose }: { property: any; onClose: () => void }) {
   const unit = property.units?.[0];
   const bedrooms = unit?.bedrooms ?? 0;
   const bathrooms = unit?.bathrooms ?? 0;
   const rentAmount = unit?.rentAmount ?? 0;
-  const monthlyPrice = rentAmount > 500 ? rentAmount : rentAmount * 30;
+  const price = rentAmount > 500 ? rentAmount : rentAmount * 30;
   const sqft = unit?.squareFootage ?? 0;
-  const dailyPrice = rentAmount > 500 ? Math.round(rentAmount / 30) : Math.round(rentAmount);
+  const basePerNight = rentAmount > 500 ? Math.round(rentAmount / 30) : Math.round(rentAmount);
   const images = property.images?.length ? property.images : [];
   const imageUrl = images[0] || null;
 
@@ -130,7 +120,7 @@ function PropertyFeaturedCard({
       <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800/80">
         <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
-          <span className="text-[10px] font-semibold text-white/90 uppercase tracking-wider">{label}</span>
+          <span className="text-[10px] font-semibold text-white/90 uppercase tracking-wider">Selected Property</span>
         </div>
         <button
           onClick={onClose}
@@ -153,11 +143,11 @@ function PropertyFeaturedCard({
           <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
             <div>
               <p className="text-white font-semibold text-xl leading-tight drop-shadow-lg tracking-tight">
-                {formatPrice(dailyPrice)}
-                <span className="text-white/70 text-sm font-normal ml-1">/day</span>
+                {formatPrice(price)}
+                <span className="text-white/70 text-sm font-normal ml-1">/mo</span>
               </p>
-              {monthlyPrice > 0 && (
-                <p className="text-white/70 text-xs mt-0.5">{formatPrice(monthlyPrice)}/month</p>
+              {basePerNight > 0 && (
+                <p className="text-white/70 text-xs mt-0.5">~{formatPrice(basePerNight)}/night</p>
               )}
             </div>
             {images.length > 1 && (
@@ -536,12 +526,10 @@ function RentalsContent() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
-  const [mapPreviewPropertyId, setMapPreviewPropertyId] = useState<string | null>(null);
   const [listDrawerOpen, setListDrawerOpen] = useState(true);
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
   const [stayCalMonths, setStayCalMonths] = useState(1);
   const [isLg, setIsLg] = useState(false);
-  const [listPage, setListPage] = useState(1);
 
   const activeType = searchParams.get("type") || "";
   const activeBedrooms = searchParams.get("bedrooms") || "";
@@ -624,68 +612,18 @@ function RentalsContent() {
     () => properties.find((p) => p._id === selectedPropertyId) ?? null,
     [properties, selectedPropertyId]
   );
-  const mapPreviewProperty = useMemo(
-    () =>
-      properties.find((p) => p._id === (mapPreviewPropertyId ?? selectedPropertyId)) ?? null,
-    [mapPreviewPropertyId, properties, selectedPropertyId]
-  );
-  const mapPreviewLabel = mapPreviewPropertyId ? "Property Preview" : "Selected Property";
-
-  const listResults = useMemo(
-    () =>
-      showFavoritesOnly
-        ? properties.filter((p) => favoriteIds.includes(p._id))
-        : properties,
-    [favoriteIds, properties, showFavoritesOnly]
-  );
-
-  const listPageCount = Math.max(1, Math.ceil(listResults.length / LISTINGS_PER_PAGE));
-  const paginatedListResults = useMemo(() => {
-    const startIndex = (listPage - 1) * LISTINGS_PER_PAGE;
-    return listResults.slice(startIndex, startIndex + LISTINGS_PER_PAGE);
-  }, [listPage, listResults]);
-  const listRangeStart =
-    listResults.length === 0 ? 0 : (listPage - 1) * LISTINGS_PER_PAGE + 1;
-  const listRangeEnd = Math.min(listPage * LISTINGS_PER_PAGE, listResults.length);
-  const visibleListPages = useMemo(() => {
-    if (listPageCount <= 7) {
-      return Array.from({ length: listPageCount }, (_, index) => index + 1);
-    }
-
-    const start = Math.max(1, Math.min(listPage - 2, listPageCount - 4));
-    const end = Math.min(listPageCount, start + 4);
-    return Array.from({ length: end - start + 1 }, (_, index) => start + index);
-  }, [listPage, listPageCount]);
 
   useEffect(() => {
     if (properties.length === 0) {
       setSelectedPropertyId(null);
-      setMapPreviewPropertyId(null);
       return;
     }
 
     const selectedStillExists = properties.some((p) => p._id === selectedPropertyId);
-    if (selectedPropertyId && !selectedStillExists) {
+    if ((!selectedPropertyId && isLg) || (selectedPropertyId && !selectedStillExists)) {
       setSelectedPropertyId(properties[0]._id);
     }
-    if (mapPreviewPropertyId && !properties.some((p) => p._id === mapPreviewPropertyId)) {
-      setMapPreviewPropertyId(null);
-    }
-  }, [properties, selectedPropertyId, mapPreviewPropertyId, isLg]);
-
-  useEffect(() => {
-    setListPage(1);
-  }, [properties, showFavoritesOnly]);
-
-  useEffect(() => {
-    if (showFavoritesOnly) {
-      setListPage(1);
-    }
-  }, [favoriteIds, showFavoritesOnly]);
-
-  useEffect(() => {
-    setListPage((current) => Math.min(current, listPageCount));
-  }, [listPageCount]);
+  }, [properties, selectedPropertyId, isLg]);
 
   useEffect(() => {
     try {
@@ -799,32 +737,17 @@ function RentalsContent() {
 
   const handleMarkerClick = useCallback((propertyId: string) => {
     setSelectedPropertyId(propertyId);
-    setMapPreviewPropertyId(propertyId);
     setHoveredPropertyId(propertyId);
     if (window.innerWidth < 768) setMobileView("list");
   }, []);
 
-  const handleMarkerHover = useCallback((propertyId: string | null) => {
-    setHoveredPropertyId(propertyId);
-    setMapPreviewPropertyId(propertyId);
-  }, []);
-
-  const handleCloseMapPreview = useCallback(() => {
-    if (mapPreviewPropertyId && mapPreviewPropertyId !== selectedPropertyId) {
-      setMapPreviewPropertyId(null);
-      setHoveredPropertyId(null);
-      return;
-    }
-    setMapPreviewPropertyId(null);
-    setHoveredPropertyId(null);
-    setSelectedPropertyId(null);
-  }, [mapPreviewPropertyId, selectedPropertyId]);
-
-  const handleListPageChange = useCallback(
+  const handlePageChange = useCallback(
     (page: number) => {
-      setListPage(Math.max(1, Math.min(page, listPageCount)));
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", String(page));
+      router.push(`/rentals?${params.toString()}`);
     },
-    [listPageCount]
+    [searchParams, router]
   );
 
   const hasActiveFilters = !!(
@@ -846,24 +769,6 @@ function RentalsContent() {
     filteredMode &&
     selectedPropertyId &&
     !properties.some((p) => p._id === selectedPropertyId);
-
-  const listViewActive = isLg ? listDrawerOpen : mobileView === "list";
-  const mapViewActive = isLg ? !listDrawerOpen : mobileView === "map";
-
-  const handleShowListView = useCallback(() => {
-    if (isLg) {
-      setListDrawerOpen(true);
-      return;
-    }
-    setMobileView("list");
-  }, [isLg]);
-
-  const handleShowMapView = useCallback(() => {
-    if (isLg) {
-      setListDrawerOpen(false);
-    }
-    setMobileView("map");
-  }, [isLg]);
 
   const rentalsListBody = (opts: { showFeaturedCard: boolean }) => (
     <>
@@ -928,7 +833,10 @@ function RentalsContent() {
       ) : null}
       {showFullPropertyCardList && !mapLoading && properties.length > 0
         ? (() => {
-            if (listResults.length === 0 && showFavoritesOnly) {
+            const displayed = showFavoritesOnly
+              ? properties.filter((p) => favoriteIds.includes(p._id))
+              : properties;
+            if (displayed.length === 0 && showFavoritesOnly) {
               return (
                 <div className="flex flex-col items-center justify-center py-16 text-center px-6">
                   <Heart className="w-12 h-12 text-slate-200 mb-4" />
@@ -945,22 +853,7 @@ function RentalsContent() {
             }
             return (
               <>
-                {listResults.length > LISTINGS_PER_PAGE && (
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2 text-xs text-slate-500 shadow-sm">
-                    <span>
-                      Showing <span className="font-semibold text-slate-700">{listRangeStart}</span>
-                      {" "}-{" "}
-                      <span className="font-semibold text-slate-700">{listRangeEnd}</span>
-                      {" "}of{" "}
-                      <span className="font-semibold text-slate-700">{listResults.length}</span>
-                    </span>
-                    <span>
-                      Page <span className="font-semibold text-slate-700">{listPage}</span> of{" "}
-                      <span className="font-semibold text-slate-700">{listPageCount}</span>
-                    </span>
-                  </div>
-                )}
-                {paginatedListResults.map((property) => (
+                {displayed.map((property) => (
                   <div key={property._id} id={`property-${property._id}`}>
                     <PropertyListCard
                       property={property}
@@ -975,23 +868,23 @@ function RentalsContent() {
                     />
                   </div>
                 ))}
-                {listPageCount > 1 && (
+                {pagination.pages > 1 && (
                   <div className="flex items-center justify-center gap-2 py-6">
                     <button
                       type="button"
-                      onClick={() => handleListPageChange(listPage - 1)}
-                      disabled={listPage <= 1}
+                      onClick={() => handlePageChange(pagination.page - 1)}
+                      disabled={pagination.page <= 1}
                       className="p-2.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
                       <ChevronLeft className="w-4 h-4 text-slate-600" />
                     </button>
-                    {visibleListPages.map((page) => (
+                    {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
                       <button
                         key={page}
                         type="button"
-                        onClick={() => handleListPageChange(page)}
+                        onClick={() => handlePageChange(page)}
                         className={`min-w-[2.25rem] h-9 px-2 rounded-lg text-sm font-medium transition-all ${
-                          page === listPage
+                          page === pagination.page
                             ? "bg-slate-900 text-white"
                             : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                         }`}
@@ -1001,8 +894,8 @@ function RentalsContent() {
                     ))}
                     <button
                       type="button"
-                      onClick={() => handleListPageChange(listPage + 1)}
-                      disabled={listPage >= listPageCount}
+                      onClick={() => handlePageChange(pagination.page + 1)}
+                      disabled={pagination.page >= pagination.pages}
                       className="p-2.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
                       <ChevronRight className="w-4 h-4 text-slate-600" />
@@ -1184,42 +1077,33 @@ function RentalsContent() {
                 </PopoverContent>
               </Popover>
 
-              <div className="ml-auto flex shrink-0 items-center gap-2">
+              <div className="ml-auto flex shrink-0 items-center gap-1.5">
                 {mapLoading ? (
-                  <span className="inline-flex h-8 shrink-0 items-center rounded-full border border-slate-200 bg-white px-3 shadow-sm">
+                  <span className="inline-flex shrink-0 items-center pr-1">
                     <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500" />
                   </span>
                 ) : (
-                  <p className="inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 text-xs text-slate-500 shadow-sm">
-                    <span className="font-semibold text-slate-700">{pagination.total}</span>
-                    <span className="ml-1 hidden sm:inline">
-                      {pagination.total === 1
-                        ? t("rentals.results.property")
-                        : t("rentals.results.properties")}
-                    </span>
+                  <p className="hidden sm:block shrink-0 whitespace-nowrap pr-1 text-xs text-slate-500">
+                    <span className="font-semibold text-slate-700">{pagination.total}</span>{" "}
+                    {pagination.total === 1 ? t("rentals.results.property") : t("rentals.results.properties")}
                   </p>
                 )}
                 <div className="flex items-center gap-0.5 rounded-full border border-slate-200 bg-white p-0.5 shadow-sm">
                   <button
                     type="button"
-                    onClick={handleShowListView}
-                    aria-pressed={listViewActive}
-                    title={isLg ? "Show list and map" : t("rentals.view.list")}
+                    onClick={() => setMobileView("list")}
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-1.5 text-xs font-medium transition-colors ${
-                      listViewActive ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-50"
+                      mobileView === "list" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-50"
                     }`}
                   >
                     <LayoutList className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline lg:hidden">{t("rentals.view.list")}</span>
-                    <span className="hidden lg:inline">Split</span>
+                    <span className="hidden sm:inline">{t("rentals.view.list")}</span>
                   </button>
                   <button
                     type="button"
-                    onClick={handleShowMapView}
-                    aria-pressed={mapViewActive}
-                    title={isLg ? "Show map only" : t("rentals.view.map")}
+                    onClick={() => setMobileView("map")}
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-1.5 text-xs font-medium transition-colors ${
-                      mapViewActive ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-50"
+                      mobileView === "map" ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-50"
                     }`}
                   >
                     <Map className="h-3.5 w-3.5" />
@@ -1229,16 +1113,14 @@ function RentalsContent() {
                 <button
                   type="button"
                   onClick={() => setListDrawerOpen((v) => !v)}
-                  aria-pressed={listDrawerOpen}
-                  title={listDrawerOpen ? "Hide property list panel" : "Show property list panel"}
-                  className={`hidden md:inline-flex h-8 items-center gap-1 rounded-full border px-2.5 text-xs font-medium transition-colors ${
+                  className={`hidden lg:inline-flex h-8 items-center gap-1 rounded-full border px-2.5 text-xs font-medium transition-colors ${
                     listDrawerOpen
                       ? "border-slate-900 bg-slate-900 text-white"
                       : "border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"
                   }`}
                 >
                   <LayoutList className="h-3 w-3" />
-                  {listDrawerOpen ? "Hide list" : "Show list"}
+                  {listDrawerOpen ? "Hide" : "List"}
                 </button>
               </div>
             </div>
@@ -1442,20 +1324,19 @@ function RentalsContent() {
                   <RentalsGoogleMap
                     properties={properties}
                     onMarkerClick={handleMarkerClick}
-                    onMarkerHover={handleMarkerHover}
+                    onMarkerHover={setHoveredPropertyId}
                     hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
                     neighborhoods={NEIGHBORHOODS}
                     activeNeighborhood={activeNeighborhood}
                     onNeighborhoodChange={handleNeighborhood}
                   />
                 </MapErrorBoundary>
-                {mapPreviewProperty && (
+                {selectedProperty && (
                   <div className="absolute bottom-3 left-3 right-3 z-[1000] max-w-md pointer-events-none">
                     <div className="pointer-events-auto shadow-xl">
                       <PropertyFeaturedCard
-                        property={mapPreviewProperty}
-                        label={mapPreviewLabel}
-                        onClose={handleCloseMapPreview}
+                        property={selectedProperty}
+                        onClose={() => setSelectedPropertyId(null)}
                       />
                     </div>
                   </div>
@@ -1485,20 +1366,19 @@ function RentalsContent() {
                   <RentalsGoogleMap
                     properties={properties}
                     onMarkerClick={handleMarkerClick}
-                    onMarkerHover={handleMarkerHover}
+                    onMarkerHover={setHoveredPropertyId}
                     hoveredPropertyId={hoveredPropertyId ?? selectedPropertyId}
                     neighborhoods={NEIGHBORHOODS}
                     activeNeighborhood={activeNeighborhood}
                     onNeighborhoodChange={handleNeighborhood}
                   />
                 </MapErrorBoundary>
-                {mapPreviewProperty && (
+                {selectedProperty && !listDrawerOpen && (
                   <div className="absolute bottom-3 left-3 right-3 z-[1000] max-w-md pointer-events-none">
                     <div className="pointer-events-auto shadow-xl">
                       <PropertyFeaturedCard
-                        property={mapPreviewProperty}
-                        label={mapPreviewLabel}
-                        onClose={handleCloseMapPreview}
+                        property={selectedProperty}
+                        onClose={() => setSelectedPropertyId(null)}
                       />
                     </div>
                   </div>
@@ -1543,23 +1423,23 @@ function RentalsContent() {
                       Browse on the map and use the panel to compare, save, and open full details.
                     </p>
                   </div>
-                  {listPageCount > 1 && !listDrawerOpen && (
+                  {pagination.pages > 1 && !listDrawerOpen && (
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => handleListPageChange(listPage - 1)}
-                        disabled={listPage <= 1}
+                        onClick={() => handlePageChange(pagination.page - 1)}
+                        disabled={pagination.page <= 1}
                         className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                       >
                         <ChevronLeft className="w-4 h-4 text-slate-600" />
                       </button>
                       <span className="text-xs font-medium text-slate-600 tabular-nums">
-                        Page {listPage} / {listPageCount}
+                        Page {pagination.page} / {pagination.pages}
                       </span>
                       <button
                         type="button"
-                        onClick={() => handleListPageChange(listPage + 1)}
-                        disabled={listPage >= listPageCount}
+                        onClick={() => handlePageChange(pagination.page + 1)}
+                        disabled={pagination.page >= pagination.pages}
                         className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                       >
                         <ChevronRight className="w-4 h-4 text-slate-600" />

@@ -54,11 +54,10 @@ export function LandingHeader() {
 
   const isHome = pathname === "/";
   const isRentals = pathname?.startsWith("/rentals") ?? false;
-  const isPropertyDetails = pathname?.startsWith("/properties") ?? false;
-  const showRentalsNav = isRentals || isPropertyDetails;
   const isLight =
     (isHome && theme === "light") ||
-    showRentalsNav ||
+    isRentals ||
+    pathname?.startsWith("/properties") ||
     pathname?.startsWith("/all-in-one-calendar") ||
     pathname?.startsWith("/contact");
 
@@ -94,7 +93,7 @@ export function LandingHeader() {
     };
   }, [open]);
 
-  const headerBg = showRentalsNav
+  const headerBg = isRentals
     ? "border-b border-slate-100 bg-white"
     : !isLight
       ? "border-b border-white/10 bg-slate-950/25 backdrop-blur-md"
@@ -112,7 +111,7 @@ export function LandingHeader() {
     return `hidden lg:inline px-2 py-1 text-[13px] font-medium tracking-wide text-slate-900 transition-opacity touch-manipulation hover:opacity-70`;
   };
 
-  const logoSrc = showRentalsNav
+  const logoSrc = isRentals
     ? "/images/logo-light.svg"
     : !isLight || (isLight && overDarkBg)
       ? "/images/logo-dark.svg"
@@ -168,7 +167,7 @@ export function LandingHeader() {
                 )}
               </nav>
             </div>
-          ) : showRentalsNav ? (
+          ) : isRentals ? (
             <div className="hidden min-w-0 flex-1 justify-center px-2 lg:flex">
               <nav
                 className="flex max-w-full items-center gap-1 overflow-x-auto whitespace-nowrap xl:gap-5 [&::-webkit-scrollbar]:hidden"
@@ -246,7 +245,7 @@ export function LandingHeader() {
             </button>
 
             {SHOW_LANDING_HEADER_AUTH &&
-              (showRentalsNav ? (
+              (isRentals ? (
                 <>
                   <Link
                     href="/auth/signin"
@@ -323,7 +322,7 @@ export function LandingHeader() {
                 <div className={`my-1 border-t ${isLight ? "border-slate-100" : "border-white/8"}`} />
               </>
             )}
-            {showRentalsNav && (
+            {isRentals && (
               <>
                 {RENTALS_NAV.map(({ href, label, teal, ...rest }) => {
                   const style = { fontWeight: 500 as const, color: teal ? "#0ABAB5" : "#1e293b" };
@@ -384,7 +383,7 @@ export function LandingHeader() {
             </div>
             <div className={`my-1 border-t ${isLight ? "border-slate-100" : "border-white/8"}`} />
             {SHOW_LANDING_HEADER_AUTH &&
-              (showRentalsNav ? (
+              (isRentals ? (
                 <>
                   <Link
                     href="/auth/signin"

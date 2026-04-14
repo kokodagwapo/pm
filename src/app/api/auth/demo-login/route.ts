@@ -17,7 +17,7 @@ import { cookies } from "next/headers";
 const DEMO_AUTH_ENABLED = process.env.ENABLE_DEMO_AUTH === "true";
 
 const DEMO_CREDENTIALS: Record<string, { email: string; password: string }> = {
-    superadmin: { email: "superadmin@smartstartpm.com", password: "Sspm!Super2026" },
+    admin: { email: "superadmin@smartstartpm.com", password: "Sspm!Super2026" },
     manager: { email: "pmadmin@smartstartpm.com", password: "Sspm!Manager2026" },
     owner: { email: "owner@smartstartpm.com", password: "Sspm!Owner2026" },
     tenant: { email: "tenant@smartstartpm.com", password: "Sspm!Tenant2026" },
@@ -28,12 +28,12 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const role = request.nextUrl.searchParams.get("role") || "superadmin";
+    const role = request.nextUrl.searchParams.get("role") || "admin";
     const creds = DEMO_CREDENTIALS[role];
 
     if (!creds) {
         return NextResponse.json(
-            { error: `Unknown role: ${role}. Valid: superadmin, manager, owner, tenant` },
+            { error: `Unknown role: ${role}. Valid: admin, manager, owner, tenant` },
             { status: 400 }
         );
     }
