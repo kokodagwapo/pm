@@ -77,6 +77,26 @@ function safeCallbackUrl(input: string | null): string {
   return path.startsWith("/dashboard") ? path : "/dashboard";
 }
 
+function getDemoLoginCredentials(
+  searchParams: URLSearchParams
+): { email: string; password: string } | null {
+  if (searchParams.get("demo") !== "1") return null;
+  const role = searchParams.get("role") || "superadmin";
+  if (role === "superadmin" || role === "admin") {
+    return { email: "superadmin@smartstartpm.com", password: "Sspm!Super2026" };
+  }
+  if (role === "manager") {
+    return { email: "pmadmin@smartstartpm.com", password: "Sspm!Manager2026" };
+  }
+  if (role === "owner") {
+    return { email: "owner@smartstartpm.com", password: "Sspm!Owner2026" };
+  }
+  if (role === "tenant") {
+    return { email: "tenant@smartstartpm.com", password: "Sspm!Tenant2026" };
+  }
+  return null;
+}
+
 function CredentialsSignInSection({
   t,
   isLoading,
@@ -209,6 +229,7 @@ function SignInContent() {
   const [logoError, setLogoError] = useState(false);
   const registered = searchParams.get("registered") === "1";
   const initialEmail = searchParams.get("email") || "";
+  const demoCredentials = getDemoLoginCredentials(searchParams);
 
   useEffect(() => {
     const fetchBranding = async () => {
@@ -224,6 +245,23 @@ function SignInContent() {
     };
     fetchBranding();
   }, []);
+
+  useEffect(() => {
+    if (!demoCredentials) return;
+    void (async () => {
+      setError("");
+      setIsLoading(true);
+      const target = await signInCredentialsWithFallback(
+        demoCredentials.email,
+        demoCredentials.password
+      );
+      if (target) {
+        window.location.href = target;
+        return;
+      }
+      setIsLoading(false);
+    })();
+  }, [demoCredentials]);
 
   // Remove stale Auth.js error query (bookmark / failed attempt) so it does not confuse users
   useEffect(() => {
