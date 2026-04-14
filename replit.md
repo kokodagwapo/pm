@@ -15,7 +15,7 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Translation files**: `src/locales/{lang}/*.json` — each language has `common.json`, `auth.json`, `tour.json`, `dashboard.json`, `settings.json`, `properties.json`, `tenants.json`, `leases.json`, `maintenance.json`, `payments.json`, `analytics.json`, `messages.json`, `calendar.json`, `admin.json`
 - **Catalog registration**: `src/locales/index.ts` — merges all JSON files per language into the `translations` map used by `LocalizationProvider`
 - **Localization service**: `src/lib/services/localization.service.ts` — LOCALES map includes all 9 languages including `fil-PH`
-- **Translated pages**: Home `/` (new landing page), Dashboard (full), Sign-in (full), Rentals (key UI strings); all pages fallback to English for missing keys
+- **Translated pages**: Home `/` (real landing page with hero + demo cards + features), Dashboard (full), Sign-in (full with demo role buttons), Rentals (key UI strings); all pages fallback to English for missing keys
 - **LanguageSwitcher placement**: LandingHeader top bar (all landing pages incl. `/`), LandingHeader mobile dropdown menu, Dashboard `MobileHeader` (top bar, light variant), AdminTourWidget panel header (dark variant), Sign-in page (fixed overlay)
 - **Provider scope**: `LocalizationProvider` wraps the entire app via `src/components/providers/index.tsx`
 
@@ -38,6 +38,7 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **SSR hydration safety**: All providers (`DashboardAppearanceProvider`, `LocalizationProvider`, `localization.service.ts`) use stable SSR-safe defaults ("immersive", "en-US", "USD") in initial state. Client-side localStorage values are applied only in `useEffect` after hydration.
 - **React Strict Mode disabled**: `reactStrictMode: false` in `next.config.ts` to prevent double-mounting of components in dev mode, which exacerbates hydration issues on Replit.
 - **No global-error.tsx**: Removed entirely — the custom error boundary was itself causing "Critical Application Error: {}" overlays in dev mode. Next.js's default error handling is used instead.
+- **Error boundaries (ZERO hooks)**: `src/app/error.tsx` and `src/app/dashboard/error.tsx` use NO React hooks (no `useRouter`, no `useEffect`). Buttons use static HTML `<a href="javascript:history.back()">` instead of `router.back()`. Empty `error.message` returns `null`. Violating this pattern causes Fast Refresh reload loops.
 - **Dev overlay suppressor**: `layout.tsx` injects a dev-only `<script>` (MutationObserver) that watches for `<nextjs-portal>` elements. When added, portals are hidden immediately; after 120ms content is checked — if it's a "Critical Application Error: {}", the portal is removed from the DOM entirely; real errors are shown normally. Production builds never include this script.
 - **Webpack error guard (BannerPlugin)**: `next.config.ts` uses `webpack.BannerPlugin` to inject a dev-only error event listener. Catches empty `{}` errors, `options.factory`, `webpack_require`, `ChunkLoadError` at the window level and prevents them from reaching the dev overlay. Empty errors are silently swallowed; transient webpack errors trigger a bounded reload (max 2). Gated behind `dev && !isServer`.
 - **Hydration suppression**: Controlled `<input>` elements in `rentals/page.tsx` and `auth/signin/page.tsx` have `suppressHydrationWarning` to prevent React 19 hydration attribute warnings from showing in the dev toolbar.
@@ -56,6 +57,7 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Manifest**: `public/manifest.json` — `start_url: /dashboard`, `theme_color: #4f46e5`, PNG icons (72–512px) with maskable entries for 192/512.
 - **Icons**: `public/icons/icon-{size}x{size}.png` (72, 96, 128, 144, 152, 180, 192, 384, 512). Apple touch icon: `icon-180x180.png`.
 - **Service Worker**: `public/sw.js` — caches static assets and Next.js bundles only. Does NOT cache authenticated `/api/*` responses (privacy/security). Disabled in development via `ServiceWorkerRegistration.tsx`.
+- **Install prompt**: `PwaInstallHint` custom banner has been REMOVED from all layouts. PWA install is browser-native only — users install via the browser's address bar "Add to Home Screen" option when the browser criteria are met.
 - **Safe-area insets**: Applied only in `@media (display-mode: standalone)` — header gets top inset padding, main content area gets left/right/bottom insets. No double-padding on body.
 - **Mobile overflow**: `overflow-x: hidden` on `html.dashboard-layout`, body, and main. Select triggers constrained to `max-width: 100%` on mobile. Page headers use `data-slot="page-header"` for mobile flex-wrap behavior.
 - **data-scroll-behavior**: `data-scroll-behavior="smooth"` on `<html>` element per Next.js 15 recommendation.

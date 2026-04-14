@@ -470,6 +470,33 @@ function SignInContent() {
             </p>
           </div>
 
+          {/* Demo quick-access */}
+          <div className="space-y-2.5">
+            <p className="text-center text-[10px] tracking-widest text-white/30 uppercase" style={{ fontWeight: 400 }}>
+              Or try a live demo
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { role: "superadmin", label: "Super Admin", color: "border-violet-500/30 hover:border-violet-400/50 hover:bg-violet-500/10" },
+                { role: "manager",    label: "PM Manager",  color: "border-cyan-500/30 hover:border-cyan-400/50 hover:bg-cyan-500/10" },
+                { role: "owner",      label: "Owner",       color: "border-emerald-500/30 hover:border-emerald-400/50 hover:bg-emerald-500/10" },
+                { role: "tenant",     label: "Tenant",      color: "border-amber-500/30 hover:border-amber-400/50 hover:bg-amber-500/10" },
+              ].map(({ role, label, color }) => (
+                <a
+                  key={role}
+                  href={`/auth/signin?demo=1&role=${role}`}
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 h-10 rounded-xl border bg-white/[0.04] text-xs tracking-wide text-white/55 backdrop-blur-md transition-all duration-200 hover:text-white/90",
+                    color
+                  )}
+                  style={{ fontWeight: 300 }}
+                >
+                  {label}
+                </a>
+              ))}
+            </div>
+          </div>
+
           {/* View Rentals + stay finder */}
           <div className="flex flex-wrap items-center justify-center gap-2">
             <a

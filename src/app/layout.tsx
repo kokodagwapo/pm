@@ -3,7 +3,6 @@ import { Inter, Playfair_Display, Montserrat, Plus_Jakarta_Sans } from "next/fon
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
-import { PwaInstallHint } from "@/components/pwa/PwaInstallHint";
 import type { Metadata } from "next";
 
 const inter = Inter({
@@ -89,7 +88,6 @@ export default function RootLayout({
           {children}
           <Toaster />
           <ServiceWorkerRegistration />
-          <PwaInstallHint variant="dark" />
         </Providers>
       </body>
     </html>

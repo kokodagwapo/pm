@@ -1,8 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertCircle,
   RefreshCw,
@@ -13,7 +10,6 @@ import {
   Wifi,
   MessageSquare,
 } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Link from "next/link";
 
 interface DashboardErrorProps {
@@ -23,7 +19,6 @@ interface DashboardErrorProps {
 
 function getErrorContext(error: Error) {
   const message = (error?.message || "").toLowerCase();
-
   if (message.includes("unauthorized") || message.includes("session")) {
     return {
       icon: Shield,
@@ -57,51 +52,43 @@ function getErrorContext(error: Error) {
 }
 
 export default function DashboardError({ error, reset }: DashboardErrorProps) {
-  const router = useRouter();
+  if (!error?.message) return null;
+
   const errorContext = getErrorContext(error);
   const ErrorIcon = errorContext.icon;
 
-  if (!error?.message) {
-    return null;
-  }
-
   return (
-    <div className="flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
-      <Card className="max-w-2xl w-full border-border/60 shadow-xl">
-        <CardHeader className="text-center">
-          <div className="mx-auto">
-            <ErrorIcon className="size-12 text-destructive" />
+    <div className="flex min-h-[60vh] items-center justify-center p-6 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200">
+      <div className="max-w-2xl w-full rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
+        <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-8 py-6 text-white">
+          <div className="flex items-center gap-4">
+            <div className="rounded-xl bg-white/10 p-3">
+              <ErrorIcon className="size-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold">{errorContext.title}</h2>
+              <p className="mt-0.5 text-sm text-white/70">{errorContext.description}</p>
+            </div>
           </div>
-          <CardTitle className="text-2xl md:text-3xl font-bold">
-            {errorContext.title}
-          </CardTitle>
-        </CardHeader>
+        </div>
 
-        <CardContent className="space-y-4">
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>What happened?</AlertTitle>
-            <AlertDescription className="mt-2">
-              {errorContext.description}
-            </AlertDescription>
-          </Alert>
-
-          <div className="bg-muted/50 border border-border rounded-lg p-4">
-            <p className="text-sm text-muted-foreground">{errorContext.action}</p>
+        <div className="p-8 space-y-5">
+          <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            {errorContext.action}
           </div>
 
           {process.env.NODE_ENV === "development" && error.message && (
             <details>
-              <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
+              <summary className="cursor-pointer text-xs font-medium text-slate-400 hover:text-slate-600">
                 Technical Details
               </summary>
-              <div className="mt-3 p-4 bg-muted/50 rounded-lg border border-border text-xs space-y-2">
+              <div className="mt-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-2">
                 <div>
-                  <span className="font-semibold">Message: </span>
-                  <code className="bg-background px-2 py-1 rounded">{error.message}</code>
+                  <span className="font-semibold text-slate-600">Message: </span>
+                  <code className="bg-white px-2 py-1 rounded border border-slate-200">{error.message}</code>
                 </div>
                 {error.stack && (
-                  <pre className="mt-2 p-3 bg-background rounded overflow-auto max-h-48 border">
+                  <pre className="mt-2 p-3 bg-white rounded overflow-auto max-h-48 border border-slate-200 text-slate-500">
                     {error.stack}
                   </pre>
                 )}
@@ -109,51 +96,52 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
             </details>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Button onClick={() => reset()} className="flex-1 gap-2" size="lg">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              type="button"
+              onClick={() => reset()}
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700"
+            >
               <RefreshCw className="size-4" />
               Try Again
-            </Button>
-            <Button size="lg" variant="outline" className="flex-1 gap-2" asChild>
-              <a href="mailto:hi@smartstart.us" className="flex gap-2 items-center">
-                <MessageSquare className="size-4" />
-                Contact Us
-              </a>
-            </Button>
+            </button>
+            <a
+              href="mailto:hi@smartstart.us"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              <MessageSquare className="size-4" />
+              Contact Us
+            </a>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button onClick={() => router.back()} variant="outline" className="flex-1 gap-2">
+            <a
+              href="javascript:history.back()"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
               <ArrowLeft className="size-4" />
               Go Back
-            </Button>
-            <Button onClick={() => router.push("/dashboard")} variant="outline" className="flex-1 gap-2">
+            </a>
+            <a
+              href="/dashboard"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
               <LayoutDashboard className="size-4" />
               Dashboard Home
-            </Button>
+            </a>
           </div>
 
-          <div className="pt-4 border-t border-border/50">
-            <p className="text-xs text-muted-foreground text-center mb-3">
-              Quick access:
-            </p>
+          <div className="pt-4 border-t border-slate-100">
+            <p className="text-xs text-slate-400 text-center mb-3">Quick access</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <Button asChild variant="outline" size="sm" className="text-xs">
-                <Link href="/dashboard/properties">Properties</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="text-xs">
-                <Link href="/dashboard/tenants">Tenants</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="text-xs">
-                <Link href="/dashboard/maintenance">Maintenance</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="text-xs">
-                <Link href="/dashboard/settings">Settings</Link>
-              </Button>
+              <Link href="/dashboard/properties" className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-100">Properties</Link>
+              <Link href="/dashboard/tenants" className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-100">Tenants</Link>
+              <Link href="/dashboard/maintenance" className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-100">Maintenance</Link>
+              <Link href="/dashboard/settings" className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-100">Settings</Link>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

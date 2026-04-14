@@ -36,11 +36,6 @@ const HeroVideo = dynamic(() => import("@/components/landing/HeroVideo").then((m
   ssr: false,
 });
 
-const PwaInstallHint = dynamic(
-  () => import("@/components/pwa/PwaInstallHint").then((m) => ({ default: m.PwaInstallHint })),
-  { ssr: false }
-);
-
 const DemoGuide = dynamic(
   () => import("@/components/demo/DemoGuide").then((m) => ({ default: m.DemoGuide })),
   { ssr: false }
@@ -374,7 +369,6 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
       </div>
       </SidebarCollapseProvider>
 
-      <PwaInstallHint variant={isLight ? "light" : "dark"} />
       <DemoGuide />
     </div>
   );
