@@ -665,7 +665,7 @@ function RentalsContent() {
     }
 
     const selectedStillExists = properties.some((p) => p._id === selectedPropertyId);
-    if ((!selectedPropertyId && isLg) || (selectedPropertyId && !selectedStillExists)) {
+    if (selectedPropertyId && !selectedStillExists) {
       setSelectedPropertyId(properties[0]._id);
     }
     if (mapPreviewPropertyId && !properties.some((p) => p._id === mapPreviewPropertyId)) {
