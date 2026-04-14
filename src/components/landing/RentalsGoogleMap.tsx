@@ -42,23 +42,46 @@ const NAPLES_CENTER = { lat: 26.17, lng: -81.78 };
 const LEAFLET_CSS_ID = "rentals-leaflet-css";
 const mapContainerStyle = { width: "100%", height: "100%" };
 
-function getCoords(p: Property): { lat: number; lng: number } {
-  if (typeof p.latitude === "number" && typeof p.longitude === "number")
-    return { lat: p.latitude, lng: p.longitude };
+function isValidCoords(lat: number, lng: number): boolean {
+  return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+}
+
+function getCoords(p: Property): { lat: number; lng: number } | null {
+  if (typeof p.latitude === "number" && typeof p.longitude === "number") {
+    return isValidCoords(p.latitude, p.longitude)
+      ? { lat: p.latitude, lng: p.longitude }
+      : null;
+  }
   if (Array.isArray(p.location?.coordinates) && p.location!.coordinates.length === 2) {
     const [lng, lat] = p.location!.coordinates;
-    return { lat, lng };
+    return isValidCoords(lat, lng) ? { lat, lng } : null;
   }
   if (Array.isArray(p.coordinates) && p.coordinates.length === 2) {
     const [lng, lat] = p.coordinates;
-    return { lat, lng };
+    return isValidCoords(lat, lng) ? { lat, lng } : null;
   }
-  return NAPLES_CENTER;
+  return null;
+}
+
+function getAddressLabel(p: Property): string {
+  const parts = [p.address?.street, p.address?.city, p.address?.state, p.address?.zipCode].filter(Boolean);
+  return parts.join(", ");
 }
 
 function fmtPrice(amount: number): string {
   if (amount >= 1000) return `$${(amount / 1000).toFixed(1)}k`;
   return `$${amount}`;
+}
+
+function getDailyRate(property: Property): number {
+  const rent = property.units?.[0]?.rentAmount ?? 0;
+  if (rent <= 0) return 0;
+  return rent > 500 ? Math.max(1, Math.round(rent / 30)) : Math.max(1, Math.round(rent));
+}
+
+function markerRateText(property: Property): string {
+  const dailyRate = getDailyRate(property);
+  return dailyRate > 0 ? `${fmtPrice(dailyRate)}/d` : "";
 }
 
 function ensureLeafletCss() {
@@ -79,20 +102,50 @@ function markerHtml(text: string, active: boolean): string {
       justify-content:center;
       white-space:nowrap;
       border-radius:999px;
-      padding:6px 12px;
-      font-size:11px;
+      padding:${active ? "6px 11px" : "5px 9px"};
+      font-size:${active ? "11px" : "10px"};
       font-weight:600;
       letter-spacing:0.02em;
       color:${active ? "#ffffff" : "#0f172a"};
       background:${active ? "#0f172a" : "rgba(255,255,255,0.96)"};
-      border:1.5px solid ${active ? "#0f172a" : "rgba(15,23,42,0.12)"};
-      box-shadow:${active ? "0 6px 18px rgba(15,23,42,0.28)" : "0 4px 12px rgba(15,23,42,0.16)"};
-      transform:${active ? "scale(1.06)" : "scale(1)"};
+      border:1px solid ${active ? "#0f172a" : "rgba(15,23,42,0.10)"};
+      box-shadow:${active ? "0 8px 20px rgba(15,23,42,0.22)" : "0 3px 10px rgba(15,23,42,0.10)"};
+      transform:${active ? "scale(1.03)" : "scale(1)"};
       transition:all 0.15s ease;
       backdrop-filter:blur(6px);
       -webkit-backdrop-filter:blur(6px);
     ">${text}</div>
   `;
+}
+
+function createGoogleMarkerIcon(text: string, active: boolean): google.maps.Icon {
+  const width = Math.max(52, Math.round(text.length * 7.2 + (active ? 24 : 20)));
+  const height = active ? 32 : 28;
+  const radius = Math.round(height / 2);
+  const background = active ? "#0f172a" : "#ffffff";
+  const border = active ? "#0f172a" : "#e2e8f0";
+  const color = active ? "#ffffff" : "#0f172a";
+  const shadow = active ? "0.22" : "0.14";
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+      <defs>
+        <filter id="shadow" x="-20%" y="-30%" width="140%" height="180%">
+          <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="${shadow}" />
+        </filter>
+      </defs>
+      <rect x="1" y="1" width="${width - 2}" height="${height - 2}" rx="${radius}" fill="${background}" stroke="${border}" filter="url(#shadow)" />
+      <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
+        font-family="Arial, sans-serif" font-size="${active ? 11 : 10}" font-weight="700" letter-spacing="0.2"
+        fill="${color}">${text}</text>
+    </svg>
+  `.trim();
+
+  return {
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+    scaledSize: new google.maps.Size(width, height),
+    anchor: new google.maps.Point(width / 2, height / 2),
+    labelOrigin: new google.maps.Point(width / 2, height / 2),
+  };
 }
 
 function tileLayerFor(L: LeafletModule, mode: Exclude<TileMode, "streetview">): LeafletTileLayer {
@@ -238,18 +291,6 @@ function RentalsLeafletFallback({
     tileLayerRef.current = tileLayerFor(L, mode).addTo(map);
   }, [mode, ready]);
 
-  const openStreetView = useCallback(() => {
-    const map = mapRef.current;
-    const center = map?.getCenter();
-    const lat = center?.lat ?? NAPLES_CENTER.lat;
-    const lng = center?.lng ?? NAPLES_CENTER.lng;
-    window.open(
-      `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
-  }, []);
-
   useEffect(() => {
     const map = mapRef.current;
     const L = leafletRef.current;
@@ -267,16 +308,17 @@ function RentalsLeafletFallback({
 
     properties.forEach((property) => {
       const pos = getCoords(property);
+      if (!pos) return;
       bounds.push([pos.lat, pos.lng]);
-      const rent = property.units?.[0]?.rentAmount ?? 0;
-      const price = rent > 500 ? rent : rent * 30;
+      const markerText = markerRateText(property);
       const active = hoveredPropertyId === property._id;
       const marker = L.marker([pos.lat, pos.lng], {
+        title: getAddressLabel(property) || property.name,
         icon: L.divIcon({
           className: "",
-          html: markerHtml(fmtPrice(price), active),
-          iconSize: [80, 32],
-          iconAnchor: [40, 16],
+          html: markerHtml(markerText, active),
+          iconSize: [70, 30],
+          iconAnchor: [35, 15],
         }),
       })
         .addTo(map)
@@ -287,9 +329,11 @@ function RentalsLeafletFallback({
       markersRef.current.set(property._id, marker);
     });
 
-    if (properties.length === 1) {
-      const c = getCoords(properties[0]);
-      map.setView([c.lat, c.lng], 14);
+    if (bounds.length === 0) {
+      map.setView([NAPLES_CENTER.lat, NAPLES_CENTER.lng], 12);
+    } else if (bounds.length === 1) {
+      const [lat, lng] = bounds[0];
+      map.setView([lat, lng], 14);
     } else {
       map.fitBounds(bounds, { padding: [48, 48] });
     }
@@ -344,7 +388,13 @@ function RentalsGooglePrimary(props: RentalsGoogleMapProps) {
   });
 
   const markers = useMemo(
-    () => props.properties.map((property) => ({ property, position: getCoords(property) })),
+    () =>
+      props.properties
+        .map((property) => {
+          const position = getCoords(property);
+          return position ? { property, position } : null;
+        })
+        .filter((item): item is { property: Property; position: { lat: number; lng: number } } => item !== null),
     [props.properties]
   );
 
@@ -432,30 +482,17 @@ function RentalsGooglePrimary(props: RentalsGoogleMapProps) {
         }}
       >
         {markers.map(({ property, position }) => {
-          const rent = property.units?.[0]?.rentAmount ?? 0;
-          const price = rent > 500 ? rent : rent * 30;
+          const markerText = markerRateText(property);
           const active = props.hoveredPropertyId === property._id;
           return (
             <MarkerF
               key={property._id}
               position={position}
+              title={getAddressLabel(property) || property.name}
               onClick={() => props.onMarkerClick?.(property._id)}
               onMouseOver={() => props.onMarkerHover?.(property._id)}
               onMouseOut={() => props.onMarkerHover?.(null)}
-              label={{
-                text: fmtPrice(price),
-                color: active ? "#ffffff" : "#0f172a",
-                fontSize: "11px",
-                fontWeight: "600",
-              }}
-              icon={{
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: active ? 10 : 8,
-                fillColor: active ? "#0f172a" : "#ffffff",
-                fillOpacity: 0.96,
-                strokeColor: active ? "#ffffff" : "#cbd5e1",
-                strokeWeight: 2,
-              }}
+              icon={createGoogleMarkerIcon(markerText, active)}
             />
           );
         })}
