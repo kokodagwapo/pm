@@ -67,10 +67,13 @@
   "dashboard.cards.activeTenants.title": "Happy Residents",
   "dashboard.cards.activeTenants.description": "{count} new applications pending",
 
-  "dashboard.cards.maintenanceRequests.title": "Fix-It List",
-  "dashboard.cards.maintenanceRequests.description": "{count} marked urgent",
+    "dashboard.cards.maintenanceRequests.title": "Fix-It List",
+    "dashboard.cards.maintenanceRequests.description": "{count} marked urgent",
 
-  "dashboard.cards.vacantUnits.title": "Available Now",
+    "dashboard.cards.maintenancePerformance.title": "Service Efficiency",
+    "dashboard.cards.maintenancePerformance.description": "Maintenance tasks completed this month",
+
+    "dashboard.cards.vacantUnits.title": "Available Now",
   "dashboard.cards.vacantUnits.description": "{rate} vacancy across portfolio",
 
   "dashboard.cards.averageRent.title": "Avg. Rent / Unit",

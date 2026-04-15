@@ -346,10 +346,29 @@ function getRoleColor(role?: string) {
 
 const STORAGE_KEY_PREFIX = "demo_guide_v2_";
 
-export function DemoGuide() {
+interface DemoGuideProps {
+  externalOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
   const { data: session } = useSession();
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  
+  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setIsOpen = useCallback((open: boolean | ((v: boolean) => boolean)) => {
+    if (onOpenChange) {
+      if (typeof open === "function") {
+        onOpenChange(open(isOpen));
+      } else {
+        onOpenChange(open);
+      }
+    } else {
+      setInternalOpen(open);
+    }
+  }, [isOpen, onOpenChange]);
+
   const [currentStep, setCurrentStep] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [hasCompleted, setHasCompleted] = useState(false);
@@ -452,39 +471,50 @@ export function DemoGuide() {
 
   return (
     <>
-      {/* Floating launcher button */}
-      <div className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50">
+      {/* Floating launcher button (Left side with Heidi Avatar) */}
+      <div className="fixed bottom-6 left-6 z-50">
         <button
           onClick={() => setIsOpen((v) => !v)}
           aria-label="Demo guide"
           className={cn(
-            "relative w-12 h-12 rounded-2xl shadow-lg transition-all duration-300 flex items-center justify-center text-white",
-            "hover:scale-110 active:scale-95",
-            roleColors.dot,
-            isOpen && "scale-110 ring-4 ring-cyan-300/45 shadow-[0_0_28px_rgba(56,189,248,0.35)]"
+            "relative w-14 h-14 rounded-[1.8rem] shadow-2xl transition-all duration-500 flex items-center justify-center overflow-hidden border-2",
+            "hover:scale-110 active:scale-95 group",
+            isOpen ? "border-sky-400 ring-4 ring-sky-400/20 rotate-3" : "border-white/10 bg-slate-900"
           )}
         >
           {showPulse && !isOpen && !hasCompleted && (
             <span
               className={cn(
-                "absolute inset-0 rounded-2xl animate-ping opacity-60",
-                roleColors.dot
+                "absolute inset-0 rounded-[1.8rem] animate-ping opacity-40 bg-sky-400"
               )}
             />
           )}
-          {isOpen ? (
-            <X className="w-5 h-5" />
-          ) : (
-            <Sparkles className="w-5 h-5" />
-          )}
+          
+          <div className="relative w-full h-full">
+            <img 
+              src="/images/heidi-avatar.png" 
+              alt="Heidi" 
+              className={cn(
+                "w-full h-full object-cover transition-all duration-500",
+                isOpen ? "scale-110 blur-[2px] opacity-40" : "scale-100 opacity-100"
+              )}
+            />
+            {isOpen ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <X className="w-6 h-6 text-white drop-shadow-md" strokeWidth={3} />
+              </div>
+            ) : (
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-sm" />
+            )}
+          </div>
         </button>
 
-        {/* Restart button — shown after completion */}
+        {/* Restart button */}
         {hasCompleted && !isOpen && (
           <button
             onClick={handleRestart}
             aria-label="Restart tour"
-            className="absolute -top-10 right-0 flex h-8 w-8 items-center justify-center rounded-xl border border-slate-300/60 bg-white/80 text-slate-900 shadow-[0_4px_24px_rgba(15,23,42,0.08)] backdrop-blur-md transition-all hover:border-slate-400/80 hover:bg-white"
+            className="absolute -top-10 left-0 flex h-8 w-8 items-center justify-center rounded-xl border border-slate-300/60 bg-white/80 text-slate-900 shadow-[0_4px_24px_rgba(15,23,42,0.08)] backdrop-blur-md transition-all hover:border-slate-400/80 hover:bg-white"
             title="Restart tour"
           >
             <RotateCcw className="h-3.5 w-3.5" />
@@ -492,11 +522,11 @@ export function DemoGuide() {
         )}
       </div>
 
-      {/* Tour card */}
+      {/* Tour card (adjusted to point to the left launcher) */}
       <div
         className={cn(
-          "fixed z-50 transition-all duration-300 ease-out",
-          "bottom-36 right-4 lg:bottom-24 lg:right-6",
+          "fixed z-50 transition-all duration-500 ease-out",
+          "bottom-24 left-6",
           "w-[min(340px,calc(100vw-2rem))]",
           isOpen
             ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
@@ -646,10 +676,10 @@ export function DemoGuide() {
           </div>
         </div>
 
-        {/* Tail pointing to button */}
+        {/* Tail pointing to button (now to the left) */}
         <div
           className={cn(
-            "absolute -bottom-2 right-5 h-4 w-4 rotate-45 border-r border-b border-sky-200/35",
+            "absolute -bottom-2 left-5 h-4 w-4 rotate-45 border-l border-b border-sky-200/35",
             "bg-gradient-to-br from-sky-400/25 to-cyan-600/20 shadow-[0_8px_20px_rgba(15,23,42,0.35)] backdrop-blur-md"
           )}
         />

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter, usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
-import { Search, Settings, LogOut, User, Menu, X, Sun, Moon } from "lucide-react";
+import { Search, Settings, LogOut, User, Menu, X, Sun, Moon, Map } from "lucide-react";
 import { useUserAvatar } from "@/components/providers/UserAvatarProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -98,6 +98,7 @@ const MobileHeader = memo(function MobileHeader({
   setIsMobileMenuOpen,
   t,
   router,
+  onToggleTour,
 }: {
   user: any;
   avatarUrl: string | null;
@@ -105,6 +106,7 @@ const MobileHeader = memo(function MobileHeader({
   setIsMobileMenuOpen: (open: boolean) => void;
   t: (key: string) => string;
   router: any;
+  onToggleTour?: () => void;
 }) {
   const { isLight, setAppearance } = useDashboardAppearance();
 
@@ -147,6 +149,21 @@ const MobileHeader = memo(function MobileHeader({
       </div>
 
       <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2 md:gap-3">
+        {/* Tour Toggle Button */}
+        <button
+          onClick={onToggleTour}
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 relative group",
+            isLight
+              ? "border-sky-100 bg-sky-50/50 text-sky-600 hover:bg-sky-100 hover:border-sky-200"
+              : "border-white/20 bg-transparent text-white/85 hover:bg-white/10 hover:text-white"
+          )}
+          title="Start Guided Tour"
+        >
+          <Map className="h-4 w-4 transition-transform group-hover:scale-110" />
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-sky-500 rounded-full border-2 border-white animate-pulse" />
+        </button>
+
         <div className="sm:hidden">
           <Button
             variant="ghost"
@@ -262,6 +279,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
   const { avatarUrl } = useUserAvatar();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
   const { t } = useLocalizationContext();
   const { isLight } = useDashboardAppearance();
 
@@ -363,6 +381,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
             setIsMobileMenuOpen={setIsMobileMenuOpen}
             t={t}
             router={router}
+            onToggleTour={() => setIsTourOpen(!isTourOpen)}
           />
 
           <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-thin bg-transparent">
@@ -375,7 +394,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
       </SidebarCollapseProvider>
 
       <PwaInstallHint variant={isLight ? "light" : "dark"} />
-      <DemoGuide />
+      <DemoGuide externalOpen={isTourOpen} onOpenChange={setIsTourOpen} />
     </div>
   );
 }

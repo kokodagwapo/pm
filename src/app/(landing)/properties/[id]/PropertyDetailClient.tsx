@@ -3,9 +3,13 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
-import { LunaWidget } from "@/components/landing/LunaWidget";
 import { SinglePropertyMap } from "@/components/landing/SinglePropertyMap";
 import { MapErrorBoundary } from "@/components/landing/MapErrorBoundary";
+import {
+  DEFAULT_BOOKING_DISCOUNTS,
+  normalizeBookingDiscountSettings,
+  type BookingDiscountSettings,
+} from "@/lib/booking-discounts";
 import {
   Bed,
   Bath,
@@ -175,6 +179,8 @@ export function PropertyDetailClient({
   const [pricingResult, setPricingResult] = useState<PricingResult | null>(null);
   const [pricingLoading, setPricingLoading] = useState(false);
   const [pricingError, setPricingError] = useState<string | null>(null);
+  const [bookingDiscountSettings, setBookingDiscountSettings] =
+    useState<BookingDiscountSettings>(DEFAULT_BOOKING_DISCOUNTS);
   const [couponCode, setCouponCode] = useState("");
   const [couponInput, setCouponInput] = useState("");
   const [showCouponInput, setShowCouponInput] = useState(false);
@@ -425,6 +431,30 @@ export function PropertyDetailClient({
     return unit.rentAmount / 30;
   }, [unit?.rentAmount]);
 
+  const monthlyRate = useMemo(() => {
+    if (typeof unit?.rentAmount === "number" && unit.rentAmount > 0) {
+      return unit.rentAmount;
+    }
+    if (baseRentPerNight > 0) {
+      return Math.round(baseRentPerNight * 30);
+    }
+    return 0;
+  }, [baseRentPerNight, unit?.rentAmount]);
+
+  const monthlyDiscountSample = useMemo(() => {
+    const monthly = bookingDiscountSettings.monthly;
+    if (!monthly.enabled || monthly.percent <= 0 || monthlyRate <= 0) {
+      return null;
+    }
+
+    return {
+      percent: monthly.percent,
+      minNights: monthly.minNights,
+      savings: Math.round((monthlyRate * monthly.percent) / 100),
+      discountedRate: Math.round(monthlyRate * (1 - monthly.percent / 100)),
+    };
+  }, [bookingDiscountSettings.monthly, monthlyRate]);
+
   const seasonalPricingSummary = useMemo(() => {
     return calendarPricingRules
       .filter((r) => r.ruleType === "seasonal" && r.startDate && r.endDate)
@@ -578,6 +608,44 @@ export function PropertyDetailClient({
     bathrooms: unit?.bathrooms,
     availabilityStatus: status,
   }), [id, property?.name, property?.neighborhood, unit?.rentAmount, unit?.bedrooms, unit?.bathrooms, baseRentPerNight, status]);
+
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("heidi:set-property-context", {
+        detail: lunaPropertyContext,
+      })
+    );
+
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent("heidi:set-property-context", {
+          detail: null,
+        })
+      );
+    };
+  }, [lunaPropertyContext]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/settings/booking-discounts")
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        setBookingDiscountSettings(
+          normalizeBookingDiscountSettings(data?.data?.settings)
+        );
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setBookingDiscountSettings(DEFAULT_BOOKING_DISCOUNTS);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -1531,18 +1599,49 @@ export function PropertyDetailClient({
                 <div className={FROST_CARD_OUTER}>
                   {/* Header */}
                   <div className="px-6 pt-6 pb-4">
-                    <div className="flex items-end gap-2 mb-1">
-                      <span className="text-4xl font-light text-slate-900 leading-none tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
-                        {getRentDisplay(property)}
-                      </span>
-                      {getRentDisplay(property) !== "Contact for pricing" && (
-                        <span className="text-slate-400 text-sm mb-1">/month</span>
-                      )}
-                    </div>
-                    {baseRentPerNight > 0 && (
-                      <p className="text-sm text-slate-400">
-                        From <span className="font-medium text-slate-600">{formatPrice(Math.round(baseRentPerNight))}</span>/night
-                      </p>
+                    {baseRentPerNight > 0 ? (
+                      <>
+                        <div className="flex items-end gap-2 mb-1">
+                          <span
+                            className="text-[3.5rem] font-light text-slate-900 leading-none tracking-tight"
+                            style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+                          >
+                            {formatPrice(Math.round(baseRentPerNight))}
+                          </span>
+                          <span className="text-slate-400 text-base mb-1.5">/night</span>
+                        </div>
+                        {monthlyRate > 0 && (
+                          <p className="text-sm text-slate-500">
+                            Monthly rate{" "}
+                            <span className="font-medium text-slate-700">
+                              {formatPrice(monthlyRate)}
+                            </span>
+                            /month
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex items-end gap-2 mb-1">
+                        <span className="text-4xl font-light text-slate-900 leading-none tracking-tight" style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                          {getRentDisplay(property)}
+                        </span>
+                        {getRentDisplay(property) !== "Contact for pricing" && (
+                          <span className="text-slate-400 text-sm mb-1">/month</span>
+                        )}
+                      </div>
+                    )}
+                    {monthlyDiscountSample && (
+                      <div className="mt-3 inline-flex flex-col rounded-2xl border border-emerald-200 bg-emerald-50/80 px-3.5 py-2">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">
+                          Sample monthly discount
+                        </span>
+                        <span className="mt-1 text-sm font-semibold text-emerald-900">
+                          {monthlyDiscountSample.percent}% off when booked for {monthlyDiscountSample.minNights}+ nights
+                        </span>
+                        <span className="text-xs text-emerald-700">
+                          Sample total {formatPrice(monthlyDiscountSample.discountedRate)}/month, saving about {formatPrice(monthlyDiscountSample.savings)}
+                        </span>
+                      </div>
                     )}
                   </div>
 
@@ -1789,13 +1888,6 @@ export function PropertyDetailClient({
             </div>
           </div>
         </div>
-      )}
-
-      {property && (
-        <LunaWidget
-          propertyContext={lunaPropertyContext}
-          onRequestBooking={scrollToInquiry}
-        />
       )}
 
       {/* Rental Application Modal */}

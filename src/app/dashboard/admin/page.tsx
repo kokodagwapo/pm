@@ -62,6 +62,7 @@ import type {
 import { UserRole } from "@/types";
 import { AdminTourWidget } from "@/components/dashboard/AdminTourWidget";
 import { PortfolioHealthWidget } from "@/components/dashboard/PortfolioHealthWidget";
+import { BookingDiscountSettingsCard } from "@/components/configuration/BookingDiscountSettingsCard";
 
 const alertColorMap: Record<AdminDashboardAlert["type"], string> = {
   error: "text-red-600",
@@ -1027,6 +1028,8 @@ export default function AdminPage() {
               </div>
             </CardContent>
           </Card>
+
+          <BookingDiscountSettingsCard />
         </TabsContent>
       </Tabs>
       <AdminTourWidget />

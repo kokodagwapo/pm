@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest } from "next/server";
 import PricingRule from "@/models/PricingRule";
 import PromoCode from "@/models/PromoCode";
+import SystemSettings from "@/models/SystemSettings";
 import { Property } from "@/models";
 import {
   createSuccessResponse,
@@ -13,6 +14,11 @@ import {
 } from "@/lib/api-utils";
 import { calculatePrice } from "@/lib/services/pricing.service";
 import connectDB from "@/lib/mongodb";
+import {
+  DEFAULT_BOOKING_DISCOUNTS,
+  getApplicableBookingDiscount,
+  normalizeBookingDiscountSettings,
+} from "@/lib/booking-discounts";
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,6 +73,32 @@ export async function POST(request: NextRequest) {
 
     const extraDiscounts: Array<{ type: string; label: string; amount: number; percentage?: number }> = [];
     let finalPrice = result.calculatedPrice;
+
+    const publicDiscountSettings = normalizeBookingDiscountSettings(
+      await SystemSettings.getSettingValue(
+        "payment",
+        "bookingBulkDiscounts",
+        DEFAULT_BOOKING_DISCOUNTS
+      )
+    );
+    const hasPropertyLongTermDiscount = (result.discountsApplied || []).some((discount) =>
+      String(discount.type || "").startsWith("long_term_")
+    );
+    const fallbackBulkDiscount = hasPropertyLongTermDiscount
+      ? null
+      : getApplicableBookingDiscount(result.totalNights, publicDiscountSettings);
+
+    if (fallbackBulkDiscount) {
+      const discountAmount =
+        Math.round((finalPrice * fallbackBulkDiscount.percent) / 100 * 100) / 100;
+      finalPrice = Math.max(0, finalPrice - discountAmount);
+      extraDiscounts.push({
+        type: `bulk_${fallbackBulkDiscount.key}`,
+        label: `${fallbackBulkDiscount.label} (${result.totalNights} nights)`,
+        amount: discountAmount,
+        percentage: fallbackBulkDiscount.percent,
+      });
+    }
 
     if (couponCode && typeof couponCode === "string") {
       const code = couponCode.trim().toUpperCase();

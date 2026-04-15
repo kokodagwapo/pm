@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, Suspense, useMemo, useRef } from "rea
 import { useSearchParams, useRouter } from "next/navigation";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { LandingHeader } from "@/components/landing/LandingHeader";
-import { LunaWidget } from "@/components/landing/LunaWidget";
 import { NaplesAreaGuide } from "@/components/landing/NaplesAreaGuide";
 import { RentalsGoogleMap } from "@/components/landing/RentalsGoogleMap";
 import { MapErrorBoundary } from "@/components/landing/MapErrorBoundary";
@@ -1088,7 +1087,7 @@ function RentalsContent() {
                     {pagination.total === 1 ? t("rentals.results.property") : t("rentals.results.properties")}
                   </p>
                 )}
-                <div className="flex items-center gap-0.5 rounded-full border border-slate-200 bg-white p-0.5 shadow-sm">
+                <div className="flex lg:hidden items-center gap-0.5 rounded-full border border-slate-200 bg-white p-0.5 shadow-sm">
                   <button
                     type="button"
                     onClick={() => setMobileView("list")}
@@ -1556,9 +1555,6 @@ function RentalsContent() {
           </button>
         </div>
       )}
-
-      {/* Comparison modal */}
-      <LunaWidget />
 
       {showCompareModal && (
         <CompareModal

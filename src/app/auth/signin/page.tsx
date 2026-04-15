@@ -23,6 +23,7 @@ import {
   Calendar,
   ArrowLeft,
   CheckCircle2,
+  Zap,
 } from "lucide-react";
 
 interface Branding {
@@ -77,6 +78,13 @@ function safeCallbackUrl(input: string | null): string {
   return path.startsWith("/dashboard") ? path : "/dashboard";
 }
 
+const DEMO_ACCOUNTS = [
+  { role: "Admin",   email: "hi@smartstart.us",       password: "SmartStart2025", color: "from-violet-500/20 to-purple-500/20 border-violet-400/30 hover:border-violet-400/60", badge: "bg-violet-500/20 text-violet-200 border-violet-400/30" },
+  { role: "Manager", email: "manager@smartstart.us",  password: "SmartStart2025", color: "from-sky-500/20 to-blue-500/20 border-sky-400/30 hover:border-sky-400/60",           badge: "bg-sky-500/20 text-sky-200 border-sky-400/30" },
+  { role: "Owner",   email: "owner@smartstart.us",    password: "SmartStart2025", color: "from-emerald-500/20 to-teal-500/20 border-emerald-400/30 hover:border-emerald-400/60", badge: "bg-emerald-500/20 text-emerald-200 border-emerald-400/30" },
+  { role: "Tenant",  email: "tenant@smartstart.us",   password: "SmartStart2025", color: "from-amber-500/20 to-orange-500/20 border-amber-400/30 hover:border-amber-400/60",   badge: "bg-amber-500/20 text-amber-200 border-amber-400/30" },
+];
+
 function CredentialsSignInSection({
   t,
   isLoading,
@@ -94,6 +102,7 @@ function CredentialsSignInSection({
 }) {
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
+  const [demoLoading, setDemoLoading] = useState<string | null>(null);
 
   useEffect(() => {
     setEmail(initialEmail);
@@ -114,6 +123,23 @@ function CredentialsSignInSection({
     } catch {
       setError(t("auth.signin.error"));
       setIsLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (account: typeof DEMO_ACCOUNTS[0]) => {
+    setDemoLoading(account.role);
+    setError("");
+    try {
+      const target = await signInWithCredentials(account.email, account.password);
+      if (target) {
+        window.location.href = target;
+      } else {
+        setError("Demo login failed — make sure demo accounts are seeded.");
+        setDemoLoading(null);
+      }
+    } catch {
+      setError(t("auth.signin.error"));
+      setDemoLoading(null);
     }
   };
 
@@ -179,7 +205,7 @@ function CredentialsSignInSection({
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || !!demoLoading}
           className={cn(
             heroGlassButtonPrimary,
             "mt-2 min-h-[46px] py-3 disabled:cursor-not-allowed disabled:opacity-40"
@@ -196,6 +222,46 @@ function CredentialsSignInSection({
           )}
         </button>
       </form>
+
+      {/* Demo accounts */}
+      <div className="mt-6">
+        <div className="relative flex items-center gap-3 mb-4">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+            <Zap className="w-3 h-3" />
+            Quick Demo Login
+          </span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {DEMO_ACCOUNTS.map((account) => (
+            <button
+              key={account.role}
+              onClick={() => handleDemoLogin(account)}
+              disabled={isLoading || !!demoLoading}
+              className={cn(
+                "relative flex flex-col items-start gap-1.5 px-3.5 py-3 rounded-2xl border bg-gradient-to-br transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed group overflow-hidden",
+                account.color
+              )}
+            >
+              {demoLoading === account.role && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl backdrop-blur-sm">
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                </div>
+              )}
+              <span className={cn("text-[9px] font-black uppercase tracking-[0.18em] px-2 py-0.5 rounded-lg border", account.badge)}>
+                {account.role}
+              </span>
+              <span className="text-[11px] text-white/60 truncate w-full text-left" style={{ fontWeight: 300 }}>
+                {account.email}
+              </span>
+            </button>
+          ))}
+        </div>
+        <p className="mt-3 text-center text-[10px] text-white/20 tracking-wide" style={{ fontWeight: 300 }}>
+          Demo only — password: SmartStart2025
+        </p>
+      </div>
     </>
   );
 }
@@ -207,22 +273,23 @@ function SignInContent() {
   const [error, setError] = useState("");
   const [branding, setBranding] = useState<Branding>(DEFAULT_BRANDING);
   const [logoError, setLogoError] = useState(false);
+  const [csrfToken, setCsrfToken] = useState<string>("");
   const registered = searchParams.get("registered") === "1";
   const initialEmail = searchParams.get("email") || "";
 
   useEffect(() => {
-    const fetchBranding = async () => {
-      try {
-        const response = await fetch("/api/branding/public");
-        const result = await response.json();
-        if (result.success && result.data) {
-          setBranding(result.data);
-        }
-      } catch {
-        // Keep default branding on error
-      }
-    };
-    fetchBranding();
+    // Pre-fetch branding and CSRF token in parallel so neither blocks the other
+    Promise.all([
+      fetch("/api/branding/public")
+        .then((r) => r.json())
+        .then((result) => {
+          if (result.success && result.data) setBranding(result.data);
+        })
+        .catch(() => {}),
+      getCsrfToken()
+        .then((t) => { if (t) setCsrfToken(t); })
+        .catch(() => {}),
+    ]);
   }, []);
 
   // Remove stale Auth.js error query (bookmark / failed attempt) so it does not confuse users
@@ -241,6 +308,7 @@ function SignInContent() {
   /**
    * Same request shape as next-auth/react `signIn("credentials")` (X-Auth-Return-Redirect + JSON body).
    * Fallback runs when the library returns an error (e.g. MissingCSRF) so cookies are always sent with `credentials: "include"`.
+   * CSRF token is pre-fetched on page load to avoid an extra round-trip here.
    */
   const signInCredentialsWithFallback = async (
     loginEmail: string,
@@ -265,8 +333,9 @@ function SignInContent() {
       );
     }
 
-    const csrfToken = await getCsrfToken();
-    if (!csrfToken) return null;
+    // Use pre-loaded token; fall back to a fresh fetch only if not yet ready
+    const token = csrfToken || (await getCsrfToken());
+    if (!token) return null;
 
     const res = await fetch("/api/auth/callback/credentials", {
       method: "POST",
@@ -278,7 +347,7 @@ function SignInContent() {
       body: new URLSearchParams({
         email: loginEmail,
         password: loginPassword,
-        csrfToken,
+        csrfToken: token,
         callbackUrl,
       }),
     });

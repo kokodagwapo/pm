@@ -4,7 +4,14 @@
  * (enable Geocoding API on the Google Cloud project).
  */
 export function getGoogleMapsBrowserKey(): string {
-  return (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "").trim();
+  const browserKey = (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "").trim();
+  if (browserKey) return browserKey;
+  
+  // Fallback to Gemini key if it looks like a Google API key
+  const geminiKey = (process.env.NEXT_PUBLIC_GEMINI_API_KEY || "").trim();
+  if (geminiKey.startsWith("AIzaSy")) return geminiKey;
+  
+  return "";
 }
 
 export function hasGoogleMapsBrowserKey(): boolean {

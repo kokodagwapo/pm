@@ -781,6 +781,15 @@ export default function DashboardPage() {
           iconColor="warning"
         />
         <AnalyticsCard
+          title={t("dashboard.cards.maintenancePerformance.title")}
+          value={formatPercentage(
+            (maintenance?.completed ?? 0) / (maintenance?.total ?? 1) * 100
+          )}
+          description={t("dashboard.cards.maintenancePerformance.description")}
+          icon={Activity}
+          iconColor="success"
+        />
+        <AnalyticsCard
           title={t("dashboard.cards.vacantUnits.title")}
           value={vacantUnits}
           description={t("dashboard.cards.vacantUnits.description", {
@@ -849,42 +858,6 @@ export default function DashboardPage() {
           iconColor="info"
         />
       </AnalyticsCardGrid>
-      </div>
-
-      {/* Action Items — after key metrics */}
-      <div className="space-y-3">
-        <div className="grid gap-3 md:grid-cols-3">
-          {alerts?.slice(0, 3).map((alert) => {
-            const styles = getAlertStyles(alert.type, isLight);
-            return (
-              <div
-                key={alert.id}
-                className="group dashboard-ui-surface rounded-2xl px-4 py-3.5 cursor-pointer transition-all duration-300 active:scale-[0.99]"
-                onClick={() => handleAlertClick(alert.type)}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <AlertTriangle className={`h-3.5 w-3.5 shrink-0 ${styles.iconColor}`} />
-                      <h4 className={`font-medium text-base ${styles.titleColor}`}>
-                        {getAlertTitleText(alert)}
-                      </h4>
-                    </div>
-                    <p className={`text-sm leading-relaxed ${styles.bodyColor}`}>
-                      {getAlertMessageText(alert)}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className={cn("text-3xl font-semibold leading-none", pageHeading)}>
-                      {alert.count}
-                    </span>
-                    <ChevronRight className={`h-4 w-4 ${styles.iconColor} opacity-70`} />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </div>
 
       {/* Full-width property calendar — search, unit, availability & blocks */}

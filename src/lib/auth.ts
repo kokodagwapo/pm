@@ -4,7 +4,6 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { MongoClient } from "mongodb";
-import { isValidObjectId } from "mongoose";
 import connectDB, { getMongoUri } from "./mongodb";
 import User, { UserDocument } from "@/models/User";
 import { UserRole } from "@/types";
@@ -108,20 +107,15 @@ providers.push(
       try {
         await connectDB();
 
-        // Find user with password field included
+        // Fetch only the fields needed for auth + JWT population
         const user = (await User.findOne({
           email: (credentials.email as string).toLowerCase(),
-        }).select("+password")) as UserDocument | null;
+        }).select("+password firstName lastName avatar role isActive")) as UserDocument | null;
 
-        if (!user) {
+        if (!user || !user.isActive) {
           throw new Error("Invalid email or password");
         }
 
-        if (!user?.isActive) {
-          throw new Error("Account is deactivated");
-        }
-
-        // Check password
         const isPasswordValid = await user.comparePassword(
           credentials.password as string
         );
@@ -130,20 +124,19 @@ providers.push(
           throw new Error("Invalid email or password");
         }
 
-        // Update last login
-        await user.updateLastLogin();
+        // Fire-and-forget — don't block login on a timestamp write
+        user.updateLastLogin().catch(() => {});
 
         return {
-          id: user?._id?.toString() ?? "",
-          email: user?.email ?? "",
-          firstName: user?.firstName,
-          lastName: user?.lastName,
-          role: user?.role as UserRole,
-          avatar: user?.avatar,
-          isActive: user?.isActive,
+          id: user._id.toString(),
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role as UserRole,
+          avatar: user.avatar,
+          isActive: user.isActive,
         };
       } catch (error) {
-        console.error("Authentication error:", error);
         throw new Error("Authentication failed");
       }
     },
@@ -187,57 +180,34 @@ export const authOptions: NextAuthConfig = {
 
   callbacks: {
     async jwt({ token, user }) {
-      // Persist user id on the token for every sign-in path (credentials, OAuth, etc.)
+      // On first sign-in, embed all profile fields into the JWT so the
+      // session callback never needs a DB round-trip.
       if (user?.id) {
         token.userId = user.id;
         token.sub = user.id;
         token.role = user.role;
         token.isActive = user.isActive;
+        token.firstName = (user as any).firstName ?? "";
+        token.lastName = (user as any).lastName ?? "";
+        token.avatar = (user as any).avatar ?? "";
       }
-
       return token;
     },
 
     async session({ session, token }) {
-      // Send properties to the client
-      if (token) {
-        const userId =
-          (token?.userId as string) || (token?.sub as string) || "";
-        session.user.id = userId;
-
-        session.user.role = (token?.role as UserRole) ?? UserRole.TENANT;
-        session.user.isActive = (token?.isActive as boolean) ?? false;
-
-        // Fetch fresh user data for the session
-        try {
-          await connectDB();
-          const user =
-            userId && isValidObjectId(userId)
-              ? await User.findById(userId).select("-password")
-              : null;
-          if (user) {
-            session.user.role = (user?.role as UserRole) ?? UserRole.TENANT;
-
-            session.user.firstName = user?.firstName;
-            session.user.lastName = user?.lastName;
-            session.user.name = `${user?.firstName || ""} ${
-              user?.lastName || ""
-            }`;
-            session.user.avatar = user?.avatar;
-            session.user.bio = user?.bio;
-            session.user.location = user?.location;
-            session.user.city = user?.city;
-            session.user.website = user?.website;
-            session.user.address = user?.address;
-            session.user.phone = user?.phone;
-            // Add createdAt for Member Since date
-            session.user.createdAt = user?.createdAt;
-          }
-        } catch (error) {
-          console.error("Session user fetch error:", error);
-        }
-      }
-
+      // Read entirely from the JWT — zero DB queries per request.
+      // Profile changes take effect on the next sign-in (JWT re-issue).
+      const userId = ((token.userId || token.sub) as string) ?? "";
+      session.user.id = userId;
+      session.user.role = (token.role as UserRole) ?? UserRole.TENANT;
+      session.user.isActive = (token.isActive as boolean) ?? false;
+      session.user.firstName = (token.firstName as string) ?? "";
+      session.user.lastName = (token.lastName as string) ?? "";
+      session.user.name =
+        `${token.firstName || ""} ${token.lastName || ""}`.trim() ||
+        session.user.email ||
+        "";
+      session.user.avatar = (token.avatar as string) ?? "";
       return session;
     },
 
@@ -307,7 +277,7 @@ export const authOptions: NextAuthConfig = {
     error: "/auth/error",
   },
 
-  debug: process.env.NODE_ENV === "development",
+  debug: false,
 };
 
 // Export NextAuth instance with auth, handlers, signIn, signOut

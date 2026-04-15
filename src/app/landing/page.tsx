@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroSlider } from "@/components/landing/HeroSlider";
-import { LunaWidget } from "@/components/landing/LunaWidget";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { useLandingTheme } from "@/components/landing/LandingThemeProvider";
 import { cn } from "@/lib/utils";
@@ -116,7 +115,6 @@ export default function HomePage() {
           </div>
         </footer>
       </main>
-      <LunaWidget />
     </>
   );
 }

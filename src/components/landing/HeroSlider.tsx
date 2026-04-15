@@ -16,15 +16,15 @@ const SLIDES = [
     kb: "kb-left",
   },
   {
-    url: "https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=1920&q=85&auto=format&fit=crop",
-    label: "Community Life",
-    alt: "Happy family laughing and playing with their kids at a bright community playground",
+    url: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1920&q=85&auto=format&fit=crop",
+    label: "Morning Coffee",
+    alt: "Beautiful woman in her apartment kitchen having coffee in the morning",
     kb: "kb-up",
   },
   {
-    url: "https://images.unsplash.com/photo-1588242425139-26285c5dc509?w=1920&q=85&auto=format&fit=crop",
-    label: "Expert Cleaners",
-    alt: "Beautiful professional cleaning lady — elegant and confident in a pristine home",
+    url: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=85&auto=format&fit=crop",
+    label: "Expert Cleaning",
+    alt: "Pretty woman cleaning her living room with a vacuum",
     kb: "kb-right",
   },
   {
@@ -43,20 +43,20 @@ const SLIDES = [
 
 const KB_CSS = `
   @keyframes kb-right {
-    from { transform: scale(1.04) translate(0%,    0%);    }
-    to   { transform: scale(1.10) translate(-1.2%, -0.4%); }
+    from { transform: scale(1.02) translate(0%,    0%);    }
+    to   { transform: scale(1.06) translate(-0.9%, -0.3%); }
   }
   @keyframes kb-left {
-    from { transform: scale(1.04) translate(0%,   0%);   }
-    to   { transform: scale(1.10) translate(1.2%, 0.4%); }
+    from { transform: scale(1.02) translate(0%,   0%);   }
+    to   { transform: scale(1.06) translate(0.9%, 0.3%); }
   }
   @keyframes kb-up {
-    from { transform: scale(1.04) translate(0%,    0%);    }
-    to   { transform: scale(1.10) translate(0.3%, -1.2%); }
+    from { transform: scale(1.02) translate(0%,    0%);    }
+    to   { transform: scale(1.06) translate(0.2%, -0.9%); }
   }
-  .kb-right { animation: kb-right 28s linear forwards; }
-  .kb-left  { animation: kb-left  28s linear forwards; }
-  .kb-up    { animation: kb-up    28s linear forwards; }
+  .kb-right { animation: kb-right 40s linear forwards; }
+  .kb-left  { animation: kb-left  40s linear forwards; }
+  .kb-up    { animation: kb-up    40s linear forwards; }
 `;
 
 const SLIDE_DURATION = 6000;
@@ -64,6 +64,7 @@ const DISSOLVE_MS    = 2200;
 
 export function HeroSlider() {
   const [current, setCurrent]           = useState(0);
+  const [previous, setPrevious]         = useState<number | null>(null);
   const [slideEpochs, setSlideEpochs]   = useState<number[]>(() =>
     Array(SLIDES.length).fill(0)
   );
@@ -90,6 +91,7 @@ export function HeroSlider() {
   const advance = useCallback(() => {
     setCurrent((prev) => {
       const next = (prev + 1) % SLIDES.length;
+      setPrevious(prev);
       preload((next + 1) % SLIDES.length);
       activate(next);
       return next;
@@ -103,11 +105,12 @@ export function HeroSlider() {
 
   const handleDotClick = useCallback((i: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
+    setPrevious(current);
     preload((i + 1) % SLIDES.length);
     activate(i);
     setCurrent(i);
     timerRef.current = setInterval(advance, SLIDE_DURATION);
-  }, [advance, preload, activate]);
+  }, [advance, current, preload, activate]);
 
   return (
     <>
@@ -130,7 +133,9 @@ export function HeroSlider() {
                 src={url}
                 alt={alt}
                 draggable={false}
-                className={`absolute inset-0 h-full w-full object-cover ${i === current ? kb : ""}`}
+                className={`absolute inset-0 h-full w-full object-cover ${
+                  i === current || i === previous ? kb : ""
+                }`}
                 style={{ willChange: "transform" }}
               />
             </div>
