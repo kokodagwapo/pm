@@ -4,9 +4,9 @@ import { useEffect, useRef, useState, useCallback } from "react";
 
 const SLIDES = [
   {
-    url: "https://images.unsplash.com/photo-1581579186913-45ac3e6efe93?w=1920&q=85&auto=format&fit=crop",
-    label: "Family Living",
-    alt: "Happy family — mother, father and two young kids — laughing together while petting their golden retriever at home",
+    url: "https://images.unsplash.com/photo-1543342384-1f1350e27861?w=1920&q=85&auto=format&fit=crop",
+    label: "New Beginnings",
+    alt: "Loving couple tenderly holding their newborn baby — a new family at home",
     kb: "kb-right",
   },
   {
@@ -22,9 +22,9 @@ const SLIDES = [
     kb: "kb-up",
   },
   {
-    url: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=1920&q=85&auto=format&fit=crop",
+    url: "https://images.unsplash.com/photo-1588242425139-26285c5dc509?w=1920&q=85&auto=format&fit=crop",
     label: "Expert Cleaners",
-    alt: "Cheerful team of professional lady cleaners smiling confidently in a spotless home",
+    alt: "Beautiful professional cleaning lady — elegant and confident in a pristine home",
     kb: "kb-right",
   },
   {
@@ -34,38 +34,41 @@ const SLIDES = [
     kb: "kb-left",
   },
   {
-    url: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1920&q=85&auto=format&fit=crop",
-    label: "Pet-Friendly Homes",
-    alt: "Adorable golden retriever happily sitting inside a cozy rental home",
+    url: "https://images.unsplash.com/photo-1581579186913-45ac3e6efe93?w=1920&q=85&auto=format&fit=crop",
+    label: "Family Living",
+    alt: "Happy family — mother, father and two young kids — laughing together while petting their golden retriever at home",
     kb: "kb-up",
   },
 ] as const;
 
 const KB_CSS = `
   @keyframes kb-right {
-    from { transform: scale(1.00) translate(0%, 0%); }
-    to   { transform: scale(1.10) translate(-1.5%, -0.5%); }
+    from { transform: scale(1.04) translate(0%,    0%);    }
+    to   { transform: scale(1.10) translate(-1.2%, -0.4%); }
   }
   @keyframes kb-left {
-    from { transform: scale(1.00) translate(0%, 0%); }
-    to   { transform: scale(1.10) translate(1.5%, 0.5%); }
+    from { transform: scale(1.04) translate(0%,   0%);   }
+    to   { transform: scale(1.10) translate(1.2%, 0.4%); }
   }
   @keyframes kb-up {
-    from { transform: scale(1.00) translate(0%, 0%); }
-    to   { transform: scale(1.10) translate(0.4%, -1.5%); }
+    from { transform: scale(1.04) translate(0%,    0%);    }
+    to   { transform: scale(1.10) translate(0.3%, -1.2%); }
   }
-  .kb-right { animation: kb-right 14s ease-in-out forwards; }
-  .kb-left  { animation: kb-left  14s ease-in-out forwards; }
-  .kb-up    { animation: kb-up    14s ease-in-out forwards; }
+  .kb-right { animation: kb-right 28s linear forwards; }
+  .kb-left  { animation: kb-left  28s linear forwards; }
+  .kb-up    { animation: kb-up    28s linear forwards; }
 `;
 
 const SLIDE_DURATION = 6000;
+const DISSOLVE_MS    = 2200;
 
 export function HeroSlider() {
-  const [current, setCurrent] = useState(0);
-  const [epoch, setEpoch] = useState(0);
-  const [loaded, setLoaded] = useState<Set<number>>(new Set([0, 1]));
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [current, setCurrent]           = useState(0);
+  const [slideEpochs, setSlideEpochs]   = useState<number[]>(() =>
+    Array(SLIDES.length).fill(0)
+  );
+  const [loaded, setLoaded]             = useState<Set<number>>(new Set([0, 1]));
+  const timerRef                        = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const preload = useCallback((index: number) => {
     setLoaded((prev) => {
@@ -76,14 +79,22 @@ export function HeroSlider() {
     });
   }, []);
 
+  const activate = useCallback((index: number) => {
+    setSlideEpochs((prev) => {
+      const next = [...prev];
+      next[index] = prev[index] + 1;
+      return next;
+    });
+  }, []);
+
   const advance = useCallback(() => {
     setCurrent((prev) => {
       const next = (prev + 1) % SLIDES.length;
       preload((next + 1) % SLIDES.length);
+      activate(next);
       return next;
     });
-    setEpoch((e) => e + 1);
-  }, [preload]);
+  }, [preload, activate]);
 
   useEffect(() => {
     timerRef.current = setInterval(advance, SLIDE_DURATION);
@@ -93,10 +104,10 @@ export function HeroSlider() {
   const handleDotClick = useCallback((i: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
     preload((i + 1) % SLIDES.length);
+    activate(i);
     setCurrent(i);
-    setEpoch((e) => e + 1);
     timerRef.current = setInterval(advance, SLIDE_DURATION);
-  }, [advance, preload]);
+  }, [advance, preload, activate]);
 
   return (
     <>
@@ -106,15 +117,16 @@ export function HeroSlider() {
         {SLIDES.map(({ url, alt, kb }, i) =>
           loaded.has(i) ? (
             <div
-              key={i === current ? `${i}-${epoch}` : i}
+              key={i}
               className="absolute inset-0"
               style={{
                 opacity: i === current ? 1 : 0,
-                transition: "opacity 1400ms ease-in-out",
+                transition: `opacity ${DISSOLVE_MS}ms ease-in-out`,
                 willChange: "opacity",
               }}
             >
               <img
+                key={slideEpochs[i]}
                 src={url}
                 alt={alt}
                 draggable={false}
