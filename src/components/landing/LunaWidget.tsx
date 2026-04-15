@@ -886,28 +886,6 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
 
   return (
     <>
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap');
-        
-        .heidi-widget {
-          font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        @keyframes subtle-pulse {
-          0%, 100% { transform: scale(1); opacity: 0.5; }
-          50% { transform: scale(1.05); opacity: 0.8; }
-        }
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-5px); }
-        }
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
-
       {/* Launcher Button */}
       {!isOpen && (
         <button 
@@ -928,7 +906,7 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
 
       {/* Main Widget */}
       <div className={cn(
-        "fixed bottom-6 right-6 z-50 transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1) origin-bottom-right heidi-widget",
+        "fixed bottom-6 right-6 z-50 transition-all duration-700 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] origin-bottom-right",
         isOpen ? "scale-100 opacity-100 translate-y-0" : "scale-90 opacity-0 translate-y-8 pointer-events-none"
       )}>
         <div className="w-[420px] h-[680px] bg-white rounded-[3rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden border border-slate-100/60 relative">
