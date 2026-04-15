@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
     };
 
     if (type) query.type = type;
-    if (parkingType) (query as any)["parking.type"] = parkingType;
+    if (parkingType) (query as any)["units.parking.type"] = parkingType;
     if (minRent || maxRent) {
       (query as any)["units.rentAmount"] = {};
       if (minRent) (query as any)["units.rentAmount"].$gte = minRent;

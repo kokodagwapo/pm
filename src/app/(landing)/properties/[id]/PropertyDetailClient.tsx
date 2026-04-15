@@ -441,20 +441,6 @@ export function PropertyDetailClient({
     return 0;
   }, [baseRentPerNight, unit?.rentAmount]);
 
-  const monthlyDiscountSample = useMemo(() => {
-    const monthly = bookingDiscountSettings.monthly;
-    if (!monthly.enabled || monthly.percent <= 0 || monthlyRate <= 0) {
-      return null;
-    }
-
-    return {
-      percent: monthly.percent,
-      minNights: monthly.minNights,
-      savings: Math.round((monthlyRate * monthly.percent) / 100),
-      discountedRate: Math.round(monthlyRate * (1 - monthly.percent / 100)),
-    };
-  }, [bookingDiscountSettings.monthly, monthlyRate]);
-
   const seasonalPricingSummary = useMemo(() => {
     return calendarPricingRules
       .filter((r) => r.ruleType === "seasonal" && r.startDate && r.endDate)
@@ -1628,19 +1614,6 @@ export function PropertyDetailClient({
                         {getRentDisplay(property) !== "Contact for pricing" && (
                           <span className="text-slate-400 text-sm mb-1">/month</span>
                         )}
-                      </div>
-                    )}
-                    {monthlyDiscountSample && (
-                      <div className="mt-3 inline-flex flex-col rounded-2xl border border-emerald-200 bg-emerald-50/80 px-3.5 py-2">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">
-                          Sample monthly discount
-                        </span>
-                        <span className="mt-1 text-sm font-semibold text-emerald-900">
-                          {monthlyDiscountSample.percent}% off when booked for {monthlyDiscountSample.minNights}+ nights
-                        </span>
-                        <span className="text-xs text-emerald-700">
-                          Sample total {formatPrice(monthlyDiscountSample.discountedRate)}/month, saving about {formatPrice(monthlyDiscountSample.savings)}
-                        </span>
                       </div>
                     )}
                   </div>

@@ -9,6 +9,10 @@ export interface LunaToolDefinition {
   allowedRoles: HeidiAccessRole[];
 }
 
+interface LunaToolOptions {
+  includeDevelopmentDbTools?: boolean;
+}
+
 export const LUNA_TOOLS: LunaToolDefinition[] = [
   {
     name: "get_available_properties",
@@ -151,6 +155,19 @@ export const LUNA_TOOLS: LunaToolDefinition[] = [
   },
 ];
 
-export function getLunaToolsForRole(role: HeidiAccessRole): LunaToolDefinition[] {
-  return LUNA_TOOLS.filter((tool) => tool.allowedRoles.includes(role));
+export function getLunaToolsForRole(
+  role: HeidiAccessRole,
+  options: LunaToolOptions = {}
+): LunaToolDefinition[] {
+  const baseTools = LUNA_TOOLS.filter((tool) => tool.allowedRoles.includes(role));
+
+  if (!options.includeDevelopmentDbTools) {
+    return baseTools;
+  }
+
+  const extraDevTools = LUNA_TOOLS.filter(
+    (tool) => tool.name === "search_all_listings" && !baseTools.some((existing) => existing.name === tool.name)
+  );
+
+  return [...baseTools, ...extraDevTools];
 }

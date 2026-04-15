@@ -29,11 +29,35 @@ function buildUnitSummary(units: any[] = []) {
         typeof unit?.squareFootage === "number" ? `${unit.squareFootage} sqft` : null,
         typeof unit?.rentAmount === "number" ? `${formatCurrency(unit.rentAmount)}/mo` : null,
         unit?.status ? `status ${unit.status}` : null,
+        unit?.parking?.included
+          ? `${unit?.parking?.spaces || 0} parking ${unit?.parking?.type || "space"}`
+          : null,
+        unit?.balcony ? "balcony" : null,
+        unit?.patio ? "patio" : null,
+        unit?.garden ? "garden" : null,
+        unit?.notes ? `notes: ${String(unit.notes).slice(0, 120)}` : null,
       ].filter(Boolean);
 
       return bits.join(" | ");
     })
     .join(" || ");
+}
+
+function summarizeAmenities(amenities: any[] = []) {
+  if (!Array.isArray(amenities) || amenities.length === 0) return "no amenities listed";
+  return amenities
+    .map((amenity) => amenity?.name)
+    .filter((value: unknown): value is string => typeof value === "string" && value.trim().length > 0)
+    .slice(0, 10)
+    .join(", ");
+}
+
+function summarizeHoaFields(fields: any[] = []) {
+  if (!Array.isArray(fields) || fields.length === 0) return "no HOA fields listed";
+  return fields
+    .slice(0, 6)
+    .map((field) => `${field?.key || "field"}: ${String(field?.value || "").slice(0, 80)}`)
+    .join(" | ");
 }
 
 const NAPLES_AREA_KNOWLEDGE = `
@@ -176,7 +200,7 @@ async function buildPortfolioMemorySnapshot(role: HeidiAccessRole, userId?: stri
   }
 
   const properties = await Property.find(query)
-    .select("name status neighborhood address units")
+    .select("name status neighborhood address description amenities hoaCustomFields units")
     .sort({ name: 1 })
     .lean();
 
@@ -196,8 +220,11 @@ async function buildPortfolioMemorySnapshot(role: HeidiAccessRole, userId?: stri
     const address = property.address
       ? `${property.address.street}, ${property.address.city}, ${property.address.state} ${property.address.zipCode}`
       : "address unavailable";
+    const descriptionSnippet = property.description
+      ? String(property.description).replace(/\s+/g, " ").slice(0, 180)
+      : "no description";
 
-    return `- ${property.name} | ${address} | neighborhood: ${property.neighborhood || "n/a"} | property status: ${property.status || "n/a"} | ${buildUnitSummary(property.units)}`;
+    return `- ${property.name} | ${address} | neighborhood: ${property.neighborhood || "n/a"} | property status: ${property.status || "n/a"} | description: ${descriptionSnippet} | amenities: ${summarizeAmenities(property.amenities)} | HOA: ${summarizeHoaFields(property.hoaCustomFields)} | ${buildUnitSummary(property.units)}`;
   });
 
   return `
@@ -217,6 +244,7 @@ export async function POST(request: NextRequest) {
     const session = await auth();
     const apiKey = process.env.OPENAI_API_KEY;
     const requestBody = await request.json().catch(() => ({}));
+    const devDatabaseAccessEnabled = process.env.NODE_ENV !== "production";
 
     if (!apiKey) {
       return NextResponse.json({ error: "OpenAI API key is not configured" }, { status: 503 });
@@ -237,7 +265,9 @@ export async function POST(request: NextRequest) {
         : "";
 
     const portfolioMemory = await buildPortfolioMemorySnapshot(accessRole, session?.user?.id);
-    const allowedTools = getLunaToolsForRole(accessRole);
+    const allowedTools = getLunaToolsForRole(accessRole, {
+      includeDevelopmentDbTools: devDatabaseAccessEnabled,
+    });
 
     let roleLabel = "Public visitor";
     if (accessRole === UserRole.TENANT) roleLabel = "Authenticated tenant";
@@ -247,7 +277,9 @@ export async function POST(request: NextRequest) {
 
     const roleInstruction =
       accessRole === "guest"
-        ? "You are in visitor mode. Use only public website content, public listings, public pricing, and public knowledge. Do not imply account access."
+        ? devDatabaseAccessEnabled
+          ? "You are in development-database mode for a local/dev environment. You may use non-secret property and listing tools across the development database to answer feature questions like lake view, garage, HOA, amenities, and notes. Never reveal WiFi passwords, door codes, owner-private financials, or anything not returned by the safe tools."
+          : "You are in visitor mode. Use only public website content, public listings, public pricing, and public knowledge. Do not imply account access."
         : accessRole === UserRole.TENANT
           ? "You may use tenant-safe account, booking, FAQ, property, calendar, and maintenance data only when the APIs permit it."
           : accessRole === UserRole.OWNER
@@ -271,6 +303,7 @@ export async function POST(request: NextRequest) {
         You must be factual and use actual numbers only.
         If a number, address, or property detail is not in your live memory snapshot or not returned by a tool, say you need to verify it and then use a tool.
         Never claim broader permissions than the current session actually has.
+        ${devDatabaseAccessEnabled ? "Development database access override is enabled for safe property-detail lookup in this environment." : ""}
         
         Operating rules:
         1. Use the tools available in this session to search listings, calculate totals, read FAQs, check schedules, and inspect property details.
