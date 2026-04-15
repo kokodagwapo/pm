@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { LandingHeader } from "@/components/landing/LandingHeader";
-import { HeroVideo } from "@/components/landing/HeroVideo";
+import { HeroSlider } from "@/components/landing/HeroSlider";
 import { LunaWidget } from "@/components/landing/LunaWidget";
 import { useLocalizationContext } from "@/components/providers/LocalizationProvider";
 import { useLandingTheme } from "@/components/landing/LandingThemeProvider";
@@ -22,9 +22,6 @@ import {
   LandingFinalCta,
 } from "@/components/landing/home/LandingBelowFold";
 
-/** Dark scrim over hero video — readable white type on both landing themes */
-const HERO_OVERLAY =
-  "linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.28) 42%, rgba(0,0,0,0.72) 100%)";
 
 export default function HomePage() {
   const { t } = useLocalizationContext();
@@ -42,18 +39,12 @@ export default function HomePage() {
         )}
         suppressHydrationWarning
       >
-        <HeroVideo tone="dark" />
+        <HeroSlider />
 
-        {/* Hero — scrim only over hero (fixed full-viewport scrim sat above sections without z-index) */}
         <section
           data-landing-nav-bg="dark"
           className="relative z-10 flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-5 pb-16 pt-24 text-center text-white sm:px-8 sm:pb-20 sm:pt-28"
         >
-          <div
-            className="pointer-events-none absolute inset-0 z-0"
-            style={{ background: HERO_OVERLAY }}
-            aria-hidden
-          />
           <div className="relative z-10 mx-auto w-full max-w-[40rem]">
             <div className="mb-4 inline-flex items-center gap-2 rounded-2xl border border-white/35 bg-white/15 px-3 py-1.5 shadow-sm backdrop-blur-md sm:mb-6">
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />

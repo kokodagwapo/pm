@@ -23,7 +23,7 @@ type LandingThemeContextValue = {
 const LandingThemeContext = createContext<LandingThemeContextValue | null>(null);
 
 export function LandingThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<LandingTheme>("dark");
+  const [theme, setThemeState] = useState<LandingTheme>("light");
 
   useEffect(() => {
     try {
@@ -69,7 +69,7 @@ export function useLandingTheme(): LandingThemeContextValue {
   const ctx = useContext(LandingThemeContext);
   if (!ctx) {
     return {
-      theme: "dark",
+      theme: "light",
       setTheme: () => {},
       toggleTheme: () => {},
     };
