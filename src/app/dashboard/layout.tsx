@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter, usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
-import { Search, Settings, LogOut, User, Menu, X, Sun, Moon, Map } from "lucide-react";
+import { Search, Settings, LogOut, User, Menu, X, Sun, Moon, PlayCircle } from "lucide-react";
 import { useUserAvatar } from "@/components/providers/UserAvatarProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -153,14 +153,17 @@ const MobileHeader = memo(function MobileHeader({
         <button
           onClick={onToggleTour}
           className={cn(
-            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 relative group",
+            "flex h-9 shrink-0 items-center justify-center gap-2 rounded-xl border px-3 transition-all duration-300 relative group",
             isLight
               ? "border-sky-100 bg-sky-50/50 text-sky-600 hover:bg-sky-100 hover:border-sky-200"
               : "border-white/20 bg-transparent text-white/85 hover:bg-white/10 hover:text-white"
           )}
-          title="Start Guided Tour"
+          title="Demo For Verina & Marco"
         >
-          <Map className="h-4 w-4 transition-transform group-hover:scale-110" />
+          <PlayCircle className="h-4 w-4 transition-transform group-hover:scale-110" />
+          <span className="hidden lg:inline text-[11px] font-black uppercase tracking-[0.14em]">
+            Demo For Verina & Marco
+          </span>
           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-sky-500 rounded-full border-2 border-white animate-pulse" />
         </button>
 

@@ -35,6 +35,7 @@ interface LunaWidgetProps {
 }
 
 const HEIDI_WIDGET_STORAGE_KEY = "heidi-widget-state-v1";
+const HEIDI_INACTIVITY_MS = 90_000;
 
 const SHORT_TRANSCRIPT_ALLOWLIST = new Set([
   "hi",
@@ -121,6 +122,7 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
   const [activeLanguage, setActiveLanguage] = useState("English");
   const [error, setError] = useState<string | null>(null);
   const [textInput, setTextInput] = useState("");
+  const [userActivityTick, setUserActivityTick] = useState(0);
   const [livePropertyContext, setLivePropertyContext] = useState<any>(
     propertyContext ?? null
   );
@@ -133,10 +135,12 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
   const streamingAssistantIdRef = useRef<string | null>(null);
   const pendingTextRef = useRef<string | null>(null);
   const disconnectTimeoutRef = useRef<number | null>(null);
+  const inactivityTimeoutRef = useRef<number | null>(null);
   const speechStartedAtRef = useRef<number | null>(null);
   const ignoreNextTranscriptRef = useRef(false);
   const manualCloseRef = useRef(false);
   const isStoppingRef = useRef(false);
+  const idleEndingRef = useRef(false);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -334,6 +338,18 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
     }
   }, []);
 
+  const clearInactivityTimeout = useCallback(() => {
+    if (inactivityTimeoutRef.current !== null) {
+      window.clearTimeout(inactivityTimeoutRef.current);
+      inactivityTimeoutRef.current = null;
+    }
+  }, []);
+
+  const bumpUserActivity = useCallback(() => {
+    idleEndingRef.current = false;
+    setUserActivityTick((prev) => prev + 1);
+  }, []);
+
   const dispatchUserText = useCallback((text: string) => {
     if (!dcRef.current || dcRef.current.readyState !== "open") {
       return false;
@@ -476,6 +492,11 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
       // Clean up any dangling draft at end of full response cycle
       case "response.done":
         streamingAssistantIdRef.current = null;
+        if (idleEndingRef.current) {
+          idleEndingRef.current = false;
+          stopVoice();
+          setIsOpen(false);
+        }
         break;
       case "conversation.item.input_audio_transcription.completed":
         if (event.transcript) {
@@ -487,6 +508,7 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
           const result = classifyTranscriptIntent(event.transcript);
 
           if (result.action === "respond" && result.cleanedTranscript) {
+            bumpUserActivity();
             appendMessage({
               id: Date.now().toString(),
               role: "user",
@@ -520,6 +542,7 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
         setIsSpeaking(true);
         break;
       case "input_audio_buffer.speech_started":
+        bumpUserActivity();
         ignoreNextTranscriptRef.current = false;
         speechStartedAtRef.current = Date.now();
         setIsListening(true);
@@ -545,11 +568,12 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
         }
         break;
     }
-  }, [appendMessage, dispatchUserText, finalizeAssistantTranscript, handleToolCall, keepWidgetOpen, upsertAssistantDraft]);
+  }, [appendMessage, bumpUserActivity, dispatchUserText, finalizeAssistantTranscript, handleToolCall, keepWidgetOpen, upsertAssistantDraft]);
 
   const stopVoice = useCallback(() => {
     isStoppingRef.current = true;
     clearDisconnectTimeout();
+    clearInactivityTimeout();
     speechStartedAtRef.current = null;
     ignoreNextTranscriptRef.current = false;
     if (pcRef.current) pcRef.current.close();
@@ -571,7 +595,73 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
     window.setTimeout(() => {
       isStoppingRef.current = false;
     }, 0);
-  }, [clearDisconnectTimeout]);
+  }, [clearDisconnectTimeout, clearInactivityTimeout]);
+
+  const beginIdleGoodbye = useCallback(() => {
+    if (idleEndingRef.current) return;
+    idleEndingRef.current = true;
+    clearInactivityTimeout();
+    keepWidgetOpen();
+
+    if (isVoiceActive && dcRef.current?.readyState === "open") {
+      sendEvent({ type: "response.cancel" });
+      sendEvent({
+        type: "conversation.item.create",
+        item: {
+          type: "message",
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: "The user has been inactive for 90 seconds. Say one brief warm goodbye, then end the conversation now.",
+            },
+          ],
+        },
+      });
+      sendEvent({ type: "response.create" });
+      inactivityTimeoutRef.current = window.setTimeout(() => {
+        if (idleEndingRef.current) {
+          idleEndingRef.current = false;
+          stopVoice();
+          setIsOpen(false);
+        }
+      }, 8000);
+      return;
+    }
+
+    appendMessage({
+      id: `assistant-idle-goodbye-${Date.now()}`,
+      role: "assistant",
+      content: "Goodbye for now.",
+      timestamp: new Date(),
+      status: "sent",
+    });
+
+    window.setTimeout(() => {
+      idleEndingRef.current = false;
+      setIsOpen(false);
+    }, 1500);
+  }, [appendMessage, clearInactivityTimeout, isVoiceActive, keepWidgetOpen, sendEvent]);
+
+  const resetInactivityTimer = useCallback(() => {
+    clearInactivityTimeout();
+    if (manualCloseRef.current || idleEndingRef.current) return;
+    if (!isOpen && !isVoiceActive) return;
+
+    inactivityTimeoutRef.current = window.setTimeout(() => {
+      beginIdleGoodbye();
+    }, HEIDI_INACTIVITY_MS);
+  }, [beginIdleGoodbye, clearInactivityTimeout, isOpen, isVoiceActive]);
+
+  useEffect(() => {
+    if (manualCloseRef.current || (!isOpen && !isVoiceActive)) {
+      clearInactivityTimeout();
+      return;
+    }
+
+    resetInactivityTimer();
+    return clearInactivityTimeout;
+  }, [clearInactivityTimeout, isOpen, isVoiceActive, resetInactivityTimer, userActivityTick]);
 
   const toggleMicMute = useCallback(() => {
     if (streamRef.current) {
@@ -601,6 +691,7 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
     }
 
     isStoppingRef.current = false;
+    idleEndingRef.current = false;
     manualCloseRef.current = false;
     keepWidgetOpen();
     setIsVoiceActive(true);
@@ -766,6 +857,7 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
 
   const switchLanguage = useCallback(
     (language: string) => {
+      bumpUserActivity();
       setActiveLanguage(language);
       keepWidgetOpen();
 
@@ -776,12 +868,13 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
         startVoice();
       }
     },
-    [dispatchUserText, keepWidgetOpen, startVoice]
+    [bumpUserActivity, dispatchUserText, keepWidgetOpen, startVoice]
   );
 
   const handleSendText = useCallback((overrideText?: string) => {
     const trimmedInput = (overrideText ?? textInput).trim();
     if (!trimmedInput) return;
+    bumpUserActivity();
     const newMessage: Message = { id: Date.now().toString(), role: "user", content: trimmedInput, timestamp: new Date(), status: "sent" };
     setMessages(prev => [...prev, newMessage]);
     if (!overrideText) setTextInput("");
@@ -789,7 +882,7 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
       pendingTextRef.current = trimmedInput;
       startVoice();
     }
-  }, [dispatchUserText, startVoice, textInput]);
+  }, [bumpUserActivity, dispatchUserText, startVoice, textInput]);
 
   return (
     <>
@@ -1112,10 +1205,10 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
           
           {/* Disclaimer */}
           <div className="bg-slate-50 py-3 px-8 flex justify-center border-t border-slate-100/50">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2.5">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              Ai can make mistakes. Relax. Chill.
-            </span>
+            <div className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span>Ai can make mistakes. Relax. Chill.</span>
+            </div>
           </div>
         </div>
       </div>

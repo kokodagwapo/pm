@@ -246,8 +246,24 @@ export function withRoleAndDB(roles: UserRole | UserRole[]) {
           return createErrorResponse("Authentication required", 401);
         }
 
-        // Validate required session properties
-        if (!session?.user?.id || !session?.user?.email) {
+        // Recover older/stale JWT-backed sessions that may be missing one
+        // profile field locally even though the user still exists in MongoDB.
+        let sessionUserId = session.user.id ?? "";
+        let sessionUserEmail = session.user.email ?? "";
+
+        if (!sessionUserId || !sessionUserEmail) {
+          const { default: User } = await import("@/models/User");
+          const sessionUserRecord = sessionUserId
+            ? await User.findById(sessionUserId).select("_id email").lean()
+            : sessionUserEmail
+              ? await User.findOne({ email: sessionUserEmail }).select("_id email").lean()
+              : null;
+
+          sessionUserId = sessionUserId || sessionUserRecord?._id?.toString?.() || "";
+          sessionUserEmail = sessionUserEmail || sessionUserRecord?.email || "";
+        }
+
+        if (!sessionUserId || !sessionUserEmail) {
           return createErrorResponse("Invalid session", 401);
         }
 
@@ -255,8 +271,8 @@ export function withRoleAndDB(roles: UserRole | UserRole[]) {
         const userRole = (session.user.role as UserRole) || UserRole.TENANT;
 
         const user = {
-          id: session.user.id,
-          email: session.user.email,
+          id: sessionUserId,
+          email: sessionUserEmail,
           role: userRole,
           isActive: session?.user?.isActive !== false,
         };

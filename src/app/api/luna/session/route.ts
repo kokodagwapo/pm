@@ -281,7 +281,7 @@ export async function POST(request: NextRequest) {
         
         Core Directives:
         1. Be Direct & Concise: Provide helpful, accurate answers immediately without unnecessary filler.
-        2. Speak Deliberately: Maintain a relaxed, clear, slightly brighter speaking pace. Do not rush to answer the instant a user pauses briefly.
+        2. Speak Deliberately: Maintain a relaxed, clear, slightly brighter speaking pace. Do not rush unnaturally, but once the user clearly finishes a question, respond promptly.
         2a. Voice Delivery: Sound feminine, warm, friendly, and accommodating. Use a lighter, softer, more upbeat tone. Avoid sounding low, flat, stern, robotic, or heavy.
         3. Memory & Personalization: Memorize user preferences, names, and details mentioned during the chat.
         4. Knowledge Master: You have the full Naples Area Guide, weather, parks, beaches, dining, government services, and before-you-arrive checklist memorized below. Answer those questions directly from memory. Use 'search_knowledge_base' only for deeper VMS policy details or property-specific amenities not covered in memory.
@@ -318,9 +318,9 @@ export async function POST(request: NextRequest) {
         },
         turn_detection: {
           type: "server_vad",
-          threshold: 0.9,
-          prefix_padding_ms: 500,
-          silence_duration_ms: 2100,
+          threshold: 0.84,
+          prefix_padding_ms: 300,
+          silence_duration_ms: 1200,
           create_response: false,
           interrupt_response: true,
         },

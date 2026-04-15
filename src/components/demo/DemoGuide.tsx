@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { X, ChevronRight, ChevronLeft, Sparkles, RotateCcw } from "lucide-react";
+import { X, ChevronRight, ChevronLeft, Sparkles, RotateCcw, Play, Pause, Loader2, SkipBack, SkipForward, Languages } from "lucide-react";
 import { UserRole } from "@/types";
 
 interface TourStep {
@@ -345,6 +345,88 @@ function getRoleColor(role?: string) {
 }
 
 const STORAGE_KEY_PREFIX = "demo_guide_v2_";
+type DemoLanguage = "en" | "de";
+interface DemoSection {
+  id: string;
+  href: string;
+  label: Record<DemoLanguage, string>;
+  script: Record<DemoLanguage, string>;
+}
+
+const DEMO_SECTIONS: DemoSection[] = [
+  {
+    id: "welcome",
+    href: "/dashboard",
+    label: {
+      en: "Welcome Overview",
+      de: "Willkommen",
+    },
+    script: {
+      en: "Hello Marco and Verina, welcome. This is your polished Heidi deployment review. I will guide you section by section so the platform tells the story while we move through it.",
+      de: "Hallo Marco und Verina, herzlich willkommen. Das ist euer poliertes Heidi Deployment Review. Ich fuehre euch Abschnitt fuer Abschnitt, damit die Plattform die Geschichte direkt mitzeigt.",
+    },
+  },
+  {
+    id: "contracts-payments",
+    href: "/dashboard/payments",
+    label: {
+      en: "Contracts and Payments",
+      de: "Vertraege und Zahlungen",
+    },
+    script: {
+      en: "First, Contracts and Payments. We mapped the e-signature workflows for SMS and email, secured owner contract copies, integrated deposit and balance tracking, and added proof of payment uploads. In short, the money behaves and the paperwork stops playing hide and seek.",
+      de: "Zuerst Vertraege und Zahlungen. Wir haben die E Signatur Ablaeufe fuer SMS und E Mail abgebildet, die Vertragskopien der Eigentuemer abgesichert, die Nachverfolgung von Anzahlung und Restzahlung integriert und Uploads fuer Zahlungsnachweise hinzugefuegt. Kurz gesagt, das Geld verhaelt sich ordentlich und die Dokumente spielen nicht mehr Verstecken.",
+    },
+  },
+  {
+    id: "hoa-calendar-availability",
+    href: "/dashboard/properties/calendar",
+    label: {
+      en: "HOA, Calendars, and Availability",
+      de: "HOA, Kalender und Verfuegbarkeit",
+    },
+    script: {
+      en: "Next, HOA, Calendars, and Availability. We structured the property logistics with custom HOA fields, automated four to six week HOA registration reminders, and a master calendar that forecasts ahead and shows which properties are empty. Empty nights should be visible early, not discovered by surprise.",
+      de: "Als naechstes HOA, Kalender und Verfuegbarkeit. Wir haben die Property Logik mit individuellen HOA Feldern aufgebaut, die HOA Registrierung vier bis sechs Wochen im Voraus automatisiert und einen Master Kalender vorgesehen, der fruehzeitig zeigt, welche Objekte leer stehen. Leere Naechte sollen frueh sichtbar sein und nicht erst als Ueberraschung auftauchen.",
+    },
+  },
+  {
+    id: "tenant-experience",
+    href: "/dashboard/tenants",
+    label: {
+      en: "Tenant Experience",
+      de: "Tenant Experience",
+    },
+    script: {
+      en: "Now the Tenant Experience. We designed the automated welcome flow for two weeks ahead across WhatsApp, text, and email. That includes dynamic WiFi and door codes, late checkout requests with the why prompt during check in, and the My Reservation portal for guests without a contract. Less repetitive messaging, fewer missing details, and fewer dinner interruptions.",
+      de: "Nun zur Tenant Experience. Wir haben den automatisierten Welcome Ablauf fuer zwei Wochen vor Anreise ueber WhatsApp, Text und E Mail strukturiert. Dazu gehoeren dynamische WLAN und Tuercodes, Late Checkout Anfragen mit dem Warum Feld waehrend des Check ins und das My Reservation Portal fuer Gaeste ohne Vertrag. Weniger wiederholte Nachrichten, weniger fehlende Details und deutlich weniger Stoerungen beim Abendessen.",
+    },
+  },
+  {
+    id: "maintenance-ops-pricing",
+    href: "/dashboard/maintenance",
+    label: {
+      en: "Maintenance, Operations, and Pricing",
+      de: "Maintenance, Operations und Pricing",
+    },
+    script: {
+      en: "Finally, Maintenance, Operations, and Pricing. The system routes owner requests, handles tenant maintenance with photo and video uploads, includes dedicated Dog Watching and Home Watch modules, tracks cleaner in and out times, especially after ten P M, and applies dynamic pricing rules, including the one thousand dollar per person logic. Yes, the platform is now watching homes, dogs, cleaners, and pricing. Very efficient. Slightly terrifying. Exactly what we want.",
+      de: "Zum Schluss Maintenance, Operations und Pricing. Das System leitet Owner Anfragen weiter, bearbeitet Tenant Maintenance mit Foto und Video Uploads, enthaelt eigene Module fuer Dog Watching und Home Watch, verfolgt Cleaner Check in und Check out Zeiten, besonders nach zehn Uhr abends, und bildet dynamische Preisregeln inklusive der eintausend Dollar pro Person Logik ab. Ja, die Plattform beobachtet jetzt Haeuser, Hunde, Cleaner und Preise. Sehr effizient. Ein wenig furchteinfloessend. Genau richtig.",
+    },
+  },
+  {
+    id: "wrap-up",
+    href: "/dashboard/analytics",
+    label: {
+      en: "Wrap Up",
+      de: "Abschluss",
+    },
+    script: {
+      en: "That is the overview. Every item from the notes has been addressed in the architecture, mapped out, and structured for cloud deployment. VMS Florida is ready for the next step.",
+      de: "Das ist der Ueberblick. Jeder Punkt aus den Notizen wurde in der Architektur beruecksichtigt, sauber abgebildet und fuer das Cloud Deployment vorbereitet. VMS Florida ist bereit fuer den naechsten Schritt.",
+    },
+  },
+];
 
 interface DemoGuideProps {
   externalOpen?: boolean;
@@ -355,6 +437,14 @@ export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const [internalOpen, setInternalOpen] = useState(false);
+  const [demoVoiceState, setDemoVoiceState] = useState<"idle" | "loading" | "playing" | "paused">("idle");
+  const [demoLanguage, setDemoLanguage] = useState<DemoLanguage>("en");
+  const [demoPlaybackMode, setDemoPlaybackMode] = useState<"audio" | "speech" | null>(null);
+  const [currentDemoSectionIndex, setCurrentDemoSectionIndex] = useState(0);
+  const demoAudioRef = useRef<HTMLAudioElement | null>(null);
+  const fallbackSpeechRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const isStoppingDemoRef = useRef(false);
+  const demoRunIdRef = useRef(0);
   
   const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
   const setIsOpen = useCallback((open: boolean | ((v: boolean) => boolean)) => {
@@ -382,6 +472,18 @@ export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      demoAudioRef.current?.pause();
+      if (demoAudioRef.current?.src?.startsWith("blob:")) {
+        URL.revokeObjectURL(demoAudioRef.current.src);
+      }
+      if (typeof window !== "undefined") {
+        window.speechSynthesis.cancel();
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -462,12 +564,210 @@ export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
     }
   }, [currentStep, steps, router]);
 
+  const stopDemoPlayback = useCallback((resetToStart = false) => {
+    demoRunIdRef.current += 1;
+    if (demoAudioRef.current) {
+      isStoppingDemoRef.current = true;
+      demoAudioRef.current.pause();
+      if (demoAudioRef.current.src.startsWith("blob:")) {
+        URL.revokeObjectURL(demoAudioRef.current.src);
+      }
+      if (resetToStart) {
+        demoAudioRef.current.currentTime = 0;
+      }
+      demoAudioRef.current = null;
+      setTimeout(() => {
+        isStoppingDemoRef.current = false;
+      }, 0);
+    }
+    if (typeof window !== "undefined") {
+      window.speechSynthesis.cancel();
+    }
+    setDemoVoiceState("idle");
+    setDemoPlaybackMode(null);
+    if (resetToStart) {
+      setCurrentDemoSectionIndex(0);
+    }
+  }, []);
+
+  const playSpeechSynthesisFallback = useCallback((sectionIndex: number, runId: number) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      return false;
+    }
+
+    const section = DEMO_SECTIONS[sectionIndex];
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(section.script[demoLanguage]);
+    utterance.rate = 0.97;
+    utterance.pitch = 1.15;
+    utterance.volume = 1;
+    utterance.lang = demoLanguage === "de" ? "de-DE" : "en-US";
+
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice =
+      voices.find((voice) =>
+        new RegExp(demoLanguage === "de" ? "de" : "en", "i").test(voice.lang) &&
+        /female|samantha|victoria|anna|katja|zira/i.test(voice.name)
+      ) ||
+      voices.find((voice) => new RegExp(demoLanguage === "de" ? "de" : "en", "i").test(voice.lang)) ||
+      voices[0];
+
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+
+    utterance.onend = () => {
+      if (demoRunIdRef.current !== runId) return;
+      if (sectionIndex < DEMO_SECTIONS.length - 1) {
+        void startDemoSectionPlayback(sectionIndex + 1, runId);
+        return;
+      }
+      setDemoVoiceState("idle");
+      setDemoPlaybackMode(null);
+    };
+    utterance.onerror = () => {
+      setDemoVoiceState("idle");
+      setDemoPlaybackMode(null);
+    };
+    fallbackSpeechRef.current = utterance;
+    window.speechSynthesis.speak(utterance);
+    setDemoVoiceState("playing");
+    setDemoPlaybackMode("speech");
+    setCurrentDemoSectionIndex(sectionIndex);
+    return true;
+  }, [demoLanguage]);
+
+  const startDemoSectionPlayback = useCallback(async (sectionIndex: number, runId = demoRunIdRef.current) => {
+    const clampedIndex = Math.max(0, Math.min(DEMO_SECTIONS.length - 1, sectionIndex));
+    const section = DEMO_SECTIONS[clampedIndex];
+
+    setCurrentDemoSectionIndex(clampedIndex);
+    setDemoVoiceState("loading");
+    setIsOpen(false);
+    router.push(section.href);
+
+    if (demoAudioRef.current) {
+      isStoppingDemoRef.current = true;
+      demoAudioRef.current.pause();
+      if (demoAudioRef.current.src.startsWith("blob:")) {
+        URL.revokeObjectURL(demoAudioRef.current.src);
+      }
+      demoAudioRef.current = null;
+      setTimeout(() => {
+        isStoppingDemoRef.current = false;
+      }, 0);
+    }
+
+    if (typeof window !== "undefined") {
+      window.speechSynthesis.cancel();
+    }
+
+    try {
+      const response = await fetch("/api/voice/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: section.script[demoLanguage] }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Remote TTS unavailable");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      demoAudioRef.current = audio;
+
+      audio.onplay = () => {
+        if (demoRunIdRef.current !== runId) return;
+        setDemoVoiceState("playing");
+        setDemoPlaybackMode("audio");
+      };
+      audio.onpause = () => {
+        if (!audio.ended && !isStoppingDemoRef.current && demoRunIdRef.current === runId) {
+          setDemoVoiceState("paused");
+        }
+      };
+      audio.onended = () => {
+        if (demoRunIdRef.current !== runId) return;
+        if (clampedIndex < DEMO_SECTIONS.length - 1) {
+          void startDemoSectionPlayback(clampedIndex + 1, runId);
+          return;
+        }
+        setDemoVoiceState("idle");
+        setDemoPlaybackMode(null);
+      };
+      audio.onerror = () => {
+        if (demoRunIdRef.current !== runId) return;
+        setDemoVoiceState("idle");
+        setDemoPlaybackMode(null);
+      };
+
+      await audio.play();
+    } catch {
+      const started = playSpeechSynthesisFallback(clampedIndex, runId);
+      if (!started) {
+        setDemoVoiceState("idle");
+        setDemoPlaybackMode(null);
+      }
+    }
+  }, [demoLanguage, playSpeechSynthesisFallback, router, setIsOpen]);
+
+  const handleDemoPlayPause = useCallback(async () => {
+    if (demoVoiceState === "loading") return;
+
+    if (demoVoiceState === "playing") {
+      if (demoPlaybackMode === "audio" && demoAudioRef.current) {
+        demoAudioRef.current.pause();
+        return;
+      }
+      if (demoPlaybackMode === "speech" && typeof window !== "undefined") {
+        window.speechSynthesis.pause();
+        setDemoVoiceState("paused");
+        return;
+      }
+      stopDemoPlayback(false);
+      return;
+    }
+
+    if (demoVoiceState === "paused") {
+      if (demoPlaybackMode === "audio" && demoAudioRef.current) {
+        await demoAudioRef.current.play();
+        setDemoVoiceState("playing");
+        return;
+      }
+      if (demoPlaybackMode === "speech" && typeof window !== "undefined") {
+        window.speechSynthesis.resume();
+        setDemoVoiceState("playing");
+        return;
+      }
+    }
+
+    demoRunIdRef.current += 1;
+    await startDemoSectionPlayback(currentDemoSectionIndex, demoRunIdRef.current);
+  }, [currentDemoSectionIndex, demoPlaybackMode, demoVoiceState, startDemoSectionPlayback, stopDemoPlayback]);
+
+  const jumpDemoSection = useCallback(async (direction: -1 | 1) => {
+    const nextIndex = Math.max(0, Math.min(DEMO_SECTIONS.length - 1, currentDemoSectionIndex + direction));
+    if (nextIndex === currentDemoSectionIndex && demoVoiceState === "idle") return;
+
+    demoRunIdRef.current += 1;
+    await startDemoSectionPlayback(nextIndex, demoRunIdRef.current);
+  }, [currentDemoSectionIndex, demoVoiceState, startDemoSectionPlayback]);
+
+  const handleDemoLanguageChange = useCallback((language: DemoLanguage) => {
+    if (language === demoLanguage) return;
+    stopDemoPlayback(false);
+    setDemoLanguage(language);
+  }, [demoLanguage, stopDemoPlayback]);
+
   if (!mounted || !userRole) return null;
 
   const step = steps[currentStep];
   const isLast = currentStep === steps.length - 1;
   const isFirst = currentStep === 0;
   const progressPct = ((currentStep + 1) / steps.length) * 100;
+  const currentDemoSection = DEMO_SECTIONS[currentDemoSectionIndex];
 
   return (
     <>
@@ -520,6 +820,85 @@ export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
             <RotateCcw className="h-3.5 w-3.5" />
           </button>
         )}
+
+        <button
+          onClick={handleDemoPlayPause}
+          aria-label="Demo For Verina & Marco"
+          className="mt-3 flex min-h-11 items-center gap-2 rounded-2xl border border-sky-200/70 bg-white/92 px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.16em] text-slate-900 shadow-[0_10px_30px_rgba(15,23,42,0.12)] backdrop-blur-md transition-all hover:border-sky-300 hover:bg-white active:scale-[0.98]"
+        >
+          {demoVoiceState === "loading" ? (
+            <Loader2 className="h-4 w-4 animate-spin text-sky-500" />
+          ) : demoVoiceState === "playing" ? (
+            <Pause className="h-4 w-4 text-sky-500" />
+          ) : (
+            <Play className="h-4 w-4 text-sky-500" fill="currentColor" />
+          )}
+          <span>Demo For Verina & Marco</span>
+        </button>
+
+        <div className="mt-2 rounded-2xl border border-sky-200/70 bg-white/88 p-2 shadow-[0_10px_30px_rgba(15,23,42,0.10)] backdrop-blur-md">
+          <div className="mb-2 rounded-xl border border-slate-200/70 bg-white/70 px-3 py-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-sky-700">
+              {demoVoiceState === "idle" ? "Headless Demo Ready" : "Now Touring"}
+            </p>
+            <p className="mt-1 text-xs font-semibold text-slate-800">
+              {currentDemoSection.label[demoLanguage]}
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 rounded-xl bg-slate-100/80 p-1">
+              <Languages className="h-3.5 w-3.5 text-sky-600" />
+              <button
+                onClick={() => handleDemoLanguageChange("en")}
+                className={cn(
+                  "rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
+                  demoLanguage === "en" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
+                )}
+              >
+                EN
+              </button>
+              <button
+                onClick={() => handleDemoLanguageChange("de")}
+                className={cn(
+                  "rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
+                  demoLanguage === "de" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
+                )}
+              >
+                DE
+              </button>
+            </div>
+            <button
+              onClick={() => jumpDemoSection(-1)}
+              disabled={currentDemoSectionIndex === 0}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-all hover:border-sky-300 hover:text-sky-700 disabled:cursor-not-allowed disabled:opacity-40"
+              title="Previous section"
+            >
+              <SkipBack className="h-4 w-4" />
+            </button>
+            <button
+              onClick={handleDemoPlayPause}
+              disabled={demoVoiceState === "loading"}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-900 transition-all hover:border-sky-300 hover:text-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+              title={demoVoiceState === "playing" ? "Pause demo" : "Play demo"}
+            >
+              {demoVoiceState === "loading" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : demoVoiceState === "playing" ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" fill="currentColor" />
+              )}
+            </button>
+            <button
+              onClick={() => jumpDemoSection(1)}
+              disabled={currentDemoSectionIndex === DEMO_SECTIONS.length - 1}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-all hover:border-sky-300 hover:text-sky-700 disabled:cursor-not-allowed disabled:opacity-40"
+              title="Next section"
+            >
+              <SkipForward className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Tour card (adjusted to point to the left launcher) */}
@@ -566,6 +945,20 @@ export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
               </span>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={handleDemoPlayPause}
+                className="flex items-center gap-1.5 rounded-lg border border-slate-300/70 bg-white/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-900 shadow-sm transition-all hover:border-sky-300 hover:bg-white"
+                title="Play demo for Verina and Marco"
+              >
+                {demoVoiceState === "loading" ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-sky-500" />
+                ) : demoVoiceState === "playing" ? (
+                  <Pause className="h-3.5 w-3.5 text-sky-500" />
+                ) : (
+                  <Play className="h-3.5 w-3.5 text-sky-500" fill="currentColor" />
+                )}
+                <span className="hidden sm:inline">Demo For Verina & Marco</span>
+              </button>
               <span className="text-xs font-medium text-slate-700 tabular-nums">
                 {currentStep + 1} / {steps.length}
               </span>
@@ -586,6 +979,72 @@ export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
             )}
           >
             <div className="border-b border-slate-300/35 bg-gradient-to-br from-white/55 via-sky-50/40 to-cyan-50/35 p-4">
+              <div className="mb-3 rounded-2xl border border-sky-200/70 bg-white/80 px-3 py-2 shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-700">
+                  Heidi Voice Demo
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-700">
+                  A separate owner-ready walkthrough for Marco and Verina. It now runs headless and jumps pages automatically as each narrated section begins.
+                </p>
+                <p className="mt-2 text-[11px] font-semibold text-slate-800">
+                  Current section: {currentDemoSection.label[demoLanguage]}
+                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-1 py-1">
+                    <Languages className="ml-1 h-3.5 w-3.5 text-sky-600" />
+                    <button
+                      onClick={() => handleDemoLanguageChange("en")}
+                      className={cn(
+                        "rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
+                        demoLanguage === "en" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
+                      )}
+                    >
+                      English
+                    </button>
+                    <button
+                      onClick={() => handleDemoLanguageChange("de")}
+                      className={cn(
+                        "rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
+                        demoLanguage === "de" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
+                      )}
+                    >
+                      German
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => jumpDemoSection(-1)}
+                      disabled={currentDemoSectionIndex === 0}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition-all hover:border-sky-300 hover:text-sky-700 disabled:cursor-not-allowed disabled:opacity-40"
+                      title="Previous section"
+                    >
+                      <SkipBack className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={handleDemoPlayPause}
+                      disabled={demoVoiceState === "loading"}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-900 transition-all hover:border-sky-300 hover:text-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      title={demoVoiceState === "playing" ? "Pause demo" : "Play demo"}
+                    >
+                      {demoVoiceState === "loading" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : demoVoiceState === "playing" ? (
+                        <Pause className="h-4 w-4" />
+                      ) : (
+                        <Play className="h-4 w-4" fill="currentColor" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => jumpDemoSection(1)}
+                      disabled={currentDemoSectionIndex === DEMO_SECTIONS.length - 1}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition-all hover:border-sky-300 hover:text-sky-700 disabled:cursor-not-allowed disabled:opacity-40"
+                      title="Next section"
+                    >
+                      <SkipForward className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 flex-shrink-0 select-none text-3xl leading-none">
                   {step.emoji}

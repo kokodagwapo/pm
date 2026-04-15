@@ -3,7 +3,7 @@ set -e
 
 npm install --prefer-offline --legacy-peer-deps --no-audit --no-fund 2>/dev/null || true
 
-# Signal that a rebuild is needed on next workflow restart.
-# Only delete the BUILD_ID marker — NOT the entire .next directory.
-# start.sh checks for this file and rebuilds when it's missing.
-rm -f .next/BUILD_ID 2>/dev/null || true
+# After a Git pull on Replit, stale client chunks are the main source of
+# "options.factory" / "reading 'call'" runtime crashes. Remove the whole
+# build output so the next start does a completely clean rebuild.
+rm -rf .next 2>/dev/null || true

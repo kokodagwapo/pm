@@ -185,6 +185,7 @@ export const authOptions: NextAuthConfig = {
       if (user?.id) {
         token.userId = user.id;
         token.sub = user.id;
+        token.email = user.email;
         token.role = user.role;
         token.isActive = user.isActive;
         token.firstName = (user as any).firstName ?? "";
@@ -199,6 +200,7 @@ export const authOptions: NextAuthConfig = {
       // Profile changes take effect on the next sign-in (JWT re-issue).
       const userId = ((token.userId || token.sub) as string) ?? "";
       session.user.id = userId;
+      session.user.email = (token.email as string) ?? session.user.email ?? "";
       session.user.role = (token.role as UserRole) ?? UserRole.TENANT;
       session.user.isActive = (token.isActive as boolean) ?? false;
       session.user.firstName = (token.firstName as string) ?? "";
