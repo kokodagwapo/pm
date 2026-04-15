@@ -1112,10 +1112,10 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
           
           {/* Disclaimer */}
           <div className="bg-slate-50 py-3 px-8 flex justify-center border-t border-slate-100/50">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2.5">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" />
               Ai can make mistakes. Relax. Chill.
-            </p>
+            </span>
           </div>
         </div>
       </div>
