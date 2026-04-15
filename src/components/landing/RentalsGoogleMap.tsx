@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GoogleMap, MarkerF, useJsApiLoader } from "@react-google-maps/api";
-import { Eye, Map, Mountain, Satellite } from "lucide-react";
+import { Map, Mountain, Satellite } from "lucide-react";
 import {
   getGoogleMapsBrowserKey,
   hasGoogleMapsBrowserKey,
 } from "@/lib/google-maps";
 
-type TileMode = "roadmap" | "satellite" | "terrain" | "streetview";
+type TileMode = "roadmap" | "satellite" | "terrain";
 
 interface Property {
   _id: string;
@@ -58,14 +58,12 @@ function fmtPrice(amount: number): string {
 function RentalsMapToolbar({
   mode,
   setMode,
-  onStreetView,
   neighborhoods,
   activeNeighborhood,
   onNeighborhoodChange,
 }: {
   mode: TileMode;
   setMode: (mode: TileMode) => void;
-  onStreetView: () => void;
   neighborhoods?: { label: string; value: string }[];
   activeNeighborhood?: string;
   onNeighborhoodChange?: (value: string) => void;
@@ -78,19 +76,12 @@ function RentalsMapToolbar({
             { id: "roadmap", label: "Map", Icon: Map },
             { id: "satellite", label: "Satellite", Icon: Satellite },
             { id: "terrain", label: "3D", Icon: Mountain },
-            { id: "streetview", label: "Street View", Icon: Eye },
-          ] as { id: TileMode; label: string; Icon: typeof Eye }[]
+          ] as { id: TileMode; label: string; Icon: typeof Map }[]
         ).map(({ id, label, Icon }) => (
           <button
             key={id}
             type="button"
-            onClick={() => {
-              if (id === "streetview") {
-                onStreetView();
-                return;
-              }
-              setMode(id);
-            }}
+            onClick={() => setMode(id)}
             className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
               mode === id
                 ? "bg-slate-900 text-white shadow-sm"
@@ -179,14 +170,6 @@ export function RentalsGoogleMap(props: RentalsGoogleMapProps) {
     if (!isLoaded) return;
     const map = mapRef.current;
     if (!map) return;
-    const pano = map.getStreetView();
-    if (mode === "streetview") {
-      pano.setPosition(map.getCenter() ?? NAPLES_CENTER);
-      pano.setPov({ heading: 0, pitch: 0 });
-      pano.setVisible(true);
-      return;
-    }
-    pano.setVisible(false);
     map.setMapTypeId(
       mode === "terrain" ? "terrain" : mode === "satellite" ? "hybrid" : "roadmap"
     );
@@ -222,7 +205,6 @@ export function RentalsGoogleMap(props: RentalsGoogleMapProps) {
       <RentalsMapToolbar
         mode={mode}
         setMode={setMode}
-        onStreetView={() => setMode("streetview")}
         neighborhoods={props.neighborhoods}
         activeNeighborhood={props.activeNeighborhood}
         onNeighborhoodChange={props.onNeighborhoodChange}
