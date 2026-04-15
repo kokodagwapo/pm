@@ -16,15 +16,15 @@ const SLIDES = [
     kb: "kb-left",
   },
   {
-    url: "https://images.unsplash.com/photo-1576085898323-218337e3e43c?w=1920&q=85&auto=format&fit=crop",
+    url: "https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=1920&q=85&auto=format&fit=crop",
     label: "Community Life",
-    alt: "Happy family playing with their children at a sunny community playground",
+    alt: "Happy family laughing and playing with their kids at a bright community playground",
     kb: "kb-up",
   },
   {
-    url: "https://images.unsplash.com/photo-1527515637462-cff94ebb786e?w=1920&q=85&auto=format&fit=crop",
+    url: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=1920&q=85&auto=format&fit=crop",
     label: "Expert Cleaners",
-    alt: "Happy team of professional lady cleaners smiling together in a bright home",
+    alt: "Cheerful team of professional lady cleaners smiling confidently in a spotless home",
     kb: "kb-right",
   },
   {
