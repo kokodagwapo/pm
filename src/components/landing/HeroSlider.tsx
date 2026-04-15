@@ -4,9 +4,9 @@ import { useEffect, useRef, useState, useCallback } from "react";
 
 const SLIDES = [
   {
-    url: "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=1920&q=85&auto=format&fit=crop",
-    label: "Family Living",
-    alt: "Happy family with their golden retriever relaxing in a bright modern home",
+    url: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1920&q=85&auto=format&fit=crop",
+    label: "Move-In Ready",
+    alt: "Happy family excitedly moving into their beautiful new rest house",
     kb: "kb-right",
   },
   {
