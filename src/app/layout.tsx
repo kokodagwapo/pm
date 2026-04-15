@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
 import { PwaInstallHint } from "@/components/pwa/PwaInstallHint";
-import { LunaWidget } from "@/components/landing/LunaWidget";
+import { LunaWidgetShell } from "@/components/landing/LunaWidgetShell";
 import type { Metadata } from "next";
 
 const inter = Inter({
@@ -88,7 +88,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${inter.className} ${playfair.variable} ${montserrat.variable} ${plusJakarta.variable} font-light`} suppressHydrationWarning>
         <Providers>
           {children}
-          <LunaWidget />
+          <LunaWidgetShell />
           <Toaster />
           <ServiceWorkerRegistration />
           <PwaInstallHint variant="dark" />

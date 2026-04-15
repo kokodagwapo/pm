@@ -31,13 +31,13 @@ if [ "$PROVISION_BOOTSTRAP_ACCOUNTS" = "true" ]; then
 fi
 
 pkill -f "next dev" 2>/dev/null || true
+pkill -f "next start" 2>/dev/null || true
 sleep 1
-if [ -z "${REPLIT_DEPLOYMENT:-}" ]; then
-  export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=3072"
-fi
 
-if [ -z "${REPLIT_DEPLOYMENT:-}" ]; then
-  echo "Development environment — Next dev on port $PORT."
+export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=3072"
+
+if [ "${REPLIT_DEV_SERVER:-0}" = "1" ]; then
+  echo "REPLIT_DEV_SERVER=1 — starting Next dev on port $PORT."
   rm -rf .next
   exec npm run dev:5000
 fi
@@ -48,8 +48,8 @@ if [ -d .next ] && [ ! -f .next/BUILD_ID ]; then
 fi
 
 if [ ! -f .next/BUILD_ID ]; then
-  echo "No .next build found — running npm run build..."
-  npm run build
+  echo "No .next build found — running clean Replit build..."
+  bash scripts/replit-build.sh
 fi
 
 echo "Starting production server on port $PORT (next start)..."

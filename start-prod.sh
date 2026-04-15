@@ -32,5 +32,15 @@ if [ "$PROVISION_BOOTSTRAP_ACCOUNTS" = "true" ]; then
   node src/scripts/provision-bootstrap-accounts.mjs
 fi
 
+if [ -d .next ] && [ ! -f .next/BUILD_ID ]; then
+  echo "Stale/incomplete .next directory detected (no BUILD_ID) — removing it before startup."
+  rm -rf .next
+fi
+
+if [ ! -f .next/BUILD_ID ]; then
+  echo "No production build found — running clean Replit build..."
+  bash scripts/replit-build.sh
+fi
+
 echo "Starting production server on port $PORT..."
 exec npm run start
