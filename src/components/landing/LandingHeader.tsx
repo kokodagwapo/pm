@@ -51,6 +51,7 @@ export function LandingHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [navBandDark, setNavBandDark] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   const isHome = pathname === "/";
   const isRentals = pathname?.startsWith("/rentals") ?? false;
@@ -81,6 +82,10 @@ export function LandingHeader() {
       window.removeEventListener("load", sync);
     };
   }, [dynamicHome]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setOpen(false);
@@ -280,7 +285,7 @@ export function LandingHeader() {
         </div>
       </header>
 
-      {open && (
+      {mounted && open && (
         <div
           className="fixed inset-0 z-40 bg-black/15 backdrop-blur-[2px] lg:hidden"
           onClick={() => setOpen(false)}
@@ -288,6 +293,7 @@ export function LandingHeader() {
         />
       )}
 
+      {mounted && (
       <div
         className={`fixed inset-x-0 top-0 z-[45] transition-all duration-200 ease-out lg:hidden ${
           open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-1 opacity-0"
@@ -417,6 +423,7 @@ export function LandingHeader() {
           </nav>
         </div>
       </div>
+      )}
     </>
   );
 }
