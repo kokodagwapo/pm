@@ -1,7 +1,65 @@
-.git
-.next
-node_modules
-.env*
+# ── Version control ──────────────────────────────────────────────────
+.git/
+.gitignore
+.gitattributes
+
+# ── Dependencies (rebuilt inside container by build command) ──────────
+node_modules/
+.pnp
+.pnp.js
+
+# ── Next.js build output (rebuilt by build command) ──────────────────
+.next/
+out/
+
+# ── Replit local state ────────────────────────────────────────────────
+.local/
+.replit.nix
+replit.nix
+.cache/
+
+# ── Environment / secrets (injected at runtime via Replit Secrets) ────
+.env
+.env.*
 !.env.example
-*.md
+
+# ── Dev & test artifacts ──────────────────────────────────────────────
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__/
+coverage/
+jest.config.*
+vitest.config.*
+playwright.config.*
+cypress/
+.nyc_output/
+
+# ── Logs & debug files ────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+logs/
+
+# ── OS / editor artifacts ─────────────────────────────────────────────
 .DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+*.iml
+
+# ── Docker ────────────────────────────────────────────────────────────
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# ── Misc large files not needed at runtime ────────────────────────────
+*.md
+*.mdx
+attached_assets/
+screenshots/
