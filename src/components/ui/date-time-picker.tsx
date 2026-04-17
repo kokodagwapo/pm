@@ -177,7 +177,7 @@ export function FormDateTimePicker({
         <Button
           variant="outline"
           className={cn(
-            "h-11 w-full justify-start text-left font-normal border-2 border-border/60 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-background/50 transition-all duration-200",
+            "h-11 w-full justify-start rounded-xl border border-input/75 bg-[color:var(--form-field-bg)] text-left font-normal shadow-[0_1px_2px_rgb(15_23_42/0.04),0_0_0_1px_rgb(255_255_255/0.45)_inset] transition-[color,box-shadow,border-color,background-color] duration-200 hover:border-input hover:bg-[color:var(--form-field-bg-hover)] focus:border-primary/60 focus:bg-[color:var(--form-field-bg-focus)] focus:ring-4 focus:ring-primary/12",
             !internalValue && "text-muted-foreground",
             className
           )}

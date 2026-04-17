@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { cn } from "@/lib/utils";
 
 const SLIDES = [
   {
@@ -60,9 +61,21 @@ const KB_CSS = `
 `;
 
 const SLIDE_DURATION = 6000;
-const DISSOLVE_MS    = 2200;
+const DISSOLVE_MS = 2200;
 
-export function HeroSlider() {
+interface HeroSliderProps {
+  className?: string;
+  imageClassName?: string;
+  overlayClassName?: string;
+  controlsClassName?: string;
+}
+
+export function HeroSlider({
+  className,
+  imageClassName,
+  overlayClassName,
+  controlsClassName,
+}: HeroSliderProps) {
   const [current, setCurrent]           = useState(0);
   const [previous, setPrevious]         = useState<number | null>(null);
   const [slideEpochs, setSlideEpochs]   = useState<number[]>(() =>
@@ -116,7 +129,7 @@ export function HeroSlider() {
     <>
       <style dangerouslySetInnerHTML={{ __html: KB_CSS }} />
 
-      <div className="fixed inset-0 z-0 overflow-hidden" aria-hidden>
+      <div className={cn("absolute inset-0 overflow-hidden", className)} aria-hidden>
         {SLIDES.map(({ url, alt, kb }, i) =>
           loaded.has(i) ? (
             <div
@@ -133,15 +146,18 @@ export function HeroSlider() {
                 src={url}
                 alt={alt}
                 draggable={false}
-                className={`absolute inset-0 h-full w-full object-cover ${
-                  i === current || i === previous ? kb : ""
-                }`}
+                className={cn(
+                  "absolute inset-0 h-full w-full object-cover",
+                  i === current || i === previous ? kb : "",
+                  imageClassName
+                )}
                 style={{ willChange: "transform" }}
               />
             </div>
           ) : null
         )}
 
+        {overlayClassName ? <div className={cn("absolute inset-0", overlayClassName)} /> : null}
         <div
           className="absolute inset-0"
           style={{
@@ -150,7 +166,7 @@ export function HeroSlider() {
           }}
         />
 
-        <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2">
+        <div className={cn("absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2", controlsClassName)}>
           {SLIDES.map((slide, i) => (
             <button
               key={i}

@@ -1440,15 +1440,18 @@ export default function PropertiesPage() {
                 )}
               >
                 <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
+                  variant="ghost"
                   size="sm"
                   onClick={() => setViewMode("grid")}
                   className={cn(
                     "h-8 flex-1 sm:flex-none sm:px-3",
-                    viewMode !== "grid" &&
-                      (isLight
+                    viewMode === "grid"
+                      ? isLight
+                        ? "border border-sky-200 bg-sky-100/90 text-sky-900 shadow-none hover:bg-sky-100 hover:text-sky-900"
+                        : "bg-white/15 text-white hover:bg-white/15 hover:text-white"
+                      : isLight
                         ? "text-black hover:bg-slate-200/80 hover:text-black"
-                        : "text-white hover:bg-white/10 hover:text-white")
+                        : "text-white hover:bg-white/10 hover:text-white"
                   )}
                 >
                   <Grid3X3 className="h-4 w-4" />
@@ -1457,15 +1460,18 @@ export default function PropertiesPage() {
                   </span>
                 </Button>
                 <Button
-                  variant={viewMode === "rows" ? "default" : "ghost"}
+                  variant="ghost"
                   size="sm"
                   onClick={() => setViewMode("rows")}
                   className={cn(
                     "h-8 flex-1 sm:flex-none sm:px-3",
-                    viewMode !== "rows" &&
-                      (isLight
+                    viewMode === "rows"
+                      ? isLight
+                        ? "border border-rose-200 bg-rose-100/90 text-rose-900 shadow-none hover:bg-rose-100 hover:text-rose-900"
+                        : "bg-white/15 text-white hover:bg-white/15 hover:text-white"
+                      : isLight
                         ? "text-black hover:bg-slate-200/80 hover:text-black"
-                        : "text-white hover:bg-white/10 hover:text-white")
+                        : "text-white hover:bg-white/10 hover:text-white"
                   )}
                 >
                   <Rows3 className="h-4 w-4" />

@@ -26,11 +26,6 @@ function buildMasked(settings: any) {
       model: { value: i.openai?.model ?? "gpt-4o", configured: true },
       enabled: i.openai?.enabled ?? false,
     },
-    gemini: {
-      apiKey: { masked: maskKey(i.gemini?.apiKey), configured: !!i.gemini?.apiKey },
-      model: { value: i.gemini?.model ?? "gemini-1.5-pro", configured: true },
-      enabled: i.gemini?.enabled ?? false,
-    },
     twilio: {
       accountSid: { masked: maskKey(i.sms?.apiKey), configured: !!i.sms?.apiKey },
       authToken: { masked: maskKey(i.sms?.apiSecret), configured: !!i.sms?.apiSecret },
@@ -87,9 +82,6 @@ export async function PUT(request: NextRequest) {
       "openai.apiKey": "integrations.openai.apiKey",
       "openai.model": "integrations.openai.model",
       "openai.enabled": "integrations.openai.enabled",
-      "gemini.apiKey": "integrations.gemini.apiKey",
-      "gemini.model": "integrations.gemini.model",
-      "gemini.enabled": "integrations.gemini.enabled",
       "twilio.accountSid": "integrations.sms.apiKey",
       "twilio.authToken": "integrations.sms.apiSecret",
       "twilio.fromNumber": "integrations.sms.fromNumber",

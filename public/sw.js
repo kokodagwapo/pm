@@ -5,9 +5,9 @@
  * responses are NEVER cached to prevent PII exposure on shared devices.
  */
 
-const CACHE_NAME = "SmartStartPM-v1.4.0";
-const STATIC_CACHE_NAME = "SmartStartPM-static-v1.4.0";
-const DYNAMIC_CACHE_NAME = "SmartStartPM-dynamic-v1.4.0";
+const CACHE_NAME = "SmartStartPM-v1.5.0";
+const STATIC_CACHE_NAME = "SmartStartPM-static-v1.5.0";
+const DYNAMIC_CACHE_NAME = "SmartStartPM-dynamic-v1.5.0";
 
 /** Do not precache `/` — HTML must not be stuck on an old marketing shell after deploys. */
 const STATIC_ASSETS = [
@@ -79,33 +79,14 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.pathname.startsWith("/_next/static/")) {
-    event.respondWith(handleStaticAssets(request));
-  } else {
-    event.respondWith(handlePageRequest(request));
+  // Never intercept Next.js build artifacts. They are already content-hashed,
+  // and stale service-worker caches are a common source of broken deploys.
+  if (url.pathname.startsWith("/_next/")) {
+    return;
   }
+
+  event.respondWith(handlePageRequest(request));
 });
-
-async function handleStaticAssets(request) {
-  try {
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
-    const networkResponse = await fetch(request);
-
-    if (networkResponse.ok) {
-      const cache = await caches.open(STATIC_CACHE_NAME);
-      cache.put(request, networkResponse.clone());
-    }
-
-    return networkResponse;
-  } catch (error) {
-    console.error("Service Worker: Failed to fetch static asset", request.url);
-    throw error;
-  }
-}
 
 async function handlePageRequest(request) {
   try {

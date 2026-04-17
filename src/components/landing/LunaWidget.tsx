@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import {
@@ -28,6 +29,20 @@ interface Message {
   content: string;
   timestamp: Date;
   status?: "sending" | "sent" | "error";
+  propertyCards?: PropertyCardSummary[];
+}
+
+interface PropertyCardSummary {
+  id: string;
+  href: string;
+  name: string;
+  location: string;
+  imageUrl: string;
+  priceLabel: string | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  summary: string;
+  highlights: string[];
 }
 
 interface LunaWidgetProps {
@@ -109,11 +124,22 @@ function classifyTranscriptIntent(rawTranscript: string) {
   return { action: "clarify" as const };
 }
 
+function formatPropertyMeta(card: PropertyCardSummary) {
+  const items = [
+    typeof card.bedrooms === "number" ? `${card.bedrooms} bd` : null,
+    typeof card.bathrooms === "number" ? `${card.bathrooms} ba` : null,
+    card.priceLabel,
+  ].filter(Boolean);
+
+  return items.join(" • ");
+}
+
 export function LunaWidget({ propertyContext }: LunaWidgetProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isVoiceActive, setIsVoiceActive] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isSendingText, setIsSendingText] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -122,6 +148,7 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
   const [activeLanguage, setActiveLanguage] = useState("English");
   const [error, setError] = useState<string | null>(null);
   const [textInput, setTextInput] = useState("");
+  const [expandedPropertyCardId, setExpandedPropertyCardId] = useState<string | null>(null);
   const [userActivityTick, setUserActivityTick] = useState(0);
   const [livePropertyContext, setLivePropertyContext] = useState<any>(
     propertyContext ?? null
@@ -133,7 +160,6 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
   const streamRef = useRef<MediaStream | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const streamingAssistantIdRef = useRef<string | null>(null);
-  const pendingTextRef = useRef<string | null>(null);
   const disconnectTimeoutRef = useRef<number | null>(null);
   const inactivityTimeoutRef = useRef<number | null>(null);
   const speechStartedAtRef = useRef<number | null>(null);
@@ -278,6 +304,12 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
 
   const appendMessage = useCallback((message: Message) => {
     setMessages((prev) => [...prev, message]);
+  }, []);
+
+  const updateMessage = useCallback((id: string, updater: (message: Message) => Message) => {
+    setMessages((prev) =>
+      prev.map((message) => (message.id === id ? updater(message) : message))
+    );
   }, []);
 
   const finalizeAssistantTranscript = useCallback((transcript: string) => {
@@ -818,21 +850,24 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
       dc.onopen = () => {
         setIsConnecting(false);
         setIsListening(true);
-        if (pendingTextRef.current) {
-          const pendingText = pendingTextRef.current;
-          pendingTextRef.current = null;
-          dispatchUserText(pendingText);
-        } else {
-          sendEvent({
-            type: "conversation.item.create",
-            item: {
-              type: "message",
-              role: "user",
-              content: [{ type: "input_text", text: "Greet the user warmly. Say welcome to VMS Florida Property Management and briefly offer to help." }]
-            }
-          });
-          sendEvent({ type: "response.create" });
-        }
+        const openingInstruction =
+          messages.length > 0
+            ? activeLanguage !== "English"
+              ? `Switch immediately to ${activeLanguage}. Voice mode has just started in an ongoing conversation. Continue naturally from the existing chat without re-introducing yourself or repeating earlier answers.`
+              : "Voice mode has just started in an ongoing conversation. Continue naturally from the existing chat without re-introducing yourself or repeating earlier answers."
+            : activeLanguage !== "English"
+              ? `Switch immediately to ${activeLanguage}. Greet the user warmly. Say welcome to VMS Florida Property Management and briefly offer to help.`
+              : "Greet the user warmly. Say welcome to VMS Florida Property Management and briefly offer to help.";
+
+        sendEvent({
+          type: "conversation.item.create",
+          item: {
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text: openingInstruction }],
+          },
+        });
+        sendEvent({ type: "response.create" });
       };
 
       const offer = await pc.createOffer();
@@ -853,7 +888,73 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
       setError(err.message || "Failed to connect to OpenAI");
       stopVoice();
     }
-  }, [clearDisconnectTimeout, dispatchUserText, handleServerEvent, isConnecting, isSpeakerMuted, keepWidgetOpen, livePropertyContext, pathname, stopVoice, sendEvent]);
+  }, [activeLanguage, clearDisconnectTimeout, dispatchUserText, handleServerEvent, isConnecting, isSpeakerMuted, keepWidgetOpen, livePropertyContext, messages.length, pathname, stopVoice, sendEvent]);
+
+  const sendChatReply = useCallback(
+    async (userText: string, history: Message[]) => {
+      const placeholderId = `assistant-chat-${Date.now()}`;
+      appendMessage({
+        id: placeholderId,
+        role: "assistant",
+        content: "",
+        timestamp: new Date(),
+        status: "sending",
+      });
+      setIsSendingText(true);
+      setError(null);
+
+      try {
+        const response = await fetch("/api/luna/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: userText,
+            messages: history.map((entry) => ({
+              role: entry.role,
+              content: entry.content,
+            })),
+            currentPath: pathname,
+            currentSection: pathname?.split("/")[1] || "public",
+            pageTitle: typeof document !== "undefined" ? document.title : "",
+            propertyContext: livePropertyContext,
+            language: activeLanguage,
+          }),
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok || typeof data?.reply !== "string") {
+          throw new Error(data?.error || "Chat reply failed");
+        }
+
+        updateMessage(placeholderId, (message) => ({
+          ...message,
+          content: data.reply.trim(),
+          status: "sent",
+          propertyCards: Array.isArray(data?.propertyCards)
+            ? data.propertyCards.filter(
+                (card: any) =>
+                  card &&
+                  typeof card.id === "string" &&
+                  typeof card.href === "string" &&
+                  typeof card.name === "string"
+              )
+            : [],
+        }));
+      } catch (err: any) {
+        const fallback =
+          err?.message || "I hit a small issue replying in chat. Please try again.";
+        updateMessage(placeholderId, (message) => ({
+          ...message,
+          content: fallback,
+          status: "error",
+        }));
+        setError(fallback);
+      } finally {
+        setIsSendingText(false);
+      }
+    },
+    [activeLanguage, appendMessage, livePropertyContext, pathname, updateMessage]
+  );
 
   const switchLanguage = useCallback(
     (language: string) => {
@@ -861,28 +962,43 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
       setActiveLanguage(language);
       keepWidgetOpen();
 
-      const instruction = `Switch immediately to ${language}. From now on, speak only in ${language} unless the user asks you to change languages again. Keep the same warm, friendly voice and continue naturally.`;
-
-      if (!dispatchUserText(instruction)) {
-        pendingTextRef.current = instruction;
-        startVoice();
+      if (isVoiceActive) {
+        const instruction = `Switch immediately to ${language}. From now on, speak only in ${language} unless the user asks you to change languages again. Keep the same warm, friendly voice and continue naturally.`;
+        dispatchUserText(instruction);
+        return;
       }
+
+      appendMessage({
+        id: `assistant-language-${Date.now()}`,
+        role: "assistant",
+        content:
+          language === "English"
+            ? "Okay. I'll keep replying in English here."
+            : `Okay. I'll keep replying in ${language} here.`,
+        timestamp: new Date(),
+        status: "sent",
+      });
     },
-    [bumpUserActivity, dispatchUserText, keepWidgetOpen, startVoice]
+    [appendMessage, bumpUserActivity, dispatchUserText, isVoiceActive, keepWidgetOpen]
   );
 
   const handleSendText = useCallback((overrideText?: string) => {
     const trimmedInput = (overrideText ?? textInput).trim();
-    if (!trimmedInput) return;
+    if (!trimmedInput || isSendingText) return;
     bumpUserActivity();
     const newMessage: Message = { id: Date.now().toString(), role: "user", content: trimmedInput, timestamp: new Date(), status: "sent" };
     setMessages(prev => [...prev, newMessage]);
     if (!overrideText) setTextInput("");
-    if (!dispatchUserText(trimmedInput)) {
-      pendingTextRef.current = trimmedInput;
-      startVoice();
+
+    if (isVoiceActive && dispatchUserText(trimmedInput)) {
+      return;
     }
-  }, [bumpUserActivity, dispatchUserText, startVoice, textInput]);
+
+    const history = messages
+      .filter((message) => message.role === "user" || message.role === "assistant")
+      .slice(-10);
+    void sendChatReply(trimmedInput, history);
+  }, [bumpUserActivity, dispatchUserText, isSendingText, isVoiceActive, messages, sendChatReply, textInput]);
 
   return (
     <>
@@ -909,17 +1025,17 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
         "fixed bottom-6 right-6 z-50 transition-all duration-700 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] origin-bottom-right",
         isOpen ? "scale-100 opacity-100 translate-y-0" : "scale-90 opacity-0 translate-y-8 pointer-events-none"
       )}>
-        <div className="w-[420px] h-[680px] bg-white rounded-[3rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden border border-slate-100/60 relative">
+        <div className="flex h-[min(78vh,620px)] w-[min(92vw,380px)] flex-col overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_28px_80px_-24px_rgba(15,23,42,0.32)] relative">
           
           {/* Header */}
-          <div className="px-6 py-5 flex items-center justify-between shrink-0 relative z-30 border-b border-slate-100/80 bg-white/90 backdrop-blur-sm">
-            <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center justify-between border-b border-slate-100 bg-white/95 px-4 py-3.5 shrink-0">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="relative shrink-0">
                 <div className={cn(
-                  "h-12 w-12 rounded-[1.15rem] p-[2px] transition-all duration-700",
-                  isVoiceActive ? "bg-gradient-to-tr from-sky-400 via-indigo-500 to-purple-600 shadow-lg shadow-sky-100" : "bg-slate-200"
+                  "h-10 w-10 rounded-[0.95rem] p-[2px] transition-all duration-500",
+                  isVoiceActive ? "bg-gradient-to-tr from-sky-400 via-indigo-500 to-purple-600 shadow-md shadow-sky-100" : "bg-slate-200"
                 )}>
-                  <div className="h-full w-full rounded-[1rem] overflow-hidden bg-white">
+                  <div className="h-full w-full rounded-[0.85rem] overflow-hidden bg-white">
                     <img src="/images/heidi-avatar.png" alt="Heidi" className="h-full w-full object-cover" />
                   </div>
                 </div>
@@ -928,45 +1044,46 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
                 </span>
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-[15px] font-bold tracking-tight text-slate-900">Heidi</h3>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] text-emerald-600">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    Active
-                  </span>
-                </div>
-                <p className="mt-1 text-[11px] font-medium text-slate-400">AI BestFriend Agent</p>
+                <h3 className="text-[15px] font-bold tracking-tight text-slate-900">Heidi</h3>
+                <p className="mt-0.5 text-[11px] text-slate-500">
+                  {isVoiceActive
+                    ? isSpeaking
+                      ? "Voice live"
+                      : isMicMuted
+                        ? "Voice paused"
+                        : "Listening"
+                    : isSendingText
+                      ? "Typing"
+                      : "Chat ready"}
+                </p>
               </div>
             </div>
 
-            <button onClick={closeWidget} className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-slate-400 hover:text-red-500 transition-all shadow-sm shrink-0">
+            <button onClick={closeWidget} className="shrink-0 rounded-xl border border-slate-200 bg-white p-2 text-slate-400 transition-all hover:border-slate-300 hover:text-slate-700">
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Body Content */}
-          <div className="flex-1 flex flex-col min-h-0 relative px-2 bg-slate-50/20">
-            <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5 scrollbar-hide">
+          <div className="flex min-h-0 flex-1 flex-col bg-slate-50/35">
+            <div className="flex-1 overflow-y-auto px-3 py-3.5 space-y-3 scrollbar-hide">
               {messages.length === 0 && (
-                <div className="rounded-[2rem] border border-slate-100 bg-white/90 px-5 py-5 shadow-sm">
-                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-300 mb-1">Ask me anything</p>
-                  <p className="text-[13px] font-medium leading-relaxed text-slate-400 mb-4">
-                    I know every property, price, and corner of Naples. Try one of these:
+                <div className="rounded-[1.35rem] border border-slate-200/80 bg-white px-4 py-4 shadow-sm">
+                  <p className="text-[11px] font-semibold leading-relaxed text-slate-600">
+                    Welcome to VMS Florida Property Management. Ask about rentals, pricing, neighborhoods, or local Naples details.
                   </p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="mt-3 grid grid-cols-2 gap-2">
                     {[
                       { label: "What's available this month?", icon: <CalendarDays className="w-3.5 h-3.5" />, color: "hover:border-sky-200 hover:text-sky-700 hover:bg-sky-50/70" },
                       { label: "Show 2-bedroom condos", icon: <BedDouble className="w-3.5 h-3.5" />, color: "hover:border-violet-200 hover:text-violet-700 hover:bg-violet-50/70" },
                       { label: "How much per night?", icon: <DollarSign className="w-3.5 h-3.5" />, color: "hover:border-emerald-200 hover:text-emerald-700 hover:bg-emerald-50/70" },
                       { label: "Are pets welcome?", icon: <PawPrint className="w-3.5 h-3.5" />, color: "hover:border-amber-200 hover:text-amber-700 hover:bg-amber-50/70" },
-                      { label: "Which homes have a pool?", icon: <Waves className="w-3.5 h-3.5" />, color: "hover:border-sky-200 hover:text-sky-700 hover:bg-sky-50/70" },
-                      { label: "Closest property to beach?", icon: <MapPin className="w-3.5 h-3.5" />, color: "hover:border-rose-200 hover:text-rose-700 hover:bg-rose-50/70" },
                     ].map((s) => (
                       <button
                         key={s.label}
                         onClick={() => handleSendText(s.label)}
                         className={cn(
-                          "px-3.5 py-3 rounded-[1.2rem] bg-slate-50/80 border border-slate-100 text-left transition-all group flex flex-col gap-2",
+                          "px-3 py-2.5 rounded-[1rem] bg-slate-50/80 border border-slate-100 text-left transition-all group flex flex-col gap-2",
                           s.color
                         )}
                       >
@@ -987,17 +1104,119 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
 
               {messages.map((m) => (
                 <div key={m.id} className={cn("flex flex-col group", m.role === "user" ? "items-end" : "items-start")}>
-                  <div className={cn(
-                    "max-w-[85%] px-5 py-3.5 rounded-[1.75rem] text-[14px] font-medium leading-relaxed shadow-sm transition-all duration-300",
-                    m.role === "user"
-                      ? "bg-slate-900 text-white rounded-tr-none shadow-indigo-100"
-                      : "bg-white text-slate-800 rounded-tl-none border border-slate-100 group-hover:border-slate-200"
-                  )}>
-                    {m.content}
-                    {m.role === "assistant" && m.status === "sending" && (
-                      <span className="inline-block w-[2px] h-[14px] bg-sky-400 ml-0.5 align-middle animate-pulse rounded-full" />
-                    )}
-                  </div>
+                  {(m.content || m.status === "sending") && (
+                    <div className={cn(
+                      "max-w-[86%] px-4 py-3 rounded-[1.25rem] text-[13px] font-medium leading-relaxed shadow-sm transition-all duration-300",
+                      m.role === "user"
+                        ? "bg-slate-900 text-white rounded-br-md"
+                        : "bg-white text-slate-800 rounded-bl-md border border-slate-100 group-hover:border-slate-200"
+                    )}>
+                      {m.content || (m.status === "sending" ? "..." : "")}
+                      {m.role === "assistant" && m.status === "sending" && (
+                        <span className="inline-block w-[2px] h-[14px] bg-sky-400 ml-0.5 align-middle animate-pulse rounded-full" />
+                      )}
+                    </div>
+                  )}
+                  {m.role === "assistant" && Array.isArray(m.propertyCards) && m.propertyCards.length > 0 && (
+                    <div className="mt-2 flex w-full max-w-[92%] flex-col gap-2.5">
+                      {m.propertyCards.map((card) => {
+                        const cardKey = `${m.id}:${card.id}`;
+                        const isExpanded = expandedPropertyCardId === cardKey;
+                        return (
+                          <div
+                            key={cardKey}
+                            className="overflow-hidden rounded-[1.35rem] border border-slate-200/90 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:border-sky-200"
+                          >
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedPropertyCardId((prev) =>
+                                  prev === cardKey ? null : cardKey
+                                )
+                              }
+                              className="flex w-full items-stretch text-left"
+                            >
+                              <div className="h-24 w-24 shrink-0 overflow-hidden bg-slate-100">
+                                <img
+                                  src={card.imageUrl}
+                                  alt={card.name}
+                                  className="h-full w-full object-cover"
+                                />
+                              </div>
+                              <div className="flex min-w-0 flex-1 flex-col justify-between px-3.5 py-3">
+                                <div>
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                      <p className="line-clamp-1 text-[13px] font-bold tracking-tight text-slate-900">
+                                        {card.name}
+                                      </p>
+                                      {card.location && (
+                                        <p className="mt-1 line-clamp-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                                          {card.location}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <span className="rounded-full border border-sky-100 bg-sky-50 px-2 py-1 text-[10px] font-bold text-sky-700">
+                                      {isExpanded ? "Open" : "Details"}
+                                    </span>
+                                  </div>
+                                  <p className="mt-2 line-clamp-2 text-[12px] leading-relaxed text-slate-600">
+                                    {card.summary}
+                                  </p>
+                                </div>
+                                <div className="mt-3 flex flex-wrap items-center gap-2">
+                                  {formatPropertyMeta(card) && (
+                                    <span className="text-[11px] font-semibold text-slate-700">
+                                      {formatPropertyMeta(card)}
+                                    </span>
+                                  )}
+                                  {card.highlights.slice(0, 2).map((highlight) => (
+                                    <span
+                                      key={highlight}
+                                      className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500"
+                                    >
+                                      {highlight}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            </button>
+                            {isExpanded && (
+                              <div className="border-t border-slate-100 bg-slate-50/70 px-3.5 py-3">
+                                <p className="text-[12px] leading-relaxed text-slate-600">
+                                  {card.summary}
+                                </p>
+                                {card.highlights.length > 0 && (
+                                  <div className="mt-3 flex flex-wrap gap-1.5">
+                                    {card.highlights.map((highlight) => (
+                                      <span
+                                        key={highlight}
+                                        className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-semibold text-slate-600"
+                                      >
+                                        {highlight}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                                <div className="mt-3 flex items-center justify-between gap-3">
+                                  <span className="text-[11px] font-semibold text-slate-500">
+                                    Tap below for the full property page.
+                                  </span>
+                                  <Link
+                                    href={card.href}
+                                    className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-slate-800"
+                                  >
+                                    View details
+                                    <ArrowRight className="h-3 w-3" />
+                                  </Link>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                   <span className="mt-2 text-[9px] font-black text-slate-300 uppercase tracking-widest px-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     {m.role === "user" ? "You" : "Heidi"} • {m.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
@@ -1017,117 +1236,101 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
           </div>
 
           {/* Footer Controls */}
-          <div className="px-6 py-5 shrink-0 bg-white border-t border-slate-50/50 backdrop-blur-xl relative z-30">
-            <div className="flex flex-col gap-4">
-              {/* Chat Input */}
-              <div className="flex items-center gap-3 bg-slate-100/40 rounded-[1.8rem] p-2 border border-slate-200/40 transition-all focus-within:bg-white focus-within:border-sky-200 focus-within:shadow-lg focus-within:shadow-sky-500/5">
-                <input 
-                  type="text" 
-                  value={textInput}
-                  onChange={(e) => setTextInput(e.target.value)}
-                  placeholder="Type anything..."
-                  className="flex-1 bg-transparent border-none py-3 px-4 text-[14px] font-semibold text-slate-700 outline-none placeholder:text-slate-400 placeholder:text-[11px] placeholder:font-black placeholder:uppercase placeholder:tracking-widest"
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleSendText(); }}
-                />
-                <button onClick={handleSendText} className={cn("w-11 h-11 rounded-2xl flex items-center justify-center transition-all transform", textInput.trim() ? "bg-sky-500 text-white shadow-xl shadow-sky-500/20 scale-100 rotate-0" : "bg-slate-200 text-slate-400 scale-90 rotate-12 cursor-not-allowed")}>
-                  <Send className="w-5 h-5" />
-                </button>
-              </div>
-
-              {!isVoiceActive && (
-                <button onClick={startVoice} disabled={isConnecting} className="w-full h-16 rounded-[2rem] flex items-center justify-center gap-4 bg-slate-950 text-white border border-slate-800 shadow-lg shadow-slate-200/40 hover:border-slate-700 hover:bg-slate-900 active:scale-[0.99] transition-all">
-                  <div className="flex items-center gap-4">
-                    {isConnecting ? <Loader2 className="w-6 h-6 animate-spin text-sky-400" /> : (
-                      <>
-                        <div className="w-10 h-10 rounded-[1.2rem] border border-white/10 bg-white/[0.06] flex items-center justify-center">
-                          <Mic className="h-[18px] w-[18px] text-sky-300" />
-                        </div>
-                        <div className="flex flex-col items-start">
-                          <span className="text-[10px] font-black uppercase tracking-[0.22em] text-white/45">Voice</span>
-                          <span className="text-sm font-semibold tracking-tight">Speak with Heidi</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </button>
-              )}
-
+          <div className="shrink-0 border-t border-slate-100 bg-white px-3 py-3 relative z-30">
+            <div className="flex flex-col gap-2.5">
               {isVoiceActive && (
-                <div className="animate-in slide-in-from-bottom-4 duration-500">
-                  <div className="min-h-20 rounded-[1.75rem] border border-slate-200/80 bg-slate-50/85 p-4 flex items-center justify-between shadow-[0_12px_35px_rgba(15,23,42,0.08)] relative overflow-hidden">
-                    {!isMicMuted && isListening && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-sky-500/6 via-transparent to-indigo-500/6 animate-pulse pointer-events-none" />
-                    )}
-                    <div className="flex items-center gap-4 relative z-10">
-                      <div className={cn(
-                        "w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 border",
+                <div className="flex items-center justify-between rounded-[1rem] border border-slate-200 bg-slate-50 px-3 py-2.5">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold text-slate-800">
+                      {isSpeakerMuted
+                        ? "Heidi muted"
+                        : isMicMuted
+                          ? "Mic muted"
+                          : isSpeaking
+                            ? "Heidi is speaking"
+                            : "Listening"}
+                    </p>
+                    <p className="text-[10px] text-slate-500">
+                      {isSpeakerMuted ? "Speaker off" : "Voice stays on until you stop it"}
+                    </p>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <button
+                      onClick={toggleSpeakerMute}
+                      className={cn(
+                        "flex h-9 w-9 items-center justify-center rounded-xl border transition-all",
+                        isSpeakerMuted
+                          ? "border-rose-200 bg-rose-50 text-rose-500"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                      )}
+                      title={isSpeakerMuted ? "Unmute Heidi voice" : "Mute Heidi voice"}
+                    >
+                      {isSpeakerMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                    </button>
+                    <button
+                      onClick={toggleMicMute}
+                      className={cn(
+                        "flex h-9 w-9 items-center justify-center rounded-xl border transition-all",
                         isMicMuted
-                          ? "bg-white text-rose-500 border-rose-100"
-                          : "bg-white text-sky-500 border-sky-100 shadow-sm"
-                      )}>
-                        {isMicMuted ? <MicOff className="w-4.5 h-4.5" /> : <Mic className="w-4.5 h-4.5" />}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none">
-                          Voice Active
-                        </span>
-                        <span className="text-[13px] font-semibold text-slate-900 mt-1.5">
-                          {isSpeakerMuted
-                            ? "Heidi muted"
-                            : isMicMuted
-                              ? "Mic muted"
-                              : isSpeaking
-                                ? "Heidi speaking"
-                                : "Listening..."}
-                        </span>
-                        <span className="mt-1 text-[10px] font-medium text-slate-500">
-                          {isSpeakerMuted
-                            ? "Speaker off"
-                            : isMicMuted
-                              ? "Visitor mic off"
-                              : "Noise filter enabled"}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2.5 relative z-10">
-                      <button
-                        onClick={toggleSpeakerMute}
-                        className={cn(
-                          "w-10 h-10 flex items-center justify-center rounded-2xl transition-all border",
-                          isSpeakerMuted
-                            ? "bg-rose-50 text-rose-500 border-rose-100"
-                            : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-100"
-                        )}
-                        title={isSpeakerMuted ? "Unmute Heidi voice" : "Mute Heidi voice"}
-                      >
-                        {isSpeakerMuted ? <VolumeX className="w-4.5 h-4.5" /> : <Volume2 className="w-4.5 h-4.5" />}
-                      </button>
-                      <button
-                        onClick={toggleMicMute}
-                        className={cn(
-                          "w-10 h-10 flex items-center justify-center rounded-2xl transition-all border",
-                          isMicMuted
-                            ? "bg-amber-50 text-amber-600 border-amber-200"
-                            : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-100"
-                        )}
-                        title={isMicMuted ? "Unmute your microphone" : "Mute your microphone"}
-                      >
-                        {isMicMuted ? <MicOff className="w-4.5 h-4.5" /> : <Mic className="w-4.5 h-4.5" />}
-                      </button>
-                      <button
-                        onClick={stopVoice}
-                        className="w-10 h-10 flex items-center justify-center rounded-2xl transition-all border border-slate-200 bg-white text-slate-500 hover:bg-rose-50 hover:border-rose-100 hover:text-rose-500"
-                      >
-                        <X className="w-4.5 h-4.5" strokeWidth={2.6} />
-                      </button>
-                    </div>
+                          ? "border-amber-200 bg-amber-50 text-amber-600"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                      )}
+                      title={isMicMuted ? "Unmute your microphone" : "Mute your microphone"}
+                    >
+                      {isMicMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                    </button>
+                    <button
+                      onClick={stopVoice}
+                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500"
+                      title="Stop voice mode"
+                    >
+                      <X className="w-4 h-4" strokeWidth={2.6} />
+                    </button>
                   </div>
                 </div>
               )}
 
-              {/* Language Ticker */}
-              <div className="w-full overflow-hidden bg-slate-50/50 py-2 rounded-2xl border border-slate-100/50">
-                <div className="flex whitespace-nowrap animate-[marquee_30s_linear_infinite] gap-12 items-center px-4">
+              <div className="flex items-center gap-2">
+                {!isVoiceActive && (
+                  <button
+                    onClick={startVoice}
+                    disabled={isConnecting}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition-all hover:border-sky-200 hover:text-sky-600 disabled:opacity-60"
+                    title="Start voice mode"
+                  >
+                    {isConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
+                  </button>
+                )}
+
+                <div className="flex min-w-0 flex-1 items-center gap-2 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-2.5 py-2 transition-all focus-within:border-sky-200 focus-within:bg-white focus-within:shadow-sm">
+                  <input 
+                    type="text" 
+                    value={textInput}
+                    onChange={(e) => setTextInput(e.target.value)}
+                    placeholder={isVoiceActive ? "Type while voice is on..." : "Message Heidi..."}
+                    className="flex-1 bg-transparent border-none px-1.5 py-1.5 text-[13px] font-medium text-slate-700 outline-none placeholder:text-slate-400"
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleSendText(); }}
+                  />
+                  <button
+                    onClick={() => handleSendText()}
+                    disabled={!textInput.trim() || isSendingText}
+                    className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-xl transition-all",
+                      textInput.trim() && !isSendingText
+                        ? "bg-slate-900 text-white"
+                        : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                    )}
+                  >
+                    {isSendingText ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {isVoiceActive && (
+                <div className="hidden" />
+              )}
+
+              <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-hide">
                   {[
                     { flag: "🇩🇪", text: "German" }, { flag: "🇪🇸", text: "Spanish" }, { flag: "🇫🇷", text: "French" },
                     { flag: "🇮🇹", text: "Italian" }, { flag: "🇺🇸", text: "English" }, { flag: "🇧🇷", text: "Portuguese" }
@@ -1136,56 +1339,27 @@ export function LunaWidget({ propertyContext }: LunaWidgetProps) {
                       key={i}
                       onClick={() => switchLanguage(l.text)}
                       className={cn(
-                        "flex items-center gap-2.5 rounded-full px-2 py-1 transition-all",
+                        "flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1.5 transition-all",
                         activeLanguage === l.text
-                          ? "bg-sky-50 text-sky-700"
-                          : "hover:bg-white/80 text-slate-500"
+                          ? "border-sky-200 bg-sky-50 text-sky-700"
+                          : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
                       )}
                       title={`Switch Heidi to ${l.text}`}
                     >
                       <span className="text-[12px] grayscale-[0.15]">{l.flag}</span>
-                      <span className="text-[9px] font-black uppercase tracking-widest">{l.text}</span>
+                      <span className="text-[10px] font-semibold">{l.text}</span>
                     </button>
                   ))}
-                  {/* Duplicate for seamless loop */}
-                  {[
-                    { flag: "🇩🇪", text: "German" }, { flag: "🇪🇸", text: "Spanish" }, { flag: "🇫🇷", text: "French" },
-                    { flag: "🇮🇹", text: "Italian" }
-                  ].map((l, i) => (
-                    <button
-                      key={`loop-${i}`}
-                      onClick={() => switchLanguage(l.text)}
-                      className={cn(
-                        "flex items-center gap-2.5 rounded-full px-2 py-1 transition-all",
-                        activeLanguage === l.text
-                          ? "bg-sky-50 text-sky-700"
-                          : "hover:bg-white/80 text-slate-500"
-                      )}
-                      title={`Switch Heidi to ${l.text}`}
-                    >
-                      <span className="text-[12px] grayscale-[0.15]">{l.flag}</span>
-                      <span className="text-[9px] font-black uppercase tracking-widest">{l.text}</span>
-                    </button>
-                  ))}
-                </div>
               </div>
 
-              <div className="flex items-center justify-between px-2 pt-1">
-                <button onClick={closeWidget} className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] hover:text-slate-900 transition-colors flex items-center gap-2">
+              <div className="flex items-center justify-between px-1 pt-0.5">
+                <button onClick={closeWidget} className="text-[10px] font-semibold text-slate-400 hover:text-slate-700 transition-colors flex items-center gap-1.5">
                   <X className="w-3.5 h-3.5" /> Hide
                 </button>
-                <button onClick={() => { setMessages([]); }} className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] hover:text-red-500 transition-colors flex items-center gap-2">
+                <button onClick={() => { setMessages([]); }} className="text-[10px] font-semibold text-slate-400 hover:text-red-500 transition-colors flex items-center gap-1.5">
                   <RotateCcw className="w-3.5 h-3.5" /> Reset
                 </button>
               </div>
-            </div>
-          </div>
-          
-          {/* Disclaimer */}
-          <div className="bg-slate-50 py-3 px-8 flex justify-center border-t border-slate-100/50">
-            <div className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span>Ai can make mistakes. Relax. Chill.</span>
             </div>
           </div>
         </div>

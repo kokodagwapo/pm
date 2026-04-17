@@ -439,10 +439,9 @@ export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [demoVoiceState, setDemoVoiceState] = useState<"idle" | "loading" | "playing" | "paused">("idle");
   const [demoLanguage, setDemoLanguage] = useState<DemoLanguage>("en");
-  const [demoPlaybackMode, setDemoPlaybackMode] = useState<"audio" | "speech" | null>(null);
+  const [demoPlaybackMode, setDemoPlaybackMode] = useState<"audio" | null>(null);
   const [currentDemoSectionIndex, setCurrentDemoSectionIndex] = useState(0);
   const demoAudioRef = useRef<HTMLAudioElement | null>(null);
-  const fallbackSpeechRef = useRef<SpeechSynthesisUtterance | null>(null);
   const isStoppingDemoRef = useRef(false);
   const demoRunIdRef = useRef(0);
   
@@ -479,9 +478,6 @@ export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
       demoAudioRef.current?.pause();
       if (demoAudioRef.current?.src?.startsWith("blob:")) {
         URL.revokeObjectURL(demoAudioRef.current.src);
-      }
-      if (typeof window !== "undefined") {
-        window.speechSynthesis.cancel();
       }
     };
   }, []);
@@ -580,62 +576,12 @@ export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
         isStoppingDemoRef.current = false;
       }, 0);
     }
-    if (typeof window !== "undefined") {
-      window.speechSynthesis.cancel();
-    }
     setDemoVoiceState("idle");
     setDemoPlaybackMode(null);
     if (resetToStart) {
       setCurrentDemoSectionIndex(0);
     }
   }, []);
-
-  const playSpeechSynthesisFallback = useCallback((sectionIndex: number, runId: number) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-      return false;
-    }
-
-    const section = DEMO_SECTIONS[sectionIndex];
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(section.script[demoLanguage]);
-    utterance.rate = 0.97;
-    utterance.pitch = 1.15;
-    utterance.volume = 1;
-    utterance.lang = demoLanguage === "de" ? "de-DE" : "en-US";
-
-    const voices = window.speechSynthesis.getVoices();
-    const preferredVoice =
-      voices.find((voice) =>
-        new RegExp(demoLanguage === "de" ? "de" : "en", "i").test(voice.lang) &&
-        /female|samantha|victoria|anna|katja|zira/i.test(voice.name)
-      ) ||
-      voices.find((voice) => new RegExp(demoLanguage === "de" ? "de" : "en", "i").test(voice.lang)) ||
-      voices[0];
-
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
-
-    utterance.onend = () => {
-      if (demoRunIdRef.current !== runId) return;
-      if (sectionIndex < DEMO_SECTIONS.length - 1) {
-        void startDemoSectionPlayback(sectionIndex + 1, runId);
-        return;
-      }
-      setDemoVoiceState("idle");
-      setDemoPlaybackMode(null);
-    };
-    utterance.onerror = () => {
-      setDemoVoiceState("idle");
-      setDemoPlaybackMode(null);
-    };
-    fallbackSpeechRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-    setDemoVoiceState("playing");
-    setDemoPlaybackMode("speech");
-    setCurrentDemoSectionIndex(sectionIndex);
-    return true;
-  }, [demoLanguage]);
 
   const startDemoSectionPlayback = useCallback(async (sectionIndex: number, runId = demoRunIdRef.current) => {
     const clampedIndex = Math.max(0, Math.min(DEMO_SECTIONS.length - 1, sectionIndex));
@@ -656,10 +602,6 @@ export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
       setTimeout(() => {
         isStoppingDemoRef.current = false;
       }, 0);
-    }
-
-    if (typeof window !== "undefined") {
-      window.speechSynthesis.cancel();
     }
 
     try {
@@ -705,13 +647,10 @@ export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
 
       await audio.play();
     } catch {
-      const started = playSpeechSynthesisFallback(clampedIndex, runId);
-      if (!started) {
-        setDemoVoiceState("idle");
-        setDemoPlaybackMode(null);
-      }
+      setDemoVoiceState("idle");
+      setDemoPlaybackMode(null);
     }
-  }, [demoLanguage, playSpeechSynthesisFallback, router, setIsOpen]);
+  }, [demoLanguage, router, setIsOpen]);
 
   const handleDemoPlayPause = useCallback(async () => {
     if (demoVoiceState === "loading") return;
@@ -721,11 +660,6 @@ export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
         demoAudioRef.current.pause();
         return;
       }
-      if (demoPlaybackMode === "speech" && typeof window !== "undefined") {
-        window.speechSynthesis.pause();
-        setDemoVoiceState("paused");
-        return;
-      }
       stopDemoPlayback(false);
       return;
     }
@@ -733,11 +667,6 @@ export function DemoGuide({ externalOpen, onOpenChange }: DemoGuideProps) {
     if (demoVoiceState === "paused") {
       if (demoPlaybackMode === "audio" && demoAudioRef.current) {
         await demoAudioRef.current.play();
-        setDemoVoiceState("playing");
-        return;
-      }
-      if (demoPlaybackMode === "speech" && typeof window !== "undefined") {
-        window.speechSynthesis.resume();
         setDemoVoiceState("playing");
         return;
       }

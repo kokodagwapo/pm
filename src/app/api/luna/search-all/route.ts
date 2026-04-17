@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";
 import { Property } from "@/models";
-import { createErrorResponse, createSuccessResponse, handleApiError } from "@/lib/api-utils";
+import { createSuccessResponse, handleApiError } from "@/lib/api-utils";
 import { UserRole } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -61,11 +61,11 @@ function buildFeatureAwareQuery(rawQuery: string) {
 
 function summarizeProperty(property: any) {
   const amenities = Array.isArray(property.amenities)
-    ? property.amenities.map((amenity: any) => amenity?.name).filter(Boolean).slice(0, 12)
+    ? property.amenities.map((amenity: any) => amenity?.name).filter(Boolean).slice(0, 20)
     : [];
 
   const units = Array.isArray(property.units)
-    ? property.units.slice(0, 5).map((unit: any) => ({
+    ? property.units.map((unit: any) => ({
         id: unit?._id?.toString?.() || undefined,
         unitNumber: unit?.unitNumber || null,
         bedrooms: unit?.bedrooms ?? null,
@@ -105,17 +105,8 @@ export async function GET(request: NextRequest) {
   try {
     await connectDB();
     const session = await auth();
-    const role = (session?.user?.role as UserRole | undefined) ?? null;
-    const devDatabaseAccessEnabled = process.env.NODE_ENV !== "production";
-    const canAccess =
-      devDatabaseAccessEnabled ||
-      role === UserRole.OWNER ||
-      role === UserRole.MANAGER ||
-      role === UserRole.ADMIN;
-
-    if (!canAccess) {
-      return createErrorResponse("Authentication required", 401);
-    }
+    const role = (session?.user?.role as UserRole | undefined) ?? "guest";
+    const userId = session?.user?.id;
 
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("query");
@@ -124,7 +115,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
-    const properties = await Property.find(buildFeatureAwareQuery(query))
+    const dbQuery = buildFeatureAwareQuery(query) as Record<string, unknown>;
+
+    if (role === "guest" || role === UserRole.TENANT) {
+      dbQuery.status = "available";
+    } else if (role === UserRole.OWNER && userId) {
+      dbQuery.ownerId = userId;
+    } else if (role === UserRole.MANAGER && userId) {
+      dbQuery.managerId = userId;
+    }
+
+    const properties = await Property.find(dbQuery)
     .select("-__v")
     .limit(10)
     .lean();

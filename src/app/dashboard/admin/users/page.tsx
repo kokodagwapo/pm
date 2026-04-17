@@ -44,7 +44,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { UserRole, IUser } from "@/types";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { RoleBadge } from "@/components/ui/role-badge";
 import { BulkOperations } from "@/components/users/bulk-operations";
 import { useViewPreferencesStore } from "@/stores/view-preferences.store";
@@ -625,20 +625,30 @@ export default function UserListPage() {
             </div>
 
             {/* View Mode Toggle */}
-            <div className="flex items-center border rounded-lg p-1 w-full sm:w-auto">
+            <div className="flex w-full items-center rounded-lg border border-slate-200 bg-slate-50/80 p-1 sm:w-auto">
               <Button
-                variant={viewMode === "table" ? "default" : "ghost"}
+                variant="ghost"
                 size="sm"
                 onClick={() => setViewMode("table")}
-                className="h-8 flex-1 sm:flex-none sm:px-3"
+                className={cn(
+                  "h-8 flex-1 sm:flex-none sm:px-3",
+                  viewMode === "table"
+                    ? "border border-rose-200 bg-rose-100/90 text-rose-900 shadow-none hover:bg-rose-100 hover:text-rose-900"
+                    : "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                )}
               >
                 <List className="h-4 w-4" />
               </Button>
               <Button
-                variant={viewMode === "grid" ? "default" : "ghost"}
+                variant="ghost"
                 size="sm"
                 onClick={() => setViewMode("grid")}
-                className="h-8 flex-1 sm:flex-none sm:px-3"
+                className={cn(
+                  "h-8 flex-1 sm:flex-none sm:px-3",
+                  viewMode === "grid"
+                    ? "border border-sky-200 bg-sky-100/90 text-sky-900 shadow-none hover:bg-sky-100 hover:text-sky-900"
+                    : "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                )}
               >
                 <Grid3X3 className="h-4 w-4" />
               </Button>

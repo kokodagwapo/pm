@@ -40,6 +40,7 @@ import {
   Home,
   Download,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   AnalyticsCard,
   AnalyticsCardGrid,
@@ -530,20 +531,30 @@ export default function ExpiringLeasesPage() {
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               {/* View Mode Toggle */}
-              <div className="flex items-center border rounded-lg p-1 w-full sm:w-auto">
+              <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50/80 p-1 w-full sm:w-auto">
                 <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
+                  variant="ghost"
                   size="sm"
                   onClick={() => setViewMode("grid")}
-                  className="h-8 flex-1 sm:flex-none sm:px-3"
+                  className={cn(
+                    "h-8 flex-1 sm:flex-none sm:px-3",
+                    viewMode === "grid"
+                      ? "border border-sky-200 bg-sky-100/90 text-sky-900 shadow-none hover:bg-sky-100 hover:text-sky-900"
+                      : "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                  )}
                 >
                   <Grid3X3 className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant={viewMode === "list" ? "default" : "ghost"}
+                  variant="ghost"
                   size="sm"
                   onClick={() => setViewMode("list")}
-                  className="h-8 flex-1 sm:flex-none sm:px-3"
+                  className={cn(
+                    "h-8 flex-1 sm:flex-none sm:px-3",
+                    viewMode === "list"
+                      ? "border border-rose-200 bg-rose-100/90 text-rose-900 shadow-none hover:bg-rose-100 hover:text-rose-900"
+                      : "text-slate-700 hover:bg-slate-200/80 hover:text-slate-900"
+                  )}
                 >
                   <List className="h-4 w-4" />
                 </Button>

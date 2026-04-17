@@ -9,10 +9,6 @@ export interface LunaToolDefinition {
   allowedRoles: HeidiAccessRole[];
 }
 
-interface LunaToolOptions {
-  includeDevelopmentDbTools?: boolean;
-}
-
 export const LUNA_TOOLS: LunaToolDefinition[] = [
   {
     name: "get_available_properties",
@@ -88,7 +84,7 @@ export const LUNA_TOOLS: LunaToolDefinition[] = [
   },
   {
     name: "search_all_listings",
-    description: "Search across EVERY property in the entire database, including unavailable, private, or off-market listings. Use this to find properties by name (e.g., 'Woodland'), address, or specific features when they don't show up in public searches.",
+    description: "Search property listings by name, neighborhood, address, or detailed features like lake view, garage, lanai, HOA fields, amenities, and unit notes. Public users should use this for currently available listings, while internal roles can search their broader allowed listing set.",
     parameters: {
       type: "object",
       properties: {
@@ -96,7 +92,7 @@ export const LUNA_TOOLS: LunaToolDefinition[] = [
       },
       required: ["query"],
     },
-    allowedRoles: [UserRole.OWNER, UserRole.MANAGER, UserRole.ADMIN],
+    allowedRoles: ["guest", UserRole.TENANT, UserRole.OWNER, UserRole.MANAGER, UserRole.ADMIN],
   },
   {
     name: "get_user_profile",
@@ -155,19 +151,6 @@ export const LUNA_TOOLS: LunaToolDefinition[] = [
   },
 ];
 
-export function getLunaToolsForRole(
-  role: HeidiAccessRole,
-  options: LunaToolOptions = {}
-): LunaToolDefinition[] {
-  const baseTools = LUNA_TOOLS.filter((tool) => tool.allowedRoles.includes(role));
-
-  if (!options.includeDevelopmentDbTools) {
-    return baseTools;
-  }
-
-  const extraDevTools = LUNA_TOOLS.filter(
-    (tool) => tool.name === "search_all_listings" && !baseTools.some((existing) => existing.name === tool.name)
-  );
-
-  return [...baseTools, ...extraDevTools];
+export function getLunaToolsForRole(role: HeidiAccessRole): LunaToolDefinition[] {
+  return LUNA_TOOLS.filter((tool) => tool.allowedRoles.includes(role));
 }

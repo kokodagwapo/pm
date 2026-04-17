@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
   Key, Eye, EyeOff, Save, CheckCircle2, XCircle, Loader2,
-  CreditCard, Bot, MessageSquare, Map, Mail, Zap, RefreshCw,
+  CreditCard, Bot, MessageSquare, Map, Mail, RefreshCw,
 } from "lucide-react";
 import { UserRole } from "@/types";
 
@@ -56,16 +56,6 @@ const SERVICES: ServiceConfig[] = [
     ],
   },
   {
-    label: "Google Gemini",
-    icon: <Zap className="h-5 w-5" />,
-    color: "from-blue-500 to-cyan-600",
-    docUrl: "https://aistudio.google.com/app/apikey",
-    fields: [
-      { key: "apiKey", label: "API Key", placeholder: "AIza...", sensitive: true },
-      { key: "model", label: "Default Model", placeholder: "gemini-1.5-pro", sensitive: false, hint: "e.g. gemini-1.5-pro, gemini-1.5-flash" },
-    ],
-  },
-  {
     label: "Twilio SMS",
     icon: <MessageSquare className="h-5 w-5" />,
     color: "from-rose-500 to-red-600",
@@ -103,7 +93,6 @@ const SERVICES: ServiceConfig[] = [
 const SERVICE_KEY_MAP: Record<string, string> = {
   "Stripe": "stripe",
   "OpenAI": "openai",
-  "Google Gemini": "gemini",
   "Twilio SMS": "twilio",
   "Google Maps": "googleMaps",
   "Email (SMTP)": "email",

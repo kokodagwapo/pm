@@ -105,6 +105,9 @@
   --border: #e4e4e7;
   --input: #e4e4e7;
   --ring: #4f46e5;
+  --form-field-bg: color-mix(in srgb, rgb(239 246 255) 22%, #ffffff);
+  --form-field-bg-hover: color-mix(in srgb, rgb(239 246 255) 28%, #ffffff);
+  --form-field-bg-focus: color-mix(in srgb, rgb(224 242 254) 20%, #ffffff);
 
   /* Charts */
   --chart-1: #4f46e5;
@@ -179,6 +182,9 @@
   --border: #27272a;
   --input: #27272a;
   --ring: #6366f1;
+  --form-field-bg: color-mix(in srgb, rgb(30 41 59) 82%, rgb(14 23 38));
+  --form-field-bg-hover: color-mix(in srgb, rgb(36 51 74) 84%, rgb(14 23 38));
+  --form-field-bg-focus: color-mix(in srgb, rgb(49 64 92) 78%, rgb(14 23 38));
 
   /* Charts - Dark */
   --chart-1: #6366f1;
@@ -218,6 +224,35 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]),
+  textarea,
+  select {
+    border-radius: 0.85rem;
+    border: 1px solid color-mix(in srgb, var(--input) 78%, transparent);
+    background: var(--form-field-bg);
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      background-color 180ms ease;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    border-color: color-mix(in srgb, var(--ring) 65%, var(--input));
+    background: var(--form-field-bg-focus);
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--ring) 12%, transparent),
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"])::placeholder,
+  textarea::placeholder {
+    color: color-mix(in srgb, var(--muted-foreground) 80%, transparent);
   }
   html {
     height: 100%;
@@ -259,6 +294,9 @@
     --secondary-foreground: #ffffff;
     --accent: rgb(255 255 255 / 0.1);
     --accent-foreground: #ffffff;
+    --form-field-bg: color-mix(in srgb, rgb(240 249 255) 16%, rgba(255, 255, 255, 0.86));
+    --form-field-bg-hover: color-mix(in srgb, rgb(240 249 255) 24%, rgba(255, 255, 255, 0.9));
+    --form-field-bg-focus: color-mix(in srgb, rgb(224 242 254) 24%, rgba(255, 255, 255, 0.94));
     --dashboard-glass-surface: rgb(255 255 255 / 0.04);
     --dashboard-glass-border: rgb(255 255 255 / 0.14);
     --dashboard-shadow-float: none;
