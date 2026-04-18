@@ -46,7 +46,6 @@ externalPort = 80
 deploymentTarget = "vm"
 run = ["bash", "start-prod.sh"]
 build = ["bash", "scripts/replit-build.sh"]
-publicDir = "public"
 
 [userenv]
 
