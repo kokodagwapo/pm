@@ -94,6 +94,73 @@ export function SimpleLanding() {
                 No monthly minimum &middot; Volume discounts &middot; Migration support
               </p>
             </div>
+
+            <div className="mx-auto mt-16 max-w-5xl">
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl ring-1 ring-slate-900/5">
+                <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+                  <span className="h-2.5 w-2.5 rounded-full bg-rose-400" aria-hidden="true" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400" aria-hidden="true" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" aria-hidden="true" />
+                  <span className="ml-3 text-xs font-medium text-slate-500">
+                    SmartStart PM &middot; Dashboard
+                  </span>
+                </div>
+                <div className="grid gap-4 p-6 sm:grid-cols-3">
+                  {[
+                    { label: "Active units", value: "248", trend: "+12" },
+                    { label: "Open work orders", value: "17", trend: "-3" },
+                    { label: "Rent collected", value: "94%", trend: "+2.1%" },
+                  ].map((kpi) => (
+                    <div
+                      key={kpi.label}
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                    >
+                      <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                        {kpi.label}
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold text-slate-900">
+                        {kpi.value}
+                      </p>
+                      <p className="mt-1 text-xs font-medium text-emerald-600">
+                        {kpi.trend} this month
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-slate-200 px-6 py-5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-slate-900">
+                      Recent activity
+                    </p>
+                    <span className="text-xs text-indigo-600">View all</span>
+                  </div>
+                  <ul className="mt-4 space-y-3">
+                    {[
+                      { tag: "MAINT", text: "Unit 204 — A/C inspection scheduled", time: "2h ago" },
+                      { tag: "PAY", text: "Rent received from Garcia, J.", time: "4h ago" },
+                      { tag: "APP", text: "New application — Falling Waters #112", time: "Yesterday" },
+                    ].map((row) => (
+                      <li
+                        key={row.text}
+                        className="flex items-center justify-between gap-4 rounded-lg border border-slate-100 bg-white px-3 py-2"
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span className="inline-flex h-6 items-center rounded-md bg-indigo-50 px-2 text-[10px] font-semibold uppercase tracking-wider text-indigo-700">
+                            {row.tag}
+                          </span>
+                          <span className="truncate text-sm text-slate-700">
+                            {row.text}
+                          </span>
+                        </div>
+                        <span className="flex-shrink-0 text-xs text-slate-400">
+                          {row.time}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
