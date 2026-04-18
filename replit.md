@@ -29,6 +29,13 @@ A Next.js 15 property management application using the App Router (`src/app/`).
 - **Plus Jakarta Sans**: Applied to dashboard layout via `--font-jakarta`.
 - **FlickeringGridBackground**: Removed from dashboard layout for cleaner appearance.
 
+## Landing Page (`/`)
+- **Self-contained**: The home route renders `src/components/landing/SimpleLanding.tsx` — a single-file landing page (header, hero, features, why-switch, integrations, pricing, migration, CTA, footer) using only standard Tailwind v4 utilities. No `@apply` of custom utilities, no glass classes, no arbitrary-value selectors.
+- **Layout**: `src/app/(landing)/layout.tsx` is a pass-through; `LandingLayoutShell` is no longer used by `/` (kept in repo for other landing pages that may still import it).
+- **Constraints to preserve resilience**:
+  - Do NOT mix `next dev` and `next start` against the same `.next` directory — always `rm -rf .next` before switching modes (dev produces `app/layout.css` while prod produces hashed CSS filenames; mixing them causes 400s on stale HTML).
+  - Do NOT add dashboard-scoped CSS variables (anything under `html.dashboard-layout` in `globals.css`) to landing components — those variables make `--background: transparent` and break the light theme.
+
 ## Dev Server Stability (Replit-specific)
 - **Run button uses production server**: The `Project` workflow in `.replit` runs `bash start.sh`, which runs `npm run build` when `.next/BUILD_ID` is missing, then `npm run start` on port **5000** (no HMR — stable preview). Use `npm run replit:dev` (sets `REPLIT_DEV_SERVER=1`) or `bash dev.sh` only when you need webpack dev + HMR; it is heavier and less stable on Replit.
 - **Turbopack disabled**: Replit-facing scripts (`dev`, `dev:5000`) do not use Turbopack. `dev:local` uses webpack on port 3000 for Cursor/local development.

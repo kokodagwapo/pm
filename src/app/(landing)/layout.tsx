@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { LandingLayoutShell } from "@/components/landing/LandingLayoutShell";
 
 /**
- * Landing layout — default light theme; optional dark (toggle on home).
+ * Landing layout — minimal pass-through. The home page (`/`) renders a
+ * fully self-contained layout via `SimpleLanding`. Other pages in this
+ * route group inherit the root layout's body styling.
  */
 
 export const metadata: Metadata = {
@@ -22,5 +23,5 @@ export default function LandingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <LandingLayoutShell>{children}</LandingLayoutShell>;
+  return <>{children}</>;
 }
