@@ -3,9 +3,10 @@ import OpenAI from "openai";
 import KnowledgeChunk from "@/models/KnowledgeChunk";
 import connectDB from "@/lib/mongodb";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("query");

@@ -10,8 +10,6 @@ import { buildHeidiInstructions, inferCurrentSection } from "@/lib/ai/heidi-cont
 
 export const dynamic = "force-dynamic";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 interface ChatPropertyCard {
   id: string;
   href: string;
@@ -309,6 +307,8 @@ export async function POST(request: NextRequest) {
         { status: 503 }
       );
     }
+
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     if (!message) {
       return NextResponse.json(
