@@ -485,7 +485,7 @@ export function SimpleLanding() {
                 Sign in
               </Link>
             </nav>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500" suppressHydrationWarning>
               &copy; {new Date().getFullYear()} SmartStart PM &middot; Naples, FL
             </p>
           </div>
